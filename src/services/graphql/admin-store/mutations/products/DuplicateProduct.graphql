@@ -1,0 +1,97 @@
+mutation DuplicateProduct($productId: String!, $newName: String!, $copyVariants: Boolean = true, $copyInventory: Boolean = false) {
+  duplicateProduct(productId: $productId, newName: $newName, copyVariants: $copyVariants, copyInventory: $copyInventory) {
+    success
+    product {
+      id
+      name
+      description
+      slug
+      price
+      sku
+      barcode
+      brand
+      vendor
+      productType
+      status
+      publishedAt
+      category { id name }
+      tags
+      trackInventory
+      inventoryQuantity
+      allowBackorders
+      inventoryHealth
+      hasVariants
+      options
+      featuredMedia {
+        id
+        url
+        thumbnailUrl
+        optimizedUrl
+        width
+        height
+      }
+      mediaGallery {
+        id
+        url
+        thumbnailUrl
+        optimizedUrl
+        width
+        height
+      }
+      requiresShipping
+      weight
+      package {
+        id
+        name
+        regionFees
+        method
+      }
+      metaTitle
+      metaDescription
+      variants {
+        id
+        sku
+        option1
+        option2
+        price
+        compareAtPrice
+        costPrice
+        barcode
+        trackInventory
+        isActive
+        position
+        featuredMedia {
+          id
+          url
+          thumbnailUrl
+          optimizedUrl
+          width
+          height
+        }
+        inventory {
+          id
+          quantity
+          onhand
+          available
+          condition
+          location { id name }
+        }
+      }
+      totalStock
+      isInStock
+      isLowStock
+      isOnSale
+      salePercentage
+      profitMargin
+      conversionRate
+      categoryName
+      hasDimensions
+      createdAt
+      updatedAt
+    }
+    variantsCreated
+    inventoryRecordsCreated
+    message
+    error
+  }
+}

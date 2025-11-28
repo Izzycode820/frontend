@@ -1,0 +1,21 @@
+query MyThemes($workspaceId: ID!) {
+  myThemes(workspaceId: $workspaceId) {
+    id
+    themeName
+    themeSlug
+    isActive
+    isPublished
+    isDraft
+    canDelete
+    createdAt
+    lastEditedAt
+    publishedAt
+    template {
+      id
+      name
+      slug
+      previewImage
+      version
+    }
+  }
+}

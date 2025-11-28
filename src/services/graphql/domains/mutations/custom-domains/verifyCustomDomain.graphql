@@ -1,0 +1,16 @@
+mutation VerifyCustomDomain($domainId: ID!) {
+  verifyCustomDomain(domainId: $domainId) {
+    success
+    message
+    error
+    verified
+    domain {
+      id
+      domain
+      status
+      verified
+      verifiedAt
+      isActive
+    }
+  }
+}

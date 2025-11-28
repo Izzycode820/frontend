@@ -1,0 +1,20 @@
+query CustomDomain($id: ID!) {
+  customDomain(id: $id) {
+    id
+    domain
+    status
+    verified
+    verifiedAt
+    isActive
+    dnsRecords
+    verificationToken
+    isPurchasedDomain
+    canRenew
+    expiresAt
+    daysUntilExpiry
+    isExpiringSoon
+    sslEnabled
+    sslProvisionedAt
+    createdAt
+  }
+}

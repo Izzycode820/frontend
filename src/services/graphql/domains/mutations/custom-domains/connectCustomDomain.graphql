@@ -1,0 +1,18 @@
+mutation ConnectCustomDomain($workspaceId: ID!, $domain: String!) {
+  connectCustomDomain(input: { workspaceId: $workspaceId, domain: $domain }) {
+    success
+    message
+    error
+    domain {
+      id
+      domain
+      status
+      verified
+      dnsRecords
+      verificationToken
+      createdAt
+    }
+    dnsRecords
+    verificationInstructions
+  }
+}

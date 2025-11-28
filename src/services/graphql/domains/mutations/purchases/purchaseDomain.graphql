@@ -1,0 +1,24 @@
+mutation PurchaseDomain($workspaceId: ID!, $domain: String!, $registrationPeriodYears: Int) {
+  purchaseDomain(
+    input: {
+      workspaceId: $workspaceId
+      domain: $domain
+      registrationPeriodYears: $registrationPeriodYears
+    }
+  ) {
+    success
+    message
+    error
+    purchase {
+      id
+      domainName
+      priceFcfa
+      paymentStatus
+      isPending
+      isCompleted
+      isFailed
+      createdAt
+    }
+    paymentInstructions
+  }
+}

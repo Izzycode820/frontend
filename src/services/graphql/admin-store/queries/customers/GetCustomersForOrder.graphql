@@ -1,0 +1,14 @@
+query GetCustomersForOrder($first: Int, $search: String) {
+  customers(first: $first, name_Icontains: $search) {
+    edges {
+      node {
+        id
+        name
+        phone
+        email
+        city
+        region
+      }
+    }
+  }
+}

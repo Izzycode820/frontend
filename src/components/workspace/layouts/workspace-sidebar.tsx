@@ -1,0 +1,180 @@
+"use client"
+
+/**
+ * Universal Workspace Sidebar
+ * shadcn design - simplified structure with collapsible sections
+ */
+
+import { useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { IconChevronDown } from "@tabler/icons-react"
+import type { WorkspaceSidebarConfig } from "@/types/workspace/dashboard-ui/workspace"
+import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback } from "@/components/shadcn-ui/avatar"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/shadcn-ui/collapsible"
+
+interface WorkspaceSidebarProps {
+  config: WorkspaceSidebarConfig
+}
+
+export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
+  const pathname = usePathname()
+
+  return (
+    <div className="flex h-full flex-col gap-2">
+      {/* Workspace Header - shadcn style */}
+      <div className="flex h-14 items-center border-b px-4">
+        <Link
+          href={config.workspaceConfig.url || "#"}
+          className="flex items-center gap-2 font-semibold text-sidebar-foreground hover:text-sidebar-foreground/80"
+        >
+          <config.workspaceConfig.icon className="h-5 w-5" />
+          <span className="text-base">{config.workspaceConfig.name}</span>
+        </Link>
+      </div>
+
+      {/* Main Navigation - shadcn style with collapsible support */}
+      <nav className="flex-1 space-y-1 px-2 py-2">
+        {config.navMain.map((item) => {
+          const Icon = item.icon
+          const isActive = pathname === item.url
+          const hasSubItems = item.items && item.items.length > 0
+
+          // If item has sub-items, render as collapsible
+          if (hasSubItems) {
+            return (
+              <Collapsible key={item.title} defaultOpen={item.defaultOpen ?? false}>
+                <CollapsibleTrigger className="w-full">
+                  <div
+                    className={cn(
+                      "flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                    )}
+                  >
+                    {Icon && <Icon className="h-4 w-4" />}
+                    <span className="flex-1 text-left">{item.title}</span>
+                    <IconChevronDown className="h-4 w-4 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pl-6 space-y-1 pt-1">
+                  {item.items!.map((subItem) => {
+                    const isSubActive = pathname === subItem.url
+                    return (
+                      <Link
+                        key={subItem.title}
+                        href={subItem.url}
+                        className={cn(
+                          "block rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                          isSubActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                        )}
+                      >
+                        {subItem.title}
+                      </Link>
+                    )
+                  })}
+                </CollapsibleContent>
+              </Collapsible>
+            )
+          }
+
+          // Regular nav item without sub-items
+          return (
+            <Link
+              key={item.title}
+              href={item.url}
+              className={cn(
+                "flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+              )}
+            >
+              {Icon && <Icon className="h-4 w-4" />}
+              <span>{item.title}</span>
+            </Link>
+          )
+        })}
+
+        {/* Sections (Sales channels, Apps, etc.) - shadcn style with collapsible */}
+        {config.navSections?.map((section) => (
+          <Collapsible key={section.label} defaultOpen={section.defaultOpen ?? true} className="pt-4">
+            <CollapsibleTrigger className="w-full group">
+              <div className="flex items-center justify-between px-2 mb-1">
+                <h3 className="text-xs font-semibold text-sidebar-foreground/70 group-hover:text-sidebar-foreground transition-colors">
+                  {section.label}
+                </h3>
+                <IconChevronDown className="h-3 w-3 text-sidebar-foreground/70 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1">
+              {section.items.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.url
+
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.url}
+                    className={cn(
+                      "flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                    )}
+                  >
+                    {Icon && <Icon className="h-4 w-4" />}
+                    <span>{item.name}</span>
+                  </Link>
+                )
+              })}
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
+      </nav>
+
+      {/* Secondary Navigation (Settings, etc.) - shadcn style */}
+      <div className="space-y-1 border-t px-2 py-2">
+        {config.navSecondary.map((item) => {
+          const Icon = item.icon
+          const isActive = pathname === item.url
+
+          return (
+            <Link
+              key={item.title}
+              href={item.url}
+              className={cn(
+                "flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+              )}
+            >
+              {Icon && <Icon className="h-4 w-4" />}
+              <span>{item.title}</span>
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* User Footer - shadcn style with Avatar */}
+      <div className="border-t p-4 space-y-3">
+        {/* Footer Actions (Security: Leave Workspace, etc.) */}
+        <div className="pb-2">
+          {config.footerActions}
+        </div>
+
+        {/* User Info */}
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-xs">
+              {config.user.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 overflow-hidden">
+            <p className="truncate text-sm font-medium text-sidebar-foreground">
+              {config.user.name}
+            </p>
+            <p className="truncate text-xs text-sidebar-foreground/70">
+              {config.user.email}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,12 @@
+import * as Types from '../../../../../../types/hosting/graphql-base';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type CustomDomainQueryVariables = Types.Exact<{
+  id: Types.Scalars['ID']['input'];
+}>;
+
+
+export type CustomDomainQuery = { __typename?: 'Query', customDomain: { __typename?: 'CustomDomainType', id: string, domain: string, status: Types.WorkspaceHostingCustomDomainStatusChoices, verified: boolean | null, verifiedAt: string | null, isActive: boolean | null, dnsRecords: any, verificationToken: string, isPurchasedDomain: boolean | null, canRenew: boolean | null, expiresAt: string | null, daysUntilExpiry: number | null, isExpiringSoon: boolean | null, sslEnabled: boolean, sslProvisionedAt: string | null, createdAt: string } | null };
+
+
+export const CustomDomainDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CustomDomain"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"customDomain"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"domain"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"verifiedAt"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"dnsRecords"}},{"kind":"Field","name":{"kind":"Name","value":"verificationToken"}},{"kind":"Field","name":{"kind":"Name","value":"isPurchasedDomain"}},{"kind":"Field","name":{"kind":"Name","value":"canRenew"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"daysUntilExpiry"}},{"kind":"Field","name":{"kind":"Name","value":"isExpiringSoon"}},{"kind":"Field","name":{"kind":"Name","value":"sslEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"sslProvisionedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<CustomDomainQuery, CustomDomainQueryVariables>;
