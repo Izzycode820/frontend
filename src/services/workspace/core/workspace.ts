@@ -14,6 +14,7 @@ import type {
   WorkspaceGetResponse,
   WorkspaceUpdateResponse,
   WorkspaceDeleteResponse,
+  WorkspaceRestoreResponse,
   WorkspaceError
 } from '../../../types/workspace/core'
 
@@ -78,7 +79,7 @@ export class WorkspaceService extends BaseService {
   }
 
   /**
-   * Delete workspace
+   * Delete workspace (soft delete)
    * Backend: DELETE /api/workspaces/<workspace_id>/delete/
    */
   async deleteWorkspace(workspaceId: string): Promise<WorkspaceDeleteResponse> {
@@ -87,6 +88,18 @@ export class WorkspaceService extends BaseService {
     }
 
     return this.delete<WorkspaceDeleteResponse>(`/${workspaceId}/delete/`)
+  }
+
+  /**
+   * Restore soft-deleted workspace
+   * Backend: POST /api/workspaces/<workspace_id>/restore/
+   */
+  async restoreWorkspace(workspaceId: string): Promise<WorkspaceRestoreResponse> {
+    if (!workspaceId) {
+      throw new Error('Workspace ID is required')
+    }
+
+    return this.post<WorkspaceRestoreResponse>(`/${workspaceId}/restore/`, {})
   }
 }
 

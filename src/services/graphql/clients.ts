@@ -85,6 +85,40 @@ export const adminStoreClient = new ApolloClient({
   },
 })
 
+// Admin Store API Client (Workspace-scoped)
+const hostinguploadLink = new UploadHttpLink({
+  uri: 'http://localhost:8000/api/workspaces/hosting/graphql/',
+  credentials: 'include',
+})
+
+export const hostinClient = new ApolloClient({
+  link: from([
+    errorLink,
+    authLink.concat(hostinguploadLink),
+  ]),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          products: {
+            merge(existing, incoming) {
+              return incoming
+            },
+          },
+        },
+      },
+    },
+  }),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: 'all',
+    },
+    query: {
+      errorPolicy: 'all',
+    },
+  },
+})
+
 // Theme API Client (Public theme store + authenticated mutations)
 const themeUploadLink = new UploadHttpLink({
   uri: 'http://localhost:8000/api/themes/graphql/',

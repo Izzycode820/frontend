@@ -8,9 +8,7 @@ mutation VerifyCustomDomain($domainId: ID!) {
       id
       domain
       status
-      verified
       verifiedAt
-      isActive
     }
   }
 }

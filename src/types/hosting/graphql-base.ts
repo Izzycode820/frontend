@@ -12,9 +12,19 @@ export interface Scalars {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  BigInt: { input: any; output: any; }
   DateTime: { input: string; output: string; }
   Decimal: { input: string; output: string; }
   JSONString: { input: any; output: any; }
+}
+
+/** Bandwidth usage details */
+export interface BandwidthUsageType {
+  __typename?: 'BandwidthUsageType';
+  limitGb: Scalars['Float']['output'];
+  percentage: Scalars['Float']['output'];
+  remainingGb: Scalars['Float']['output'];
+  usedGb: Scalars['Float']['output'];
 }
 
 /**
@@ -22,9 +32,11 @@ export interface Scalars {
  *
  * Free for all tiers - uses SubdomainService
  * Atomic update across WorkspaceInfrastructure and DeployedSite
+ * Tracks subdomain history and enforces change limits (2 changes max)
  */
 export interface ChangeSubdomain {
   __typename?: 'ChangeSubdomain';
+  changesRemaining?: Maybe<Scalars['Int']['output']>;
   error?: Maybe<Scalars['String']['output']>;
   liveUrl?: Maybe<Scalars['String']['output']>;
   message?: Maybe<Scalars['String']['output']>;
@@ -74,166 +86,227 @@ export interface ConnectCustomDomainInput {
 }
 
 /**
- * Custom domain connected to workspace
- *
- * Represents both purchased domains (via platform) and externally-owned domains
- * Workspace-scoped - only accessible to workspace owner
+ * Custom domain detail view
+ * Used for verification polling and DNS configuration display
  */
-export interface CustomDomainType extends Node {
-  __typename?: 'CustomDomainType';
-  /** Auto-renewal not supported for mobile money payments (Cameroon market) */
-  autoRenewEnabled: Scalars['Boolean']['output'];
-  canRenew?: Maybe<Scalars['Boolean']['output']>;
+export interface CustomDomainDetailType extends Node {
+  __typename?: 'CustomDomainDetailType';
   createdAt: Scalars['DateTime']['output'];
-  daysUntilExpiry?: Maybe<Scalars['Int']['output']>;
-  /** Required DNS records for proper configuration */
-  dnsRecords: Scalars['JSONString']['output'];
+  dnsRecordsToAdd?: Maybe<Array<Maybe<DnsRecordType>>>;
+  dnsRecordsToRemove?: Maybe<Array<Maybe<DnsRecordType>>>;
+  dnsRecordsToUpdate?: Maybe<Array<Maybe<DnsRecordType>>>;
+  dnsStatus: Scalars['String']['output'];
   /** Custom domain (e.g., shoppings.com or www.shoppings.com) */
   domain: Scalars['String']['output'];
-  /** Domain expiration date */
-  expiresAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
-  isActive?: Maybe<Scalars['Boolean']['output']>;
-  isExpiringSoon?: Maybe<Scalars['Boolean']['output']>;
-  isPurchasedDomain?: Maybe<Scalars['Boolean']['output']>;
-  nextRenewalDate?: Maybe<Scalars['DateTime']['output']>;
-  /** Domain purchase price in FCFA (charged to customer) */
-  purchasePriceFcfa?: Maybe<Scalars['Decimal']['output']>;
-  /** Whether domain was purchased through Huzilerz */
-  purchasedViaPlatform: Scalars['Boolean']['output'];
   /** Domain registrar if purchased via platform */
   registrarName?: Maybe<WorkspaceHostingCustomDomainRegistrarNameChoices>;
-  /** Annual renewal price in FCFA (charged to customer) */
-  renewalPriceFcfa?: Maybe<Scalars['Decimal']['output']>;
-  renewalPriceFcfaComputed?: Maybe<Scalars['Int']['output']>;
-  /** Whether renewal reminder has been sent for current period */
-  renewalReminderSent: Scalars['Boolean']['output'];
-  /** Number of renewal warnings sent (reset after successful renewal) */
-  renewalWarningCount: Scalars['Int']['output'];
   /** Whether SSL/TLS is enabled for this domain */
   sslEnabled: Scalars['Boolean']['output'];
   /** When SSL certificate was provisioned */
   sslProvisionedAt?: Maybe<Scalars['DateTime']['output']>;
   status: WorkspaceHostingCustomDomainStatusChoices;
-  /** DNS TXT record token for domain ownership verification (_huzilerz-verify) */
-  verificationToken: Scalars['String']['output'];
-  verified?: Maybe<Scalars['Boolean']['output']>;
+  tlsStatus: Scalars['String']['output'];
   /** When domain ownership was verified */
   verifiedAt?: Maybe<Scalars['DateTime']['output']>;
 }
 
 /**
- * Domain availability search result
- *
- * NOT a Django model - data comes from registrar API
+ * Base custom domain type
+ * Used for mutation returns - simple fields only
  */
-export interface DomainAvailabilityType {
-  __typename?: 'DomainAvailabilityType';
-  available: Scalars['Boolean']['output'];
+export interface CustomDomainType extends Node {
+  __typename?: 'CustomDomainType';
+  createdAt: Scalars['DateTime']['output'];
+  /** Custom domain (e.g., shoppings.com or www.shoppings.com) */
   domain: Scalars['String']['output'];
-  error?: Maybe<Scalars['String']['output']>;
-  premium?: Maybe<Scalars['Boolean']['output']>;
-  priceFcfa?: Maybe<Scalars['Int']['output']>;
-  priceUsd?: Maybe<Scalars['Float']['output']>;
-  registrar?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  /** Whether SSL/TLS is enabled for this domain */
+  sslEnabled: Scalars['Boolean']['output'];
+  /** When SSL certificate was provisioned */
+  sslProvisionedAt?: Maybe<Scalars['DateTime']['output']>;
+  status: WorkspaceHostingCustomDomainStatusChoices;
+  /** When domain ownership was verified */
+  verifiedAt?: Maybe<Scalars['DateTime']['output']>;
+}
+
+/** Custom domains usage details */
+export interface CustomDomainsUsageType {
+  __typename?: 'CustomDomainsUsageType';
+  count: Scalars['Int']['output'];
+  limit: Scalars['Int']['output'];
+}
+
+/** DNS record for domain configuration */
+export interface DnsRecordType {
+  __typename?: 'DNSRecordType';
+  action: Scalars['String']['output'];
+  currentValue?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  updateTo?: Maybe<Scalars['String']['output']>;
 }
 
 /**
- * Domain purchase transaction record
- *
- * Tracks purchase from initiation through completion
+ * Domain purchase status type for queries
+ * Extended type with all tracking fields
+ */
+export interface DomainPurchaseStatusType extends Node {
+  __typename?: 'DomainPurchaseStatusType';
+  createdAt: Scalars['DateTime']['output'];
+  /** Domain purchased (e.g., mystore.com) */
+  domainName: Scalars['String']['output'];
+  /** Error message if purchase failed */
+  errorMessage: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  paymentStatus: WorkspaceHostingDomainPurchasePaymentStatusChoices;
+  /** Price charged to customer in FCFA */
+  priceFcfa: Scalars['Decimal']['output'];
+  status: Scalars['String']['output'];
+}
+
+/**
+ * Domain purchase type for mutations
+ * Simple return type with essential fields
  */
 export interface DomainPurchaseType extends Node {
   __typename?: 'DomainPurchaseType';
   createdAt: Scalars['DateTime']['output'];
   /** Domain purchased (e.g., mystore.com) */
   domainName: Scalars['String']['output'];
-  /** Error message if purchase failed */
-  errorMessage: Scalars['String']['output'];
-  /** USD to FCFA exchange rate at time of purchase */
-  exchangeRate: Scalars['Decimal']['output'];
-  /** Domain expiration date after this purchase */
-  expiresAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
-  isCompleted?: Maybe<Scalars['Boolean']['output']>;
-  isFailed?: Maybe<Scalars['Boolean']['output']>;
-  isPending?: Maybe<Scalars['Boolean']['output']>;
-  /** Payment method used (mobile_money, card, etc.) */
-  paymentMethod: Scalars['String']['output'];
-  /** MTN Mobile Money, Orange Money, etc. */
-  paymentProvider?: Maybe<Scalars['String']['output']>;
   paymentStatus: WorkspaceHostingDomainPurchasePaymentStatusChoices;
   /** Price charged to customer in FCFA */
   priceFcfa: Scalars['Decimal']['output'];
-  /** When domain was successfully registered */
-  registeredAt?: Maybe<Scalars['DateTime']['output']>;
-  /** Registrar used for purchase */
-  registrar: WorkspaceHostingDomainPurchaseRegistrarChoices;
-  /** Order ID from registrar API */
-  registrarOrderId?: Maybe<Scalars['String']['output']>;
-  /** Domain registration period in years */
-  registrationPeriodYears: Scalars['Int']['output'];
-  updatedAt: Scalars['DateTime']['output'];
 }
 
 /**
- * Domain renewal transaction record
- *
- * Tracks renewal attempts and history
+ * Domain renewal status type for queries
+ * Extended type with all tracking fields
  */
-export interface DomainRenewalType extends Node {
-  __typename?: 'DomainRenewalType';
+export interface DomainRenewalStatusType extends Node {
+  __typename?: 'DomainRenewalStatusType';
   createdAt: Scalars['DateTime']['output'];
-  /** How many days before expiry the warning was sent (30, 15, 7, 1) */
-  daysBeforeExpiryWarned?: Maybe<Scalars['Int']['output']>;
   domainName: Scalars['String']['output'];
-  /** USD to FCFA exchange rate at time of renewal */
-  exchangeRate: Scalars['Decimal']['output'];
+  errorMessage: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  isCompleted?: Maybe<Scalars['Boolean']['output']>;
-  isFailed?: Maybe<Scalars['Boolean']['output']>;
-  isPendingPayment?: Maybe<Scalars['Boolean']['output']>;
   /** New expiry date after renewal */
   newExpiryDate?: Maybe<Scalars['DateTime']['output']>;
-  paymentMethod: Scalars['String']['output'];
-  paymentProvider?: Maybe<Scalars['String']['output']>;
+  paymentStatus?: Maybe<Scalars['String']['output']>;
   /** Domain expiry date before renewal */
   previousExpiryDate: Scalars['DateTime']['output'];
-  registrar: Scalars['String']['output'];
-  /** Renewal transaction ID from registrar */
-  registrarRenewalId?: Maybe<Scalars['String']['output']>;
   /** Renewal price in FCFA (charged to customer) */
   renewalPriceFcfa: Scalars['Decimal']['output'];
   renewalStatus: WorkspaceHostingDomainRenewalRenewalStatusChoices;
   renewedAt?: Maybe<Scalars['DateTime']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-  /** When renewal warning was sent to user */
-  warningSentAt?: Maybe<Scalars['DateTime']['output']>;
+  status: Scalars['String']['output'];
 }
 
 /**
- * Alternative domain suggestion
- *
- * NOT a Django model - generated by registrar service
+ * Domain renewal type for mutations
+ * Simple return type with essential fields
  */
-export interface DomainSuggestionType {
-  __typename?: 'DomainSuggestionType';
+export interface DomainRenewalType extends Node {
+  __typename?: 'DomainRenewalType';
+  createdAt: Scalars['DateTime']['output'];
+  domainName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isCompleted?: Maybe<Scalars['Boolean']['output']>;
+  isFailed?: Maybe<Scalars['Boolean']['output']>;
+  isPendingPayment?: Maybe<Scalars['Boolean']['output']>;
+  /** Renewal price in FCFA (charged to customer) */
+  renewalPriceFcfa: Scalars['Decimal']['output'];
+  renewalStatus: WorkspaceHostingDomainRenewalRenewalStatusChoices;
+}
+
+/** Complete domain search response with pagination */
+export interface DomainSearchResponseType {
+  __typename?: 'DomainSearchResponseType';
   available: Scalars['Boolean']['output'];
+  hasNextPage: Scalars['Boolean']['output'];
+  page: Scalars['Int']['output'];
+  pageSize: Scalars['Int']['output'];
+  query: Scalars['String']['output'];
+  suggestions: Array<Maybe<DomainSearchResultType>>;
+  total: Scalars['Int']['output'];
+}
+
+/** Domain search result item for buy domain flow */
+export interface DomainSearchResultType {
+  __typename?: 'DomainSearchResultType';
+  available: Scalars['Boolean']['output'];
+  category: Scalars['String']['output'];
   domain: Scalars['String']['output'];
-  priceFcfa?: Maybe<Scalars['Int']['output']>;
-  priceUsd?: Maybe<Scalars['Float']['output']>;
-  registrar?: Maybe<Scalars['String']['output']>;
+  pricePerYear: Scalars['String']['output'];
+  priceUsd: Scalars['Float']['output'];
+}
+
+/**
+ * Unified domain type for main domains list
+ * Represents both default subdomain and custom domains
+ */
+export interface DomainType {
+  __typename?: 'DomainType';
+  addedAt?: Maybe<Scalars['DateTime']['output']>;
+  domain: Scalars['String']['output'];
+  id?: Maybe<Scalars['ID']['output']>;
+  isPrimary: Scalars['Boolean']['output'];
+  managedBy?: Maybe<Scalars['String']['output']>;
+  status: Scalars['String']['output'];
+  subdomainChangesLimit?: Maybe<Scalars['Int']['output']>;
+  subdomainChangesRemaining?: Maybe<Scalars['Int']['output']>;
+  type: Scalars['String']['output'];
+}
+
+/**
+ * Hosting environment resource quota tracker
+ *
+ * Workspace-scoped - only accessible to user who owns the hosting environment
+ * Tracks resource limits and current usage per subscription tier
+ */
+export interface HostingEnvironmentType extends Node {
+  __typename?: 'HostingEnvironmentType';
+  activeSitesCount: Scalars['Int']['output'];
+  bandwidthLimitGb: Scalars['Decimal']['output'];
+  bandwidthUsagePercentage?: Maybe<Scalars['Float']['output']>;
+  bandwidthUsedGb: Scalars['Decimal']['output'];
+  canDeployNewSite?: Maybe<Scalars['Boolean']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  customDomainsLimit: Scalars['Int']['output'];
+  gracePeriodEnd?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  isDeploymentAllowed?: Maybe<Scalars['Boolean']['output']>;
+  lastUsageSync?: Maybe<Scalars['DateTime']['output']>;
+  overageCost?: Maybe<OverageCostType>;
+  sitesLimit: Scalars['Int']['output'];
+  status: WorkspaceHostingHostingEnvironmentStatusChoices;
+  storageLimitGb: Scalars['Decimal']['output'];
+  storageUsagePercentage?: Maybe<Scalars['Float']['output']>;
+  storageUsedGb: Scalars['Decimal']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  usageHistory?: Maybe<UsageHistoryType>;
+  usageSummary?: Maybe<UsageSummaryType>;
+}
+
+
+/**
+ * Hosting environment resource quota tracker
+ *
+ * Workspace-scoped - only accessible to user who owns the hosting environment
+ * Tracks resource limits and current usage per subscription tier
+ */
+export interface HostingEnvironmentTypeUsageHistoryArgs {
+  days?: InputMaybe<Scalars['Int']['input']>;
 }
 
 /**
  * Domain management mutations (all require authentication + workspace)
  *
- * - searchDomain: Check domain availability + pricing
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain (Shopify 2-step flow)
- * - verifyCustomDomain: Manually trigger domain verification
  */
 export interface Mutation {
   __typename?: 'Mutation';
@@ -242,6 +315,7 @@ export interface Mutation {
    *
    * Free for all tiers - uses SubdomainService
    * Atomic update across WorkspaceInfrastructure and DeployedSite
+   * Tracks subdomain history and enforces change limits (2 changes max)
    */
   changeSubdomain?: Maybe<ChangeSubdomain>;
   /**
@@ -266,13 +340,6 @@ export interface Mutation {
    */
   renewDomain?: Maybe<RenewDomain>;
   /**
-   * Search domain availability with Cameroon pricing (FCFA)
-   *
-   * Returns availability + pricing + alternative suggestions
-   * Uses DomainRegistrarService to check with Namecheap/GoDaddy
-   */
-  searchDomain?: Maybe<SearchDomain>;
-  /**
    * Manually trigger domain verification
    *
    * Use case: User configured DNS and wants immediate verification
@@ -285,12 +352,11 @@ export interface Mutation {
 /**
  * Domain management mutations (all require authentication + workspace)
  *
- * - searchDomain: Check domain availability + pricing
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain (Shopify 2-step flow)
- * - verifyCustomDomain: Manually trigger domain verification
  */
 export interface MutationChangeSubdomainArgs {
   input: ChangeSubdomainInput;
@@ -300,12 +366,11 @@ export interface MutationChangeSubdomainArgs {
 /**
  * Domain management mutations (all require authentication + workspace)
  *
- * - searchDomain: Check domain availability + pricing
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain (Shopify 2-step flow)
- * - verifyCustomDomain: Manually trigger domain verification
  */
 export interface MutationConnectCustomDomainArgs {
   input: ConnectCustomDomainInput;
@@ -315,12 +380,11 @@ export interface MutationConnectCustomDomainArgs {
 /**
  * Domain management mutations (all require authentication + workspace)
  *
- * - searchDomain: Check domain availability + pricing
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain (Shopify 2-step flow)
- * - verifyCustomDomain: Manually trigger domain verification
  */
 export interface MutationPurchaseDomainArgs {
   input: PurchaseDomainInput;
@@ -330,12 +394,11 @@ export interface MutationPurchaseDomainArgs {
 /**
  * Domain management mutations (all require authentication + workspace)
  *
- * - searchDomain: Check domain availability + pricing
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain (Shopify 2-step flow)
- * - verifyCustomDomain: Manually trigger domain verification
  */
 export interface MutationRenewDomainArgs {
   input: RenewDomainInput;
@@ -345,27 +408,11 @@ export interface MutationRenewDomainArgs {
 /**
  * Domain management mutations (all require authentication + workspace)
  *
- * - searchDomain: Check domain availability + pricing
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain (Shopify 2-step flow)
- * - verifyCustomDomain: Manually trigger domain verification
- */
-export interface MutationSearchDomainArgs {
-  input: SearchDomainInput;
-}
-
-
-/**
- * Domain management mutations (all require authentication + workspace)
- *
- * - searchDomain: Check domain availability + pricing
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain (Shopify 2-step flow)
- * - verifyCustomDomain: Manually trigger domain verification
  */
 export interface MutationVerifyCustomDomainArgs {
   domainId: Scalars['ID']['input'];
@@ -375,6 +422,14 @@ export interface MutationVerifyCustomDomainArgs {
 export interface Node {
   /** The ID of the object */
   id: Scalars['ID']['output'];
+}
+
+/** Overage cost calculation for billing */
+export interface OverageCostType {
+  __typename?: 'OverageCostType';
+  bandwidthOverageGb: Scalars['Float']['output'];
+  storageOverageGb: Scalars['Float']['output'];
+  totalOverageUsd: Scalars['Float']['output'];
 }
 
 /**
@@ -396,156 +451,304 @@ export interface PurchaseDomain {
  * Input for purchasing a domain
  *
  * Used by purchaseDomain mutation
+ * Requires contact info for WHOIS registration (ICANN requirement)
  */
 export interface PurchaseDomainInput {
+  /** Street address */
+  address: Scalars['String']['input'];
+  /** City */
+  city: Scalars['String']['input'];
+  /** Country code (ISO 2-letter, default: CM for Cameroon) */
+  country?: InputMaybe<Scalars['String']['input']>;
   /** Domain to purchase */
   domain: Scalars['String']['input'];
+  /** Phone number (e.g., '+237670000000') */
+  phone: Scalars['String']['input'];
+  /** Postal/ZIP code */
+  postalCode: Scalars['String']['input'];
   /** Registration period (1-10 years) */
   registrationPeriodYears?: InputMaybe<Scalars['Int']['input']>;
+  /** State/Region */
+  state: Scalars['String']['input'];
   /** Workspace to associate domain with */
   workspaceId: Scalars['ID']['input'];
 }
 
 /**
- * Domain management queries (all require authentication + workspace)
+ * Hosting management queries (all require authentication)
  *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
  */
 export interface Query {
   __typename?: 'Query';
-  /** Get single custom domain by ID (for polling verification status) */
-  customDomain?: Maybe<CustomDomainType>;
-  /** Get domain purchase status and details */
-  domainPurchaseStatus?: Maybe<DomainPurchaseType>;
-  /** Get domain renewal status and details */
-  domainRenewalStatus?: Maybe<DomainRenewalType>;
-  /** Get subdomain suggestions (e.g., mystore, mystore-cm, mystore237) */
-  subdomainSuggestions?: Maybe<Array<Maybe<SubdomainSuggestionType>>>;
-  /** Validate if subdomain is available and DNS-compliant */
-  validateSubdomain?: Maybe<Scalars['Boolean']['output']>;
-  /** Get all domains for workspace (purchased + connected) */
-  workspaceDomains?: Maybe<Array<Maybe<CustomDomainType>>>;
-  /** Get workspace infrastructure (subdomain, URLs, status) */
-  workspaceInfrastructure?: Maybe<WorkspaceInfrastructureType>;
+  /** Check if user can deploy new site based on limits */
+  checkDeploymentEligibility?: Maybe<Scalars['JSONString']['output']>;
+  /** Check if user can upload file based on storage limits */
+  checkUploadEligibility?: Maybe<Scalars['JSONString']['output']>;
+  /** Get custom domain with DNS/TLS status (for polling) */
+  customDomain?: Maybe<CustomDomainDetailType>;
+  /** Get all domains (default subdomain + custom domains) */
+  domains?: Maybe<Array<Maybe<DomainType>>>;
+  /** Get current user's hosting environment and resource quotas */
+  myHostingEnvironment?: Maybe<HostingEnvironmentType>;
+  /** Calculate current overage costs for billing */
+  myOverageCost?: Maybe<OverageCostType>;
+  /** Get usage history for analytics charts (default 30 days) */
+  myUsageHistory?: Maybe<UsageHistoryType>;
+  /** Get detailed usage logs (for debugging/support) */
+  myUsageLogs?: Maybe<Array<Maybe<ResourceUsageLogType>>>;
+  /** Get current usage summary with percentages (for dashboard) */
+  myUsageSummary?: Maybe<UsageSummaryType>;
+  /** Track domain purchase progress */
+  purchaseStatus?: Maybe<DomainPurchaseStatusType>;
+  /** Track domain renewal progress */
+  renewalStatus?: Maybe<DomainRenewalStatusType>;
+  /** Search domains with pagination */
+  searchDomains?: Maybe<DomainSearchResponseType>;
+  /** Check if subdomain is available */
+  validateSubdomain?: Maybe<SubdomainValidationType>;
 }
 
 
 /**
- * Domain management queries (all require authentication + workspace)
+ * Hosting management queries (all require authentication)
  *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
+ */
+export interface QueryCheckUploadEligibilityArgs {
+  fileSizeBytes: Scalars['Int']['input'];
+}
+
+
+/**
+ * Hosting management queries (all require authentication)
+ *
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
  */
 export interface QueryCustomDomainArgs {
-  id: Scalars['ID']['input'];
+  domainId: Scalars['ID']['input'];
 }
 
 
 /**
- * Domain management queries (all require authentication + workspace)
+ * Hosting management queries (all require authentication)
  *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
  */
-export interface QueryDomainPurchaseStatusArgs {
+export interface QueryDomainsArgs {
+  workspaceId: Scalars['ID']['input'];
+}
+
+
+/**
+ * Hosting management queries (all require authentication)
+ *
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
+ */
+export interface QueryMyUsageHistoryArgs {
+  days?: InputMaybe<Scalars['Int']['input']>;
+}
+
+
+/**
+ * Hosting management queries (all require authentication)
+ *
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
+ */
+export interface QueryMyUsageLogsArgs {
+  days?: InputMaybe<Scalars['Int']['input']>;
+}
+
+
+/**
+ * Hosting management queries (all require authentication)
+ *
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
+ */
+export interface QueryPurchaseStatusArgs {
   purchaseId: Scalars['ID']['input'];
 }
 
 
 /**
- * Domain management queries (all require authentication + workspace)
+ * Hosting management queries (all require authentication)
  *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
  */
-export interface QueryDomainRenewalStatusArgs {
+export interface QueryRenewalStatusArgs {
   renewalId: Scalars['ID']['input'];
 }
 
 
 /**
- * Domain management queries (all require authentication + workspace)
+ * Hosting management queries (all require authentication)
  *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
  */
-export interface QuerySubdomainSuggestionsArgs {
-  baseName: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['Int']['input']>;
+export interface QuerySearchDomainsArgs {
+  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
 }
 
 
 /**
- * Domain management queries (all require authentication + workspace)
+ * Hosting management queries (all require authentication)
  *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
  */
 export interface QueryValidateSubdomainArgs {
   subdomain: Scalars['String']['input'];
-}
-
-
-/**
- * Domain management queries (all require authentication + workspace)
- *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
- */
-export interface QueryWorkspaceDomainsArgs {
-  workspaceId: Scalars['ID']['input'];
-}
-
-
-/**
- * Domain management queries (all require authentication + workspace)
- *
- * - workspaceDomains: Get all domains for workspace (purchased + connected)
- * - customDomain: Get single domain by ID (for polling verification status)
- * - workspaceInfrastructure: Get workspace subdomain and URLs
- * - domainPurchaseStatus: Track purchase progress
- * - domainRenewalStatus: Track renewal progress
- * - subdomainSuggestions: Get subdomain suggestions
- * - validateSubdomain: Check subdomain availability
- */
-export interface QueryWorkspaceInfrastructureArgs {
-  workspaceId: Scalars['ID']['input'];
 }
 
 /**
@@ -576,40 +779,77 @@ export interface RenewDomainInput {
 }
 
 /**
- * Search domain availability with Cameroon pricing (FCFA)
+ * Resource usage log entry
  *
- * Returns availability + pricing + alternative suggestions
- * Uses DomainRegistrarService to check with Namecheap/GoDaddy
+ * Historical usage data for analytics and billing
  */
-export interface SearchDomain {
-  __typename?: 'SearchDomain';
-  availability?: Maybe<DomainAvailabilityType>;
-  error?: Maybe<Scalars['String']['output']>;
-  message?: Maybe<Scalars['String']['output']>;
-  success?: Maybe<Scalars['Boolean']['output']>;
-  suggestions?: Maybe<Array<Maybe<DomainSuggestionType>>>;
+export interface ResourceUsageLogType extends Node {
+  __typename?: 'ResourceUsageLogType';
+  avgResponseTimeMs: Scalars['Int']['output'];
+  bandwidthUsedGb: Scalars['Decimal']['output'];
+  errorRatePercentage: Scalars['Decimal']['output'];
+  estimatedCostUsd: Scalars['Decimal']['output'];
+  hostingEnvironment: HostingEnvironmentType;
+  id: Scalars['ID']['output'];
+  recordedAt: Scalars['DateTime']['output'];
+  requestsCount: Scalars['BigInt']['output'];
+  storageUsedGb: Scalars['Decimal']['output'];
 }
 
-/**
- * Input for searching domain availability
- *
- * Used by searchDomain mutation
- */
-export interface SearchDomainInput {
-  /** Domain to search (e.g., 'mystore.com') */
-  domain: Scalars['String']['input'];
+/** Sites usage details */
+export interface SitesUsageType {
+  __typename?: 'SitesUsageType';
+  activeCount: Scalars['Int']['output'];
+  limit: Scalars['Int']['output'];
+  percentage: Scalars['Float']['output'];
+  remaining: Scalars['Int']['output'];
 }
 
-/**
- * Subdomain suggestion (e.g., mystore, mystore-cm, mystore237)
- *
- * NOT a Django model - generated by subdomain service
- */
-export interface SubdomainSuggestionType {
-  __typename?: 'SubdomainSuggestionType';
+/** Storage usage details */
+export interface StorageUsageType {
+  __typename?: 'StorageUsageType';
+  limitGb: Scalars['Float']['output'];
+  percentage: Scalars['Float']['output'];
+  remainingGb: Scalars['Float']['output'];
+  usedGb: Scalars['Float']['output'];
+}
+
+/** Subdomain availability validation result */
+export interface SubdomainValidationType {
+  __typename?: 'SubdomainValidationType';
   available: Scalars['Boolean']['output'];
-  fullDomain: Scalars['String']['output'];
-  subdomain: Scalars['String']['output'];
+  errors?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  fullDomain?: Maybe<Scalars['String']['output']>;
+  subdomain?: Maybe<Scalars['String']['output']>;
+}
+
+/** Single data point in usage history */
+export interface UsageDataPointType {
+  __typename?: 'UsageDataPointType';
+  avgResponseTimeMs?: Maybe<Scalars['Int']['output']>;
+  bandwidthUsedGb: Scalars['Float']['output'];
+  recordedAt: Scalars['DateTime']['output'];
+  requestsCount?: Maybe<Scalars['Int']['output']>;
+  storageUsedGb: Scalars['Float']['output'];
+}
+
+/** Usage history with time series data */
+export interface UsageHistoryType {
+  __typename?: 'UsageHistoryType';
+  currentUsage: UsageSummaryType;
+  dataPoints: Array<Maybe<UsageDataPointType>>;
+  periodDays: Scalars['Int']['output'];
+}
+
+/** Complete usage summary with all resources */
+export interface UsageSummaryType {
+  __typename?: 'UsageSummaryType';
+  bandwidth: BandwidthUsageType;
+  customDomains: CustomDomainsUsageType;
+  deploymentAllowed: Scalars['Boolean']['output'];
+  sites: SitesUsageType;
+  status: Scalars['String']['output'];
+  storage: StorageUsageType;
 }
 
 /**
@@ -664,14 +904,6 @@ export enum WorkspaceHostingDomainPurchasePaymentStatusChoices {
 }
 
 /** An enumeration. */
-export enum WorkspaceHostingDomainPurchaseRegistrarChoices {
-  /** GoDaddy */
-  Godaddy = 'GODADDY',
-  /** Namecheap */
-  Namecheap = 'NAMECHEAP'
-}
-
-/** An enumeration. */
 export enum WorkspaceHostingDomainRenewalRenewalStatusChoices {
   /** Completed */
   Completed = 'COMPLETED',
@@ -688,30 +920,15 @@ export enum WorkspaceHostingDomainRenewalRenewalStatusChoices {
 }
 
 /** An enumeration. */
-export enum WorkspaceHostingWorkspaceInfrastructureStatusChoices {
+export enum WorkspaceHostingHostingEnvironmentStatusChoices {
   /** Active */
   Active = 'ACTIVE',
-  /** Failed */
-  Failed = 'FAILED',
-  /** Migrating */
-  Migrating = 'MIGRATING',
-  /** Provisioning */
-  Provisioning = 'PROVISIONING',
+  /** Error */
+  Error = 'ERROR',
+  /** Grace Period */
+  GracePeriod = 'GRACE_PERIOD',
+  /** Initializing */
+  Initializing = 'INITIALIZING',
   /** Suspended */
   Suspended = 'SUSPENDED'
-}
-
-/**
- * Workspace infrastructure info (subdomain, URLs, status)
- *
- * Used to show current subdomain in UI (Shopify pattern)
- */
-export interface WorkspaceInfrastructureType extends Node {
-  __typename?: 'WorkspaceInfrastructureType';
-  createdAt: Scalars['DateTime']['output'];
-  id: Scalars['ID']['output'];
-  previewUrl: Scalars['String']['output'];
-  status: WorkspaceHostingWorkspaceInfrastructureStatusChoices;
-  subdomain: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
 }

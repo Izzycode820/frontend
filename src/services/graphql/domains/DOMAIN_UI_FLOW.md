@@ -544,11 +544,11 @@ const result = await verifyDomain({
 │ ⚠️  DNS not configured yet                      │
 │──────────────────────────────────────────────────│
 │                                                  │
-│ We couldn't verify your domain yet.             │
+│ We couldn't verify your domain yet.              │
 │                                                  │
 │ Please check:                                    │
-│ • DNS records are correctly configured          │
-│ • Changes have propagated (up to 48 hours)      │
+│ • DNS records are correctly configured           │
+│ • Changes have propagated (up to 48 hours)       │
 │                                                  │
 │ Status: Pending verification                     │
 │                                                  │

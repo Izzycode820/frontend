@@ -1,20 +1,35 @@
-query CustomDomain($id: ID!) {
-  customDomain(id: $id) {
+query CustomDomain($domainId: ID!) {
+  customDomain(domainId: $domainId) {
     id
     domain
     status
-    verified
+    dnsStatus
+    tlsStatus
+    registrarName
+    createdAt
     verifiedAt
-    isActive
-    dnsRecords
-    verificationToken
-    isPurchasedDomain
-    canRenew
-    expiresAt
-    daysUntilExpiry
-    isExpiringSoon
     sslEnabled
     sslProvisionedAt
-    createdAt
+    dnsRecordsToRemove {
+      type
+      name
+      currentValue
+      updateTo
+      action
+    }
+    dnsRecordsToAdd {
+      type
+      name
+      currentValue
+      updateTo
+      action
+    }
+    dnsRecordsToUpdate {
+      type
+      name
+      currentValue
+      updateTo
+      action
+    }
   }
 }

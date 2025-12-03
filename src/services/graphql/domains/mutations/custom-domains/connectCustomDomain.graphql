@@ -7,9 +7,6 @@ mutation ConnectCustomDomain($workspaceId: ID!, $domain: String!) {
       id
       domain
       status
-      verified
-      dnsRecords
-      verificationToken
       createdAt
     }
     dnsRecords

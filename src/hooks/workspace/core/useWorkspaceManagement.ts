@@ -11,7 +11,8 @@ import type {
   WorkspaceUpdateRequest,
   WorkspaceCreateResponse,
   WorkspaceUpdateResponse,
-  WorkspaceDeleteResponse
+  WorkspaceDeleteResponse,
+  WorkspaceRestoreResponse
 } from '../../../types/workspace/core'
 
 // ============================================================================
@@ -25,6 +26,7 @@ export interface UseWorkspaceManagementReturn {
   isCreating: boolean
   isUpdating: boolean
   isDeleting: boolean
+  isRestoring: boolean
   error: string | null
 
   // Computed state
@@ -37,6 +39,7 @@ export interface UseWorkspaceManagementReturn {
   createWorkspace: (request: WorkspaceCreateRequest) => Promise<WorkspaceCreateResponse>
   updateWorkspace: (workspaceId: string, request: WorkspaceUpdateRequest) => Promise<WorkspaceUpdateResponse>
   deleteWorkspace: (workspaceId: string) => Promise<WorkspaceDeleteResponse>
+  restoreWorkspace: (workspaceId: string) => Promise<WorkspaceRestoreResponse>
   clearError: () => void
   clearWorkspaces: () => void
 
@@ -58,6 +61,7 @@ export function useWorkspaceManagement(): UseWorkspaceManagementReturn {
   const isCreating = useWorkspaceStore(workspaceSelectors.isCreating)
   const isUpdating = useWorkspaceStore(workspaceSelectors.isUpdating)
   const isDeleting = useWorkspaceStore(workspaceSelectors.isDeleting)
+  const isRestoring = useWorkspaceStore(workspaceSelectors.isRestoring)
   const error = useWorkspaceStore(workspaceSelectors.error)
   const hasWorkspaces = useWorkspaceStore(workspaceSelectors.hasWorkspaces)
   const workspaceCount = useWorkspaceStore(workspaceSelectors.workspaceCount)
@@ -68,6 +72,7 @@ export function useWorkspaceManagement(): UseWorkspaceManagementReturn {
   const createWorkspaceAction = useWorkspaceStore(workspaceSelectors.createWorkspace)
   const updateWorkspaceAction = useWorkspaceStore(workspaceSelectors.updateWorkspace)
   const deleteWorkspaceAction = useWorkspaceStore(workspaceSelectors.deleteWorkspace)
+  const restoreWorkspaceAction = useWorkspaceStore(workspaceSelectors.restoreWorkspace)
   const clearError = useWorkspaceStore(workspaceSelectors.clearError)
   const clearWorkspaces = useWorkspaceStore(workspaceSelectors.clearWorkspaces)
   const getWorkspaceById = useWorkspaceStore(workspaceSelectors.getWorkspaceById)
@@ -99,6 +104,10 @@ export function useWorkspaceManagement(): UseWorkspaceManagementReturn {
     return deleteWorkspaceAction(workspaceId)
   }, [deleteWorkspaceAction])
 
+  const restoreWorkspace = useCallback(async (workspaceId: string): Promise<WorkspaceRestoreResponse> => {
+    return restoreWorkspaceAction(workspaceId)
+  }, [restoreWorkspaceAction])
+
   // ============================================================================
   // Return Hook Interface
   // ============================================================================
@@ -110,6 +119,7 @@ export function useWorkspaceManagement(): UseWorkspaceManagementReturn {
     isCreating,
     isUpdating,
     isDeleting,
+    isRestoring,
     error,
 
     // Computed state
@@ -122,6 +132,7 @@ export function useWorkspaceManagement(): UseWorkspaceManagementReturn {
     createWorkspace,
     updateWorkspace,
     deleteWorkspace,
+    restoreWorkspace,
     clearError,
     clearWorkspaces,
 
@@ -147,6 +158,7 @@ export function useWorkspaceStatus() {
     isCreating: useWorkspaceStore(workspaceSelectors.isCreating),
     isUpdating: useWorkspaceStore(workspaceSelectors.isUpdating),
     isDeleting: useWorkspaceStore(workspaceSelectors.isDeleting),
+    isRestoring: useWorkspaceStore(workspaceSelectors.isRestoring),
     error: useWorkspaceStore(workspaceSelectors.error)
   }
 }

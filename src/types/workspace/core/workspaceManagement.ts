@@ -66,6 +66,20 @@ export type WorkspacePermissionType = typeof WorkspacePermission[keyof typeof Wo
  * Workspace data structure matching backend response
  * GET /api/workspaces/<workspace_id>/
  */
+/**
+ * Deletion info for soft-deleted workspaces
+ */
+export interface WorkspaceDeletionInfo {
+  readonly isDeleted: boolean;
+  readonly deletedAt: string;
+  readonly scheduledFor: string;
+  readonly daysRemaining: number;
+  readonly hoursRemaining: number;
+  readonly canRestore: boolean;
+  readonly gracePeriodDays: number;
+  readonly message: string;
+}
+
 export interface WorkspaceData {
   readonly id: string;
   readonly name: string;
@@ -77,6 +91,9 @@ export interface WorkspaceData {
   readonly member_count: number;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly deletedAt?: string | null;
+  readonly deletionScheduledFor?: string | null;
+  readonly deletionInfo?: WorkspaceDeletionInfo | null;
 }
 
 /**
@@ -92,6 +109,9 @@ export interface WorkspaceListItem {
   readonly member_count: number;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly deletedAt?: string | null;
+  readonly deletionScheduledFor?: string | null;
+  readonly deletionInfo?: WorkspaceDeletionInfo | null;
 }
 
 // ============================================================================
@@ -175,6 +195,16 @@ export interface WorkspaceUpdateResponse {
  * DELETE /api/workspaces/<workspace_id>/delete/
  */
 export interface WorkspaceDeleteResponse {
+  readonly success: true;
+  readonly message: string;
+  readonly workspace: WorkspaceData;
+}
+
+/**
+ * Restore Workspace Response
+ * POST /api/workspaces/<workspace_id>/restore/
+ */
+export interface WorkspaceRestoreResponse {
   readonly success: true;
   readonly message: string;
   readonly workspace: WorkspaceData;

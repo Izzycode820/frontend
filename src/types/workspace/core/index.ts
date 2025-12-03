@@ -20,6 +20,8 @@ export type {
   WorkspaceGetResponse,
   WorkspaceUpdateResponse,
   WorkspaceDeleteResponse,
+  WorkspaceRestoreResponse,
+  WorkspaceDeletionInfo,
 
   // Workspace state (discriminated union only)
   WorkspaceState,

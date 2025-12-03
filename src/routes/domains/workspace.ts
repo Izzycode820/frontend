@@ -86,7 +86,7 @@ export const STORE_ROUTES = {
 
   // Settings
   SETTINGS: {
-    GENERAL: (workspaceId: string) => `/workspace/${workspaceId}/store/settings`,
+    GENERAL: (workspaceId: string) => `/workspace/${workspaceId}/store/settings/domains`,
     PAYMENTS: (workspaceId: string) => `/workspace/${workspaceId}/store/settings/payments`,
     SHIPPING: (workspaceId: string) => `/workspace/${workspaceId}/store/settings/shipping`,
     TAXES: (workspaceId: string) => `/workspace/${workspaceId}/store/settings/taxes`,

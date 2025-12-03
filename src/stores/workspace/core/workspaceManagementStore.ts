@@ -14,7 +14,8 @@ import type {
   WorkspaceUpdateRequest,
   WorkspaceCreateResponse,
   WorkspaceUpdateResponse,
-  WorkspaceDeleteResponse
+  WorkspaceDeleteResponse,
+  WorkspaceRestoreResponse
 } from '../../../types/workspace/core'
 import workspaceService from '../../../services/workspace/core/workspace'
 import { useWorkspaceStore as useWorkspaceAuthStore } from '../../authentication/workspaceStore'
@@ -70,6 +71,7 @@ interface WorkspaceStoreState {
   isCreating: boolean
   isUpdating: boolean
   isDeleting: boolean
+  isRestoring: boolean
   error: string | null
 
   // Actions - Workspace Management
@@ -78,6 +80,7 @@ interface WorkspaceStoreState {
   createWorkspace: (request: WorkspaceCreateRequest) => Promise<WorkspaceCreateResponse>
   updateWorkspace: (workspaceId: string, request: WorkspaceUpdateRequest) => Promise<WorkspaceUpdateResponse>
   deleteWorkspace: (workspaceId: string) => Promise<WorkspaceDeleteResponse>
+  restoreWorkspace: (workspaceId: string) => Promise<WorkspaceRestoreResponse>
 
   // UI Actions
   setCurrentWorkspace: (workspace: WorkspaceData | null) => void
@@ -85,6 +88,7 @@ interface WorkspaceStoreState {
   setCreating: (creating: boolean) => void
   setUpdating: (updating: boolean) => void
   setDeleting: (deleting: boolean) => void
+  setRestoring: (restoring: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
   clearWorkspaces: () => void
@@ -114,6 +118,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>()(
       isCreating: false,
       isUpdating: false,
       isDeleting: false,
+      isRestoring: false,
       error: null,
 
       // ========================================================================
@@ -265,11 +270,16 @@ export const useWorkspaceStore = create<WorkspaceStoreState>()(
           const response = await workspaceService.deleteWorkspace(workspaceId)
 
           set((state) => {
-            // Remove workspace from list
-            state.workspaces = state.workspaces.filter(ws => ws.id !== workspaceId)
+            // Update workspace in list to suspended status with deletion info
+            const workspaceIndex = state.workspaces.findIndex(ws => ws.id === workspaceId)
+            if (workspaceIndex !== -1) {
+              state.workspaces[workspaceIndex] = response.workspace
+            }
 
-            // Remove workspace from details cache
-            delete state.workspaceDetails[workspaceId]
+            // Update workspace in details cache
+            if (state.workspaceDetails[workspaceId]) {
+              state.workspaceDetails[workspaceId] = response.workspace
+            }
 
             // Clear current workspace if it's the one being deleted
             if (state.currentWorkspace?.id === workspaceId) {
@@ -288,6 +298,48 @@ export const useWorkspaceStore = create<WorkspaceStoreState>()(
           set((state) => {
             state.error = error instanceof Error ? error.message : 'Failed to delete workspace'
             state.isDeleting = false
+          })
+          throw error
+        }
+      },
+
+      restoreWorkspace: async (workspaceId) => {
+        if (!workspaceId) {
+          throw new Error('Workspace ID is required')
+        }
+
+        set((state) => {
+          state.isRestoring = true
+          state.error = null
+        })
+
+        try {
+          const response = await workspaceService.restoreWorkspace(workspaceId)
+
+          set((state) => {
+            // Update workspace in list to active status
+            const workspaceIndex = state.workspaces.findIndex(ws => ws.id === workspaceId)
+            if (workspaceIndex !== -1) {
+              state.workspaces[workspaceIndex] = response.workspace
+            }
+
+            // Update workspace in details cache
+            if (state.workspaceDetails[workspaceId]) {
+              state.workspaceDetails[workspaceId] = response.workspace
+            }
+
+            state.isRestoring = false
+          })
+
+          // Sync updated workspace list to auth store
+          const { workspaces } = get()
+          syncToAuthStore(workspaces)
+
+          return response
+        } catch (error) {
+          set((state) => {
+            state.error = error instanceof Error ? error.message : 'Failed to restore workspace'
+            state.isRestoring = false
           })
           throw error
         }
@@ -324,6 +376,12 @@ export const useWorkspaceStore = create<WorkspaceStoreState>()(
       setDeleting: (deleting) => {
         set((state) => {
           state.isDeleting = deleting
+        })
+      },
+
+      setRestoring: (restoring) => {
+        set((state) => {
+          state.isRestoring = restoring
         })
       },
 
@@ -426,6 +484,7 @@ export const workspaceSelectors = {
   isCreating: (state: WorkspaceStoreState) => state.isCreating,
   isUpdating: (state: WorkspaceStoreState) => state.isUpdating,
   isDeleting: (state: WorkspaceStoreState) => state.isDeleting,
+  isRestoring: (state: WorkspaceStoreState) => state.isRestoring,
   error: (state: WorkspaceStoreState) => state.error,
 
   // Computed selectors
@@ -448,6 +507,7 @@ export const workspaceSelectors = {
   createWorkspace: (state: WorkspaceStoreState) => state.createWorkspace,
   updateWorkspace: (state: WorkspaceStoreState) => state.updateWorkspace,
   deleteWorkspace: (state: WorkspaceStoreState) => state.deleteWorkspace,
+  restoreWorkspace: (state: WorkspaceStoreState) => state.restoreWorkspace,
   setCurrentWorkspace: (state: WorkspaceStoreState) => state.setCurrentWorkspace,
   clearError: (state: WorkspaceStoreState) => state.clearError,
   clearWorkspaces: (state: WorkspaceStoreState) => state.clearWorkspaces,
