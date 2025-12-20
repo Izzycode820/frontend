@@ -25,6 +25,7 @@ export interface UseAuthReturn {
   user: ReturnType<typeof authSelectors.user>
   workspace: ReturnType<typeof authSelectors.workspace>
   subscription: ReturnType<typeof authSelectors.subscription>
+  capabilities: ReturnType<typeof authSelectors.capabilities>
   isLoading: boolean
   error: string | null
 
@@ -41,9 +42,12 @@ export interface UseAuthReturn {
   trialDaysRemaining: number | null
   canUpgradeTrial: boolean
 
-  // Workspace limit helpers (from JWT claims)
+  // Workspace/subscription limit helpers (from capabilities)
   maxWorkspaces: number
-  subscriptionLimits: ReturnType<typeof authSelectors.subscriptionLimits>
+  deploymentAllowed: boolean
+  customDomainsLimit: number
+  storageGb: number
+  bandwidthGb: number
 
   // Actions (stable references)
   login: (credentials: LoginRequest) => Promise<LoginResponse>
@@ -53,6 +57,9 @@ export interface UseAuthReturn {
   updateUser: (updates: Partial<import('../../types/authentication/auth').UserData>) => void
   clearError: () => void
   updateLastActivity: () => void
+
+  // Capabilities helper
+  can: (feature: string) => boolean
 }
 
 // ============================================================================
@@ -66,6 +73,7 @@ export function useAuth(): UseAuthReturn {
   const user = useAuthStore(authSelectors.user)
   const workspace = useAuthStore(authSelectors.workspace)
   const subscription = useAuthStore(authSelectors.subscription)
+  const capabilities = useAuthStore(authSelectors.capabilities)
   const isLoading = useAuthStore(authSelectors.isLoading)
   const error = useAuthStore(authSelectors.error)
   const userDisplayName = useAuthStore(authSelectors.userDisplayName)
@@ -80,9 +88,12 @@ export function useAuth(): UseAuthReturn {
   const trialDaysRemaining = useAuthStore(authSelectors.trialDaysRemaining)
   const canUpgradeTrial = useAuthStore(authSelectors.canUpgradeTrial)
 
-  // Workspace limit selectors (from JWT claims)
+  // Workspace/subscription limit selectors (from capabilities)
   const maxWorkspaces = useAuthStore(authSelectors.maxWorkspaces)
-  const subscriptionLimits = useAuthStore(authSelectors.subscriptionLimits)
+  const deploymentAllowed = useAuthStore(authSelectors.deploymentAllowed)
+  const customDomainsLimit = useAuthStore(authSelectors.customDomainsLimit)
+  const storageGb = useAuthStore(authSelectors.storageGb)
+  const bandwidthGb = useAuthStore(authSelectors.bandwidthGb)
 
   // Store actions (direct references for performance)
   const setLoginSuccess = useAuthStore(state => state.setLoginSuccess)
@@ -93,6 +104,7 @@ export function useAuth(): UseAuthReturn {
   const clearError = useAuthStore(state => state.clearError)
   const updateLastActivity = useAuthStore(state => state.updateLastActivity)
   const updateUser = useAuthStore(state => state.updateUser)
+  const can = useAuthStore(state => state.can)
 
   // ============================================================================
   // Stable Action Implementations
@@ -196,6 +208,7 @@ export function useAuth(): UseAuthReturn {
     user,
     workspace,
     subscription,
+    capabilities,
     isLoading,
     error,
 
@@ -212,9 +225,12 @@ export function useAuth(): UseAuthReturn {
     trialDaysRemaining,
     canUpgradeTrial,
 
-    // Workspace limit helpers
+    // Workspace/subscription limit helpers
     maxWorkspaces,
-    subscriptionLimits,
+    deploymentAllowed,
+    customDomainsLimit,
+    storageGb,
+    bandwidthGb,
 
     // Actions (stable)
     login,
@@ -223,7 +239,10 @@ export function useAuth(): UseAuthReturn {
     refreshToken,
     updateUser,
     clearError,
-    updateLastActivity
+    updateLastActivity,
+
+    // Capabilities helper
+    can
   }
 }
 

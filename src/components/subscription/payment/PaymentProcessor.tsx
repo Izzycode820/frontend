@@ -16,7 +16,7 @@ import { Progress } from '@/components/shadcn-ui/progress';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { cn } from '@/lib/utils';
-import { usePayment } from '@/hooks/subscription';
+import usePayment from '@/hooks/payment/usePayment';
 
 interface PaymentProcessorProps {
   paymentId: string;
@@ -29,8 +29,9 @@ interface PaymentProcessorProps {
 }
 
 /**
- * Payment Processor Component - Modern Version
- * Real-time payment status polling using modern usePayment hook
+ * Payment Processor Component - Refactored
+ * Real-time payment status polling using refactored usePayment hook
+ * Uses webhook-driven polling with progressive intervals
  * Follows best practices: security, performance, scalability
  */
 export function PaymentProcessor({
@@ -42,20 +43,18 @@ export function PaymentProcessor({
   onRetry,
   className
 }: PaymentProcessorProps) {
+  // Use refactored payment hook for polling
   const {
-    currentPayment,
     paymentStatus,
-    isLoading,
+    isPolling,
     error,
-    checkPaymentStatus,
-    pollPaymentStatus,
-    clearError,
-    isPaymentComplete,
+    startPolling,
+    stopPolling,
+    isPaymentSuccess,
     isPaymentFailed,
     isPaymentPending
   } = usePayment();
 
-  const [pollingActive, setPollingActive] = useState(false);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
 
   // Format currency
@@ -108,7 +107,7 @@ export function PaymentProcessor({
       };
     }
 
-    if (isPaymentComplete()) {
+    if (isPaymentSuccess) {
       return {
         icon: <CheckCircle className="w-5 h-5 text-green-500" />,
         title: 'Payment Successful',
@@ -117,7 +116,7 @@ export function PaymentProcessor({
       };
     }
 
-    if (isPaymentFailed()) {
+    if (isPaymentFailed) {
       return {
         icon: <XCircle className="w-5 h-5 text-red-500" />,
         title: 'Payment Failed',
@@ -126,7 +125,7 @@ export function PaymentProcessor({
       };
     }
 
-    if (isPaymentPending()) {
+    if (isPaymentPending) {
       return {
         icon: <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />,
         title: 'Processing Payment',
@@ -147,36 +146,31 @@ export function PaymentProcessor({
 
   // Start polling for payment status
   useEffect(() => {
-    if (!paymentId || pollingActive) return;
+    if (!paymentId || isPolling) return;
 
-    setPollingActive(true);
+    // Start polling with new hook (uses webhook-driven progressive intervals)
+    startPolling(
+      paymentId,
+      // onSuccess callback
+      (payment) => {
+        onComplete({ success: true });
+      },
+      // onError callback
+      (errorMsg) => {
+        onComplete({ success: false, error: errorMsg });
+      }
+    );
 
-    // Start polling (max 60 attempts = 5 minutes with 5s interval)
-    pollPaymentStatus(paymentId, 60)
-      .then((finalStatus) => {
-        if (finalStatus.status === 'completed' || finalStatus.status === 'successful') {
-          onComplete({ success: true });
-        } else if (finalStatus.status === 'failed' || finalStatus.status === 'cancelled') {
-          onComplete({ success: false, error: 'Payment was not completed' });
-        }
-      })
-      .catch((err) => {
-        console.error('Polling error:', err);
-        onComplete({ success: false, error: err.message || 'Payment verification failed' });
-      })
-      .finally(() => {
-        setPollingActive(false);
-      });
-
-    // Timer for elapsed time
+    // Timer for elapsed time display
     const timer = setInterval(() => {
       setSecondsElapsed(prev => prev + 1);
     }, 1000);
 
     return () => {
       clearInterval(timer);
+      stopPolling();
     };
-  }, [paymentId, pollPaymentStatus, onComplete, pollingActive]);
+  }, [paymentId, startPolling, stopPolling, onComplete, isPolling]);
 
   // Format elapsed time
   const formatElapsedTime = () => {
@@ -187,16 +181,15 @@ export function PaymentProcessor({
 
   // Calculate progress (mock progress based on time)
   const getProgress = () => {
-    if (isPaymentComplete()) return 100;
-    if (isPaymentFailed()) return 0;
+    if (isPaymentSuccess) return 100;
+    if (isPaymentFailed) return 0;
     // Show gradual progress up to 90% over 2 minutes
     return Math.min((secondsElapsed / 120) * 90, 90);
   };
 
   const handleRetry = () => {
-    clearError();
+    stopPolling();
     setSecondsElapsed(0);
-    setPollingActive(false);
     onRetry?.();
   };
 
@@ -237,16 +230,16 @@ export function PaymentProcessor({
             <span className="font-mono text-sm">{phoneNumber}</span>
           </div>
 
-          {currentPayment?.payment_reference && (
+          {paymentStatus?.metadata?.payment_reference && (
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Reference:</span>
-              <span className="font-mono text-xs">{currentPayment.payment_reference}</span>
+              <span className="font-mono text-xs">{paymentStatus.metadata.payment_reference}</span>
             </div>
           )}
         </div>
 
         {/* Progress */}
-        {pollingActive && !isPaymentComplete() && !isPaymentFailed() && (
+        {isPolling && !isPaymentSuccess && !isPaymentFailed && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Progress</span>
@@ -257,7 +250,7 @@ export function PaymentProcessor({
         )}
 
         {/* Timer */}
-        {pollingActive && secondsElapsed > 0 && (
+        {isPolling && secondsElapsed > 0 && (
           <div className="text-center">
             <div className="text-sm text-muted-foreground">Time elapsed</div>
             <div className="text-lg font-mono font-medium">
@@ -267,7 +260,7 @@ export function PaymentProcessor({
         )}
 
         {/* Instructions */}
-        {pollingActive && !isPaymentComplete() && !isPaymentFailed() && (
+        {isPolling && !isPaymentSuccess && !isPaymentFailed && (
           <Alert>
             <Smartphone className="h-4 w-4" />
             <AlertDescription>
@@ -292,22 +285,22 @@ export function PaymentProcessor({
 
         {/* Action Buttons */}
         <div className="flex gap-3">
-          {(error || isPaymentFailed()) && onRetry && (
+          {(error || isPaymentFailed) && onRetry && (
             <Button
               onClick={handleRetry}
               className="flex-1"
-              disabled={pollingActive}
+              disabled={isPolling}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Try Again
             </Button>
           )}
 
-          {pollingActive && !isPaymentComplete() && !isPaymentFailed() && (
+          {isPolling && !isPaymentSuccess && !isPaymentFailed && (
             <Button
               variant="outline"
               onClick={() => {
-                setPollingActive(false);
+                stopPolling();
                 onComplete({ success: false, error: 'Payment cancelled by user' });
               }}
               className="flex-1"
@@ -318,7 +311,7 @@ export function PaymentProcessor({
         </div>
 
         {/* Success State */}
-        {isPaymentComplete() && (
+        {isPaymentSuccess && (
           <div className="text-center text-green-600 font-medium">
             ✅ Payment completed successfully!
           </div>

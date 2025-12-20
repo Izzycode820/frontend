@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 
 // Shadcn/UI Components
@@ -32,7 +33,7 @@ import {
 import { useAuth } from '@/hooks/authentication/useAuth'
 
 // Utils
-import { getPostAuthRedirect, extractRedirectParams, reconstructContext } from '@/utils/auth-redirect'
+import { getPostAuthRedirect } from '@/utils/redirect-with-intent'
 
 // Types
 import type { LoginRequest } from '@/types/authentication/auth'
@@ -70,6 +71,7 @@ export function LoginForm({
   showForgotPassword = true
 }: LoginFormProps) {
   const [showPassword, setShowPassword] = React.useState(false)
+  const router = useRouter()
   const { login, isLoading, error, clearError } = useAuth()
   const searchParams = useSearchParams()
 
@@ -105,42 +107,13 @@ export function LoginForm({
 
       onSuccess?.()
 
-      // Context restoration: Extract params and reconstruct redirect path
-      if (typeof window !== 'undefined') {
-        const urlSearchParams = new URLSearchParams(searchParams?.toString() || '')
-        const targetPath = getPostAuthRedirect(urlSearchParams)
-        const params = extractRedirectParams(urlSearchParams)
-        const context = reconstructContext(params)
+      // Clean redirect pattern (industry standard)
+      // 1. Get destination from ?next param OR sessionStorage OR fallback
+      const urlSearchParams = new URLSearchParams(searchParams?.toString() || '')
+      const destination = getPostAuthRedirect(urlSearchParams, redirectTo)
 
-        // Build redirect URL with context params if available
-        let finalRedirectUrl = targetPath
-
-        if (context && context.intent !== 'simple') {
-          const contextParams = new URLSearchParams()
-
-          switch (context.intent) {
-            case 'trial':
-              contextParams.set('tier', context.plan)
-              contextParams.set('type', 'trial')
-              if (context.period) contextParams.set('period', context.period)
-              break
-            case 'subscription':
-              if (context.plan) contextParams.set('tier', context.plan)
-              contextParams.set('type', 'standard')
-              if (context.period) contextParams.set('period', context.period)
-              break
-            case 'upgrade':
-              contextParams.set('fromPlan', context.fromPlan)
-              contextParams.set('toPlan', context.toPlan)
-              break
-          }
-
-          const paramsString = contextParams.toString()
-          finalRedirectUrl = paramsString ? `${targetPath}?${paramsString}` : targetPath
-        }
-
-        window.location.href = finalRedirectUrl || redirectTo
-      }
+      // 2. Use router.replace (not push!) to prevent "back button → login again"
+      router.replace(destination)
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.'
       onError?.(errorMessage)

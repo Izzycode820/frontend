@@ -5,7 +5,6 @@ import { IconPlus } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/authentication/useAuth';
 import { useWorkspaceManagement } from '@/hooks/workspace/core/useWorkspaceManagement';
-import { FeatureGateModal } from '@/components/subscription/gates/FeatureGateModal';
 
 // Shadcn/UI Components
 import { Card, CardContent } from '@/components/shadcn-ui/card';
@@ -13,16 +12,13 @@ import { Badge } from '@/components/shadcn-ui/badge';
 
 export function CreateWorkspaceCard() {
   const router = useRouter();
-  const { isAuthenticated, maxWorkspaces, subscription } = useAuth();
+  const { isAuthenticated, maxWorkspaces } = useAuth();
   const { workspaceCount } = useWorkspaceManagement();
 
-  const [showGateModal, setShowGateModal] = useState(false);
 
   // Check if user hit workspace limit (soft gate check)
   const isAtLimit = isAuthenticated && workspaceCount >= maxWorkspaces;
 
-  // Get current tier from subscription (defaults to 'free')
-  const currentTier = (subscription?.tier || 'free') as 'free' | 'beginning' | 'pro' | 'enterprise';
 
   const handleCreateWorkspace = () => {
     // Auth gate - redirect unauthenticated users to signup (industry standard)
@@ -32,11 +28,6 @@ export function CreateWorkspaceCard() {
       return;
     }
 
-    // Soft gate - show modal if at limit
-    if (isAtLimit) {
-      setShowGateModal(true);
-      return;
-    }
 
     // User can create workspace - proceed to form
     router.push('/workspace/create');
@@ -82,15 +73,6 @@ export function CreateWorkspaceCard() {
         </CardContent>
       </Card>
 
-      {/* Feature Gate Modal - Smart, Achievement-Based */}
-      <FeatureGateModal
-        open={showGateModal}
-        onOpenChange={setShowGateModal}
-        feature="workspace_limit"
-        currentTier={currentTier}
-        currentUsage={`${workspaceCount}/${maxWorkspaces} workspaces`}
-        usageData={{ current: workspaceCount, limit: maxWorkspaces }}
-      />
     </>
   );
 }

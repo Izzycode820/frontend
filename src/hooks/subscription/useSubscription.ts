@@ -2,19 +2,29 @@
  * Subscription Hook - 2024 Best Practices with Zustand
  * Custom hook layer for subscription store - provides clean interface and performance
  * Following patterns: single responsibility, selective subscriptions, error boundaries
+ * Aligned with backend subscription_views.py and PaymentService
  */
 
 import { useCallback } from 'react'
 import { useSubscriptionStore, subscriptionSelectors } from '../../stores/subscription/subscriptionStore'
 import type {
-  SubscriptionCreateRequest,
-  SubscriptionCreateResponse,
-  SubscriptionUpgradeRequest,
-  SubscriptionUpgradeResponse,
+  CreateSubscriptionRequest,
+  CreateSubscriptionResponse,
   RenewSubscriptionRequest,
+  RenewSubscriptionResponse,
+  UpgradeSubscriptionRequest,
+  UpgradeSubscriptionResponse,
   ScheduleDowngradeRequest,
-  ReactivateSubscriptionRequest,
-} from '../../types/subscription'
+  ScheduleDowngradeResponse,
+  CancelSubscriptionRequest,
+  CancelSubscriptionResponse,
+  VoidPendingPaymentResponse,
+  ReactivateSubscriptionResponse,
+  RetryPaymentRequest,
+  RetryPaymentResponse,
+  SubscriptionError,
+} from '../../types/subscription/subscription'
+import type { SubscriptionData } from '../../types/authentication/auth'
 
 // ============================================================================
 // Hook Return Interface - Clean Contract
@@ -22,36 +32,29 @@ import type {
 
 export interface UseSubscriptionReturn {
   // State selectors (performance optimized)
-  subscription: ReturnType<typeof subscriptionSelectors.subscription>
-  history: ReturnType<typeof subscriptionSelectors.history>
+  jwtSubscription: SubscriptionData | null
   isLoading: boolean
-  error: string | null
+  error: SubscriptionError | null
 
-  // Computed state
+  // Computed state (derived from JWT - minimal claims only)
+  tier: ReturnType<typeof subscriptionSelectors.tier>
+  status: ReturnType<typeof subscriptionSelectors.status>
+  expiresAt: ReturnType<typeof subscriptionSelectors.expiresAt>
+  capabilitiesVersion: ReturnType<typeof subscriptionSelectors.capabilitiesVersion>
+  billingCycle: ReturnType<typeof subscriptionSelectors.billingCycle>
+  currency: ReturnType<typeof subscriptionSelectors.currency>
   isActive: boolean
-  planTier: ReturnType<typeof subscriptionSelectors.planTier>
-  planName: ReturnType<typeof subscriptionSelectors.planName>
-  daysRemaining: ReturnType<typeof subscriptionSelectors.daysRemaining>
-  deploymentAllowed: boolean
-  hasSubscription: boolean
 
   // Actions (stable references)
-  createSubscription: (request: SubscriptionCreateRequest) => Promise<SubscriptionCreateResponse>
-  upgradeSubscription: (request: SubscriptionUpgradeRequest) => Promise<SubscriptionUpgradeResponse>
-  getSubscriptionStatus: () => Promise<void>
-  getSubscriptionHistory: () => Promise<void>
-  renewSubscription: (request: RenewSubscriptionRequest) => Promise<void>
-  scheduleDowngrade: (request: ScheduleDowngradeRequest) => Promise<void>
-  reactivateSubscription: (request: ReactivateSubscriptionRequest) => Promise<void>
+  createSubscription: (request: CreateSubscriptionRequest) => Promise<CreateSubscriptionResponse>
+  renewSubscription: (request: RenewSubscriptionRequest) => Promise<RenewSubscriptionResponse>
+  upgradeSubscription: (request: UpgradeSubscriptionRequest) => Promise<UpgradeSubscriptionResponse>
+  scheduleDowngrade: (request: ScheduleDowngradeRequest) => Promise<ScheduleDowngradeResponse>
+  cancelActiveSubscription: (request?: CancelSubscriptionRequest) => Promise<CancelSubscriptionResponse>
+  voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>
+  reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>
+  retryPayment: (request: RetryPaymentRequest) => Promise<RetryPaymentResponse>
   clearError: () => void
-  clearSubscription: () => void
-
-  // Helper methods
-  isOperational: () => boolean
-  requiresPayment: () => boolean
-  daysUntilExpiry: () => number | null
-  canUpgrade: () => boolean
-  canDowngrade: () => boolean
 }
 
 // ============================================================================
@@ -60,64 +63,63 @@ export interface UseSubscriptionReturn {
 
 export function useSubscription(): UseSubscriptionReturn {
   // Selective store subscriptions (performance optimized)
-  const subscription = useSubscriptionStore(subscriptionSelectors.subscription)
-  const history = useSubscriptionStore(subscriptionSelectors.history)
+  const jwtSubscription = useSubscriptionStore(subscriptionSelectors.jwtSubscription)
   const isLoading = useSubscriptionStore(subscriptionSelectors.isLoading)
   const error = useSubscriptionStore(subscriptionSelectors.error)
+  const tier = useSubscriptionStore(subscriptionSelectors.tier)
+  const status = useSubscriptionStore(subscriptionSelectors.status)
+  const expiresAt = useSubscriptionStore(subscriptionSelectors.expiresAt)
+  const capabilitiesVersion = useSubscriptionStore(subscriptionSelectors.capabilitiesVersion)
+  const billingCycle = useSubscriptionStore(subscriptionSelectors.billingCycle)
+  const currency = useSubscriptionStore(subscriptionSelectors.currency)
   const isActive = useSubscriptionStore(subscriptionSelectors.isActive)
-  const planTier = useSubscriptionStore(subscriptionSelectors.planTier)
-  const planName = useSubscriptionStore(subscriptionSelectors.planName)
-  const daysRemaining = useSubscriptionStore(subscriptionSelectors.daysRemaining)
-  const deploymentAllowed = useSubscriptionStore(subscriptionSelectors.deploymentAllowed)
-  const hasSubscription = useSubscriptionStore(subscriptionSelectors.hasSubscription)
 
   // Store actions (use stable selectors for performance)
   const createSubscriptionAction = useSubscriptionStore(subscriptionSelectors.createSubscription)
-  const upgradeSubscriptionAction = useSubscriptionStore(subscriptionSelectors.upgradeSubscription)
-  const getSubscriptionStatusAction = useSubscriptionStore(subscriptionSelectors.getSubscriptionStatus)
-  const getSubscriptionHistoryAction = useSubscriptionStore(subscriptionSelectors.getSubscriptionHistory)
   const renewSubscriptionAction = useSubscriptionStore(subscriptionSelectors.renewSubscription)
+  const upgradeSubscriptionAction = useSubscriptionStore(subscriptionSelectors.upgradeSubscription)
   const scheduleDowngradeAction = useSubscriptionStore(subscriptionSelectors.scheduleDowngrade)
+  const cancelActiveSubscriptionAction = useSubscriptionStore(subscriptionSelectors.cancelActiveSubscription)
+  const voidPendingPaymentAction = useSubscriptionStore(subscriptionSelectors.voidPendingPayment)
   const reactivateSubscriptionAction = useSubscriptionStore(subscriptionSelectors.reactivateSubscription)
+  const retryPaymentAction = useSubscriptionStore(subscriptionSelectors.retryPayment)
   const clearError = useSubscriptionStore(subscriptionSelectors.clearError)
-  const clearSubscription = useSubscriptionStore(subscriptionSelectors.clearSubscription)
-  const isOperational = useSubscriptionStore(subscriptionSelectors.isOperational)
-  const requiresPayment = useSubscriptionStore(subscriptionSelectors.requiresPayment)
-  const daysUntilExpiry = useSubscriptionStore(subscriptionSelectors.daysUntilExpiry)
-  const canUpgrade = useSubscriptionStore(subscriptionSelectors.canUpgrade)
-  const canDowngrade = useSubscriptionStore(subscriptionSelectors.canDowngrade)
 
   // ============================================================================
-  // Stable Action Implementations
+  // Stable Action Implementations (useCallback for performance)
   // ============================================================================
 
-  const createSubscription = useCallback(async (request: SubscriptionCreateRequest): Promise<SubscriptionCreateResponse> => {
+  const createSubscription = useCallback(async (request: CreateSubscriptionRequest): Promise<CreateSubscriptionResponse> => {
     return createSubscriptionAction(request)
   }, [createSubscriptionAction])
 
-  const upgradeSubscription = useCallback(async (request: SubscriptionUpgradeRequest): Promise<SubscriptionUpgradeResponse> => {
-    return upgradeSubscriptionAction(request)
-  }, [upgradeSubscriptionAction])
-
-  const getSubscriptionStatus = useCallback(async (): Promise<void> => {
-    return getSubscriptionStatusAction()
-  }, [getSubscriptionStatusAction])
-
-  const getSubscriptionHistory = useCallback(async (): Promise<void> => {
-    return getSubscriptionHistoryAction()
-  }, [getSubscriptionHistoryAction])
-
-  const renewSubscription = useCallback(async (request: RenewSubscriptionRequest): Promise<void> => {
+  const renewSubscription = useCallback(async (request: RenewSubscriptionRequest): Promise<RenewSubscriptionResponse> => {
     return renewSubscriptionAction(request)
   }, [renewSubscriptionAction])
 
-  const scheduleDowngrade = useCallback(async (request: ScheduleDowngradeRequest): Promise<void> => {
+  const upgradeSubscription = useCallback(async (request: UpgradeSubscriptionRequest): Promise<UpgradeSubscriptionResponse> => {
+    return upgradeSubscriptionAction(request)
+  }, [upgradeSubscriptionAction])
+
+  const scheduleDowngrade = useCallback(async (request: ScheduleDowngradeRequest): Promise<ScheduleDowngradeResponse> => {
     return scheduleDowngradeAction(request)
   }, [scheduleDowngradeAction])
 
-  const reactivateSubscription = useCallback(async (request: ReactivateSubscriptionRequest): Promise<void> => {
-    return reactivateSubscriptionAction(request)
+  const cancelActiveSubscription = useCallback(async (request?: CancelSubscriptionRequest): Promise<CancelSubscriptionResponse> => {
+    return cancelActiveSubscriptionAction(request)
+  }, [cancelActiveSubscriptionAction])
+
+  const voidPendingPayment = useCallback(async (subscriptionId: string): Promise<VoidPendingPaymentResponse> => {
+    return voidPendingPaymentAction(subscriptionId)
+  }, [voidPendingPaymentAction])
+
+  const reactivateSubscription = useCallback(async (): Promise<ReactivateSubscriptionResponse> => {
+    return reactivateSubscriptionAction()
   }, [reactivateSubscriptionAction])
+
+  const retryPayment = useCallback(async (request: RetryPaymentRequest): Promise<RetryPaymentResponse> => {
+    return retryPaymentAction(request)
+  }, [retryPaymentAction])
 
   // ============================================================================
   // Return Hook Interface
@@ -125,36 +127,29 @@ export function useSubscription(): UseSubscriptionReturn {
 
   return {
     // State (reactive)
-    subscription,
-    history,
+    jwtSubscription,
     isLoading,
     error,
 
-    // Computed state
+    // Computed state (from JWT - minimal claims only)
+    tier,
+    status,
+    expiresAt,
+    capabilitiesVersion,
+    billingCycle,
+    currency,
     isActive,
-    planTier,
-    planName,
-    daysRemaining,
-    deploymentAllowed,
-    hasSubscription,
 
-    // Actions (stable)
+    // Actions (stable references)
     createSubscription,
-    upgradeSubscription,
-    getSubscriptionStatus,
-    getSubscriptionHistory,
     renewSubscription,
+    upgradeSubscription,
     scheduleDowngrade,
+    cancelActiveSubscription,
+    voidPendingPayment,
     reactivateSubscription,
+    retryPayment,
     clearError,
-    clearSubscription,
-
-    // Helper methods
-    isOperational,
-    requiresPayment,
-    daysUntilExpiry,
-    canUpgrade,
-    canDowngrade,
   }
 }
 
@@ -164,37 +159,78 @@ export function useSubscription(): UseSubscriptionReturn {
 
 /**
  * Hook for subscription status only - minimal re-renders
+ * Use when you only need to check subscription tier/status
  */
 export function useSubscriptionStatus() {
   return {
+    tier: useSubscriptionStore(subscriptionSelectors.tier),
+    status: useSubscriptionStore(subscriptionSelectors.status),
     isActive: useSubscriptionStore(subscriptionSelectors.isActive),
-    planTier: useSubscriptionStore(subscriptionSelectors.planTier),
-    deploymentAllowed: useSubscriptionStore(subscriptionSelectors.deploymentAllowed),
-    hasSubscription: useSubscriptionStore(subscriptionSelectors.hasSubscription),
-    isLoading: useSubscriptionStore(subscriptionSelectors.isLoading)
+    isLoading: useSubscriptionStore(subscriptionSelectors.isLoading),
   }
 }
 
 /**
  * Hook for subscription data only - minimal re-renders
+ * Use when you need full subscription details
  */
 export function useSubscriptionData() {
   return {
-    subscription: useSubscriptionStore(subscriptionSelectors.subscription),
-    planName: useSubscriptionStore(subscriptionSelectors.planName),
-    planTier: useSubscriptionStore(subscriptionSelectors.planTier),
-    daysRemaining: useSubscriptionStore(subscriptionSelectors.daysRemaining),
+    jwtSubscription: useSubscriptionStore(subscriptionSelectors.jwtSubscription),
+    tier: useSubscriptionStore(subscriptionSelectors.tier),
+    status: useSubscriptionStore(subscriptionSelectors.status),
+    expiresAt: useSubscriptionStore(subscriptionSelectors.expiresAt),
+    capabilitiesVersion: useSubscriptionStore(subscriptionSelectors.capabilitiesVersion),
+    billingCycle: useSubscriptionStore(subscriptionSelectors.billingCycle),
+    currency: useSubscriptionStore(subscriptionSelectors.currency),
   }
 }
 
 /**
  * Hook for subscription actions only - no reactive state
+ * Use when you only need to trigger subscription operations
  */
 export function useSubscriptionActions() {
+  const createSubscription = useSubscriptionStore(subscriptionSelectors.createSubscription)
+  const renewSubscription = useSubscriptionStore(subscriptionSelectors.renewSubscription)
+  const upgradeSubscription = useSubscriptionStore(subscriptionSelectors.upgradeSubscription)
+  const scheduleDowngrade = useSubscriptionStore(subscriptionSelectors.scheduleDowngrade)
+  const cancelActiveSubscription = useSubscriptionStore(subscriptionSelectors.cancelActiveSubscription)
+  const voidPendingPayment = useSubscriptionStore(subscriptionSelectors.voidPendingPayment)
+  const reactivateSubscription = useSubscriptionStore(subscriptionSelectors.reactivateSubscription)
+  const retryPayment = useSubscriptionStore(subscriptionSelectors.retryPayment)
   const clearError = useSubscriptionStore(subscriptionSelectors.clearError)
-  const clearSubscription = useSubscriptionStore(subscriptionSelectors.clearSubscription)
 
-  return { clearError, clearSubscription }
+  const isLoading = useSubscriptionStore(subscriptionSelectors.isLoading)
+  const error = useSubscriptionStore(subscriptionSelectors.error)
+
+  return {
+    // Actions
+    createSubscription,
+    renewSubscription,
+    upgradeSubscription,
+    scheduleDowngrade,
+    cancelActiveSubscription,
+    voidPendingPayment,
+    reactivateSubscription,
+    retryPayment,
+    clearError,
+
+    // Minimal state for action feedback
+    isLoading,
+    error,
+  }
+}
+
+/**
+ * Hook for error handling only - minimal re-renders
+ * Use in error boundaries or error display components
+ */
+export function useSubscriptionError() {
+  return {
+    error: useSubscriptionStore(subscriptionSelectors.error),
+    clearError: useSubscriptionStore(subscriptionSelectors.clearError),
+  }
 }
 
 // ============================================================================

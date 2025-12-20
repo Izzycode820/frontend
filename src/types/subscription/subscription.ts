@@ -1,285 +1,412 @@
-import { z } from 'zod';
-
 /**
- * Subscription Management Types
- * Types matching exact backend API responses from subscription endpoints
+ * Subscription Types
+ * Aligned with backend SubscriptionService and PaymentService
+ * Features: Webhook-driven payments, manual renewal, strict validation
  */
 
-// Subscription status types from backend
-export const SubscriptionStatus = {
-  ACTIVE: 'active',
+// ============================================================================
+// Subscription Plan Types
+// ============================================================================
+
+export type SubscriptionTier = 'free' | 'beginner' | 'pro' | 'enterprise';
+export type BillingCycle = 'monthly' | 'yearly';
+export type PricingMode = 'intro' | 'regular';
+export type BillingPhase = 'intro' | 'regular';
+export type SubscriptionStatus =
+  | 'pending_payment'
+  | 'change_pending'
+  | 'active'
+  | 'expired'
+  | 'grace_period'
+  | 'suspended'
+  | 'cancelled';
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  tier: SubscriptionTier;
+  description: string;
+
+  // Intro pricing (28-day first cycle)
+  intro_price: number;
+  intro_duration_days: number;
+
+  // Regular pricing
+  regular_price_monthly: number;
+  regular_price_yearly: number;
+
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================================================
+// Create Subscription Types
+// ============================================================================
+
+export interface CreateSubscriptionRequest {
+  plan_tier: SubscriptionTier;
+  workspace_id?: string;
+  phone_number: string;
+  provider?: string;
+  billing_cycle?: BillingCycle;
+  pricing_mode?: PricingMode; // NEW: Explicit user choice (intro or regular)
+  idempotency_key?: string;
+}
+
+export interface CreateSubscriptionResponse {
+  success: boolean;
+  subscription_id?: string;
+  payment_intent_id?: string;
+  payment_instructions?: string;
+  redirect_url?: string;
+  amount?: number;
+  plan?: SubscriptionTier;
+  billing_cycle?: BillingCycle;
+  billing_phase?: BillingPhase; // NEW: intro or regular
+  cycle_duration_days?: number; // NEW: 28/30/365
+  message?: string;
+  already_processed?: boolean;
+  error?: string;
+}
+
+// ============================================================================
+// Renew Subscription Types
+// ============================================================================
+
+export interface RenewSubscriptionRequest {
+  phone_number: string;
+  provider?: string;
+  idempotency_key?: string;
+}
+
+export interface RenewSubscriptionResponse {
+  success: boolean;
+  subscription_id?: string;
+  payment_intent_id?: string;
+  payment_instructions?: string;
+  redirect_url?: string;
+  amount?: number;
+  billing_cycle?: BillingCycle; // NEW
+  cycle_duration_days?: number; // NEW
+  message?: string;
+  already_processed?: boolean;
+  error?: string;
+}
+
+// ============================================================================
+// Upgrade Subscription Types
+// ============================================================================
+
+export interface UpgradeSubscriptionRequest {
+  new_plan_tier: SubscriptionTier;
+  phone_number: string;
+  provider?: string;
+  idempotency_key?: string;
+}
+
+export interface UpgradeSubscriptionResponse {
+  success: boolean;
+  subscription_id?: string;
+  payment_intent_id?: string;
+  payment_instructions?: string;
+  redirect_url?: string;
+  amount?: number;
+  from_plan?: SubscriptionTier;
+  to_plan?: SubscriptionTier;
+  billing_cycle?: BillingCycle; // NEW
+  billing_phase?: BillingPhase; // NEW: always 'regular' for upgrades
+  cycle_duration_days?: number; // NEW
+  message?: string;
+  already_processed?: boolean;
+  error?: string;
+}
+
+// ============================================================================
+// Schedule Downgrade Types
+// ============================================================================
+
+export interface ScheduleDowngradeRequest {
+  new_plan_tier: SubscriptionTier;
+  effective_date?: string;
+}
+
+export interface ScheduleDowngradeResponse {
+  success: boolean;
+  subscription_id?: string;
+  from_plan?: SubscriptionTier;
+  to_plan?: SubscriptionTier;
+  effective_date?: string;
+  message?: string;
+  error?: string;
+}
+
+// ============================================================================
+// Cancel Subscription Types
+// ============================================================================
+
+export interface CancelSubscriptionRequest {
+  reason?: string;
+}
+
+export interface CancelSubscriptionResponse {
+  success: boolean;
+  subscription_id?: string;
+  previous_plan?: SubscriptionTier;
+  current_plan?: SubscriptionTier;
+  status?: string;
+  message?: string;
+  error?: string;
+}
+
+// ============================================================================
+// Void Pending Payment Types
+// ============================================================================
+
+export interface VoidPendingPaymentResponse {
+  success: boolean;
+  message?: string;
+  subscription_id?: string;
+  status?: string;
+  error?: string;
+  current_status?: SubscriptionStatus;
+  error_code?: string;
+}
+
+// ============================================================================
+// Reactivate Subscription Types
+// ============================================================================
+
+export interface ReactivateSubscriptionResponse {
+  success: boolean;
+  subscription_id?: string;
+  status?: SubscriptionStatus;
+  message?: string;
+  error?: string;
+}
+
+// ============================================================================
+// Subscription Status/Capabilities Types
+// ============================================================================
+
+export interface SubscriptionStatusResponse {
+  status: SubscriptionStatus;
+  message: string;
+  current_plan: SubscriptionTier;
+  target_plan?: SubscriptionTier;
+  previous_plan?: SubscriptionTier;
+  access_level: SubscriptionTier;
+  action_required: string | null;
+  expires_at: string | null;
+  expired_at?: string | null;
+  days_remaining?: number | null;
+}
+
+export interface SubscriptionCapabilitiesResponse {
+  tier: SubscriptionTier;
+  capabilities: Record<string, unknown>;
+  version_hash: string;
+}
+
+// ============================================================================
+// Payment Retry Types (NEW)
+// ============================================================================
+
+export interface RetryPaymentRequest {
+  purpose: 'subscription' | 'subscription_renewal' | 'subscription_upgrade' | 'domain' | 'theme' | 'checkout' | 'trial';
+  reference_id: string;
+  workspace_id: string;
+  phone_number?: string;
+  preferred_provider?: string;
+}
+
+export interface RetryPaymentResponse {
+  success: boolean;
+  payment_intent_id?: string;
+  status?: string;
+  amount?: number;
+  currency?: string;
+  provider?: string;
+  mode?: string;
+  redirect_url?: string;
+  client_token?: string;
+  qr_code?: string;
+  instructions?: string;
+  expires_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at?: string;
+  completed_at?: string | null;
+  error?: string;
+  error_code?: string;
+}
+
+// ============================================================================
+// Error Types
+// ============================================================================
+
+export interface SubscriptionError {
+  error: string;
+  error_code?: string;
+  current_status?: SubscriptionStatus;
+  subscription_id?: string;
+  payment_intent_id?: string;
+  trial_tier?: SubscriptionTier;
+  trial_expires_at?: string | null;
+  days_remaining?: number | null;
+  grace_period_remaining_hours?: number;
+  expires_at?: string | null;
+  grace_period_ends_at?: string | null;
+  days_until_renewal_window?: number;
+  renewal_window_starts?: string | null;
+  current_expires_at?: string | null;
+  current_plan?: SubscriptionTier;
+  scheduled_plan?: SubscriptionTier;
+  scheduled_date?: string | null;
+  suggestion?: string;
+}
+
+export type SubscriptionErrorCode =
+  | 'ACTIVE_TRIAL_EXISTS'
+  | 'PENDING_PAYMENT'
+  | 'PAYMENT_EXPIRED_RETRY_AVAILABLE'
+  | 'RENEWAL_OUTSIDE_WINDOW'
+  | 'GRACE_PERIOD_EXPIRED'
+  | 'SUBSCRIPTION_EXPIRED'
+  | 'INVALID_STATUS_FOR_RENEWAL'
+  | 'UPGRADE_OUTSIDE_RENEWAL_WINDOW'
+  | 'INVALID_STATUS_FOR_VOID'
+  | 'INVALID_STATUS_FOR_DOWNGRADE'
+  | 'USE_CANCEL_ENDPOINT'
+  | 'NOT_A_DOWNGRADE'
+  | 'DOWNGRADE_ALREADY_SCHEDULED'
+  | 'INVALID_DATE_FORMAT'
+  | 'PAST_EFFECTIVE_DATE'
+  | 'EARLY_EFFECTIVE_DATE'
+  | 'NO_EXPIRY_DATE'
+  | 'PLAN_NOT_FOUND'
+  | 'GRACE_PERIOD_ACTIVE'
+  | 'INVALID_PRICING_MODE' // NEW
+  | 'INTRO_ALREADY_USED'; // NEW
+
+// ============================================================================
+// Subscription State Types (Discriminated Union)
+// ============================================================================
+
+export type SubscriptionState =
+  | {
+      status: 'idle';
+      subscription: null;
+      error: null;
+      isLoading: false;
+    }
+  | {
+      status: 'loading';
+      subscription: null;
+      error: null;
+      isLoading: true;
+    }
+  | {
+      status: 'loaded';
+      subscription: SubscriptionStatusResponse;
+      error: null;
+      isLoading: false;
+    }
+  | {
+      status: 'error';
+      subscription: null;
+      error: SubscriptionError;
+      isLoading: false;
+    };
+
+// ============================================================================
+// Hook Return Types
+// ============================================================================
+
+export interface UseSubscriptionReturn {
+  state: SubscriptionState;
+  createSubscription: (data: CreateSubscriptionRequest) => Promise<CreateSubscriptionResponse>;
+  renewSubscription: (data: RenewSubscriptionRequest) => Promise<RenewSubscriptionResponse>;
+  upgradeSubscription: (data: UpgradeSubscriptionRequest) => Promise<UpgradeSubscriptionResponse>;
+  scheduleDowngrade: (data: ScheduleDowngradeRequest) => Promise<ScheduleDowngradeResponse>;
+  cancelSubscription: (data: CancelSubscriptionRequest) => Promise<CancelSubscriptionResponse>;
+  voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>;
+  reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>;
+  retryPayment: (data: RetryPaymentRequest) => Promise<RetryPaymentResponse>;
+  clearError: () => void;
+}
+
+export interface UseSubscriptionActionsReturn {
+  createSubscription: (data: CreateSubscriptionRequest) => Promise<CreateSubscriptionResponse>;
+  renewSubscription: (data: RenewSubscriptionRequest) => Promise<RenewSubscriptionResponse>;
+  upgradeSubscription: (data: UpgradeSubscriptionRequest) => Promise<UpgradeSubscriptionResponse>;
+  scheduleDowngrade: (data: ScheduleDowngradeRequest) => Promise<ScheduleDowngradeResponse>;
+  cancelSubscription: (data: CancelSubscriptionRequest) => Promise<CancelSubscriptionResponse>;
+  voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>;
+  reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>;
+  retryPayment: (data: RetryPaymentRequest) => Promise<RetryPaymentResponse>;
+  isLoading: boolean;
+  error: SubscriptionError | null;
+  clearError: () => void;
+}
+
+export interface UseSubscriptionStatusReturn {
+  status: SubscriptionStatusResponse | null;
+  isLoading: boolean;
+  error: SubscriptionError | null;
+  refetch: () => Promise<void>;
+}
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+export const SUBSCRIPTION_TIERS = {
+  FREE: 'free',
+  BEGINNER: 'beginner',
+  PRO: 'pro',
+  ENTERPRISE: 'enterprise',
+} as const;
+
+export const BILLING_CYCLES = {
+  MONTHLY: 'monthly',
+  YEARLY: 'yearly',
+} as const;
+
+export const PRICING_MODES = {
+  INTRO: 'intro',
+  REGULAR: 'regular',
+} as const;
+
+export const BILLING_PHASES = {
+  INTRO: 'intro',
+  REGULAR: 'regular',
+} as const;
+
+export const SUBSCRIPTION_STATUSES = {
   PENDING_PAYMENT: 'pending_payment',
+  CHANGE_PENDING: 'change_pending',
+  ACTIVE: 'active',
   EXPIRED: 'expired',
   GRACE_PERIOD: 'grace_period',
   SUSPENDED: 'suspended',
   CANCELLED: 'cancelled',
 } as const;
 
-export type SubscriptionStatusType = typeof SubscriptionStatus[keyof typeof SubscriptionStatus];
-
-// Plan tier types aligned with backend
-export const PlanTier = {
-  FREE: 'free',
-  BEGINNING: 'beginning',
-  PRO: 'pro',
-  ENTERPRISE: 'enterprise',
+export const SUBSCRIPTION_ERROR_CODES = {
+  ACTIVE_TRIAL_EXISTS: 'ACTIVE_TRIAL_EXISTS',
+  PENDING_PAYMENT: 'PENDING_PAYMENT',
+  PAYMENT_EXPIRED_RETRY_AVAILABLE: 'PAYMENT_EXPIRED_RETRY_AVAILABLE',
+  RENEWAL_OUTSIDE_WINDOW: 'RENEWAL_OUTSIDE_WINDOW',
+  GRACE_PERIOD_EXPIRED: 'GRACE_PERIOD_EXPIRED',
+  SUBSCRIPTION_EXPIRED: 'SUBSCRIPTION_EXPIRED',
+  INVALID_STATUS_FOR_RENEWAL: 'INVALID_STATUS_FOR_RENEWAL',
+  UPGRADE_OUTSIDE_RENEWAL_WINDOW: 'UPGRADE_OUTSIDE_RENEWAL_WINDOW',
+  INVALID_STATUS_FOR_VOID: 'INVALID_STATUS_FOR_VOID',
+  INVALID_STATUS_FOR_DOWNGRADE: 'INVALID_STATUS_FOR_DOWNGRADE',
+  USE_CANCEL_ENDPOINT: 'USE_CANCEL_ENDPOINT',
+  NOT_A_DOWNGRADE: 'NOT_A_DOWNGRADE',
+  DOWNGRADE_ALREADY_SCHEDULED: 'DOWNGRADE_ALREADY_SCHEDULED',
+  GRACE_PERIOD_ACTIVE: 'GRACE_PERIOD_ACTIVE',
+  INVALID_PRICING_MODE: 'INVALID_PRICING_MODE', // NEW
+  INTRO_ALREADY_USED: 'INTRO_ALREADY_USED', // NEW
 } as const;
-
-export type PlanTierType = typeof PlanTier[keyof typeof PlanTier];
-
-/**
- * Create Subscription Request
- * POST /api/subscriptions/create/
- */
-export const SubscriptionCreateSchema = z.object({
-  plan_tier: z.enum(['beginning', 'pro', 'enterprise']),
-});
-
-export interface SubscriptionCreateRequest {
-  readonly plan_tier: 'beginning' | 'pro' | 'enterprise';
-}
-
-/**
- * Create Subscription Response
- * Matches backend response structure exactly
- */
-export interface SubscriptionCreateResponse {
-  readonly subscription: {
-    readonly id: string;
-    readonly plan: {
-      readonly name: string;
-      readonly tier: PlanTierType;
-      readonly price_fcfa: number;
-    };
-    readonly status: SubscriptionStatusType;
-    readonly expires_at: string;
-    readonly deployment_allowed: boolean;
-  };
-}
-
-/**
- * Upgrade Subscription Request
- * POST /api/subscriptions/upgrade/
- */
-export const SubscriptionUpgradeSchema = z.object({
-  new_plan_tier: z.enum(['beginning', 'pro', 'enterprise']),
-});
-
-export interface SubscriptionUpgradeRequest {
-  readonly new_plan_tier: 'beginning' | 'pro' | 'enterprise';
-}
-
-/**
- * Upgrade Subscription Response
- * Returns pending_payment status requiring payment completion
- */
-export interface SubscriptionUpgradeResponse {
-  readonly success: boolean;
-  readonly message: string;
-  readonly upgrade: {
-    readonly id: string;
-    readonly current_plan: PlanTierType;
-    readonly target_plan: PlanTierType;
-    readonly status: SubscriptionStatusType;
-    readonly requires_payment: boolean;
-    readonly amount_due: number;
-  };
-}
-
-/**
- * Subscription Status Response
- * GET /api/subscriptions/status/
- */
-export interface SubscriptionStatusResponse {
-  readonly success: boolean;
-  readonly subscription: {
-    readonly id: string;
-    readonly plan: {
-      readonly name: string;
-      readonly tier: PlanTierType;
-      readonly price_fcfa: number;
-    };
-    readonly status: SubscriptionStatusType;
-    readonly started_at: string;
-    readonly expires_at: string;
-    readonly days_remaining: number;
-    readonly is_active: boolean;
-    readonly deployment_allowed: boolean;
-    readonly limits: {
-      readonly storage_gb: number;
-      readonly bandwidth_gb: number;
-      readonly deployed_sites: number;
-      readonly workspaces: number;
-      readonly custom_domains: number;
-    };
-    readonly capabilities: {
-      readonly deployment_allowed: boolean;
-      readonly custom_domains_allowed: boolean;
-      readonly analytics_enabled: boolean;
-      readonly white_label_enabled: boolean;
-      readonly dedicated_support: boolean;
-      readonly api_access: boolean;
-      readonly priority_support: boolean;
-    };
-  } | null;
-}
-
-/**
- * Type guard to check if subscription requires payment
- */
-export function requiresPayment(status: SubscriptionStatusType): boolean {
-  return status === SubscriptionStatus.PENDING_PAYMENT;
-}
-
-/**
- * Type guard to check if subscription is operational
- */
-export function isOperational(status: SubscriptionStatusType): boolean {
-  return status === SubscriptionStatus.ACTIVE || status === SubscriptionStatus.GRACE_PERIOD;
-}
-
-/**
- * Cancel Subscription Request
- * POST /api/subscriptions/cancel/{subscription_id}/
- * Only works for pending_payment, failed, or expired subscriptions
- */
-export interface CancelSubscriptionRequest {
-  readonly subscription_id: string;
-}
-
-/**
- * Cancel Subscription Response
- * Voids incomplete subscriptions (Stripe pattern)
- */
-export interface CancelSubscriptionResponse {
-  readonly success: boolean;
-  readonly message: string;
-  readonly subscription_id?: string;
-  readonly status?: string;
-  readonly error?: string;
-  readonly current_status?: string;
-}
-
-/**
- * Type guard to check if subscription can be cancelled (voided)
- * Only pending_payment, failed, or expired subscriptions can be voided
- */
-export function canCancelSubscription(status: SubscriptionStatusType): boolean {
-  return (
-    status === SubscriptionStatus.PENDING_PAYMENT ||
-    status === SubscriptionStatus.EXPIRED ||
-    status === 'failed' as SubscriptionStatusType
-  );
-}
-
-// ============================================================================
-// Subscription Error Types (Discriminated Unions)
-// Aligned with PAYLOAD.md (2025-10-03)
-// ============================================================================
-
-/**
- * Trial Creation Blocked by Paid Subscription (403 FORBIDDEN)
- * POST /api/subscriptions/trials/create/
- */
-export interface PaidSubscriptionExistsError {
-  readonly error: string;
-  readonly error_code: 'PAID_SUBSCRIPTION_EXISTS';
-  readonly message: string;
-  readonly current_plan: 'beginning' | 'pro' | 'enterprise';
-  readonly subscription_status: 'active';
-}
-
-/**
- * Subscription Creation Blocked by Active Trial (409 CONFLICT)
- * POST /api/subscriptions/create/
- */
-export interface ActiveTrialExistsError {
-  readonly error: string;
-  readonly error_code: 'ACTIVE_TRIAL_EXISTS';
-  readonly trial_tier: 'beginning' | 'pro' | 'enterprise';
-  readonly trial_expires_at: string;
-  readonly days_remaining: number;
-}
-
-/**
- * Payment Session Expired - Retry Available (409 CONFLICT)
- * POST /api/subscriptions/create/
- */
-export interface PaymentExpiredRetryAvailableError {
-  readonly error: string;
-  readonly error_code: 'PAYMENT_EXPIRED_RETRY_AVAILABLE';
-  readonly subscription_id: string;
-  readonly plan_tier: 'beginning' | 'pro' | 'enterprise';
-  readonly grace_period_remaining_hours: number;
-  readonly actions: {
-    readonly create_payment: string;
-    readonly cancel_subscription: string;
-  };
-}
-
-/**
- * Cannot Cancel Active Subscription (400 BAD REQUEST)
- * POST /api/subscriptions/cancel/{subscription_id}/
- */
-export interface CannotCancelActiveSubscriptionError {
-  readonly error: string;
-  readonly error_code: 'CANNOT_CANCEL_ACTIVE_SUBSCRIPTION';
-  readonly current_status: 'active';
-}
-
-/**
- * Discriminated Union for All Subscription Errors
- */
-export type SubscriptionError =
-  | PaidSubscriptionExistsError
-  | ActiveTrialExistsError
-  | PaymentExpiredRetryAvailableError
-  | CannotCancelActiveSubscriptionError;
-
-// ============================================================================
-// Type Guards for Subscription Errors
-// ============================================================================
-
-export function isPaidSubscriptionExistsError(
-  error: unknown
-): error is PaidSubscriptionExistsError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'error_code' in error &&
-    error.error_code === 'PAID_SUBSCRIPTION_EXISTS'
-  );
-}
-
-export function isActiveTrialExistsError(
-  error: unknown
-): error is ActiveTrialExistsError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'error_code' in error &&
-    error.error_code === 'ACTIVE_TRIAL_EXISTS'
-  );
-}
-
-export function isPaymentExpiredRetryAvailableError(
-  error: unknown
-): error is PaymentExpiredRetryAvailableError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'error_code' in error &&
-    error.error_code === 'PAYMENT_EXPIRED_RETRY_AVAILABLE'
-  );
-}
-
-export function isCannotCancelActiveSubscriptionError(
-  error: unknown
-): error is CannotCancelActiveSubscriptionError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'error_code' in error &&
-    error.error_code === 'CANNOT_CANCEL_ACTIVE_SUBSCRIPTION'
-  );
-}

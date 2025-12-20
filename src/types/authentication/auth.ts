@@ -176,27 +176,25 @@ export interface LocationInfo {
 // Subscription Data Types (from JWT)
 // ============================================================================
 
+/**
+ * Subscription Data (Minimal JWT Claims)
+ * Industry Standard: Stripe/GitHub/Vercel approach
+ *
+ * JWT contains minimal data + version hash
+ * Full capabilities fetched separately via API
+ */
 export interface SubscriptionData {
-  tier: 'free' | 'beginning' | 'pro' | 'enterprise';
+  // Core subscription info
+  tier: 'free' | 'beginner' | 'pro' | 'enterprise';
   status: 'active' | 'inactive' | 'expired' | 'grace_period';
-  plan_id?: string | null;
-  features_bitmap: number; // O(1) feature checking
-  expires_at?: string | null;
-  usage_hash: string;
-  limits: {
-    max_workspaces: number;
-    deployment_allowed: boolean;
-    storage_gb: number;
-    bandwidth_gb: number;
-    sites_limit: number;
-    custom_domains: number;
-  };
-  infrastructure?: {
-    model: string;
-    analytics_level: string;
-    white_label: boolean;
-    support: boolean;
-  };
+  expires_at: string | null;
+
+  // Capabilities versioning (industry standard)
+  capabilities_version: string; // Hash from plans.yaml (e.g., 'v2_abc123de')
+  billing_cycle: 'monthly' | 'yearly';
+  currency: string; // e.g., 'XAF'
+
+  // Trial claims (from JWT)
   trial: {
     eligible: boolean;
     used_trial: boolean;
@@ -207,12 +205,24 @@ export interface SubscriptionData {
     used_at: string | null;
     ineligible_reason?: 'paid_subscription_active' | 'trial_already_used' | null;
   };
+
+  // Template claims (from JWT)
   templates: {
     owned_count: number;
     owned_templates: string[];
-    bonus_eligible: boolean;
-    last_bonus_used: string | null;
   };
+}
+
+/**
+ * Full Capabilities Response (from API)
+ * Fetched separately from GET /api/subscriptions/me/capabilities/
+ */
+export interface CapabilitiesResponse {
+  tier: 'free' | 'beginner' | 'pro' | 'enterprise';
+  status: 'active' | 'inactive' | 'expired' | 'grace_period';
+  capabilities: Record<string, any>; // Full capabilities from YAML
+  version: string; // Same as capabilities_version in JWT
+  expires_at: string | null;
 }
 
 // ============================================================================

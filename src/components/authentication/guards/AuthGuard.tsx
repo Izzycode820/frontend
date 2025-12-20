@@ -11,24 +11,20 @@ import React, { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore, authSelectors } from '@/stores/authentication/authStore'
 import { AuthPageSpinner } from '../shared/AuthLoadingSpinner'
-import { buildLoginRedirect, type RedirectContext } from '@/utils/auth-redirect'
+import { redirectToLogin } from '@/utils/redirect-with-intent'
 
 export interface AuthGuardProps {
   children: React.ReactNode
-  redirectTo?: string
   requireAuth?: boolean
   fallback?: React.ReactNode
-  onUnauthorized?: (context?: RedirectContext) => void
-  preserveContext?: RedirectContext // NEW: Context preservation
+  onUnauthorized?: () => void
 }
 
 export function AuthGuard({
   children,
-  redirectTo = '/auth/login',
   requireAuth = true,
   fallback,
-  onUnauthorized,
-  preserveContext // NEW
+  onUnauthorized
 }: AuthGuardProps) {
   const router = useRouter()
   const [isClientMounted, setIsClientMounted] = React.useState(false)
@@ -37,19 +33,6 @@ export function AuthGuard({
   const isFullyAuthenticated = useAuthStore(authSelectors.isFullyAuthenticated)
   const isLoading = useAuthStore(authSelectors.isLoading)
   const isAuthInitialized = useAuthStore(authSelectors.isInitialized)
-
-  // Memoized redirect builder (performance optimization)
-  const buildRedirect = useCallback(() => {
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
-
-    // Skip redirect for auth pages
-    if (currentPath === '/auth/login' || currentPath === '/auth/register') {
-      return redirectTo;
-    }
-
-    // Use buildLoginRedirect with OWASP validation and context
-    return buildLoginRedirect(currentPath, preserveContext);
-  }, [preserveContext, redirectTo]);
 
   React.useEffect(() => {
     // Mark as mounted after first render to avoid hydration issues
@@ -61,14 +44,19 @@ export function AuthGuard({
     if (!isClientMounted || !isAuthInitialized || isLoading) return
 
     if (requireAuth && !isFullyAuthenticated) {
-      // Call onUnauthorized callback with context
-      onUnauthorized?.(preserveContext)
+      // Call onUnauthorized callback
+      onUnauthorized?.()
 
-      // Build and execute redirect
-      const redirectUrl = buildRedirect();
-      router.replace(redirectUrl);
+      // Redirect with intent preservation (industry standard pattern)
+      // Captures current path + query params as the "intent"
+      const currentPath = typeof window !== 'undefined'
+        ? window.location.pathname + window.location.search
+        : '/workspace'
+
+      // Use unified redirect helper (handles sessionStorage + ?next param)
+      redirectToLogin(router, currentPath)
     }
-  }, [isClientMounted, isAuthInitialized, isLoading, isFullyAuthenticated, requireAuth, router, onUnauthorized, preserveContext, buildRedirect])
+  }, [isClientMounted, isAuthInitialized, isLoading, isFullyAuthenticated, requireAuth, router, onUnauthorized])
 
   // Show loading during client mount, auth initialization, or auth loading
   if (!isClientMounted || !isAuthInitialized || isLoading) {

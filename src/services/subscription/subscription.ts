@@ -5,20 +5,19 @@
 
 import BaseService from '../base/BaseService'
 import type {
-  SubscriptionCreateRequest,
-  SubscriptionCreateResponse,
-  SubscriptionUpgradeRequest,
-  SubscriptionUpgradeResponse,
-  SubscriptionStatusResponse,
-  SubscriptionHistoryResponse,
+  CreateSubscriptionRequest,
+  CreateSubscriptionResponse,
   RenewSubscriptionRequest,
   RenewSubscriptionResponse,
+  UpgradeSubscriptionRequest,
+  UpgradeSubscriptionResponse,
   ScheduleDowngradeRequest,
   ScheduleDowngradeResponse,
-  ReactivateSubscriptionRequest,
-  ReactivateSubscriptionResponse,
+  CancelSubscriptionRequest,
   CancelSubscriptionResponse,
-} from '../../types/subscription'
+  VoidPendingPaymentResponse,
+  ReactivateSubscriptionResponse,
+} from '../../types/subscription/subscription'
 
 // ============================================================================
 // Subscription Service
@@ -33,36 +32,10 @@ export class SubscriptionService extends BaseService {
    * Create new subscription
    * Backend: POST /api/subscriptions/create/
    */
-  async createSubscription(request: SubscriptionCreateRequest): Promise<SubscriptionCreateResponse> {
-    this.validateRequired(request as unknown as Record<string, unknown>, ['plan_tier'])
+  async createSubscription(request: CreateSubscriptionRequest): Promise<CreateSubscriptionResponse> {
+    this.validateRequired(request as unknown as Record<string, unknown>, ['plan_tier', 'phone_number'])
 
-    return this.post<SubscriptionCreateResponse>('/create/', request)
-  }
-
-  /**
-   * Upgrade existing subscription
-   * Backend: POST /api/subscriptions/upgrade/
-   */
-  async upgradeSubscription(request: SubscriptionUpgradeRequest): Promise<SubscriptionUpgradeResponse> {
-    this.validateRequired(request as unknown as Record<string, unknown>, ['new_plan_tier'])
-
-    return this.post<SubscriptionUpgradeResponse>('/upgrade/', request)
-  }
-
-  /**
-   * Get current subscription status
-   * Backend: GET /api/subscriptions/status/
-   */
-  async getSubscriptionStatus(): Promise<SubscriptionStatusResponse> {
-    return this.get<SubscriptionStatusResponse>('/status/')
-  }
-
-  /**
-   * Get subscription and trial history
-   * Backend: GET /api/subscriptions/history/
-   */
-  async getSubscriptionHistory(): Promise<SubscriptionHistoryResponse> {
-    return this.get<SubscriptionHistoryResponse>('/history/')
+    return this.post<CreateSubscriptionResponse>('/create/', request)
   }
 
   /**
@@ -70,9 +43,19 @@ export class SubscriptionService extends BaseService {
    * Backend: POST /api/subscriptions/renew/
    */
   async renewSubscription(request: RenewSubscriptionRequest): Promise<RenewSubscriptionResponse> {
-    this.validateRequired(request as unknown as Record<string, unknown>, ['payment_method_id'])
+    this.validateRequired(request as unknown as Record<string, unknown>, ['phone_number'])
 
     return this.post<RenewSubscriptionResponse>('/renew/', request)
+  }
+
+  /**
+   * Upgrade existing subscription
+   * Backend: POST /api/subscriptions/upgrade/
+   */
+  async upgradeSubscription(request: UpgradeSubscriptionRequest): Promise<UpgradeSubscriptionResponse> {
+    this.validateRequired(request as unknown as Record<string, unknown>, ['new_plan_tier', 'phone_number'])
+
+    return this.post<UpgradeSubscriptionResponse>('/upgrade/', request)
   }
 
   /**
@@ -86,26 +69,44 @@ export class SubscriptionService extends BaseService {
   }
 
   /**
-   * Reactivate suspended subscription
-   * Backend: POST /api/subscriptions/reactivate/
+   * Cancel active subscription - downgrade to free immediately
+   * Backend: POST /api/subscriptions/cancel/
    */
-  async reactivateSubscription(request: ReactivateSubscriptionRequest): Promise<ReactivateSubscriptionResponse> {
-    this.validateRequired(request as unknown as Record<string, unknown>, ['payment_method_id'])
-
-    return this.post<ReactivateSubscriptionResponse>('/reactivate/', request)
+  async cancelActiveSubscription(request?: CancelSubscriptionRequest): Promise<CancelSubscriptionResponse> {
+    return this.post<CancelSubscriptionResponse>('/cancel/', request || {})
   }
 
   /**
-   * Cancel/void incomplete subscription (Stripe pattern)
+   * Void pending payment subscription (Stripe PaymentIntent cancel pattern)
    * Only works for pending_payment, failed, or expired subscriptions
-   * Backend: POST /api/subscriptions/cancel/{subscription_id}/
+   * Backend: POST /api/subscriptions/void/{subscription_id}/
    */
-  async cancelSubscription(subscriptionId: string): Promise<CancelSubscriptionResponse> {
+  async voidPendingPayment(subscriptionId: string): Promise<VoidPendingPaymentResponse> {
     if (!subscriptionId) {
       throw new Error('Subscription ID is required')
     }
 
-    return this.post<CancelSubscriptionResponse>(`/cancel/${subscriptionId}/`)
+    return this.post<VoidPendingPaymentResponse>(`/void/${subscriptionId}/`)
+  }
+
+  /**
+   * Reactivate suspended subscription
+   * Backend: POST /api/subscriptions/reactivate/
+   */
+  async reactivateSubscription(): Promise<ReactivateSubscriptionResponse> {
+    return this.post<ReactivateSubscriptionResponse>('/reactivate/')
+  }
+
+  /**
+   * Get full capabilities for current tier
+   * Backend: GET /api/subscriptions/me/capabilities/
+   *
+   * Industry Standard: Stripe/GitHub/Vercel approach
+   * JWT contains minimal claims + version hash
+   * Full capabilities fetched separately for dynamic updates
+   */
+  async getCapabilities(): Promise<import('../../types/authentication/auth').CapabilitiesResponse> {
+    return this.get<import('../../types/authentication/auth').CapabilitiesResponse>('/me/capabilities/')
   }
 }
 

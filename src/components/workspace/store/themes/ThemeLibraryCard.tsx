@@ -22,6 +22,7 @@ interface ThemeLibraryCardProps {
   createdAt: string;
   isPublished: boolean | null;
   canDelete: boolean | null;
+  isPublishing?: boolean;
   onEditTheme: () => void;
   onPublish?: () => void;
   onDelete?: () => void;
@@ -35,6 +36,7 @@ export function ThemeLibraryCard({
   createdAt,
   isPublished,
   canDelete,
+  isPublishing = false,
   onEditTheme,
   onPublish,
   onDelete,
@@ -93,11 +95,21 @@ export function ThemeLibraryCard({
           {/* Actions */}
           <div className="flex items-center gap-2">
             {!isPublished && onPublish && (
-              <Button variant="outline" size="sm" onClick={onPublish}>
-                Publish
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onPublish}
+                disabled={isPublishing}
+              >
+                {isPublishing ? 'Publishing...' : 'Publish'}
               </Button>
             )}
-            <Button variant="default" size="sm" onClick={onEditTheme}>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onEditTheme}
+              disabled={isPublishing}
+            >
               Edit theme
             </Button>
             <DropdownMenu>

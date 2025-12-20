@@ -20,6 +20,7 @@ export interface APIBase {
   workspaces: string
   security: string
   subscriptions: string  // For subscription management and pricing (plural)
+  payments: string  // For payment operations (retry, refund, etc.)
   users: string
   store: string  // For store management endpoints
   themes: string  // For theme management endpoints
@@ -75,6 +76,7 @@ export const API_BASE: APIBase = {
   workspaces: '/api/workspaces',
   security: '/api/security',
   subscriptions: '/api/subscriptions',
+  payments: '/api/payments',
   users: '/api/users',
   store: '/api/workspaces/{workspace_id}/store/admin',
   themes: '/api/themes',

@@ -132,3 +132,17 @@ export const themeClient = new ApolloClient({
   ]),
   cache: new InMemoryCache(),
 })
+
+// Subscription API Client (Public plan showcase + authenticated subscription management)
+const subscriptionUploadLink = new UploadHttpLink({
+  uri: 'http://localhost:8000/api/subscriptions/graphql/',
+  credentials: 'include',
+})
+
+export const subscriptionClient = new ApolloClient({
+  link: from([
+    errorLink,
+    authLink.concat(subscriptionUploadLink), // ✅ Add authLink for authenticated queries/mutations
+  ]),
+  cache: new InMemoryCache(),
+})

@@ -1,0 +1,16 @@
+query GetCurrentPlan {
+  currentPlan {
+    plan {
+      name
+      introPrice
+      introDurationDays
+      regularPriceMonthly
+      regularPriceYearly
+    }
+    status
+    expiresAt
+    billingCycle
+    isOnIntroPricing
+    introEndsAt
+  }
+}

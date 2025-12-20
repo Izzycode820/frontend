@@ -9,10 +9,22 @@ import {
   CreditCard,
   Bell,
   Users,
-  Settings
+  Settings,
+  Receipt,
+  Crown
 } from 'lucide-react';
 
 const settingsNavItems = [
+  {
+    label: 'Plan',
+    href: '/plan',
+    icon: Crown,
+  },
+  {
+    label: 'Billing',
+    href: '/billing',
+    icon: Receipt,
+  },
   {
     label: 'Domains',
     href: '/domains',

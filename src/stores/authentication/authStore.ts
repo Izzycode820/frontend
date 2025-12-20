@@ -16,6 +16,7 @@ import type {
 } from '../../types/authentication'
 import authService from '../../services/authentication/auth'
 import { extractSubscriptionFromJWT, extractWorkspaceFromJWT } from '../../utils/jwt'
+import { CapabilitiesManager } from '../../utils/capabilities'
 import { useSubscriptionStore } from '../subscription/subscriptionStore'
 import { useWorkspaceStore } from './workspaceStore'
 
@@ -43,6 +44,7 @@ interface AuthStoreState {
   // User Context
   subscription: SubscriptionData | null
   workspace: WorkspaceAuthContext | null
+  capabilities: Record<string, any> | null // Full capabilities from API
 
   // Session Info
   lastActivity: number | null
@@ -60,6 +62,8 @@ interface AuthStoreState {
   updateUser: (updates: Partial<UserData>) => void
   setSubscription: (subscription: SubscriptionData | null) => void
   setWorkspace: (workspace: WorkspaceAuthContext | null) => void
+  setCapabilities: (capabilities: Record<string, any> | null) => void
+  syncCapabilities: () => Promise<void>
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   clearError: () => void
@@ -73,7 +77,7 @@ interface AuthStoreState {
   isTokenExpired: () => boolean
   getTimeUntilExpiry: () => number | null
   hasPermission: (permission: string) => boolean
-  hasFeature: (featureBitmap: number) => boolean
+  can: (feature: string) => boolean
   refreshTokenSafe: () => Promise<RefreshTokenResponse>
 }
 
@@ -95,6 +99,7 @@ export const useAuthStore = create<AuthStoreState>()(
       tokenExpiresAt: null,
       subscription: null,
       workspace: null,
+      capabilities: null,
       lastActivity: null,
       isSessionValid: false,
       isInitialized: false,
@@ -123,6 +128,11 @@ export const useAuthStore = create<AuthStoreState>()(
           // Sync subscription to subscriptionStore (keeps all stores in sync)
           useSubscriptionStore.getState().syncFromAuth(subscription)
 
+          // Sync capabilities (fetch if version mismatch)
+          if (subscription && response.user) {
+            get().syncCapabilities()
+          }
+
           // Extract workspace from JWT or response
           if (accessToken) {
             const jwtWorkspace = extractWorkspaceFromJWT(accessToken)
@@ -150,6 +160,8 @@ export const useAuthStore = create<AuthStoreState>()(
       },
 
       setLogoutSuccess: () => {
+        const userId = get().user?.id
+
         set((state) => {
           state.user = null
           state.isAuthenticated = false
@@ -159,9 +171,15 @@ export const useAuthStore = create<AuthStoreState>()(
           state.tokenExpiresAt = null
           state.subscription = null
           state.workspace = null
+          state.capabilities = null
           state.lastActivity = null
           state.isSessionValid = false
         })
+
+        // Clear capabilities cache
+        if (userId) {
+          CapabilitiesManager.clear(userId)
+        }
 
         // Clear workspace context on logout
         WorkspaceContextManager.clearWorkspace()
@@ -189,6 +207,11 @@ export const useAuthStore = create<AuthStoreState>()(
 
             // Sync subscription to subscriptionStore (keeps all stores in sync)
             useSubscriptionStore.getState().syncFromAuth(state.subscription)
+
+            // Sync capabilities (fetch if version mismatch)
+            if (state.subscription && state.user) {
+              get().syncCapabilities()
+            }
 
             // Extract workspace from JWT (v2.0: Backend now includes workspace_id in refresh token)
             // This ensures workspace context is preserved across token refreshes (Shopify pattern)
@@ -298,6 +321,26 @@ export const useAuthStore = create<AuthStoreState>()(
             WorkspaceContextManager.clearWorkspace()
           }
         })
+      },
+
+      setCapabilities: (capabilities) => {
+        set((state) => {
+          state.capabilities = capabilities
+        })
+      },
+
+      syncCapabilities: async () => {
+        const { subscription, user } = get()
+        if (!subscription || !user) return
+
+        try {
+          const capabilities = await CapabilitiesManager.getCapabilities(subscription, user.id)
+          set((state) => {
+            state.capabilities = capabilities
+          })
+        } catch (error) {
+          console.error('Failed to sync capabilities:', error)
+        }
       },
 
       // ========================================================================
@@ -429,10 +472,9 @@ export const useAuthStore = create<AuthStoreState>()(
         return workspace?.permissions?.includes(permission) ?? false
       },
 
-      hasFeature: (featureBitmap) => {
-        const { subscription } = get()
-        if (!subscription?.features_bitmap) return false
-        return (subscription.features_bitmap & featureBitmap) === featureBitmap
+      can: (feature) => {
+        const { capabilities } = get()
+        return !!capabilities?.[feature]
       },
 
       refreshTokenSafe: async () => {
@@ -462,6 +504,7 @@ export const authSelectors = {
   user: (state: AuthStoreState) => state.user,
   workspace: (state: AuthStoreState) => state.workspace,
   subscription: (state: AuthStoreState) => state.subscription,
+  capabilities: (state: AuthStoreState) => state.capabilities,
   isLoading: (state: AuthStoreState) => state.isLoading,
   error: (state: AuthStoreState) => state.error,
   token: (state: AuthStoreState) => state.token,
@@ -495,11 +538,17 @@ export const authSelectors = {
   canUpgradeTrial: (state: AuthStoreState) =>
     state.subscription?.trial?.can_upgrade ?? false,
 
-  // Workspace limit selectors (from JWT subscription claims)
+  // Workspace limit selectors (from capabilities API)
   maxWorkspaces: (state: AuthStoreState) =>
-    state.subscription?.limits?.max_workspaces ?? 1,
-  subscriptionLimits: (state: AuthStoreState) =>
-    state.subscription?.limits || null,
+    state.capabilities?.max_workspaces ?? 1,
+  deploymentAllowed: (state: AuthStoreState) =>
+    state.capabilities?.deployment_allowed ?? false,
+  customDomainsLimit: (state: AuthStoreState) =>
+    state.capabilities?.custom_domains ?? 0,
+  storageGb: (state: AuthStoreState) =>
+    state.capabilities?.storage_gb ?? 0,
+  bandwidthGb: (state: AuthStoreState) =>
+    state.capabilities?.bandwidth_gb ?? 0,
 }
 
 // ============================================================================
