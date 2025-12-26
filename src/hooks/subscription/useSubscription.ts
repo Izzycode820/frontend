@@ -18,6 +18,7 @@ import type {
   ScheduleDowngradeResponse,
   CancelSubscriptionRequest,
   CancelSubscriptionResponse,
+  ResumeSubscriptionResponse,
   VoidPendingPaymentResponse,
   ReactivateSubscriptionResponse,
   RetryPaymentRequest,
@@ -51,6 +52,7 @@ export interface UseSubscriptionReturn {
   upgradeSubscription: (request: UpgradeSubscriptionRequest) => Promise<UpgradeSubscriptionResponse>
   scheduleDowngrade: (request: ScheduleDowngradeRequest) => Promise<ScheduleDowngradeResponse>
   cancelActiveSubscription: (request?: CancelSubscriptionRequest) => Promise<CancelSubscriptionResponse>
+  resumeSubscription: () => Promise<ResumeSubscriptionResponse>
   voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>
   reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>
   retryPayment: (request: RetryPaymentRequest) => Promise<RetryPaymentResponse>
@@ -80,6 +82,7 @@ export function useSubscription(): UseSubscriptionReturn {
   const upgradeSubscriptionAction = useSubscriptionStore(subscriptionSelectors.upgradeSubscription)
   const scheduleDowngradeAction = useSubscriptionStore(subscriptionSelectors.scheduleDowngrade)
   const cancelActiveSubscriptionAction = useSubscriptionStore(subscriptionSelectors.cancelActiveSubscription)
+  const resumeSubscriptionAction = useSubscriptionStore(subscriptionSelectors.resumeSubscription)
   const voidPendingPaymentAction = useSubscriptionStore(subscriptionSelectors.voidPendingPayment)
   const reactivateSubscriptionAction = useSubscriptionStore(subscriptionSelectors.reactivateSubscription)
   const retryPaymentAction = useSubscriptionStore(subscriptionSelectors.retryPayment)
@@ -108,6 +111,10 @@ export function useSubscription(): UseSubscriptionReturn {
   const cancelActiveSubscription = useCallback(async (request?: CancelSubscriptionRequest): Promise<CancelSubscriptionResponse> => {
     return cancelActiveSubscriptionAction(request)
   }, [cancelActiveSubscriptionAction])
+
+  const resumeSubscription = useCallback(async (): Promise<ResumeSubscriptionResponse> => {
+    return resumeSubscriptionAction()
+  }, [resumeSubscriptionAction])
 
   const voidPendingPayment = useCallback(async (subscriptionId: string): Promise<VoidPendingPaymentResponse> => {
     return voidPendingPaymentAction(subscriptionId)
@@ -146,6 +153,7 @@ export function useSubscription(): UseSubscriptionReturn {
     upgradeSubscription,
     scheduleDowngrade,
     cancelActiveSubscription,
+    resumeSubscription,
     voidPendingPayment,
     reactivateSubscription,
     retryPayment,
@@ -196,6 +204,7 @@ export function useSubscriptionActions() {
   const upgradeSubscription = useSubscriptionStore(subscriptionSelectors.upgradeSubscription)
   const scheduleDowngrade = useSubscriptionStore(subscriptionSelectors.scheduleDowngrade)
   const cancelActiveSubscription = useSubscriptionStore(subscriptionSelectors.cancelActiveSubscription)
+  const resumeSubscription = useSubscriptionStore(subscriptionSelectors.resumeSubscription)
   const voidPendingPayment = useSubscriptionStore(subscriptionSelectors.voidPendingPayment)
   const reactivateSubscription = useSubscriptionStore(subscriptionSelectors.reactivateSubscription)
   const retryPayment = useSubscriptionStore(subscriptionSelectors.retryPayment)
@@ -211,6 +220,7 @@ export function useSubscriptionActions() {
     upgradeSubscription,
     scheduleDowngrade,
     cancelActiveSubscription,
+    resumeSubscription,
     voidPendingPayment,
     reactivateSubscription,
     retryPayment,

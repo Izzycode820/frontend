@@ -15,6 +15,7 @@ import type {
   ScheduleDowngradeResponse,
   CancelSubscriptionRequest,
   CancelSubscriptionResponse,
+  ResumeSubscriptionResponse,
   VoidPendingPaymentResponse,
   ReactivateSubscriptionResponse,
 } from '../../types/subscription/subscription'
@@ -74,6 +75,14 @@ export class SubscriptionService extends BaseService {
    */
   async cancelActiveSubscription(request?: CancelSubscriptionRequest): Promise<CancelSubscriptionResponse> {
     return this.post<CancelSubscriptionResponse>('/cancel/', request || {})
+  }
+
+  /**
+   * Resume cancelled subscription before expiry (Shopify/Stripe pattern)
+   * Backend: POST /api/subscriptions/resume/
+   */
+  async resumeSubscription(): Promise<ResumeSubscriptionResponse> {
+    return this.post<ResumeSubscriptionResponse>('/resume/')
   }
 
   /**

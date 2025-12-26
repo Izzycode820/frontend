@@ -267,20 +267,17 @@ export interface DomainType {
 export interface HostingEnvironmentType extends Node {
   __typename?: 'HostingEnvironmentType';
   activeSitesCount: Scalars['Int']['output'];
-  bandwidthLimitGb: Scalars['Decimal']['output'];
   bandwidthUsagePercentage?: Maybe<Scalars['Float']['output']>;
   bandwidthUsedGb: Scalars['Decimal']['output'];
-  canDeployNewSite?: Maybe<Scalars['Boolean']['output']>;
+  /** Hosting entitlements: storage_gb, custom_domain, deployment_allowed */
+  capabilities: Scalars['JSONString']['output'];
   createdAt: Scalars['DateTime']['output'];
-  customDomainsLimit: Scalars['Int']['output'];
   gracePeriodEnd?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   isDeploymentAllowed?: Maybe<Scalars['Boolean']['output']>;
   lastUsageSync?: Maybe<Scalars['DateTime']['output']>;
   overageCost?: Maybe<OverageCostType>;
-  sitesLimit: Scalars['Int']['output'];
   status: WorkspaceHostingHostingEnvironmentStatusChoices;
-  storageLimitGb: Scalars['Decimal']['output'];
   storageUsagePercentage?: Maybe<Scalars['Float']['output']>;
   storageUsedGb: Scalars['Decimal']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -300,13 +297,20 @@ export interface HostingEnvironmentTypeUsageHistoryArgs {
 }
 
 /**
- * Domain management mutations (all require authentication + workspace)
+ * Hosting management mutations (all require authentication + workspace)
  *
+ * Domain Management:
  * - changeSubdomain: Change workspace subdomain
  * - connectCustomDomain: Connect externally-owned domain
  * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
  */
 export interface Mutation {
   __typename?: 'Mutation';
@@ -340,6 +344,110 @@ export interface Mutation {
    */
   renewDomain?: Maybe<RenewDomain>;
   /**
+   * Set or update storefront password protection
+   *
+   * Shopify pattern: "Infrastructure live, business not live"
+   * Allows merchants to lock their storefront during development.
+   *
+   * Args:
+   *     workspace_id: ID of workspace
+   *     password: Plain text password (will be hashed)
+   *              Set to None or empty string to disable protection
+   *
+   * Returns:
+   *     success: Boolean
+   *     message: Success/error message
+   *     password_enabled: Whether password protection is now active
+   *
+   * Security:
+   *     - Password is hashed using Django's PBKDF2 SHA256
+   *     - Never stored in plain text
+   *     - Requires workspace ownership (validated by middleware)
+   *
+   * Examples:
+   *     # Enable password protection
+   *     mutation {
+   *       setStorefrontPassword(
+   *         workspaceId: "uuid",
+   *         password: "my-secret-password"
+   *       ) {
+   *         success
+   *         message
+   *         passwordEnabled
+   *       }
+   *     }
+   *
+   *     # Disable password protection
+   *     mutation {
+   *       setStorefrontPassword(
+   *         workspaceId: "uuid",
+   *         password: ""
+   *       ) {
+   *         success
+   *         message
+   *         passwordEnabled
+   *       }
+   *     }
+   */
+  setStorefrontPassword?: Maybe<SetStorefrontPassword>;
+  /**
+   * Update SEO settings for a deployed storefront
+   *
+   * Allows merchants to optimize their store for search engines and social sharing.
+   * Fields are validated against Google's best practices:
+   * - Title: Max 60 chars (Google truncates at ~60)
+   * - Description: Max 160 chars (Google truncates at ~160)
+   * - Keywords: Optional (less important for modern SEO)
+   *
+   * Args:
+   *     workspace_id: ID of workspace
+   *     seo_title: Page title for search results (max 60 chars recommended)
+   *     seo_description: Meta description for search snippets (max 160 chars recommended)
+   *     seo_keywords: Comma-separated keywords (optional)
+   *     seo_image_url: Open Graph image URL for social sharing
+   *
+   * Returns:
+   *     success: Boolean
+   *     message: Success/error message
+   *     warnings: List of SEO warnings (e.g., "title too long")
+   *     seo_settings: Updated SEO settings object
+   *
+   * Examples:
+   *     # Update all SEO fields
+   *     mutation {
+   *       updateStorefrontSEO(
+   *         workspaceId: "uuid",
+   *         seoTitle: "My Amazing Store - Quality Products",
+   *         seoDescription: "Shop our curated collection of quality products at amazing prices. Free shipping on orders over $50.",
+   *         seoKeywords: "online store, quality products, free shipping",
+   *         seoImageUrl: "https://cdn.huzilerz.com/my-store/og-image.jpg"
+   *       ) {
+   *         success
+   *         message
+   *         warnings
+   *         seoSettings {
+   *           title
+   *           description
+   *           keywords
+   *           imageUrl
+   *         }
+   *       }
+   *     }
+   *
+   *     # Update only title and description
+   *     mutation {
+   *       updateStorefrontSEO(
+   *         workspaceId: "uuid",
+   *         seoTitle: "Best Shoes Online",
+   *         seoDescription: "Find your perfect pair from our collection of premium footwear."
+   *       ) {
+   *         success
+   *         message
+   *       }
+   *     }
+   */
+  updateStorefrontSeo?: Maybe<UpdateStorefrontSeo>;
+  /**
    * Manually trigger domain verification
    *
    * Use case: User configured DNS and wants immediate verification
@@ -350,13 +458,20 @@ export interface Mutation {
 
 
 /**
- * Domain management mutations (all require authentication + workspace)
+ * Hosting management mutations (all require authentication + workspace)
  *
+ * Domain Management:
  * - changeSubdomain: Change workspace subdomain
  * - connectCustomDomain: Connect externally-owned domain
  * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
  */
 export interface MutationChangeSubdomainArgs {
   input: ChangeSubdomainInput;
@@ -364,13 +479,20 @@ export interface MutationChangeSubdomainArgs {
 
 
 /**
- * Domain management mutations (all require authentication + workspace)
+ * Hosting management mutations (all require authentication + workspace)
  *
+ * Domain Management:
  * - changeSubdomain: Change workspace subdomain
  * - connectCustomDomain: Connect externally-owned domain
  * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
  */
 export interface MutationConnectCustomDomainArgs {
   input: ConnectCustomDomainInput;
@@ -378,13 +500,20 @@ export interface MutationConnectCustomDomainArgs {
 
 
 /**
- * Domain management mutations (all require authentication + workspace)
+ * Hosting management mutations (all require authentication + workspace)
  *
+ * Domain Management:
  * - changeSubdomain: Change workspace subdomain
  * - connectCustomDomain: Connect externally-owned domain
  * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
  */
 export interface MutationPurchaseDomainArgs {
   input: PurchaseDomainInput;
@@ -392,13 +521,20 @@ export interface MutationPurchaseDomainArgs {
 
 
 /**
- * Domain management mutations (all require authentication + workspace)
+ * Hosting management mutations (all require authentication + workspace)
  *
+ * Domain Management:
  * - changeSubdomain: Change workspace subdomain
  * - connectCustomDomain: Connect externally-owned domain
  * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
  */
 export interface MutationRenewDomainArgs {
   input: RenewDomainInput;
@@ -406,13 +542,62 @@ export interface MutationRenewDomainArgs {
 
 
 /**
- * Domain management mutations (all require authentication + workspace)
+ * Hosting management mutations (all require authentication + workspace)
  *
+ * Domain Management:
  * - changeSubdomain: Change workspace subdomain
  * - connectCustomDomain: Connect externally-owned domain
  * - verifyCustomDomain: Manually trigger domain verification
  * - purchaseDomain: Initiate domain purchase (mobile money flow)
  * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
+ */
+export interface MutationSetStorefrontPasswordArgs {
+  input: SetStorefrontPasswordInput;
+}
+
+
+/**
+ * Hosting management mutations (all require authentication + workspace)
+ *
+ * Domain Management:
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
+ * - purchaseDomain: Initiate domain purchase (mobile money flow)
+ * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
+ */
+export interface MutationUpdateStorefrontSeoArgs {
+  input: UpdateStorefrontSeoInput;
+}
+
+
+/**
+ * Hosting management mutations (all require authentication + workspace)
+ *
+ * Domain Management:
+ * - changeSubdomain: Change workspace subdomain
+ * - connectCustomDomain: Connect externally-owned domain
+ * - verifyCustomDomain: Manually trigger domain verification
+ * - purchaseDomain: Initiate domain purchase (mobile money flow)
+ * - renewDomain: Initiate domain renewal (mobile money flow)
+ *
+ * Storefront Management (Concern #2):
+ * - setStorefrontPassword: Enable/disable/change storefront password protection
+ *
+ * SEO Management (Phase 4):
+ * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
  */
 export interface MutationVerifyCustomDomainArgs {
   domainId: Scalars['ID']['input'];
@@ -485,6 +670,9 @@ export interface PurchaseDomainInput {
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
  *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
+ *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
  * - myUsageSummary: Get current usage with percentages
@@ -520,6 +708,8 @@ export interface Query {
   renewalStatus?: Maybe<DomainRenewalStatusType>;
   /** Search domains with pagination */
   searchDomains?: Maybe<DomainSearchResponseType>;
+  /** Get storefront preview settings (password, title, domain) */
+  storefrontSettings?: Maybe<StorefrontSettingsType>;
   /** Check if subdomain is available */
   validateSubdomain?: Maybe<SubdomainValidationType>;
 }
@@ -535,6 +725,9 @@ export interface Query {
  * - searchDomains: Search domains with pagination (for buy flow)
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
+ *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
  *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
@@ -561,6 +754,9 @@ export interface QueryCheckUploadEligibilityArgs {
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
  *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
+ *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
  * - myUsageSummary: Get current usage with percentages
@@ -585,6 +781,9 @@ export interface QueryCustomDomainArgs {
  * - searchDomains: Search domains with pagination (for buy flow)
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
+ *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
  *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
@@ -611,6 +810,9 @@ export interface QueryDomainsArgs {
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
  *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
+ *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
  * - myUsageSummary: Get current usage with percentages
@@ -635,6 +837,9 @@ export interface QueryMyUsageHistoryArgs {
  * - searchDomains: Search domains with pagination (for buy flow)
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
+ *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
  *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
@@ -661,6 +866,9 @@ export interface QueryMyUsageLogsArgs {
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
  *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
+ *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
  * - myUsageSummary: Get current usage with percentages
@@ -686,6 +894,9 @@ export interface QueryPurchaseStatusArgs {
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
  *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
+ *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
  * - myUsageSummary: Get current usage with percentages
@@ -710,6 +921,9 @@ export interface QueryRenewalStatusArgs {
  * - searchDomains: Search domains with pagination (for buy flow)
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
+ *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
  *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
@@ -737,6 +951,37 @@ export interface QuerySearchDomainsArgs {
  * - searchDomains: Search domains with pagination (for buy flow)
  * - purchaseStatus: Track purchase progress
  * - renewalStatus: Track renewal progress
+ *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
+ *
+ * Resource Usage:
+ * - myHostingEnvironment: Get resource quotas and limits
+ * - myUsageSummary: Get current usage with percentages
+ * - myUsageHistory: Get usage history for charts (30 days)
+ * - myOverageCost: Calculate overage costs for billing
+ * - myUsageLogs: Get detailed usage logs
+ * - checkUploadEligibility: Pre-flight check for file uploads
+ * - checkDeploymentEligibility: Pre-flight check for deployments
+ */
+export interface QueryStorefrontSettingsArgs {
+  workspaceId: Scalars['ID']['input'];
+}
+
+
+/**
+ * Hosting management queries (all require authentication)
+ *
+ * Domain Management (Clean - matches UI flows):
+ * - domains: Get all domains for workspace (default + custom)
+ * - validateSubdomain: Check subdomain availability (for change modal)
+ * - customDomain: Get domain detail with DNS/TLS status (for polling)
+ * - searchDomains: Search domains with pagination (for buy flow)
+ * - purchaseStatus: Track purchase progress
+ * - renewalStatus: Track renewal progress
+ *
+ * Storefront Settings:
+ * - storefrontSettings: Get preview data (password, title, domain) for UI forms
  *
  * Resource Usage:
  * - myHostingEnvironment: Get resource quotas and limits
@@ -796,6 +1041,89 @@ export interface ResourceUsageLogType extends Node {
   storageUsedGb: Scalars['Decimal']['output'];
 }
 
+/**
+ * SEO settings for a deployed storefront
+ *
+ * Contains all SEO metadata used for:
+ * - Search engine optimization (Google, Bing, etc.)
+ * - Social media sharing (Facebook, Twitter, WhatsApp)
+ * - Open Graph previews
+ */
+export interface SeoSettingsType {
+  __typename?: 'SEOSettingsType';
+  /** Meta description for search snippets (max 160 chars recommended) */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Open Graph image URL for social sharing previews */
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  /** Comma-separated keywords (optional, less important for modern SEO) */
+  keywords?: Maybe<Scalars['String']['output']>;
+  /** SEO title for search results (max 60 chars recommended) */
+  title?: Maybe<Scalars['String']['output']>;
+}
+
+/**
+ * Set or update storefront password protection
+ *
+ * Shopify pattern: "Infrastructure live, business not live"
+ * Allows merchants to lock their storefront during development.
+ *
+ * Args:
+ *     workspace_id: ID of workspace
+ *     password: Plain text password (will be hashed)
+ *              Set to None or empty string to disable protection
+ *
+ * Returns:
+ *     success: Boolean
+ *     message: Success/error message
+ *     password_enabled: Whether password protection is now active
+ *
+ * Security:
+ *     - Password is hashed using Django's PBKDF2 SHA256
+ *     - Never stored in plain text
+ *     - Requires workspace ownership (validated by middleware)
+ *
+ * Examples:
+ *     # Enable password protection
+ *     mutation {
+ *       setStorefrontPassword(
+ *         workspaceId: "uuid",
+ *         password: "my-secret-password"
+ *       ) {
+ *         success
+ *         message
+ *         passwordEnabled
+ *       }
+ *     }
+ *
+ *     # Disable password protection
+ *     mutation {
+ *       setStorefrontPassword(
+ *         workspaceId: "uuid",
+ *         password: ""
+ *       ) {
+ *         success
+ *         message
+ *         passwordEnabled
+ *       }
+ *     }
+ */
+export interface SetStorefrontPassword {
+  __typename?: 'SetStorefrontPassword';
+  message?: Maybe<Scalars['String']['output']>;
+  passwordEnabled?: Maybe<Scalars['Boolean']['output']>;
+  success?: Maybe<Scalars['Boolean']['output']>;
+}
+
+/**
+ * Input for setting/updating storefront password
+ *
+ * Used by setStorefrontPassword mutation
+ */
+export interface SetStorefrontPasswordInput {
+  password?: InputMaybe<Scalars['String']['input']>;
+  workspaceId: Scalars['ID']['input'];
+}
+
 /** Sites usage details */
 export interface SitesUsageType {
   __typename?: 'SitesUsageType';
@@ -814,6 +1142,14 @@ export interface StorageUsageType {
   usedGb: Scalars['Float']['output'];
 }
 
+/** Storefront preview settings - password, title, domain only */
+export interface StorefrontSettingsType {
+  __typename?: 'StorefrontSettingsType';
+  assignedDomain: Scalars['String']['output'];
+  password?: Maybe<Scalars['String']['output']>;
+  seoTitle: Scalars['String']['output'];
+}
+
 /** Subdomain availability validation result */
 export interface SubdomainValidationType {
   __typename?: 'SubdomainValidationType';
@@ -821,6 +1157,83 @@ export interface SubdomainValidationType {
   errors?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   fullDomain?: Maybe<Scalars['String']['output']>;
   subdomain?: Maybe<Scalars['String']['output']>;
+}
+
+/**
+ * Update SEO settings for a deployed storefront
+ *
+ * Allows merchants to optimize their store for search engines and social sharing.
+ * Fields are validated against Google's best practices:
+ * - Title: Max 60 chars (Google truncates at ~60)
+ * - Description: Max 160 chars (Google truncates at ~160)
+ * - Keywords: Optional (less important for modern SEO)
+ *
+ * Args:
+ *     workspace_id: ID of workspace
+ *     seo_title: Page title for search results (max 60 chars recommended)
+ *     seo_description: Meta description for search snippets (max 160 chars recommended)
+ *     seo_keywords: Comma-separated keywords (optional)
+ *     seo_image_url: Open Graph image URL for social sharing
+ *
+ * Returns:
+ *     success: Boolean
+ *     message: Success/error message
+ *     warnings: List of SEO warnings (e.g., "title too long")
+ *     seo_settings: Updated SEO settings object
+ *
+ * Examples:
+ *     # Update all SEO fields
+ *     mutation {
+ *       updateStorefrontSEO(
+ *         workspaceId: "uuid",
+ *         seoTitle: "My Amazing Store - Quality Products",
+ *         seoDescription: "Shop our curated collection of quality products at amazing prices. Free shipping on orders over $50.",
+ *         seoKeywords: "online store, quality products, free shipping",
+ *         seoImageUrl: "https://cdn.huzilerz.com/my-store/og-image.jpg"
+ *       ) {
+ *         success
+ *         message
+ *         warnings
+ *         seoSettings {
+ *           title
+ *           description
+ *           keywords
+ *           imageUrl
+ *         }
+ *       }
+ *     }
+ *
+ *     # Update only title and description
+ *     mutation {
+ *       updateStorefrontSEO(
+ *         workspaceId: "uuid",
+ *         seoTitle: "Best Shoes Online",
+ *         seoDescription: "Find your perfect pair from our collection of premium footwear."
+ *       ) {
+ *         success
+ *         message
+ *       }
+ *     }
+ */
+export interface UpdateStorefrontSeo {
+  __typename?: 'UpdateStorefrontSEO';
+  message?: Maybe<Scalars['String']['output']>;
+  seoSettings?: Maybe<SeoSettingsType>;
+  success?: Maybe<Scalars['Boolean']['output']>;
+  warnings?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+}
+
+/**
+ * Input for updating storefront SEO settings
+ *
+ * Used by updateStorefrontSEO mutation
+ */
+export interface UpdateStorefrontSeoInput {
+  seoDescription?: InputMaybe<Scalars['String']['input']>;
+  seoImageUrl?: InputMaybe<Scalars['String']['input']>;
+  seoKeywords?: InputMaybe<Scalars['String']['input']>;
+  seoTitle?: InputMaybe<Scalars['String']['input']>;
+  workspaceId: Scalars['ID']['input'];
 }
 
 /** Single data point in usage history */

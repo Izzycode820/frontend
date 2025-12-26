@@ -154,9 +154,29 @@ export interface CancelSubscriptionResponse {
   subscription_id?: string;
   previous_plan?: SubscriptionTier;
   current_plan?: SubscriptionTier;
+  plan?: SubscriptionTier;
   status?: string;
+  expires_at?: string | null;
+  upgrade_cancelled?: boolean;
+  downgraded_immediately?: boolean;
   message?: string;
   error?: string;
+}
+
+// ============================================================================
+// Resume Cancelled Subscription Types
+// ============================================================================
+
+export interface ResumeSubscriptionResponse {
+  success: boolean;
+  subscription_id?: string;
+  plan?: SubscriptionTier;
+  status?: string;
+  expires_at?: string | null;
+  days_remaining?: number;
+  message?: string;
+  error?: string;
+  error_code?: string;
 }
 
 // ============================================================================
@@ -329,6 +349,7 @@ export interface UseSubscriptionReturn {
   upgradeSubscription: (data: UpgradeSubscriptionRequest) => Promise<UpgradeSubscriptionResponse>;
   scheduleDowngrade: (data: ScheduleDowngradeRequest) => Promise<ScheduleDowngradeResponse>;
   cancelSubscription: (data: CancelSubscriptionRequest) => Promise<CancelSubscriptionResponse>;
+  resumeSubscription: () => Promise<ResumeSubscriptionResponse>;
   voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>;
   reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>;
   retryPayment: (data: RetryPaymentRequest) => Promise<RetryPaymentResponse>;
@@ -341,6 +362,7 @@ export interface UseSubscriptionActionsReturn {
   upgradeSubscription: (data: UpgradeSubscriptionRequest) => Promise<UpgradeSubscriptionResponse>;
   scheduleDowngrade: (data: ScheduleDowngradeRequest) => Promise<ScheduleDowngradeResponse>;
   cancelSubscription: (data: CancelSubscriptionRequest) => Promise<CancelSubscriptionResponse>;
+  resumeSubscription: () => Promise<ResumeSubscriptionResponse>;
   voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>;
   reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>;
   retryPayment: (data: RetryPaymentRequest) => Promise<RetryPaymentResponse>;

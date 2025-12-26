@@ -18,6 +18,7 @@ import type {
   ScheduleDowngradeResponse,
   CancelSubscriptionRequest,
   CancelSubscriptionResponse,
+  ResumeSubscriptionResponse,
   VoidPendingPaymentResponse,
   ReactivateSubscriptionResponse,
   RetryPaymentRequest,
@@ -43,6 +44,7 @@ interface SubscriptionStoreState {
   upgradeSubscription: (request: UpgradeSubscriptionRequest) => Promise<UpgradeSubscriptionResponse>
   scheduleDowngrade: (request: ScheduleDowngradeRequest) => Promise<ScheduleDowngradeResponse>
   cancelActiveSubscription: (request?: CancelSubscriptionRequest) => Promise<CancelSubscriptionResponse>
+  resumeSubscription: () => Promise<ResumeSubscriptionResponse>
   voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>
   reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>
   retryPayment: (request: RetryPaymentRequest) => Promise<RetryPaymentResponse>
@@ -222,6 +224,35 @@ export const useSubscriptionStore = create<SubscriptionStoreState>()(
         }
       },
 
+      resumeSubscription: async () => {
+        set((state) => {
+          state.isLoading = true
+          state.error = null
+        })
+
+        try {
+          const response = await subscriptionService.resumeSubscription()
+
+          set((state) => {
+            state.isLoading = false
+          })
+
+          return response
+        } catch (error: any) {
+          const subscriptionError: SubscriptionError = {
+            error: error?.response?.data?.error || error.message || 'Failed to resume subscription',
+            error_code: error?.response?.data?.error_code,
+            ...error?.response?.data
+          }
+
+          set((state) => {
+            state.error = subscriptionError
+            state.isLoading = false
+          })
+          throw error
+        }
+      },
+
       voidPendingPayment: async (subscriptionId) => {
         set((state) => {
           state.isLoading = true
@@ -372,6 +403,7 @@ export const subscriptionSelectors = {
   upgradeSubscription: (state: SubscriptionStoreState) => state.upgradeSubscription,
   scheduleDowngrade: (state: SubscriptionStoreState) => state.scheduleDowngrade,
   cancelActiveSubscription: (state: SubscriptionStoreState) => state.cancelActiveSubscription,
+  resumeSubscription: (state: SubscriptionStoreState) => state.resumeSubscription,
   voidPendingPayment: (state: SubscriptionStoreState) => state.voidPendingPayment,
   reactivateSubscription: (state: SubscriptionStoreState) => state.reactivateSubscription,
   retryPayment: (state: SubscriptionStoreState) => state.retryPayment,

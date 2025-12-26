@@ -7,9 +7,22 @@ import { ApolloProvider } from '@apollo/client/react';
 import { themeClient } from '@/services/graphql/clients';
 import { MyThemesDocument } from '@/services/graphql/themes/queries/mythemes/__generated__/myThemes.generated';
 import { PublishThemeDocument } from '@/services/graphql/themes/mutations/mythemes/__generated__/publishTheme.generated';
-import { ActiveThemeCard } from '@/components/workspace/store/themes/ActiveThemeCard';
-import { ThemeLibraryCard } from '@/components/workspace/store/themes/ThemeLibraryCard';
+import { DeleteThemeDocument } from '@/services/graphql/themes/mutations/mythemes/__generated__/deleteTheme.generated';
+import { DuplicateThemeDocument } from '@/services/graphql/themes/mutations/mythemes/__generated__/duplicateTheme.generated';
+import { RenameThemeDocument } from '@/services/graphql/themes/mutations/mythemes/__generated__/renameTheme.generated';
+import { ActiveThemeCard } from '@/components/workspace/store/themes/library/ActiveThemeCard';
+import { ThemeLibraryCard } from '@/components/workspace/store/themes/library/ThemeLibraryCard';
 import { Button } from '@/components/shadcn-ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/shadcn-ui/dialog';
+import { Input } from '@/components/shadcn-ui/input';
+import { Label } from '@/components/shadcn-ui/label';
 import { Eye, Plus, Package } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -18,6 +31,11 @@ function ThemesContent() {
   const router = useRouter();
   const workspaceId = params.workspace_id as string;
   const [publishingThemeId, setPublishingThemeId] = React.useState<string | null>(null);
+  const [deletingThemeId, setDeletingThemeId] = React.useState<string | null>(null);
+  const [duplicatingThemeId, setDuplicatingThemeId] = React.useState<string | null>(null);
+  const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
+  const [renameThemeId, setRenameThemeId] = React.useState<string | null>(null);
+  const [renameThemeName, setRenameThemeName] = React.useState('');
 
   const { data, loading, error, refetch } = useQuery(MyThemesDocument, {
     variables: { workspaceId },
@@ -41,8 +59,59 @@ function ThemesContent() {
     },
   });
 
+  const [deleteTheme] = useMutation(DeleteThemeDocument, {
+    client: themeClient,
+    onCompleted: (data) => {
+      setDeletingThemeId(null);
+      if (data?.deleteTheme?.success) {
+        toast.success(data.deleteTheme.message || 'Theme deleted successfully');
+        refetch();
+      } else if (data?.deleteTheme?.error) {
+        toast.error(data.deleteTheme.error);
+      }
+    },
+    onError: (error) => {
+      setDeletingThemeId(null);
+      toast.error(`Failed to delete theme: ${error.message}`);
+    },
+  });
+
+  const [duplicateTheme] = useMutation(DuplicateThemeDocument, {
+    client: themeClient,
+    onCompleted: (data) => {
+      setDuplicatingThemeId(null);
+      if (data?.duplicateTheme?.success) {
+        toast.success(data.duplicateTheme.message || 'Theme duplicated successfully');
+        refetch();
+      } else if (data?.duplicateTheme?.error) {
+        toast.error(data.duplicateTheme.error);
+      }
+    },
+    onError: (error) => {
+      setDuplicatingThemeId(null);
+      toast.error(`Failed to duplicate theme: ${error.message}`);
+    },
+  });
+
+  const [renameTheme] = useMutation(RenameThemeDocument, {
+    client: themeClient,
+    onCompleted: (data) => {
+      if (data?.renameTheme?.success) {
+        toast.success(data.renameTheme.message || 'Theme renamed successfully');
+        refetch();
+      } else if (data?.renameTheme?.error) {
+        toast.error(data.renameTheme.error);
+      }
+    },
+    onError: (error) => {
+      toast.error(`Failed to rename theme: ${error.message}`);
+    },
+  });
+
   const handleEditTheme = (customizationId: string) => {
-    router.push(`/workspace/${workspaceId}/editor/${customizationId}`);
+   // router.push(`/workspace/${workspaceId}/editor/${customizationId}`);
+    router.push(`/showcase/editor/${customizationId}`);
+
   };
 
   const handleViewStore = () => {
@@ -67,15 +136,64 @@ function ThemesContent() {
     }
   };
 
-  const handleDelete = (customizationId: string) => {
-    // TODO: Implement delete mutation
-    toast.info('Delete functionality coming soon');
+  const handleDelete = async (customizationId: string) => {
+    setDeletingThemeId(customizationId);
+    try {
+      await deleteTheme({
+        variables: { id: customizationId },
+      });
+    } catch (error) {
+      // Error already handled in onError callback
+      console.error('Error deleting theme:', error);
+    }
+  };
+
+  const handleDuplicate = async (customizationId: string, themeName?: string) => {
+    setDuplicatingThemeId(customizationId);
+    try {
+      await duplicateTheme({
+        variables: {
+          id: customizationId,
+          newName: themeName ? `${themeName} (Copy)` : undefined
+        },
+      });
+    } catch (error) {
+      // Error already handled in onError callback
+      console.error('Error duplicating theme:', error);
+    }
+  };
+
+  const openRenameDialog = (customizationId: string, currentName: string) => {
+    setRenameThemeId(customizationId);
+    setRenameThemeName(currentName);
+    setRenameDialogOpen(true);
+  };
+
+  const handleRenameSubmit = async () => {
+    if (!renameThemeId || !renameThemeName.trim()) {
+      toast.error('Theme name cannot be empty');
+      return;
+    }
+    try {
+      await renameTheme({
+        variables: {
+          id: renameThemeId,
+          name: renameThemeName
+        },
+      });
+      setRenameDialogOpen(false);
+      setRenameThemeId(null);
+      setRenameThemeName('');
+    } catch (error) {
+      // Error already handled in onError callback
+      console.error('Error renaming theme:', error);
+    }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -84,8 +202,8 @@ function ThemesContent() {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error loading themes</h2>
-          <p className="text-gray-600">{error.message}</p>
+          <h2 className="text-2xl font-bold mb-2">Error loading themes</h2>
+          <p className="text-muted-foreground">{error.message}</p>
         </div>
       </div>
     );
@@ -96,15 +214,15 @@ function ThemesContent() {
   const libraryThemes = themes.filter((t) => !t.isActive);
 
   return (
-    <div className="@container/main flex flex-1 flex-col gap-2">
-      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+    <div className="w-full max-w-[1000px] mx-auto px-6">
+      <div className="flex flex-col gap-6 py-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-900 rounded-lg">
-              <Package className="w-5 h-5 text-white" />
+            <div className="p-2 bg-primary rounded-lg">
+              <Package className="w-5 h-5 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Themes</h1>
+            <h1 className="text-2xl font-bold">Themes</h1>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" onClick={handleViewStore}>
@@ -128,6 +246,8 @@ function ThemesContent() {
               version={activeTheme.template.version}
               createdAt={activeTheme.createdAt}
               onEditTheme={() => handleEditTheme(activeTheme.id)}
+              onDuplicate={() => handleDuplicate(activeTheme.id, activeTheme.themeName)}
+              onRename={() => openRenameDialog(activeTheme.id, activeTheme.themeName)}
             />
           </div>
         )}
@@ -136,9 +256,11 @@ function ThemesContent() {
         {libraryThemes.length > 0 && (
           <div>
             <div className="mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Theme library</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                These themes are only visible to you. Publishing a theme from your library will switch it to your current theme.
+              <h2 className="text-base font-semibold">Theme library</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                These themes are only visible to you.{' '}
+                <span className="text-blue-600 dark:text-blue-400">Publishing a theme from your library</span>{' '}
+                will switch it to your current theme.
               </p>
             </div>
             <div className="space-y-3">
@@ -153,9 +275,12 @@ function ThemesContent() {
                   isPublished={theme.isPublished}
                   canDelete={theme.canDelete}
                   isPublishing={publishingThemeId === theme.id}
+                  isDuplicating={duplicatingThemeId === theme.id}
                   onEditTheme={() => handleEditTheme(theme.id)}
                   onPublish={() => handlePublish(theme.id)}
                   onDelete={() => handleDelete(theme.id)}
+                  onDuplicate={() => handleDuplicate(theme.id, theme.themeName)}
+                  onRename={() => openRenameDialog(theme.id, theme.themeName)}
                 />
               ))}
             </div>
@@ -165,11 +290,11 @@ function ThemesContent() {
         {/* Empty State */}
         {themes.length === 0 && (
           <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-              <Package className="w-8 h-8 text-gray-400" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/50 mb-4">
+              <Package className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No themes yet</h3>
-            <p className="text-gray-600 mb-6">Import a theme from our store to get started</p>
+            <h3 className="text-lg font-semibold mb-2">No themes yet</h3>
+            <p className="text-muted-foreground mb-6">Import a theme from our store to get started</p>
             <Button onClick={handleImportTheme}>
               <Plus className="w-4 h-4 mr-2" />
               Browse themes
@@ -177,6 +302,45 @@ function ThemesContent() {
           </div>
         )}
       </div>
+
+      {/* Rename Dialog */}
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename theme</DialogTitle>
+            <DialogDescription>
+              Enter a new name for your theme
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="theme-name">Theme name</Label>
+              <Input
+                id="theme-name"
+                value={renameThemeName}
+                onChange={(e) => setRenameThemeName(e.target.value)}
+                placeholder="Enter theme name"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleRenameSubmit();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRenameDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleRenameSubmit}>
+              Rename
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

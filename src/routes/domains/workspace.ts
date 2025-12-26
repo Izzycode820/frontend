@@ -74,7 +74,10 @@ export const STORE_ROUTES = {
 
   // Sales Channels (Shopify-exact: Online Store, Shop, Point of Sale)
   CHANNELS: {
-    ONLINE_STORE: (workspaceId: string) => `/workspace/${workspaceId}/store//themes`,
+    ONLINE_STORE: (workspaceId: string) => `/workspace/${workspaceId}/store/themes`,
+    THEMES: (workspaceId: string) => `/workspace/${workspaceId}/store/themes`,
+    PAGES: (workspaceId: string) => `/workspace/${workspaceId}/store/pages`,
+    PREFERENCES: (workspaceId: string) => `/workspace/${workspaceId}/store/themes/preferences`,
     // SHOP: (workspaceId: string) => `/workspace/${workspaceId}/store/channels/shop`,
     // POINT_OF_SALE: (workspaceId: string) => `/workspace/${workspaceId}/store/channels/pos`,
   },

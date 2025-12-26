@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Loader2,
   CheckCircle,
@@ -56,6 +56,16 @@ export function PaymentProcessor({
   } = usePayment();
 
   const [secondsElapsed, setSecondsElapsed] = useState(0);
+
+  // Store latest callbacks in refs to prevent effect re-runs (React best practice)
+  // This prevents parent re-renders from restarting polling
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  // Track which payment we've started polling for (prevent duplicate polling)
+  const pollingStartedForRef = useRef<string | null>(null);
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -145,19 +155,29 @@ export function PaymentProcessor({
   const statusDisplay = getStatusDisplay();
 
   // Start polling for payment status
+  // Industry standard: Only run once when paymentId changes, not when callbacks/actions change
   useEffect(() => {
-    if (!paymentId || isPolling) return;
+    if (!paymentId) return;
+
+    // Prevent duplicate polling for same payment (idempotency guard)
+    if (pollingStartedForRef.current === paymentId) {
+      console.log('[PaymentProcessor] Already polling for this payment:', paymentId);
+      return;
+    }
+
+    console.log('[PaymentProcessor] Starting polling for payment:', paymentId);
+    pollingStartedForRef.current = paymentId;
 
     // Start polling with new hook (uses webhook-driven progressive intervals)
     startPolling(
       paymentId,
-      // onSuccess callback
+      // onSuccess callback - use ref to get latest callback
       (payment) => {
-        onComplete({ success: true });
+        onCompleteRef.current({ success: true });
       },
-      // onError callback
+      // onError callback - use ref to get latest callback
       (errorMsg) => {
-        onComplete({ success: false, error: errorMsg });
+        onCompleteRef.current({ success: false, error: errorMsg });
       }
     );
 
@@ -167,10 +187,15 @@ export function PaymentProcessor({
     }, 1000);
 
     return () => {
+      console.log('[PaymentProcessor] Cleanup - stopping polling for:', paymentId);
       clearInterval(timer);
       stopPolling();
+      pollingStartedForRef.current = null;
     };
-  }, [paymentId, startPolling, stopPolling, onComplete, isPolling]);
+    // Only re-run if paymentId changes (not when store actions or callbacks change)
+    // Store actions (startPolling, stopPolling) are stable from Zustand
+    // Callback changes are handled via ref
+  }, [paymentId, startPolling, stopPolling]);
 
   // Format elapsed time
   const formatElapsedTime = () => {

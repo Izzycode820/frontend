@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { PaymentForm } from './PaymentForm';
 import { PaymentProcessor } from './PaymentProcessor';
 import { usePlatformPaymentMethods } from '@/hooks/payment/usePayment';
 import { useAuth } from '@/hooks/authentication/useAuth';
+import { useCurrentWorkspace } from '@/hooks/authentication/useWorkspace';
 import subscriptionService from '@/services/subscription/subscription';
 import type { SubscriptionTier, BillingCycle, PricingMode } from '@/types/subscription/subscription';
 
@@ -66,6 +67,7 @@ export function PaymentWizard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [currentIdempotencyKey, setCurrentIdempotencyKey] = useState<string | null>(null);
 
   // Platform payment methods hook (auto-fetches and auto-selects recommended)
   const {
@@ -75,10 +77,36 @@ export function PaymentWizard({
   } = usePlatformPaymentMethods(true, 'subscription');
 
   const { isAuthenticated, user } = useAuth();
+  const { currentWorkspaceId } = useCurrentWorkspace();
+
+  // SessionStorage keys for persistence
+  const IDEMPOTENCY_KEY_STORAGE = `payment-idempotency-${planTier}`;
+  const PAYMENT_INTENT_STORAGE = `payment-intent-${planTier}`;
 
   // Generate idempotency key (prevents double-click submissions)
   const generateIdempotencyKey = () => {
     return `${user?.id || 'anon'}-${planTier}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  };
+
+  // Get or create idempotency key with sessionStorage persistence
+  const getOrCreateIdempotencyKey = () => {
+    // Check if we have a stored key (for retry scenario)
+    const storedKey = sessionStorage.getItem(IDEMPOTENCY_KEY_STORAGE);
+    if (storedKey) {
+      return storedKey;
+    }
+
+    // Generate new key and persist
+    const newKey = generateIdempotencyKey();
+    sessionStorage.setItem(IDEMPOTENCY_KEY_STORAGE, newKey);
+    return newKey;
+  };
+
+  // Clear idempotency key (on success or cancel)
+  const clearIdempotencyKey = () => {
+    sessionStorage.removeItem(IDEMPOTENCY_KEY_STORAGE);
+    sessionStorage.removeItem(PAYMENT_INTENT_STORAGE);
+    setCurrentIdempotencyKey(null);
   };
 
   // Get client context (browser info for fraud detection)
@@ -111,6 +139,11 @@ export function PaymentWizard({
       return;
     }
 
+    if (!currentWorkspaceId) {
+      setError('No workspace found. Please create a workspace first.');
+      return;
+    }
+
     if (!selectedPaymentMethod) {
       setError('Please select a payment method');
       return;
@@ -120,6 +153,10 @@ export function PaymentWizard({
       setIsSubmitting(true);
       setError(null);
 
+      // Get or reuse idempotency key (critical for retry logic)
+      const idempotencyKey = getOrCreateIdempotencyKey();
+      setCurrentIdempotencyKey(idempotencyKey);
+
       // Build complete payload for initiate_subscription
       const payload = {
         plan_tier: planTier,
@@ -127,9 +164,15 @@ export function PaymentWizard({
         provider: selectedPaymentMethod.provider, // 'fapshi'
         billing_cycle: billingCycle, // 'monthly' or 'yearly'
         pricing_mode: pricingMode, // 'intro' or 'regular'
-        idempotency_key: generateIdempotencyKey(),
-        // workspace_id is handled by backend from authenticated user
+        idempotency_key: idempotencyKey, // ✅ Persistent key for retry
+        client_context: getClientContext(), // ✅ Fraud detection context
+        workspace_id: currentWorkspaceId, // ✅ Current workspace from JWT
       };
+
+      console.log('[PaymentWizard] Creating subscription with payload:', {
+        ...payload,
+        client_context: '...' // Don't log full context
+      });
 
       // Call subscription service (which calls initiate_subscription on backend)
       const response = await subscriptionService.createSubscription(payload);
@@ -138,9 +181,16 @@ export function PaymentWizard({
         throw new Error(response.error || 'Subscription creation failed');
       }
 
+      // Check if already processed (idempotent response)
+      if (response.already_processed) {
+        console.log('[PaymentWizard] Payment already processed (idempotent response)');
+      }
+
       // Store payment intent ID for polling
       if (response.payment_intent_id) {
         setPaymentIntentId(response.payment_intent_id);
+        // Persist to sessionStorage for page refresh recovery
+        sessionStorage.setItem(PAYMENT_INTENT_STORAGE, response.payment_intent_id);
         setStage('processing');
       } else {
         throw new Error('No payment intent ID returned');
@@ -148,24 +198,45 @@ export function PaymentWizard({
     } catch (err: any) {
       const errorMessage = err?.response?.data?.error || err.message || 'Subscription failed';
       setError(errorMessage);
-      console.error('Subscription error:', err);
+      console.error('[PaymentWizard] Subscription error:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handlePaymentComplete = (result: PaymentResult) => {
+  const handlePaymentComplete = useCallback((result: PaymentResult) => {
     if (result.success) {
+      // Payment succeeded - clear idempotency key and navigate to workspace
+      clearIdempotencyKey();
       onSuccess({
         ...result,
         payment_intent_id: paymentIntentId || result.payment_intent_id
       });
     } else {
+      // Payment failed - keep idempotency key for potential retry
+      // But clear payment intent to allow fresh retry
       setError(result.error || 'Payment failed');
       setStage('input');
       setPaymentIntentId(null);
+      sessionStorage.removeItem(PAYMENT_INTENT_STORAGE);
+      // Note: We keep the idempotency key so retry can check if payment actually succeeded
     }
-  };
+  }, [paymentIntentId, onSuccess]);
+
+  // Handle retry - reuse idempotency key to check backend for existing payment
+  const handleRetry = useCallback(() => {
+    setStage('input');
+    setPaymentIntentId(null);
+    setError(null);
+    sessionStorage.removeItem(PAYMENT_INTENT_STORAGE);
+    // Keep idempotency key - backend will return existing result if already processed
+  }, []);
+
+  // Handle cancel - clear everything
+  const handleCancel = useCallback(() => {
+    clearIdempotencyKey();
+    onCancel();
+  }, [onCancel]);
 
   // Stage 2: Processing - Poll payment status and redirect
   if (stage === 'processing' && paymentIntentId) {
@@ -177,11 +248,7 @@ export function PaymentWizard({
           phoneNumber={phoneNumber}
           operator={selectedPaymentMethod?.displayName || 'Mobile Money'}
           onComplete={handlePaymentComplete}
-          onRetry={() => {
-            setStage('input');
-            setPaymentIntentId(null);
-            setError(null);
-          }}
+          onRetry={handleRetry}
         />
       </div>
     );
@@ -195,7 +262,7 @@ export function PaymentWizard({
       phoneNumber={phoneNumber}
       onPhoneNumberChange={setPhoneNumber}
       onSubmit={handleSubmit}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       isSubmitting={isSubmitting || !hasPaymentMethods}
       error={error}
       className={className}

@@ -15,6 +15,7 @@ export interface NavMainItem {
   icon?: Icon
   items?: NavMainSubItem[]
   defaultOpen?: boolean // For collapsible items
+  navigateToFirstChild?: boolean // If true, clicking parent navigates to first child (for label-only parents)
 }
 
 /**
@@ -41,6 +42,9 @@ export interface NavSectionItem {
   name: string
   url: string
   icon: Icon
+  items?: NavMainSubItem[] // Support for nested sub-items
+  defaultOpen?: boolean // For collapsible items
+  navigateToFirstChild?: boolean // If true, clicking parent navigates to first child (for label-only parents)
 }
 
 /**

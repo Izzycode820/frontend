@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { GetBillingOverviewDocument } from '@/services/graphql/subscription/queries/billing/__generated__/get-billing-overview.generated';
 import { GetPastBillsDocument } from '@/services/graphql/subscription/queries/billing/__generated__/get-past-bills.generated';
 import { GetBillingProfileDocument } from '@/services/graphql/subscription/queries/billing/__generated__/get-billing-profile.generated';
+import { useSubscription } from '@/hooks/subscription/useSubscription';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
@@ -36,7 +37,8 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
-  Edit
+  Edit,
+  RefreshCw
 } from 'lucide-react';
 
 export function BillingPage() {
@@ -45,7 +47,11 @@ export function BillingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [sortOrder, setSortOrder] = useState<string>('newest_first');
+  const [isRenewing, setIsRenewing] = useState(false);
   const pageSize = 50;
+
+  // Subscription hook for renewal functionality
+  const { status, renewSubscription } = useSubscription();
 
   // Query for billing overview
   const { data: overviewData, loading: overviewLoading } = useQuery(GetBillingOverviewDocument);
@@ -97,32 +103,66 @@ export function BillingPage() {
     return actionMap[action] || action;
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Billing</h1>
-        <Button
-          variant="outline"
-          onClick={() => router.push('./billing/profile')}
-          className="gap-2"
-        >
-          <FileText className="h-4 w-4" />
-          Billing profile
-        </Button>
-      </div>
+  // Determine if renew button should be shown
+  const showRenewButton =
+    (billingOverview?.daysUntilBill !== null &&
+     billingOverview?.daysUntilBill !== undefined &&
+     billingOverview.daysUntilBill <= 5) ||
+    status === 'grace_period';
 
-      {/* Upcoming Bill Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Upcoming bill</CardTitle>
-            <Button variant="link" className="text-blue-600 p-0 h-auto">
-              View bill
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+  const handleRenew = async () => {
+    if (!billingProfile?.userPhone) {
+      alert('Please add a phone number to your billing profile first.');
+      router.push('./billing/profile');
+      return;
+    }
+
+    setIsRenewing(true);
+    try {
+      const result = await renewSubscription({
+        phoneNumber: billingProfile.userPhone,
+        preferredProvider: billingProfile.primaryPaymentMethod || 'fapshi',
+      });
+
+      if (result.success) {
+        alert(`Renewal initiated! ${result.paymentInstructions || 'Please complete payment via USSD prompt on your phone.'}`);
+      } else {
+        alert(`Renewal failed: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error: any) {
+      alert(`Renewal error: ${error.message || 'Failed to initiate renewal'}`);
+    } finally {
+      setIsRenewing(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-[1000px] mx-auto px-6">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Billing</h1>
+          <Button
+            variant="outline"
+            onClick={() => router.push('./billing/profile')}
+            className="gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Billing profile
+          </Button>
+        </div>
+
+        {/* Upcoming Bill Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-semibold">Upcoming bill</CardTitle>
+              <Button variant="link" className="text-blue-600 p-0 h-auto text-sm">
+                View bill
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
           {overviewLoading ? (
             <>
               <Skeleton className="h-12 w-48" />
@@ -153,7 +193,7 @@ export function BillingPage() {
               </p>
 
               {/* Payment Method */}
-              <Card className="bg-muted/50">
+              <Card className="bg-muted/20">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     {billingProfile?.primaryPaymentMethod ? (
@@ -193,6 +233,33 @@ export function BillingPage() {
                 </CardContent>
               </Card>
 
+              {/* Renew button - shown in 5-day window or grace period */}
+              {showRenewButton && (
+                <div className="pt-2">
+                  <Button
+                    onClick={handleRenew}
+                    disabled={isRenewing}
+                    className="w-full sm:w-auto gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isRenewing ? 'animate-spin' : ''}`} />
+                    {isRenewing ? 'Processing...' : 'Renew subscription'}
+                  </Button>
+                  {status === 'grace_period' && (
+                    <p className="text-sm text-red-600 mt-2">
+                      Your subscription is in grace period. Please renew to avoid service interruption.
+                    </p>
+                  )}
+                  {billingOverview?.daysUntilBill !== null &&
+                   billingOverview?.daysUntilBill !== undefined &&
+                   billingOverview.daysUntilBill <= 5 &&
+                   status !== 'grace_period' && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Renew now to extend your subscription without interruption.
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Plan settings link */}
               <p className="text-sm">
                 To make changes to your plan,{' '}
@@ -209,25 +276,25 @@ export function BillingPage() {
         </CardContent>
       </Card>
 
-      {/* Past Bills Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Past bills</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push('./billing/charges')}>
-                  See charge table
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardHeader>
+        {/* Past Bills Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-semibold">Past bills</CardTitle>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => router.push('./billing/charges')}>
+                    See charge table
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
         <CardContent className="space-y-4">
           {/* Filters and Search */}
           <div className="flex items-center justify-between gap-4">
@@ -346,6 +413,7 @@ export function BillingPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

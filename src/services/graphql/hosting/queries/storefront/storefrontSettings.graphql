@@ -1,0 +1,7 @@
+query StorefrontSettings($workspaceId: ID!) {
+  storefrontSettings(workspaceId: $workspaceId) {
+    password
+    seoTitle
+    assignedDomain
+  }
+}

@@ -30,7 +30,7 @@ export default function Header({ className }: HeaderProps) {
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <div className="font-bold text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            HUZILERZ
+            HUZILERZ CAMP
           </div>
         </Link>
 

@@ -4,17 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { Puck, type Data, type Config } from '@measured/puck';
 import '@measured/puck/puck.css';
 import { loadThemeConfig } from '@/registry/theme-registry';
+import { puckOverrides } from './overrides/puck-overrides';
 import { Button } from '@/components/shadcn-ui/button';
 
 /**
- * UniversalEditor - Production Multi-Tenant Architecture
+ * UniversalEditorV2 - Production Multi-Tenant Architecture with Shopify-style sidebar
  *
  * Loads master theme config (shared) + user's customized data (unique).
- *
- * Flow:
- * 1. Load master puck.config.tsx from registry (has render functions)
- * 2. Load user's puck_data from props (from DB via GraphQL)
- * 3. User edits → saves back to their DB row
+ * Uses Shopify-inspired left sidebar (Outline/Blocks/Fields) instead of default Puck UI.
  */
 interface EditorProps {
   themeSlug: string;          // Which theme (e.g., 'ecommerce-sneakers')
@@ -28,7 +25,7 @@ interface EditorProps {
   isPublishing?: boolean;
 }
 
-export default function UniversalEditor({
+export default function UniversalEditorV2({
   themeSlug,
   puckData,
   className = '',
@@ -44,7 +41,6 @@ export default function UniversalEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
   useEffect(() => {
     loadMasterConfig();
   }, [themeSlug]);
@@ -53,7 +49,6 @@ export default function UniversalEditor({
     try {
       setIsLoading(true);
       setError(null);
-
 
       // Load master config from registry (shared by all users)
       const masterConfig = await loadThemeConfig(themeSlug);
@@ -135,53 +130,8 @@ export default function UniversalEditor({
         data={data}
         onPublish={handlePublish}
         onChange={handleChange}
-
-        // Viewport Configuration
-        viewports={[
-          {
-            width: 360,
-            height: "auto",
-            label: "Mobile",
-            icon: (
-              <svg width="16" height="16" viewBox="0 0 24 24">
-                <path d="M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 4h10v11H7V4zm0 13h10v3H7v-3z"/>
-              </svg>
-            )
-          },
-          {
-            width: 768,
-            height: "auto",
-            label: "Tablet",
-            icon: (
-              <svg width="16" height="16" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM5 5h14v10H5V5zm0 12h14v2H5v-2z"/>
-              </svg>
-            )
-          },
-          {
-            width: 1280,
-            height: "auto",
-            label: "Desktop",
-            icon: (
-              <svg width="16" height="16" viewBox="0 0 24 24">
-                <path d="M21 3H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM3 5h18v9H3V5z"/>
-              </svg>
-            )
-          }
-        ]}
-
-        // Enable iframe for proper viewport simulation
-        iframe={{
-          enabled: true,
-          waitForStyles: true
-        }}
-
-        // UI Configuration
-        ui={{
-          leftSideBarVisible: true
-        }}
-
         overrides={{
+          ...puckOverrides,
           headerActions: ({ children }) => (
             <>
               {onPreview && (
@@ -226,6 +176,50 @@ export default function UniversalEditor({
               {children}
             </>
           ),
+        }}
+        // Viewport Configuration
+        viewports={[
+          {
+            width: 360,
+            height: "auto",
+            label: "Mobile",
+            icon: (
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path d="M17 2H7c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 4h10v11H7V4zm0 13h10v3H7v-3z"/>
+              </svg>
+            )
+          },
+          {
+            width: 768,
+            height: "auto",
+            label: "Tablet",
+            icon: (
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM5 5h14v10H5V5zm0 12h14v2H5v-2z"/>
+              </svg>
+            )
+          },
+          {
+            width: 1280,
+            height: "auto",
+            label: "Desktop",
+            icon: (
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path d="M21 3H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM3 5h18v9H3V5z"/>
+              </svg>
+            )
+          }
+        ]}
+        // Enable iframe for proper viewport simulation
+        iframe={{
+          enabled: true,
+          waitForStyles: true
+        }}
+        // UI Configuration - Both sidebars visible
+        // Left: Outline/Blocks tabs | Right: Fields (custom enhanced fields)
+        ui={{
+          leftSideBarVisible: true,
+          rightSideBarVisible: true
         }}
       />
     </div>

@@ -55,12 +55,9 @@ export function getStoreSidebarConfig(
       title: "Products",
       url: STORE_ROUTES.PRODUCTS.LIST(workspaceId),
       icon: IconPackage,
-      defaultOpen: true, // Shopify-style: Products section open by default
+      defaultOpen: false,
+      navigateToFirstChild: false, // Click navigates to Products page itself
       items: [
-        {
-          title: "All products",
-          url: STORE_ROUTES.PRODUCTS.LIST(workspaceId),
-        },
         {
           title: "Inventory",
           url: STORE_ROUTES.PRODUCTS.INVENTORY(workspaceId),
@@ -69,10 +66,6 @@ export function getStoreSidebarConfig(
           title: "Collections",
           url: STORE_ROUTES.PRODUCTS.COLLECTIONS(workspaceId),
         },
-        // {
-        //   title: "Transfers",
-        //   url: STORE_ROUTES.PRODUCTS.TRANSFERS(workspaceId),
-        // },
       ],
     },
     {
@@ -99,10 +92,25 @@ export function getStoreSidebarConfig(
       items: [
         {
           name: "Online Store",
-          url: STORE_ROUTES.CHANNELS.ONLINE_STORE(workspaceId),
+          url: STORE_ROUTES.CHANNELS.THEMES(workspaceId), // Points to first child
           icon: IconWorldWww,
+          navigateToFirstChild: true, // Click opens children and navigates to first child
+          items: [
+            {
+              title: "Themes",
+              url: STORE_ROUTES.CHANNELS.THEMES(workspaceId),
+            },
+            // {
+            //   title: "Pages",
+            //   url: STORE_ROUTES.CHANNELS.PAGES(workspaceId),
+            // },
+            {
+              title: "Preferences",
+              url: STORE_ROUTES.CHANNELS.PREFERENCES(workspaceId),
+            },
+          ],
         },
-        
+
       ],
     },
   ]
