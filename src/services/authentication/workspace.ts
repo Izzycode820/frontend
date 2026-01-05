@@ -25,9 +25,13 @@ export class WorkspaceService extends BaseService {
   }
 
   /**
-   * Switch to different workspace context
+   * Switch to different workspace context (Industry Standard: Shopify/Stripe/Linear)
    * Backend: POST /api/auth/workspace-switch/
-   * Updates JWT tokens with workspace claims
+   *
+   * v3.0 - NO token regeneration:
+   * - Backend validates user has access to workspace
+   * - Returns workspace details + membership (role, permissions)
+   * - Frontend updates Zustand + sends X-Workspace-Id header on next request
    */
   async switchWorkspace(workspaceId: string): Promise<WorkspaceSwitchResponse> {
     this.validateRequired({ workspace_id: workspaceId }, ['workspace_id'])
@@ -35,33 +39,23 @@ export class WorkspaceService extends BaseService {
     const request: WorkspaceSwitchRequest = { workspace_id: workspaceId }
     const response = await this.post<WorkspaceSwitchResponse>('/workspace-switch/', request)
 
-    // Update token after workspace switch (contains new workspace claims)
-    if (response.tokens?.access_token) {
-      apiClient.setAuthToken(response.tokens.access_token, response.tokens.expires_in)
-    }
-
+    // NO token handling - workspace context managed via header (v3.0)
     return response
   }
 
   /**
-   * Leave current workspace context
+   * Leave current workspace context (Industry Standard: Stateless)
    * Backend: POST /api/auth/workspace-leave/
-   * Removes workspace claims from JWT (OAuth2 refresh token rotation pattern)
    *
-   * Security:
-   * - Revokes old refresh token (contains workspace_id)
-   * - Issues new refresh token WITHOUT workspace context
-   * - New refresh token automatically set as httpOnly cookie by backend
-   * - Implements principle of least privilege
+   * v3.0 - NO token regeneration:
+   * - Backend logs the event for audit trail
+   * - Frontend clears workspace from Zustand
+   * - Frontend stops sending X-Workspace-Id header on next request
    */
   async leaveWorkspace(): Promise<LeaveWorkspaceResponse> {
     const response = await this.post<LeaveWorkspaceResponse>('/workspace-leave/')
 
-    // Update token after leaving workspace (no workspace claims)
-    if (response.tokens?.access_token) {
-      apiClient.setAuthToken(response.tokens.access_token, response.tokens.expires_in)
-    }
-
+    // NO token handling - workspace context managed via header (v3.0)
     return response
   }
 

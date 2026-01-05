@@ -8,11 +8,9 @@ interface ToggleProps {
   onChange: (value: boolean) => void;
   label?: string;
   description?: string;
+  name: string;
 }
 
-/**
- * Toggle - Better boolean control than checkbox
- */
 export function Toggle({ value, onChange, label, description }: ToggleProps) {
   return (
     <div className="flex items-center justify-between gap-4 py-1">

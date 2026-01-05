@@ -16,32 +16,10 @@ export function ReactivatePage() {
   const { tier, renewSubscription } = useSubscription();
   const { data: profileData } = useQuery(GetBillingProfileDocument);
 
-  // TODO: Verify renewSubscription hook params match backend API
-  const handleReactivate = async () => {
-    if (!profileData?.billingProfile?.userPhone) {
-      alert('Please add a phone number to your billing profile first.');
-      router.push('/workspace/settings/billing/profile');
-      return;
-    }
-
-    setIsReactivating(true);
-    try {
-      const result = await renewSubscription({
-        phone_number: profileData.billingProfile.userPhone,
-        provider: profileData.billingProfile.primaryPaymentMethod || 'fapshi',
-      });
-
-      if (result.success) {
-        alert(`Reactivation initiated! ${result.paymentInstructions || 'Please complete payment via USSD prompt on your phone.'}`);
-        router.push('/workspace');
-      } else {
-        alert(`Reactivation failed: ${result.error || 'Unknown error'}`);
-      }
-    } catch (error: any) {
-      alert(`Reactivation error: ${error.message || 'Failed to initiate reactivation'}`);
-    } finally {
-      setIsReactivating(false);
-    }
+  // Redirect to checkout for reactivation
+  // User completes full checkout flow - backend is source of truth
+  const handleReactivate = () => {
+    router.push('/checkout?action=reactivate');
   };
 
   const handleChooseDifferentPlan = () => {

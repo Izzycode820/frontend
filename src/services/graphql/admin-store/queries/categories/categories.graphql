@@ -16,6 +16,8 @@ query Categories(
         name
         description
         slug
+        metaTitle
+        metaDescription
         featuredMedia {
           id
           url

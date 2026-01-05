@@ -7,6 +7,9 @@ mutation UpdateCategory(
   $isVisible: Boolean
   $isFeatured: Boolean
   $sortOrder: Int
+  $slug: String
+  $metaTitle: String
+  $metaDescription: String
 ) {
   updateCategory(
     id: $id
@@ -17,6 +20,9 @@ mutation UpdateCategory(
     isVisible: $isVisible
     isFeatured: $isFeatured
     sortOrder: $sortOrder
+    slug: $slug
+    metaTitle: $metaTitle
+    metaDescription: $metaDescription
   ) {
     success
     category {
@@ -24,6 +30,8 @@ mutation UpdateCategory(
       name
       description
       slug
+      metaTitle
+      metaDescription
       featuredMedia {
         id
         url

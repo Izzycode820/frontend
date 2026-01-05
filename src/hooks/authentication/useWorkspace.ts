@@ -8,10 +8,11 @@ import { useCallback } from 'react'
 import { useWorkspaceStore, workspaceSelectors } from '../../stores/authentication/workspaceStore'
 import { useAuthStore } from '../../stores/authentication/authStore'
 import workspaceService from '../../services/authentication/workspace'
-import { extractWorkspaceFromJWT } from '../../utils/jwt'
+import { adminStoreClient, hostinClient, themeClient, subscriptionClient } from '../../services/graphql/clients'
 import type {
   WorkspaceSwitchResponse,
-  LeaveWorkspaceResponse
+  LeaveWorkspaceResponse,
+  WorkspaceAuthContext
 } from '../../types/authentication/workspace'
 
 // ============================================================================
@@ -92,27 +93,45 @@ export function useWorkspace(): UseWorkspaceReturn {
       // Start switch process with workspace ID (sets UI state)
       startWorkspaceSwitch(workspaceId)
 
-      // Actual workspace switch with the ID
+      // v3.0 - NO token regeneration, just validate access and get workspace details
       const response = await workspaceService.switchWorkspace(workspaceId)
 
-      if (response.success && response.workspace && response.tokens?.access_token) {
-        // Validate JWT claims before trusting the response
-        const workspaceClaims = extractWorkspaceFromJWT(response.tokens.access_token)
-
-        if (!workspaceClaims) {
-          throw new Error('Workspace token validation failed - missing workspace claims')
+      if (response.success && response.workspace && response.membership) {
+        // Build WorkspaceAuthContext from response
+        const workspaceContext: WorkspaceAuthContext = {
+          id: response.workspace.id,
+          name: response.workspace.name,
+          type: response.workspace.type,
+          status: response.workspace.status,
+          role: response.membership.role,
+          permissions: response.membership.permissions,
+          is_default: false // Backend doesn't return this in v3.0
         }
 
-        if (workspaceClaims.id !== workspaceId) {
-          throw new Error('Workspace token validation failed - workspace ID mismatch')
+        // Update workspace store
+        useWorkspaceStore.getState().setCurrentWorkspace(workspaceContext)
+
+        // Update auth store (for unified state management)
+        useAuthStore.getState().setWorkspace(workspaceContext)
+
+        // Clear Apollo cache to force refetch with new workspace context
+        // Industry Standard: Shopify/Linear - fresh data on workspace switch
+        try {
+          await Promise.all([
+            adminStoreClient.clearStore(),    // Clear workspace-scoped GraphQL cache
+            hostinClient.clearStore(),         // Clear hosting GraphQL cache
+            themeClient.resetStore(),          // Reset theme cache (soft clear)
+            subscriptionClient.resetStore()    // Reset subscription cache (soft clear)
+          ])
+          console.log('✅ Apollo cache cleared after workspace switch')
+        } catch (cacheError) {
+          // Non-blocking - cache clear failure shouldn't break workspace switch
+          console.warn('⚠️ Apollo cache clear failed (non-critical):', cacheError)
         }
 
-        if (!workspaceClaims.role) {
-          throw new Error('Workspace token validation failed - missing role claim')
-        }
-
-        // Validation passed - update store
+        // Mark switch as complete
         setSwitchSuccess(response)
+
         return response
       }
 
@@ -132,12 +151,27 @@ export function useWorkspace(): UseWorkspaceReturn {
         throw new Error('Not currently in a workspace')
       }
 
-      // Call backend to leave workspace (revokes old token, issues new one)
+      // v3.0 - NO token regeneration, backend just logs the event
       const response = await workspaceService.leaveWorkspace()
 
-      if (response.success && response.tokens?.access_token) {
-        // Update authStore with new tokens (clears workspace context)
+      if (response.success) {
+        // Clear workspace context in stores
         useAuthStore.getState().setLeaveSuccess(response)
+
+        // Clear Apollo cache when leaving workspace
+        try {
+          await Promise.all([
+            adminStoreClient.clearStore(),
+            hostinClient.clearStore(),
+            themeClient.resetStore(),
+            subscriptionClient.resetStore()
+          ])
+          console.log('✅ Apollo cache cleared after leaving workspace')
+        } catch (cacheError) {
+          console.warn('⚠️ Apollo cache clear failed (non-critical):', cacheError)
+        }
+
+        // Frontend stops sending X-Workspace-Id header on next request
         return response
       }
 

@@ -33,7 +33,7 @@ interface OrdersFiltersProps {
 const PAYMENT_STATUSES = [
   { value: 'PAID', label: 'Paid' },
   { value: 'PENDING', label: 'Pending' },
-  { value: 'UNPAID', label: 'Unpaid' },
+  { value: 'FAILED', label: 'Failed' },
   { value: 'REFUNDED', label: 'Refunded' },
 ];
 

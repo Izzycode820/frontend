@@ -149,12 +149,11 @@ export class AuthService extends BaseService {
     const request: WorkspaceSwitchRequest = { workspace_id: workspaceId }
     const response = await this.post<WorkspaceSwitchResponse>('/workspace-switch/', request)
 
-    // Update token after workspace switch
-    if (response.tokens?.access_token) {
-      apiClient.setAuthToken(response.tokens.access_token, response.tokens.expires_in)
-    }
+    // v3.0 - NO token regeneration on workspace switch
+    // Backend validates access and returns workspace details
+    // Frontend updates Zustand state (handled in useWorkspace hook)
 
-    // Track workspace context for refresh flow (industry standard pattern)
+    // Track workspace context in localStorage (for persistence across page reload)
     if (typeof window !== 'undefined' && response.success) {
       localStorage.setItem('current_workspace_id', workspaceId)
     }

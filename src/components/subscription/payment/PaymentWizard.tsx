@@ -61,6 +61,10 @@ export function PaymentWizard({
   const billingCycle = urlBillingCycle || propBillingPeriod || 'monthly';
   const pricingMode = urlPricingMode || propPricingMode || 'regular'; // Default to regular
 
+  // Check for renewal/reactivate action from URL
+  const action = searchParams?.get('action'); // 'renew' | 'reactivate' | null
+  const isRenewal = action === 'renew' || action === 'reactivate';
+
   // Component state
   const [stage, setStage] = useState<'input' | 'processing'>('input');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -139,10 +143,7 @@ export function PaymentWizard({
       return;
     }
 
-    if (!currentWorkspaceId) {
-      setError('No workspace found. Please create a workspace first.');
-      return;
-    }
+    // NOTE: Workspace is optional for subscriptions - they are user-level, not workspace-scoped
 
     if (!selectedPaymentMethod) {
       setError('Please select a payment method');
@@ -157,25 +158,39 @@ export function PaymentWizard({
       const idempotencyKey = getOrCreateIdempotencyKey();
       setCurrentIdempotencyKey(idempotencyKey);
 
-      // Build complete payload for initiate_subscription
-      const payload = {
-        plan_tier: planTier,
-        phone_number: phoneNumber.replace(/\s+/g, ''),
-        provider: selectedPaymentMethod.provider, // 'fapshi'
-        billing_cycle: billingCycle, // 'monthly' or 'yearly'
-        pricing_mode: pricingMode, // 'intro' or 'regular'
-        idempotency_key: idempotencyKey, // ✅ Persistent key for retry
-        client_context: getClientContext(), // ✅ Fraud detection context
-        workspace_id: currentWorkspaceId, // ✅ Current workspace from JWT
-      };
+      let response;
 
-      console.log('[PaymentWizard] Creating subscription with payload:', {
-        ...payload,
-        client_context: '...' // Don't log full context
-      });
+      if (isRenewal) {
+        // RENEWAL FLOW: Call renewal endpoint (user already has active subscription)
+        // Renewal only needs phone_number and provider - backend uses current plan
+        const renewPayload = {
+          phone_number: phoneNumber.replace(/\s+/g, ''),
+          provider: selectedPaymentMethod.provider,
+          idempotency_key: idempotencyKey,
+        };
 
-      // Call subscription service (which calls initiate_subscription on backend)
-      const response = await subscriptionService.createSubscription(payload);
+        console.log('[PaymentWizard] Renewing subscription with payload:', renewPayload);
+        response = await subscriptionService.renewSubscription(renewPayload);
+      } else {
+        // CREATE FLOW: Standard subscription creation
+        // NOTE: workspace_id is optional - subscriptions are user-level, not workspace-level
+        const createPayload = {
+          plan_tier: planTier,
+          phone_number: phoneNumber.replace(/\s+/g, ''),
+          provider: selectedPaymentMethod.provider,
+          billing_cycle: billingCycle,
+          pricing_mode: pricingMode,
+          idempotency_key: idempotencyKey,
+          client_context: getClientContext(),
+          ...(currentWorkspaceId && { workspace_id: currentWorkspaceId }),
+        };
+
+        console.log('[PaymentWizard] Creating subscription with payload:', {
+          ...createPayload,
+          client_context: '...'
+        });
+        response = await subscriptionService.createSubscription(createPayload);
+      }
 
       if (!response.success) {
         throw new Error(response.error || 'Subscription creation failed');

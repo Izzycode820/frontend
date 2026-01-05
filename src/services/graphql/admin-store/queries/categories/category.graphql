@@ -8,6 +8,8 @@ query Category(
     name
     description
     slug
+    metaTitle
+    metaDescription
     featuredMedia {
       id
       url

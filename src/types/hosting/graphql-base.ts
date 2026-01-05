@@ -12,595 +12,106 @@ export interface Scalars {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  BigInt: { input: any; output: any; }
   DateTime: { input: string; output: string; }
   Decimal: { input: string; output: string; }
-  JSONString: { input: any; output: any; }
-}
-
-/** Bandwidth usage details */
-export interface BandwidthUsageType {
-  __typename?: 'BandwidthUsageType';
-  limitGb: Scalars['Float']['output'];
-  percentage: Scalars['Float']['output'];
-  remainingGb: Scalars['Float']['output'];
-  usedGb: Scalars['Float']['output'];
 }
 
 /**
- * Change workspace subdomain (e.g., mystore.huzilerz.com)
- *
- * Free for all tiers - uses SubdomainService
- * Atomic update across WorkspaceInfrastructure and DeployedSite
- * Tracks subdomain history and enforces change limits (2 changes max)
+ * Billing overview type for billing page
+ * Matches Shopify billing page structure - upcoming bill section only
  */
-export interface ChangeSubdomain {
-  __typename?: 'ChangeSubdomain';
-  changesRemaining?: Maybe<Scalars['Int']['output']>;
-  error?: Maybe<Scalars['String']['output']>;
-  liveUrl?: Maybe<Scalars['String']['output']>;
-  message?: Maybe<Scalars['String']['output']>;
-  newSubdomain?: Maybe<Scalars['String']['output']>;
-  previewUrl?: Maybe<Scalars['String']['output']>;
-  success?: Maybe<Scalars['Boolean']['output']>;
+export interface BillingOverviewType {
+  __typename?: 'BillingOverviewType';
+  daysUntilBill?: Maybe<Scalars['Int']['output']>;
+  lastPaymentMethod?: Maybe<Scalars['String']['output']>;
+  lastPaymentPhoneNumber?: Maybe<Scalars['String']['output']>;
+  nextBillDate?: Maybe<Scalars['DateTime']['output']>;
+  upcomingBillAmount?: Maybe<Scalars['Float']['output']>;
 }
 
 /**
- * Input for changing workspace subdomain
- *
- * Used by changeSubdomain mutation
+ * Billing profile type for billing profile page
+ * Matches Shopify billing-profile page
+ * Fields: primary payment method, payment number
  */
-export interface ChangeSubdomainInput {
-  /** New subdomain (e.g., 'mystore' for mystore.huzilerz.com) */
-  subdomain: Scalars['String']['input'];
-  /** Workspace to update */
-  workspaceId: Scalars['ID']['input'];
+export interface BillingProfileType {
+  __typename?: 'BillingProfileType';
+  primaryPaymentMethod?: Maybe<Scalars['String']['output']>;
+  userPhone?: Maybe<Scalars['String']['output']>;
 }
 
 /**
- * Connect externally-owned custom domain
- *
- * User must configure DNS records externally
- * System verifies DNS and provisions SSL (Shopify 2-step flow)
+ * Charges table type
+ * Matches Shopify billing-charging table page
+ * Fields: bill number (reference), date, charge type, amount
  */
-export interface ConnectCustomDomain {
-  __typename?: 'ConnectCustomDomain';
-  dnsRecords?: Maybe<Scalars['JSONString']['output']>;
-  domain?: Maybe<CustomDomainType>;
-  error?: Maybe<Scalars['String']['output']>;
-  message?: Maybe<Scalars['String']['output']>;
-  success?: Maybe<Scalars['Boolean']['output']>;
-  verificationInstructions?: Maybe<Scalars['String']['output']>;
-}
-
-/**
- * Input for connecting an externally-owned custom domain
- *
- * Used by connectCustomDomain mutation
- */
-export interface ConnectCustomDomainInput {
-  /** Domain to connect (must be owned externally) */
-  domain: Scalars['String']['input'];
-  /** Workspace to connect domain to */
-  workspaceId: Scalars['ID']['input'];
-}
-
-/**
- * Custom domain detail view
- * Used for verification polling and DNS configuration display
- */
-export interface CustomDomainDetailType extends Node {
-  __typename?: 'CustomDomainDetailType';
+export interface ChargesType {
+  __typename?: 'ChargesType';
+  /** Amount in XAF */
+  amount: Scalars['Decimal']['output'];
+  /** Type of charge (derived from PaymentIntent.purpose) */
+  chargeType: SubscriptionPaymentRecordChargeTypeChoices;
   createdAt: Scalars['DateTime']['output'];
-  dnsRecordsToAdd?: Maybe<Array<Maybe<DnsRecordType>>>;
-  dnsRecordsToRemove?: Maybe<Array<Maybe<DnsRecordType>>>;
-  dnsRecordsToUpdate?: Maybe<Array<Maybe<DnsRecordType>>>;
-  dnsStatus: Scalars['String']['output'];
-  /** Custom domain (e.g., shoppings.com or www.shoppings.com) */
-  domain: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  /** Domain registrar if purchased via platform */
-  registrarName?: Maybe<WorkspaceHostingCustomDomainRegistrarNameChoices>;
-  /** Whether SSL/TLS is enabled for this domain */
-  sslEnabled: Scalars['Boolean']['output'];
-  /** When SSL certificate was provisioned */
-  sslProvisionedAt?: Maybe<Scalars['DateTime']['output']>;
-  status: WorkspaceHostingCustomDomainStatusChoices;
-  tlsStatus: Scalars['String']['output'];
-  /** When domain ownership was verified */
-  verifiedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Payment reference */
+  reference: Scalars['String']['output'];
+}
+
+/** Price breakdown for transparency */
+export interface CheckoutBreakdown {
+  __typename?: 'CheckoutBreakdown';
+  /** Base plan price */
+  basePrice?: Maybe<Scalars['Float']['output']>;
+  /** Currency code (XAF) */
+  currency?: Maybe<Scalars['String']['output']>;
+  /** Discount amount (if intro) */
+  discount?: Maybe<Scalars['Float']['output']>;
+  /** Final amount to charge */
+  finalAmount?: Maybe<Scalars['Float']['output']>;
 }
 
 /**
- * Base custom domain type
- * Used for mutation returns - simple fields only
- */
-export interface CustomDomainType extends Node {
-  __typename?: 'CustomDomainType';
-  createdAt: Scalars['DateTime']['output'];
-  /** Custom domain (e.g., shoppings.com or www.shoppings.com) */
-  domain: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  /** Whether SSL/TLS is enabled for this domain */
-  sslEnabled: Scalars['Boolean']['output'];
-  /** When SSL certificate was provisioned */
-  sslProvisionedAt?: Maybe<Scalars['DateTime']['output']>;
-  status: WorkspaceHostingCustomDomainStatusChoices;
-  /** When domain ownership was verified */
-  verifiedAt?: Maybe<Scalars['DateTime']['output']>;
-}
-
-/** Custom domains usage details */
-export interface CustomDomainsUsageType {
-  __typename?: 'CustomDomainsUsageType';
-  count: Scalars['Int']['output'];
-  limit: Scalars['Int']['output'];
-}
-
-/** DNS record for domain configuration */
-export interface DnsRecordType {
-  __typename?: 'DNSRecordType';
-  action: Scalars['String']['output'];
-  currentValue?: Maybe<Scalars['String']['output']>;
-  name: Scalars['String']['output'];
-  type: Scalars['String']['output'];
-  updateTo?: Maybe<Scalars['String']['output']>;
-}
-
-/**
- * Domain purchase status type for queries
- * Extended type with all tracking fields
- */
-export interface DomainPurchaseStatusType extends Node {
-  __typename?: 'DomainPurchaseStatusType';
-  createdAt: Scalars['DateTime']['output'];
-  /** Domain purchased (e.g., mystore.com) */
-  domainName: Scalars['String']['output'];
-  /** Error message if purchase failed */
-  errorMessage: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  paymentStatus: WorkspaceHostingDomainPurchasePaymentStatusChoices;
-  /** Price charged to customer in FCFA */
-  priceFcfa: Scalars['Decimal']['output'];
-  status: Scalars['String']['output'];
-}
-
-/**
- * Domain purchase type for mutations
- * Simple return type with essential fields
- */
-export interface DomainPurchaseType extends Node {
-  __typename?: 'DomainPurchaseType';
-  createdAt: Scalars['DateTime']['output'];
-  /** Domain purchased (e.g., mystore.com) */
-  domainName: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  paymentStatus: WorkspaceHostingDomainPurchasePaymentStatusChoices;
-  /** Price charged to customer in FCFA */
-  priceFcfa: Scalars['Decimal']['output'];
-}
-
-/**
- * Domain renewal status type for queries
- * Extended type with all tracking fields
- */
-export interface DomainRenewalStatusType extends Node {
-  __typename?: 'DomainRenewalStatusType';
-  createdAt: Scalars['DateTime']['output'];
-  domainName: Scalars['String']['output'];
-  errorMessage: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  /** New expiry date after renewal */
-  newExpiryDate?: Maybe<Scalars['DateTime']['output']>;
-  paymentStatus?: Maybe<Scalars['String']['output']>;
-  /** Domain expiry date before renewal */
-  previousExpiryDate: Scalars['DateTime']['output'];
-  /** Renewal price in FCFA (charged to customer) */
-  renewalPriceFcfa: Scalars['Decimal']['output'];
-  renewalStatus: WorkspaceHostingDomainRenewalRenewalStatusChoices;
-  renewedAt?: Maybe<Scalars['DateTime']['output']>;
-  status: Scalars['String']['output'];
-}
-
-/**
- * Domain renewal type for mutations
- * Simple return type with essential fields
- */
-export interface DomainRenewalType extends Node {
-  __typename?: 'DomainRenewalType';
-  createdAt: Scalars['DateTime']['output'];
-  domainName: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  isCompleted?: Maybe<Scalars['Boolean']['output']>;
-  isFailed?: Maybe<Scalars['Boolean']['output']>;
-  isPendingPayment?: Maybe<Scalars['Boolean']['output']>;
-  /** Renewal price in FCFA (charged to customer) */
-  renewalPriceFcfa: Scalars['Decimal']['output'];
-  renewalStatus: WorkspaceHostingDomainRenewalRenewalStatusChoices;
-}
-
-/** Complete domain search response with pagination */
-export interface DomainSearchResponseType {
-  __typename?: 'DomainSearchResponseType';
-  available: Scalars['Boolean']['output'];
-  hasNextPage: Scalars['Boolean']['output'];
-  page: Scalars['Int']['output'];
-  pageSize: Scalars['Int']['output'];
-  query: Scalars['String']['output'];
-  suggestions: Array<Maybe<DomainSearchResultType>>;
-  total: Scalars['Int']['output'];
-}
-
-/** Domain search result item for buy domain flow */
-export interface DomainSearchResultType {
-  __typename?: 'DomainSearchResultType';
-  available: Scalars['Boolean']['output'];
-  category: Scalars['String']['output'];
-  domain: Scalars['String']['output'];
-  pricePerYear: Scalars['String']['output'];
-  priceUsd: Scalars['Float']['output'];
-}
-
-/**
- * Unified domain type for main domains list
- * Represents both default subdomain and custom domains
- */
-export interface DomainType {
-  __typename?: 'DomainType';
-  addedAt?: Maybe<Scalars['DateTime']['output']>;
-  domain: Scalars['String']['output'];
-  id?: Maybe<Scalars['ID']['output']>;
-  isPrimary: Scalars['Boolean']['output'];
-  managedBy?: Maybe<Scalars['String']['output']>;
-  status: Scalars['String']['output'];
-  subdomainChangesLimit?: Maybe<Scalars['Int']['output']>;
-  subdomainChangesRemaining?: Maybe<Scalars['Int']['output']>;
-  type: Scalars['String']['output'];
-}
-
-/**
- * Hosting environment resource quota tracker
+ * Subscription mutations
  *
- * Workspace-scoped - only accessible to user who owns the hosting environment
- * Tracks resource limits and current usage per subscription tier
- */
-export interface HostingEnvironmentType extends Node {
-  __typename?: 'HostingEnvironmentType';
-  activeSitesCount: Scalars['Int']['output'];
-  bandwidthUsagePercentage?: Maybe<Scalars['Float']['output']>;
-  bandwidthUsedGb: Scalars['Decimal']['output'];
-  /** Hosting entitlements: storage_gb, custom_domain, deployment_allowed */
-  capabilities: Scalars['JSONString']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  gracePeriodEnd?: Maybe<Scalars['DateTime']['output']>;
-  id: Scalars['ID']['output'];
-  isDeploymentAllowed?: Maybe<Scalars['Boolean']['output']>;
-  lastUsageSync?: Maybe<Scalars['DateTime']['output']>;
-  overageCost?: Maybe<OverageCostType>;
-  status: WorkspaceHostingHostingEnvironmentStatusChoices;
-  storageUsagePercentage?: Maybe<Scalars['Float']['output']>;
-  storageUsedGb: Scalars['Decimal']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-  usageHistory?: Maybe<UsageHistoryType>;
-  usageSummary?: Maybe<UsageSummaryType>;
-}
-
-
-/**
- * Hosting environment resource quota tracker
- *
- * Workspace-scoped - only accessible to user who owns the hosting environment
- * Tracks resource limits and current usage per subscription tier
- */
-export interface HostingEnvironmentTypeUsageHistoryArgs {
-  days?: InputMaybe<Scalars['Int']['input']>;
-}
-
-/**
- * Hosting management mutations (all require authentication + workspace)
- *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
+ * Platform-level mutations (auth required, no workspace):
+ * - prepareSubscriptionCheckout: Get authoritative pricing for checkout
  */
 export interface Mutation {
   __typename?: 'Mutation';
   /**
-   * Change workspace subdomain (e.g., mystore.huzilerz.com)
-   *
-   * Free for all tiers - uses SubdomainService
-   * Atomic update across WorkspaceInfrastructure and DeployedSite
-   * Tracks subdomain history and enforces change limits (2 changes max)
-   */
-  changeSubdomain?: Maybe<ChangeSubdomain>;
-  /**
-   * Connect externally-owned custom domain
-   *
-   * User must configure DNS records externally
-   * System verifies DNS and provisions SSL (Shopify 2-step flow)
-   */
-  connectCustomDomain?: Maybe<ConnectCustomDomain>;
-  /**
-   * Initiate domain purchase (Cameroon mobile money flow)
-   *
-   * Creates DomainPurchase record → User pays via MTN/Orange → Webhook completes purchase
-   * Uses DomainPurchaseService.initiate_purchase()
-   */
-  purchaseDomain?: Maybe<PurchaseDomain>;
-  /**
-   * Initiate domain renewal (Cameroon mobile money flow)
-   *
-   * Creates DomainRenewal record → User pays via MTN/Orange → Webhook completes renewal
-   * Uses DomainRenewalService.initiate_renewal()
-   */
-  renewDomain?: Maybe<RenewDomain>;
-  /**
-   * Set or update storefront password protection
-   *
-   * Shopify pattern: "Infrastructure live, business not live"
-   * Allows merchants to lock their storefront during development.
-   *
-   * Args:
-   *     workspace_id: ID of workspace
-   *     password: Plain text password (will be hashed)
-   *              Set to None or empty string to disable protection
-   *
-   * Returns:
-   *     success: Boolean
-   *     message: Success/error message
-   *     password_enabled: Whether password protection is now active
+   * Prepare renewal checkout - Returns AUTHORITATIVE PRICING for current plan
    *
    * Security:
-   *     - Password is hashed using Django's PBKDF2 SHA256
-   *     - Never stored in plain text
-   *     - Requires workspace ownership (validated by middleware)
-   *
-   * Examples:
-   *     # Enable password protection
-   *     mutation {
-   *       setStorefrontPassword(
-   *         workspaceId: "uuid",
-   *         password: "my-secret-password"
-   *       ) {
-   *         success
-   *         message
-   *         passwordEnabled
-   *       }
-   *     }
-   *
-   *     # Disable password protection
-   *     mutation {
-   *       setStorefrontPassword(
-   *         workspaceId: "uuid",
-   *         password: ""
-   *       ) {
-   *         success
-   *         message
-   *         passwordEnabled
-   *       }
-   *     }
+   * - Verifies user has active subscription
+   * - Validates renewal window (5 days)
+   * - Returns price of CURRENT plan (no user input needed)
    */
-  setStorefrontPassword?: Maybe<SetStorefrontPassword>;
+  prepareRenewalCheckout?: Maybe<PrepareRenewalCheckout>;
   /**
-   * Update SEO settings for a deployed storefront
+   * Prepare subscription checkout - Returns AUTHORITATIVE PRICING
    *
-   * Allows merchants to optimize their store for search engines and social sharing.
-   * Fields are validated against Google's best practices:
-   * - Title: Max 60 chars (Google truncates at ~60)
-   * - Description: Max 160 chars (Google truncates at ~160)
-   * - Keywords: Optional (less important for modern SEO)
+   * SECURITY BOUNDARY: This mutation re-derives price from source of truth
+   * Frontend passes INTENT only, backend computes final price
    *
-   * Args:
-   *     workspace_id: ID of workspace
-   *     seo_title: Page title for search results (max 60 chars recommended)
-   *     seo_description: Meta description for search snippets (max 160 chars recommended)
-   *     seo_keywords: Comma-separated keywords (optional)
-   *     seo_image_url: Open Graph image URL for social sharing
+   * Pattern: Shopify/Stripe checkout preparation
    *
-   * Returns:
-   *     success: Boolean
-   *     message: Success/error message
-   *     warnings: List of SEO warnings (e.g., "title too long")
-   *     seo_settings: Updated SEO settings object
-   *
-   * Examples:
-   *     # Update all SEO fields
-   *     mutation {
-   *       updateStorefrontSEO(
-   *         workspaceId: "uuid",
-   *         seoTitle: "My Amazing Store - Quality Products",
-   *         seoDescription: "Shop our curated collection of quality products at amazing prices. Free shipping on orders over $50.",
-   *         seoKeywords: "online store, quality products, free shipping",
-   *         seoImageUrl: "https://cdn.huzilerz.com/my-store/og-image.jpg"
-   *       ) {
-   *         success
-   *         message
-   *         warnings
-   *         seoSettings {
-   *           title
-   *           description
-   *           keywords
-   *           imageUrl
-   *         }
-   *       }
-   *     }
-   *
-   *     # Update only title and description
-   *     mutation {
-   *       updateStorefrontSEO(
-   *         workspaceId: "uuid",
-   *         seoTitle: "Best Shoes Online",
-   *         seoDescription: "Find your perfect pair from our collection of premium footwear."
-   *       ) {
-   *         success
-   *         message
-   *       }
-   *     }
+   * Flow:
+   * 1. Frontend: User selects plan → passes tier/cycle/requested_mode
+   * 2. Backend: Validates eligibility, resolves final pricing_mode, computes amount
+   * 3. Frontend: Displays returned amount (authoritative)
+   * 4. Payment: Creates PaymentIntent with backend-computed amount
    */
-  updateStorefrontSeo?: Maybe<UpdateStorefrontSeo>;
-  /**
-   * Manually trigger domain verification
-   *
-   * Use case: User configured DNS and wants immediate verification
-   * (instead of waiting for 15-min auto-verification Celery task)
-   */
-  verifyCustomDomain?: Maybe<VerifyCustomDomain>;
+  prepareSubscriptionCheckout?: Maybe<PrepareSubscriptionCheckout>;
 }
 
 
 /**
- * Hosting management mutations (all require authentication + workspace)
+ * Subscription mutations
  *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
+ * Platform-level mutations (auth required, no workspace):
+ * - prepareSubscriptionCheckout: Get authoritative pricing for checkout
  */
-export interface MutationChangeSubdomainArgs {
-  input: ChangeSubdomainInput;
-}
-
-
-/**
- * Hosting management mutations (all require authentication + workspace)
- *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
- */
-export interface MutationConnectCustomDomainArgs {
-  input: ConnectCustomDomainInput;
-}
-
-
-/**
- * Hosting management mutations (all require authentication + workspace)
- *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
- */
-export interface MutationPurchaseDomainArgs {
-  input: PurchaseDomainInput;
-}
-
-
-/**
- * Hosting management mutations (all require authentication + workspace)
- *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
- */
-export interface MutationRenewDomainArgs {
-  input: RenewDomainInput;
-}
-
-
-/**
- * Hosting management mutations (all require authentication + workspace)
- *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
- */
-export interface MutationSetStorefrontPasswordArgs {
-  input: SetStorefrontPasswordInput;
-}
-
-
-/**
- * Hosting management mutations (all require authentication + workspace)
- *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
- */
-export interface MutationUpdateStorefrontSeoArgs {
-  input: UpdateStorefrontSeoInput;
-}
-
-
-/**
- * Hosting management mutations (all require authentication + workspace)
- *
- * Domain Management:
- * - changeSubdomain: Change workspace subdomain
- * - connectCustomDomain: Connect externally-owned domain
- * - verifyCustomDomain: Manually trigger domain verification
- * - purchaseDomain: Initiate domain purchase (mobile money flow)
- * - renewDomain: Initiate domain renewal (mobile money flow)
- *
- * Storefront Management (Concern #2):
- * - setStorefrontPassword: Enable/disable/change storefront password protection
- *
- * SEO Management (Phase 4):
- * - updateStorefrontSEO: Update SEO meta tags (title, description, keywords, image)
- */
-export interface MutationVerifyCustomDomainArgs {
-  domainId: Scalars['ID']['input'];
+export interface MutationPrepareSubscriptionCheckoutArgs {
+  checkoutData: PrepareCheckoutInput;
 }
 
 /** An object with an ID */
@@ -609,739 +120,408 @@ export interface Node {
   id: Scalars['ID']['output'];
 }
 
-/** Overage cost calculation for billing */
-export interface OverageCostType {
-  __typename?: 'OverageCostType';
-  bandwidthOverageGb: Scalars['Float']['output'];
-  storageOverageGb: Scalars['Float']['output'];
-  totalOverageUsd: Scalars['Float']['output'];
+/**
+ * Badge display for plan cards (e.g., "Most popular", "Best value")
+ * Loaded from plans_showcase.yaml
+ */
+export interface PlanBadgeType {
+  __typename?: 'PlanBadgeType';
+  text?: Maybe<Scalars['String']['output']>;
+  tone?: Maybe<Scalars['String']['output']>;
 }
 
 /**
- * Initiate domain purchase (Cameroon mobile money flow)
- *
- * Creates DomainPurchase record → User pays via MTN/Orange → Webhook completes purchase
- * Uses DomainPurchaseService.initiate_purchase()
+ * Call-to-action button text configuration
+ * Changes based on whether it's the current plan
  */
-export interface PurchaseDomain {
-  __typename?: 'PurchaseDomain';
+export interface PlanCtaType {
+  __typename?: 'PlanCTAType';
+  currentPlan?: Maybe<Scalars['String']['output']>;
+  default?: Maybe<Scalars['String']['output']>;
+}
+
+/**
+ * Plan capabilities/features from YAML
+ * Matches plans.yaml structure exactly
+ */
+export interface PlanCapabilitiesType {
+  __typename?: 'PlanCapabilitiesType';
+  analytics?: Maybe<Scalars['String']['output']>;
+  apiAccess?: Maybe<Scalars['String']['output']>;
+  automation?: Maybe<Scalars['String']['output']>;
+  customDomain?: Maybe<Scalars['Boolean']['output']>;
+  dedicatedSupport?: Maybe<Scalars['Boolean']['output']>;
+  deploymentAllowed?: Maybe<Scalars['Boolean']['output']>;
+  paymentProcessing?: Maybe<Scalars['Boolean']['output']>;
+  productLimit?: Maybe<Scalars['Int']['output']>;
+  staffLimit?: Maybe<Scalars['Int']['output']>;
+  storageGb?: Maybe<Scalars['Float']['output']>;
+  themeLibraryLimit?: Maybe<Scalars['Int']['output']>;
+  workspaceLimit?: Maybe<Scalars['Int']['output']>;
+}
+
+/**
+ * Pricing display configuration for plan cards
+ * Controls how pricing is shown (intro, standard, starting_at, free)
+ */
+export interface PlanPricingDisplayType {
+  __typename?: 'PlanPricingDisplayType';
+  hasIntroDiscount?: Maybe<Scalars['Boolean']['output']>;
+  introLabel?: Maybe<Scalars['String']['output']>;
+  introSuffix?: Maybe<Scalars['String']['output']>;
+  mode?: Maybe<Scalars['String']['output']>;
+  startingLabel?: Maybe<Scalars['String']['output']>;
+  supportsYearlyBilling?: Maybe<Scalars['Boolean']['output']>;
+}
+
+/**
+ * Complete showcase/presentation configuration for a plan
+ * Separates UI concerns from pricing/capability data
+ * Based on Shopify pricing page pattern
+ */
+export interface PlanShowcaseType {
+  __typename?: 'PlanShowcaseType';
+  badge?: Maybe<PlanBadgeType>;
+  cta?: Maybe<PlanCtaType>;
+  highlightedFeatures?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  nameOverride?: Maybe<Scalars['String']['output']>;
+  order?: Maybe<Scalars['Int']['output']>;
+  pricingDisplay?: Maybe<PlanPricingDisplayType>;
+  tagline?: Maybe<Scalars['String']['output']>;
+}
+
+/**
+ * Public plan type for plan listing/browsing
+ *
+ * Contains pricing and basic info
+ * Features loaded dynamically from YAML
+ */
+export interface PlanType extends Node {
+  __typename?: 'PlanType';
+  capabilities?: Maybe<PlanCapabilitiesType>;
+  createdAt: Scalars['DateTime']['output'];
+  /** Plan description for pricing page */
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  introDurationDays?: Maybe<Scalars['Int']['output']>;
+  introPrice?: Maybe<Scalars['Float']['output']>;
+  isActive: Scalars['Boolean']['output'];
+  isFree?: Maybe<Scalars['Boolean']['output']>;
+  isPaid?: Maybe<Scalars['Boolean']['output']>;
+  name: Scalars['String']['output'];
+  regularPriceMonthly?: Maybe<Scalars['Float']['output']>;
+  regularPriceYearly?: Maybe<Scalars['Float']['output']>;
+  showcase?: Maybe<PlanShowcaseType>;
+  targetMarketDescription?: Maybe<Scalars['String']['output']>;
+  tier: SubscriptionSubscriptionPlanTierChoices;
+  updatedAt: Scalars['DateTime']['output'];
+}
+
+/**
+ * Input for checkout preparation
+ * Represents USER INTENT only (not authoritative pricing)
+ */
+export interface PrepareCheckoutInput {
+  /** Billing cycle (monthly, yearly) */
+  cycle: Scalars['String']['input'];
+  /** Requested pricing mode (intro, regular) */
+  requestedMode: Scalars['String']['input'];
+  /** Plan tier (beginning, pro, enterprise) */
+  tier: Scalars['String']['input'];
+}
+
+/**
+ * Prepare renewal checkout - Returns AUTHORITATIVE PRICING for current plan
+ *
+ * Security:
+ * - Verifies user has active subscription
+ * - Validates renewal window (5 days)
+ * - Returns price of CURRENT plan (no user input needed)
+ */
+export interface PrepareRenewalCheckout {
+  __typename?: 'PrepareRenewalCheckout';
+  /** Authoritative renewal amount */
+  amount?: Maybe<Scalars['Float']['output']>;
+  /** Price breakdown */
+  breakdown?: Maybe<CheckoutBreakdown>;
+  /** Currency code */
+  currency?: Maybe<Scalars['String']['output']>;
+  /** Billing cycle duration */
+  cycleDurationDays?: Maybe<Scalars['Int']['output']>;
+  /** Error message if any */
   error?: Maybe<Scalars['String']['output']>;
+  /** Error code */
+  errorCode?: Maybe<Scalars['String']['output']>;
+  /** User-friendly message */
   message?: Maybe<Scalars['String']['output']>;
-  paymentInstructions?: Maybe<Scalars['String']['output']>;
-  purchase?: Maybe<DomainPurchaseType>;
+  /** Plan display name */
+  planName?: Maybe<Scalars['String']['output']>;
   success?: Maybe<Scalars['Boolean']['output']>;
 }
 
 /**
- * Input for purchasing a domain
+ * Prepare subscription checkout - Returns AUTHORITATIVE PRICING
  *
- * Used by purchaseDomain mutation
- * Requires contact info for WHOIS registration (ICANN requirement)
+ * SECURITY BOUNDARY: This mutation re-derives price from source of truth
+ * Frontend passes INTENT only, backend computes final price
+ *
+ * Pattern: Shopify/Stripe checkout preparation
+ *
+ * Flow:
+ * 1. Frontend: User selects plan → passes tier/cycle/requested_mode
+ * 2. Backend: Validates eligibility, resolves final pricing_mode, computes amount
+ * 3. Frontend: Displays returned amount (authoritative)
+ * 4. Payment: Creates PaymentIntent with backend-computed amount
  */
-export interface PurchaseDomainInput {
-  /** Street address */
-  address: Scalars['String']['input'];
-  /** City */
-  city: Scalars['String']['input'];
-  /** Country code (ISO 2-letter, default: CM for Cameroon) */
-  country?: InputMaybe<Scalars['String']['input']>;
-  /** Domain to purchase */
-  domain: Scalars['String']['input'];
-  /** Phone number (e.g., '+237670000000') */
-  phone: Scalars['String']['input'];
-  /** Postal/ZIP code */
-  postalCode: Scalars['String']['input'];
-  /** Registration period (1-10 years) */
-  registrationPeriodYears?: InputMaybe<Scalars['Int']['input']>;
-  /** State/Region */
-  state: Scalars['String']['input'];
-  /** Workspace to associate domain with */
-  workspaceId: Scalars['ID']['input'];
+export interface PrepareSubscriptionCheckout {
+  __typename?: 'PrepareSubscriptionCheckout';
+  /** Authoritative amount to charge */
+  amount?: Maybe<Scalars['Float']['output']>;
+  /** Price breakdown */
+  breakdown?: Maybe<CheckoutBreakdown>;
+  /** Currency code */
+  currency?: Maybe<Scalars['String']['output']>;
+  /** Billing cycle duration */
+  cycleDurationDays?: Maybe<Scalars['Int']['output']>;
+  /** Resolved pricing mode (intro or regular) */
+  effectiveMode?: Maybe<Scalars['String']['output']>;
+  /** Error message if any */
+  error?: Maybe<Scalars['String']['output']>;
+  /** Error code for programmatic handling */
+  errorCode?: Maybe<Scalars['String']['output']>;
+  /** Intro period duration (if applicable) */
+  introDurationDays?: Maybe<Scalars['Int']['output']>;
+  /** User-friendly message */
+  message?: Maybe<Scalars['String']['output']>;
+  /** Plan display name */
+  planName?: Maybe<Scalars['String']['output']>;
+  success?: Maybe<Scalars['Boolean']['output']>;
 }
 
 /**
- * Hosting management queries (all require authentication)
+ * Combined subscription queries
  *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
+ * Public queries (no auth):
+ * - plans: Browse available subscription plans
+ * - planDetails: View single plan details
+ * - trialPricing: Get trial pricing info
  *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
+ * Authenticated queries (requires workspace):
+ * - billingOverview: Billing page data (upcoming bill + past bills)
+ * - paymentRecords: Charges table (payment history)
+ * - billingProfile: Billing profile page (payment methods + user info)
+ * - currentPlan: Current subscription/plan details
+ * - myTrial: Trial status (eligibility check)
  */
 export interface Query {
   __typename?: 'Query';
-  /** Check if user can deploy new site based on limits */
-  checkDeploymentEligibility?: Maybe<Scalars['JSONString']['output']>;
-  /** Check if user can upload file based on storage limits */
-  checkUploadEligibility?: Maybe<Scalars['JSONString']['output']>;
-  /** Get custom domain with DNS/TLS status (for polling) */
-  customDomain?: Maybe<CustomDomainDetailType>;
-  /** Get all domains (default subdomain + custom domains) */
-  domains?: Maybe<Array<Maybe<DomainType>>>;
-  /** Get current user's hosting environment and resource quotas */
-  myHostingEnvironment?: Maybe<HostingEnvironmentType>;
-  /** Calculate current overage costs for billing */
-  myOverageCost?: Maybe<OverageCostType>;
-  /** Get usage history for analytics charts (default 30 days) */
-  myUsageHistory?: Maybe<UsageHistoryType>;
-  /** Get detailed usage logs (for debugging/support) */
-  myUsageLogs?: Maybe<Array<Maybe<ResourceUsageLogType>>>;
-  /** Get current usage summary with percentages (for dashboard) */
-  myUsageSummary?: Maybe<UsageSummaryType>;
-  /** Track domain purchase progress */
-  purchaseStatus?: Maybe<DomainPurchaseStatusType>;
-  /** Track domain renewal progress */
-  renewalStatus?: Maybe<DomainRenewalStatusType>;
-  /** Search domains with pagination */
-  searchDomains?: Maybe<DomainSearchResponseType>;
-  /** Get storefront preview settings (password, title, domain) */
-  storefrontSettings?: Maybe<StorefrontSettingsType>;
-  /** Check if subdomain is available */
-  validateSubdomain?: Maybe<SubdomainValidationType>;
+  /** Get billing overview for main billing page (upcoming bill + past bills) */
+  billingOverview?: Maybe<BillingOverviewType>;
+  /** Get billing profile (payment methods, currency, address) */
+  billingProfile?: Maybe<BillingProfileType>;
+  /** Get charges for charges table page */
+  charges?: Maybe<Array<Maybe<ChargesType>>>;
+  /** Get user's current subscription/plan */
+  currentPlan?: Maybe<SubscriptionType>;
+  /** Check if current user is eligible for intro pricing (returns null if not authenticated) */
+  isIntroPricingEligible?: Maybe<Scalars['Boolean']['output']>;
+  /** Get past bills with filters and sorting */
+  pastBills?: Maybe<Array<Maybe<SubscriptionHistoryType>>>;
+  /** Get detailed plan information by tier (PUBLIC) */
+  planDetails?: Maybe<PlanType>;
+  /** Browse all available subscription plans (PUBLIC) */
+  plans?: Maybe<Array<Maybe<PlanType>>>;
 }
 
 
 /**
- * Hosting management queries (all require authentication)
+ * Combined subscription queries
  *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
+ * Public queries (no auth):
+ * - plans: Browse available subscription plans
+ * - planDetails: View single plan details
+ * - trialPricing: Get trial pricing info
  *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
+ * Authenticated queries (requires workspace):
+ * - billingOverview: Billing page data (upcoming bill + past bills)
+ * - paymentRecords: Charges table (payment history)
+ * - billingProfile: Billing profile page (payment methods + user info)
+ * - currentPlan: Current subscription/plan details
+ * - myTrial: Trial status (eligibility check)
  */
-export interface QueryCheckUploadEligibilityArgs {
-  fileSizeBytes: Scalars['Int']['input'];
+export interface QueryChargesArgs {
+  chargeType?: InputMaybe<Scalars['String']['input']>;
+  dateFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  dateTo?: InputMaybe<Scalars['DateTime']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
 }
 
 
 /**
- * Hosting management queries (all require authentication)
+ * Combined subscription queries
  *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
+ * Public queries (no auth):
+ * - plans: Browse available subscription plans
+ * - planDetails: View single plan details
+ * - trialPricing: Get trial pricing info
  *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
+ * Authenticated queries (requires workspace):
+ * - billingOverview: Billing page data (upcoming bill + past bills)
+ * - paymentRecords: Charges table (payment history)
+ * - billingProfile: Billing profile page (payment methods + user info)
+ * - currentPlan: Current subscription/plan details
+ * - myTrial: Trial status (eligibility check)
  */
-export interface QueryCustomDomainArgs {
-  domainId: Scalars['ID']['input'];
+export interface QueryPastBillsArgs {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  sortOrder?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
 }
 
 
 /**
- * Hosting management queries (all require authentication)
+ * Combined subscription queries
  *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
+ * Public queries (no auth):
+ * - plans: Browse available subscription plans
+ * - planDetails: View single plan details
+ * - trialPricing: Get trial pricing info
  *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
+ * Authenticated queries (requires workspace):
+ * - billingOverview: Billing page data (upcoming bill + past bills)
+ * - paymentRecords: Charges table (payment history)
+ * - billingProfile: Billing profile page (payment methods + user info)
+ * - currentPlan: Current subscription/plan details
+ * - myTrial: Trial status (eligibility check)
  */
-export interface QueryDomainsArgs {
-  workspaceId: Scalars['ID']['input'];
-}
-
-
-/**
- * Hosting management queries (all require authentication)
- *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
- *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
- */
-export interface QueryMyUsageHistoryArgs {
-  days?: InputMaybe<Scalars['Int']['input']>;
-}
-
-
-/**
- * Hosting management queries (all require authentication)
- *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
- *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
- */
-export interface QueryMyUsageLogsArgs {
-  days?: InputMaybe<Scalars['Int']['input']>;
-}
-
-
-/**
- * Hosting management queries (all require authentication)
- *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
- *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
- */
-export interface QueryPurchaseStatusArgs {
-  purchaseId: Scalars['ID']['input'];
-}
-
-
-/**
- * Hosting management queries (all require authentication)
- *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
- *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
- */
-export interface QueryRenewalStatusArgs {
-  renewalId: Scalars['ID']['input'];
-}
-
-
-/**
- * Hosting management queries (all require authentication)
- *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
- *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
- */
-export interface QuerySearchDomainsArgs {
-  page?: InputMaybe<Scalars['Int']['input']>;
-  pageSize?: InputMaybe<Scalars['Int']['input']>;
-  query: Scalars['String']['input'];
-}
-
-
-/**
- * Hosting management queries (all require authentication)
- *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
- *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
- */
-export interface QueryStorefrontSettingsArgs {
-  workspaceId: Scalars['ID']['input'];
-}
-
-
-/**
- * Hosting management queries (all require authentication)
- *
- * Domain Management (Clean - matches UI flows):
- * - domains: Get all domains for workspace (default + custom)
- * - validateSubdomain: Check subdomain availability (for change modal)
- * - customDomain: Get domain detail with DNS/TLS status (for polling)
- * - searchDomains: Search domains with pagination (for buy flow)
- * - purchaseStatus: Track purchase progress
- * - renewalStatus: Track renewal progress
- *
- * Storefront Settings:
- * - storefrontSettings: Get preview data (password, title, domain) for UI forms
- *
- * Resource Usage:
- * - myHostingEnvironment: Get resource quotas and limits
- * - myUsageSummary: Get current usage with percentages
- * - myUsageHistory: Get usage history for charts (30 days)
- * - myOverageCost: Calculate overage costs for billing
- * - myUsageLogs: Get detailed usage logs
- * - checkUploadEligibility: Pre-flight check for file uploads
- * - checkDeploymentEligibility: Pre-flight check for deployments
- */
-export interface QueryValidateSubdomainArgs {
-  subdomain: Scalars['String']['input'];
+export interface QueryPlanDetailsArgs {
+  tier: Scalars['String']['input'];
 }
 
 /**
- * Initiate domain renewal (Cameroon mobile money flow)
- *
- * Creates DomainRenewal record → User pays via MTN/Orange → Webhook completes renewal
- * Uses DomainRenewalService.initiate_renewal()
+ * Subscription history type for past bills
+ * Matches Shopify billing page past bills section
  */
-export interface RenewDomain {
-  __typename?: 'RenewDomain';
-  error?: Maybe<Scalars['String']['output']>;
-  message?: Maybe<Scalars['String']['output']>;
-  paymentInstructions?: Maybe<Scalars['String']['output']>;
-  renewal?: Maybe<DomainRenewalType>;
-  success?: Maybe<Scalars['Boolean']['output']>;
+export interface SubscriptionHistoryType {
+  __typename?: 'SubscriptionHistoryType';
+  action: SubscriptionSubscriptionHistoryActionChoices;
+  amountPaid?: Maybe<Scalars['Decimal']['output']>;
+  /** Human-readable bill number (e.g., #452157574) */
+  billNumber: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  /** Payment status of this bill */
+  status: SubscriptionSubscriptionHistoryStatusChoices;
 }
 
-/**
- * Input for renewing a domain
- *
- * Used by renewDomain mutation
- */
-export interface RenewDomainInput {
-  /** CustomDomain ID to renew */
-  domainId: Scalars['ID']['input'];
-  /** Renewal period (1-10 years) */
-  renewalPeriodYears?: InputMaybe<Scalars['Int']['input']>;
+/** An enumeration. */
+export enum SubscriptionPaymentRecordChargeTypeChoices {
+  /** Add-on */
+  Addon = 'ADDON',
+  /** Checkout */
+  Checkout = 'CHECKOUT',
+  /** Domain */
+  Domain = 'DOMAIN',
+  /** Domain Renewal */
+  DomainRenewal = 'DOMAIN_RENEWAL',
+  /** Other */
+  Other = 'OTHER',
+  /** Subscription */
+  Subscription = 'SUBSCRIPTION',
+  /** Subscription Renewal */
+  SubscriptionRenewal = 'SUBSCRIPTION_RENEWAL',
+  /** Subscription Upgrade */
+  SubscriptionUpgrade = 'SUBSCRIPTION_UPGRADE',
+  /** Theme */
+  Theme = 'THEME'
 }
 
-/**
- * Resource usage log entry
- *
- * Historical usage data for analytics and billing
- */
-export interface ResourceUsageLogType extends Node {
-  __typename?: 'ResourceUsageLogType';
-  avgResponseTimeMs: Scalars['Int']['output'];
-  bandwidthUsedGb: Scalars['Decimal']['output'];
-  errorRatePercentage: Scalars['Decimal']['output'];
-  estimatedCostUsd: Scalars['Decimal']['output'];
-  hostingEnvironment: HostingEnvironmentType;
+/** Plan type for authenticated subscription context */
+export interface SubscriptionPlanType {
+  __typename?: 'SubscriptionPlanType';
+  /** Plan description for pricing page */
+  description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  recordedAt: Scalars['DateTime']['output'];
-  requestsCount: Scalars['BigInt']['output'];
-  storageUsedGb: Scalars['Decimal']['output'];
-}
-
-/**
- * SEO settings for a deployed storefront
- *
- * Contains all SEO metadata used for:
- * - Search engine optimization (Google, Bing, etc.)
- * - Social media sharing (Facebook, Twitter, WhatsApp)
- * - Open Graph previews
- */
-export interface SeoSettingsType {
-  __typename?: 'SEOSettingsType';
-  /** Meta description for search snippets (max 160 chars recommended) */
-  description?: Maybe<Scalars['String']['output']>;
-  /** Open Graph image URL for social sharing previews */
-  imageUrl?: Maybe<Scalars['String']['output']>;
-  /** Comma-separated keywords (optional, less important for modern SEO) */
-  keywords?: Maybe<Scalars['String']['output']>;
-  /** SEO title for search results (max 60 chars recommended) */
-  title?: Maybe<Scalars['String']['output']>;
-}
-
-/**
- * Set or update storefront password protection
- *
- * Shopify pattern: "Infrastructure live, business not live"
- * Allows merchants to lock their storefront during development.
- *
- * Args:
- *     workspace_id: ID of workspace
- *     password: Plain text password (will be hashed)
- *              Set to None or empty string to disable protection
- *
- * Returns:
- *     success: Boolean
- *     message: Success/error message
- *     password_enabled: Whether password protection is now active
- *
- * Security:
- *     - Password is hashed using Django's PBKDF2 SHA256
- *     - Never stored in plain text
- *     - Requires workspace ownership (validated by middleware)
- *
- * Examples:
- *     # Enable password protection
- *     mutation {
- *       setStorefrontPassword(
- *         workspaceId: "uuid",
- *         password: "my-secret-password"
- *       ) {
- *         success
- *         message
- *         passwordEnabled
- *       }
- *     }
- *
- *     # Disable password protection
- *     mutation {
- *       setStorefrontPassword(
- *         workspaceId: "uuid",
- *         password: ""
- *       ) {
- *         success
- *         message
- *         passwordEnabled
- *       }
- *     }
- */
-export interface SetStorefrontPassword {
-  __typename?: 'SetStorefrontPassword';
-  message?: Maybe<Scalars['String']['output']>;
-  passwordEnabled?: Maybe<Scalars['Boolean']['output']>;
-  success?: Maybe<Scalars['Boolean']['output']>;
-}
-
-/**
- * Input for setting/updating storefront password
- *
- * Used by setStorefrontPassword mutation
- */
-export interface SetStorefrontPasswordInput {
-  password?: InputMaybe<Scalars['String']['input']>;
-  workspaceId: Scalars['ID']['input'];
-}
-
-/** Sites usage details */
-export interface SitesUsageType {
-  __typename?: 'SitesUsageType';
-  activeCount: Scalars['Int']['output'];
-  limit: Scalars['Int']['output'];
-  percentage: Scalars['Float']['output'];
-  remaining: Scalars['Int']['output'];
-}
-
-/** Storage usage details */
-export interface StorageUsageType {
-  __typename?: 'StorageUsageType';
-  limitGb: Scalars['Float']['output'];
-  percentage: Scalars['Float']['output'];
-  remainingGb: Scalars['Float']['output'];
-  usedGb: Scalars['Float']['output'];
-}
-
-/** Storefront preview settings - password, title, domain only */
-export interface StorefrontSettingsType {
-  __typename?: 'StorefrontSettingsType';
-  assignedDomain: Scalars['String']['output'];
-  password?: Maybe<Scalars['String']['output']>;
-  seoTitle: Scalars['String']['output'];
-}
-
-/** Subdomain availability validation result */
-export interface SubdomainValidationType {
-  __typename?: 'SubdomainValidationType';
-  available: Scalars['Boolean']['output'];
-  errors?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  fullDomain?: Maybe<Scalars['String']['output']>;
-  subdomain?: Maybe<Scalars['String']['output']>;
-}
-
-/**
- * Update SEO settings for a deployed storefront
- *
- * Allows merchants to optimize their store for search engines and social sharing.
- * Fields are validated against Google's best practices:
- * - Title: Max 60 chars (Google truncates at ~60)
- * - Description: Max 160 chars (Google truncates at ~160)
- * - Keywords: Optional (less important for modern SEO)
- *
- * Args:
- *     workspace_id: ID of workspace
- *     seo_title: Page title for search results (max 60 chars recommended)
- *     seo_description: Meta description for search snippets (max 160 chars recommended)
- *     seo_keywords: Comma-separated keywords (optional)
- *     seo_image_url: Open Graph image URL for social sharing
- *
- * Returns:
- *     success: Boolean
- *     message: Success/error message
- *     warnings: List of SEO warnings (e.g., "title too long")
- *     seo_settings: Updated SEO settings object
- *
- * Examples:
- *     # Update all SEO fields
- *     mutation {
- *       updateStorefrontSEO(
- *         workspaceId: "uuid",
- *         seoTitle: "My Amazing Store - Quality Products",
- *         seoDescription: "Shop our curated collection of quality products at amazing prices. Free shipping on orders over $50.",
- *         seoKeywords: "online store, quality products, free shipping",
- *         seoImageUrl: "https://cdn.huzilerz.com/my-store/og-image.jpg"
- *       ) {
- *         success
- *         message
- *         warnings
- *         seoSettings {
- *           title
- *           description
- *           keywords
- *           imageUrl
- *         }
- *       }
- *     }
- *
- *     # Update only title and description
- *     mutation {
- *       updateStorefrontSEO(
- *         workspaceId: "uuid",
- *         seoTitle: "Best Shoes Online",
- *         seoDescription: "Find your perfect pair from our collection of premium footwear."
- *       ) {
- *         success
- *         message
- *       }
- *     }
- */
-export interface UpdateStorefrontSeo {
-  __typename?: 'UpdateStorefrontSEO';
-  message?: Maybe<Scalars['String']['output']>;
-  seoSettings?: Maybe<SeoSettingsType>;
-  success?: Maybe<Scalars['Boolean']['output']>;
-  warnings?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-}
-
-/**
- * Input for updating storefront SEO settings
- *
- * Used by updateStorefrontSEO mutation
- */
-export interface UpdateStorefrontSeoInput {
-  seoDescription?: InputMaybe<Scalars['String']['input']>;
-  seoImageUrl?: InputMaybe<Scalars['String']['input']>;
-  seoKeywords?: InputMaybe<Scalars['String']['input']>;
-  seoTitle?: InputMaybe<Scalars['String']['input']>;
-  workspaceId: Scalars['ID']['input'];
-}
-
-/** Single data point in usage history */
-export interface UsageDataPointType {
-  __typename?: 'UsageDataPointType';
-  avgResponseTimeMs?: Maybe<Scalars['Int']['output']>;
-  bandwidthUsedGb: Scalars['Float']['output'];
-  recordedAt: Scalars['DateTime']['output'];
-  requestsCount?: Maybe<Scalars['Int']['output']>;
-  storageUsedGb: Scalars['Float']['output'];
-}
-
-/** Usage history with time series data */
-export interface UsageHistoryType {
-  __typename?: 'UsageHistoryType';
-  currentUsage: UsageSummaryType;
-  dataPoints: Array<Maybe<UsageDataPointType>>;
-  periodDays: Scalars['Int']['output'];
-}
-
-/** Complete usage summary with all resources */
-export interface UsageSummaryType {
-  __typename?: 'UsageSummaryType';
-  bandwidth: BandwidthUsageType;
-  customDomains: CustomDomainsUsageType;
-  deploymentAllowed: Scalars['Boolean']['output'];
-  sites: SitesUsageType;
-  status: Scalars['String']['output'];
-  storage: StorageUsageType;
-}
-
-/**
- * Manually trigger domain verification
- *
- * Use case: User configured DNS and wants immediate verification
- * (instead of waiting for 15-min auto-verification Celery task)
- */
-export interface VerifyCustomDomain {
-  __typename?: 'VerifyCustomDomain';
-  domain?: Maybe<CustomDomainType>;
-  error?: Maybe<Scalars['String']['output']>;
-  message?: Maybe<Scalars['String']['output']>;
-  success?: Maybe<Scalars['Boolean']['output']>;
-  verified?: Maybe<Scalars['Boolean']['output']>;
+  introDurationDays?: Maybe<Scalars['Int']['output']>;
+  introPrice?: Maybe<Scalars['Float']['output']>;
+  isFree?: Maybe<Scalars['Boolean']['output']>;
+  isPaid?: Maybe<Scalars['Boolean']['output']>;
+  name: Scalars['String']['output'];
+  regularPriceMonthly?: Maybe<Scalars['Float']['output']>;
+  regularPriceYearly?: Maybe<Scalars['Float']['output']>;
+  tier: SubscriptionSubscriptionPlanTierChoices;
 }
 
 /** An enumeration. */
-export enum WorkspaceHostingCustomDomainRegistrarNameChoices {
-  /** GoDaddy */
-  Godaddy = 'GODADDY',
-  /** Namecheap */
-  Namecheap = 'NAMECHEAP'
-}
-
-/** An enumeration. */
-export enum WorkspaceHostingCustomDomainStatusChoices {
-  /** Active */
-  Active = 'ACTIVE',
-  /** Verification Failed */
-  Failed = 'FAILED',
-  /** Pending Verification */
-  Pending = 'PENDING',
+export enum SubscriptionSubscriptionHistoryActionChoices {
+  /** Cancelled */
+  Cancelled = 'CANCELLED',
+  /** Converted */
+  Converted = 'CONVERTED',
+  /** Created */
+  Created = 'CREATED',
+  /** Downgraded */
+  Downgraded = 'DOWNGRADED',
+  /** Reactivated */
+  Reactivated = 'REACTIVATED',
+  /** Renewed */
+  Renewed = 'RENEWED',
   /** Suspended */
   Suspended = 'SUSPENDED',
-  /** Verified */
-  Verified = 'VERIFIED'
+  /** Upgraded */
+  Upgraded = 'UPGRADED'
 }
 
 /** An enumeration. */
-export enum WorkspaceHostingDomainPurchasePaymentStatusChoices {
-  /** Completed */
-  Completed = 'COMPLETED',
-  /** Failed */
-  Failed = 'FAILED',
-  /** Pending Payment */
+export enum SubscriptionSubscriptionHistoryStatusChoices {
+  /** Paid */
+  Paid = 'PAID',
+  /** Pending */
   Pending = 'PENDING',
-  /** Processing */
-  Processing = 'PROCESSING',
-  /** Refunded */
-  Refunded = 'REFUNDED'
+  /** Unpaid */
+  Unpaid = 'UNPAID'
 }
 
 /** An enumeration. */
-export enum WorkspaceHostingDomainRenewalRenewalStatusChoices {
-  /** Completed */
-  Completed = 'COMPLETED',
-  /** Expired - Not Renewed */
-  Expired = 'EXPIRED',
-  /** Failed */
-  Failed = 'FAILED',
-  /** Payment Received */
-  PaymentReceived = 'PAYMENT_RECEIVED',
-  /** Pending Payment */
-  PendingPayment = 'PENDING_PAYMENT',
-  /** Processing Renewal */
-  Processing = 'PROCESSING'
+export enum SubscriptionSubscriptionPlanTierChoices {
+  /** Beginning */
+  Beginning = 'BEGINNING',
+  /** Enterprise */
+  Enterprise = 'ENTERPRISE',
+  /** Free */
+  Free = 'FREE',
+  /** Pro */
+  Pro = 'PRO'
 }
 
 /** An enumeration. */
-export enum WorkspaceHostingHostingEnvironmentStatusChoices {
+export enum SubscriptionSubscriptionStatusChoices {
   /** Active */
   Active = 'ACTIVE',
-  /** Error */
-  Error = 'ERROR',
+  /** Cancelled */
+  Cancelled = 'CANCELLED',
+  /** Change Pending */
+  ChangePending = 'CHANGE_PENDING',
+  /** Expired */
+  Expired = 'EXPIRED',
   /** Grace Period */
   GracePeriod = 'GRACE_PERIOD',
-  /** Initializing */
-  Initializing = 'INITIALIZING',
+  /** Pending Payment */
+  PendingPayment = 'PENDING_PAYMENT',
   /** Suspended */
   Suspended = 'SUSPENDED'
+}
+
+/** User's subscription type for current plan page */
+export interface SubscriptionType {
+  __typename?: 'SubscriptionType';
+  billingCycle?: Maybe<Scalars['String']['output']>;
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  introEndsAt?: Maybe<Scalars['DateTime']['output']>;
+  isOnIntroPricing?: Maybe<Scalars['Boolean']['output']>;
+  plan?: Maybe<SubscriptionPlanType>;
+  status: SubscriptionSubscriptionStatusChoices;
 }

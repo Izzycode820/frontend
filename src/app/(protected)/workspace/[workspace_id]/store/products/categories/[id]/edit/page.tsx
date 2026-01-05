@@ -12,6 +12,13 @@ import { UpdateCategoryDocument } from '@/services/graphql/admin-store/mutations
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { toast } from 'sonner';
 
+const stripHtmlTags = (html: string): string => {
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export default function EditCategoryPage() {
   const params = useParams();
   const router = useRouter();
@@ -44,11 +51,13 @@ export default function EditCategoryPage() {
       variables: {
         id: categoryId,
         name: formData.name,
-        description: formData.description || undefined,
-        image: formData.image,
+        description: formData.description ? stripHtmlTags(formData.description) : undefined,
+        featuredMediaId: formData.featuredMediaId,
         isVisible: formData.isVisible,
         isFeatured: formData.isFeatured,
         sortOrder: formData.sortOrder,
+        metaTitle: formData.metaTitle || undefined,
+        metaDescription: formData.metaDescription ? formData.metaDescription : (formData.description ? stripHtmlTags(formData.description) : undefined),
       },
     });
   };
@@ -58,11 +67,13 @@ export default function EditCategoryPage() {
       variables: {
         id: categoryId,
         name: formData.name,
-        description: formData.description || undefined,
-        image: formData.image,
+        description: formData.description ? stripHtmlTags(formData.description) : undefined,
+        featuredMediaId: formData.featuredMediaId,
         isVisible: false,
         isFeatured: formData.isFeatured,
         sortOrder: formData.sortOrder,
+        metaTitle: formData.metaTitle || undefined,
+        metaDescription: formData.metaDescription ? formData.metaDescription : (formData.description ? stripHtmlTags(formData.description) : undefined),
       },
     });
   };
@@ -76,7 +87,7 @@ export default function EditCategoryPage() {
     updateCategory({
       variables: {
         id: categoryId,
-        removeImage: true,
+        removeFeaturedMedia: true,
       },
     });
   };
@@ -120,10 +131,13 @@ export default function EditCategoryPage() {
   const initialData: Partial<CategoryFormData> = {
     name: category.name,
     description: category.description || '',
-    image: undefined, // Will be handled via existingImage prop
+    productIds: [], // Will be populated separately if needed
     isVisible: category.isVisible,
     isFeatured: category.isFeatured,
     sortOrder: category.sortOrder || 0,
+    metaTitle: category.metaTitle || '',
+    metaDescription: category.metaDescription || '',
+    slug: category.slug || '',
   };
 
   return (
@@ -153,11 +167,11 @@ export default function EditCategoryPage() {
             onPreview={handlePreview}
             isEditing={true}
             isLoading={updateLoading}
-            existingImage={category.categoryImage ? {
-              id: category.categoryImage.id || '',
-              url: category.categoryImage.url || '',
-              width: category.categoryImage.width || 0,
-              height: category.categoryImage.height || 0,
+            existingImage={category.featuredMedia ? {
+              id: category.featuredMedia.id || '',
+              url: category.featuredMedia.url || '',
+              width: category.featuredMedia.width || 0,
+              height: category.featuredMedia.height || 0,
             } : undefined}
             onRemoveExistingImage={handleRemoveExistingImage}
           />

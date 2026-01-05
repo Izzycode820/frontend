@@ -9,20 +9,24 @@ import { Skeleton } from '@/components/shadcn-ui/skeleton';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { CheckCircle, AlertCircle, Loader2, Info } from 'lucide-react';
 import { PrepareSubscriptionCheckoutDocument } from '@/services/graphql/subscription/mutations/pricing/__generated__/prepare-checkout.generated';
+import { PrepareRenewalCheckoutDocument } from '@/services/graphql/subscription/mutations/pricing/__generated__/prepare-renewal.generated';
+import { PrepareUpgradeCheckoutDocument } from '@/services/graphql/subscription/mutations/pricing/__generated__/prepare-upgrade.generated';
 import type { SubscriptionTier, BillingCycle, PricingMode } from '@/types/subscription/subscription';
 
 /**
  * Checkout Flow Component - Handles subscription checkout with authoritative pricing
  *
  * Flow (SECURITY BOUNDARY):
- * 1. Reads URL params (?tier=pro&cycle=monthly&mode=intro)
- * 2. Calls backend mutation to get AUTHORITATIVE PRICING
+ * 1. Reads URL params (?tier=pro&cycle=monthly&mode=intro&action=subscribe|renew|upgrade)
+ * 2. Calls backend mutation based on action to get AUTHORITATIVE PRICING
  * 3. Displays backend-computed price
  * 4. PaymentWizard processes payment with authoritative amount
  * 5. Success → Redirect to workspace
  *
- * Pattern: Shopify/Stripe checkout preparation
- * See: c:\S.T.E.V.E\V2\HUZILERZ\ZCHAT\p.md
+ * Actions:
+ * - subscribe: New subscription (PrepareSubscriptionCheckout)
+ * - renew: Renewal of current plan (PrepareRenewalCheckout)
+ * - upgrade: Upgrade to higher tier (PrepareUpgradeCheckout)
  */
 export function CheckoutFlow() {
   const router = useRouter();
@@ -33,34 +37,75 @@ export function CheckoutFlow() {
   const tier = (searchParams?.get('tier') || 'pro') as SubscriptionTier;
   const cycle = (searchParams?.get('cycle') || 'monthly') as BillingCycle;
   const requestedMode = (searchParams?.get('mode') || 'regular') as PricingMode;
+  const action = searchParams?.get('action') || 'subscribe'; // subscribe | renew | upgrade
 
   // Map frontend tier to backend tier (frontend: 'beginner', backend: 'beginning')
   const backendTier = tier === 'beginner' ? 'beginning' : tier;
 
-  // Backend mutation to get AUTHORITATIVE PRICING
-  const [prepareCheckout, { data, loading, error }] = useMutation(PrepareSubscriptionCheckoutDocument);
+  // Determine flow type
+  const isRenewal = action === 'renew' || action === 'reactivate';
+  const isUpgrade = action === 'upgrade';
 
-  // Call mutation on mount (SECURITY BOUNDARY)
+  // MUTATION 1: Standard Checkout (New Subscriptions)
+  const [prepareCheckout, { data: standardData, loading: standardLoading, error: standardError }] = useMutation(PrepareSubscriptionCheckoutDocument);
+
+  // MUTATION 2: Renewal Checkout (Existing Subscriptions)
+  const [prepareRenewal, { data: renewalData, loading: renewalLoading, error: renewalError }] = useMutation(PrepareRenewalCheckoutDocument);
+
+  // MUTATION 3: Upgrade Checkout (Plan Upgrades)
+  const [prepareUpgrade, { data: upgradeData, loading: upgradeLoading, error: upgradeError }] = useMutation(PrepareUpgradeCheckoutDocument);
+
+  // Call appropriate mutation on mount (SECURITY BOUNDARY)
   useEffect(() => {
-    prepareCheckout({
-      variables: {
-        checkoutData: {
-          tier: backendTier,
-          cycle,
-          requestedMode
+    if (isUpgrade) {
+      // For upgrades, get authoritative upgrade pricing
+      prepareUpgrade({
+        variables: {
+          upgradeData: {
+            tier: backendTier,
+            cycle
+          }
         }
-      }
-    }).catch((err) => {
-      console.error('Checkout preparation failed:', err);
-    });
-  }, [backendTier, cycle, requestedMode, prepareCheckout]);
+      }).catch((err) => {
+        console.error('Upgrade preparation failed:', err);
+      });
+    } else if (isRenewal) {
+      // For renewals, get authoritative price for CURRENT plan
+      prepareRenewal().catch((err) => {
+        console.error('Renewal preparation failed:', err);
+      });
+    } else {
+      // For new subscriptions, validate requested plan/tier
+      prepareCheckout({
+        variables: {
+          checkoutData: {
+            tier: backendTier,
+            cycle,
+            requestedMode
+          }
+        }
+      }).catch((err) => {
+        console.error('Checkout preparation failed:', err);
+      });
+    }
+  }, [backendTier, cycle, requestedMode, prepareCheckout, prepareRenewal, prepareUpgrade, isRenewal, isUpgrade]);
 
-  // Extract authoritative data from backend response
-  const checkoutData = data?.prepareSubscriptionCheckout;
-  const effectiveMode = checkoutData?.effectiveMode || 'regular';
-  const authoritativeAmount = checkoutData?.amount || 0;
-  const planName = checkoutData?.planName || 'Pro';
-  const breakdown = checkoutData?.breakdown;
+  // Extract authoritative data (Unified)
+  const standardResult = standardData?.prepareSubscriptionCheckout;
+  const renewalResult = renewalData?.prepareRenewalCheckout;
+  const upgradeResult = upgradeData?.prepareUpgradeCheckout;
+
+  // Active result based on flow type
+  const activeResult = isUpgrade ? upgradeResult : isRenewal ? renewalResult : standardResult;
+
+  const loading = isUpgrade ? upgradeLoading : isRenewal ? renewalLoading : standardLoading;
+  const error = isUpgrade ? upgradeError : isRenewal ? renewalError : standardError;
+
+  const effectiveMode = (activeResult as any)?.effectiveMode || 'regular';
+  const authoritativeAmount = activeResult?.amount || 0;
+  const planName = activeResult?.planName || (isUpgrade ? 'Upgrade' : isRenewal ? 'Current Plan' : 'Pro');
+  const breakdown = activeResult?.breakdown;
+  const message = activeResult?.message;
 
   const handlePaymentSuccess = (result: { success: boolean; payment_intent_id?: string; subscription_id?: string; error?: string }) => {
     if (result.success) {
@@ -107,9 +152,9 @@ export function CheckoutFlow() {
   }
 
   // Error state - Backend validation failed
-  if (error || (checkoutData && !checkoutData.success)) {
-    const errorMessage = checkoutData?.error || error?.message || 'Failed to prepare checkout';
-    const errorCode = checkoutData?.errorCode;
+  if (error || (activeResult && !activeResult.success)) {
+    const errorMessage = activeResult?.error || error?.message || 'Failed to prepare checkout';
+    const errorCode = activeResult?.errorCode;
 
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -176,9 +221,9 @@ export function CheckoutFlow() {
             {planName} - {cycle === 'monthly' ? 'Monthly' : 'Yearly'} billing
             {effectiveMode === 'intro' && ' (Introductory pricing)'}
           </p>
-          {checkoutData?.message && (
+          {message && (
             <p className="text-sm text-muted-foreground mt-2">
-              {checkoutData.message}
+              {message}
             </p>
           )}
         </div>

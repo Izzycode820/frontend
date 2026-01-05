@@ -1,19 +1,30 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client/react';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
 import { useAuthWithRedirect } from '@/hooks/authentication/useAuthWithRedirect';
 import { buildPathWithParams } from '@/utils/redirect-with-intent';
 import { GetPlansDocument } from '@/services/graphql/subscription/queries/pricing/__generated__/get-plans.generated';
 import { GetCurrentPlanDocument } from '@/services/graphql/subscription/queries/plan/__generated__/get-current-plan.generated';
+import { PrepareIntentDocument } from '@/services/graphql/subscription/mutations/pricing/__generated__/prepare-intent.generated';
 import { Tabs, TabsList, TabsTrigger } from '@/components/shadcn-ui/tabs';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { Badge } from '@/components/shadcn-ui/badge';
-import { AlertCircle, Smartphone, Check } from 'lucide-react';
+import { AlertCircle, Smartphone, Check, Calendar } from 'lucide-react';
 import { PricingCard } from './PricingCard';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/shadcn-ui/dialog';
+import { Button } from '@/components/shadcn-ui/button';
+import { toast } from 'sonner';
 
 interface PricingPageProps {
   className?: string;
@@ -21,8 +32,15 @@ interface PricingPageProps {
 
 export function PricingPage({ className }: PricingPageProps) {
   const router = useRouter();
-  const { requireAuth } = useAuthWithRedirect();
+  const { requireAuth, isAuthenticated } = useAuthWithRedirect();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedTier, setSelectedTier] = useState<string | null>(null);
+  const [downgradeDialog, setDowngradeDialog] = useState<{
+    open: boolean;
+    planName: string;
+    currentPlan: string;
+    scheduleDate: string;
+  }>({ open: false, planName: '', currentPlan: '', scheduleDate: '' });
 
   // Query all plans
   const { data: plansData, loading: plansLoading, error: plansError } = useQuery(GetPlansDocument);
@@ -30,11 +48,14 @@ export function PricingPage({ className }: PricingPageProps) {
   // Query current plan (for highlighting current plan)
   const { data: currentPlanData, loading: currentPlanLoading } = useQuery(GetCurrentPlanDocument);
 
+  // PrepareIntent mutation - determines action type from backend
+  const [prepareIntent, { loading: intentLoading }] = useMutation(PrepareIntentDocument);
+
   const plans = plansData?.plans || [];
   const currentTier = currentPlanData?.currentPlan?.plan?.name?.toLowerCase();
 
   /**
-   * Intro Pricing Eligibility Logic (per error.md)
+   * Intro Pricing Eligibility Logic 
    *
    * isIntroPricingEligible from backend:
    * - true  = User authenticated AND eligible (never used intro)
@@ -49,38 +70,144 @@ export function PricingPage({ className }: PricingPageProps) {
   const shouldShowIntroPrice = isIntroPricingEligible === null || isIntroPricingEligible === true;
 
   /**
-   * Handle plan selection with Auth Gate (following guide p.md)
+   * Handle plan selection with PrepareIntent (backend source of truth)
    *
    * Flow:
-   * 1. Determine pricing_mode based on intro eligibility (AUTO, not user choice)
-   * 2. Build checkout path with INTENT-ONLY params (tier, cycle, mode)
-   * 3. Use requireAuth to gate checkout (preserves params through login)
-   * 4. Backend validates eligibility and computes authoritative price
+   * 1. If unauthenticated → old flow (redirect to checkout, auth gate handles)
+   * 2. If authenticated → call prepareIntent to determine action type
+   * 3. Based on action: subscribe/renew/upgrade → checkout, downgrade → confirmation modal
    */
-  const handlePlanSelect = (tier: string) => {
-    // Find plan to check if it has intro discount
-    const selectedPlan = plans.find(p => p?.tier?.toLowerCase() === tier.toLowerCase());
-    const hasIntroDiscount = selectedPlan?.showcase?.pricingDisplay?.hasIntroDiscount;
+  const handlePlanSelect = async (tier: string) => {
+    setSelectedTier(tier);
 
-    // AUTO-DETERMINE MODE (backend will validate, this is just frontend intent)
-    // If user eligible for intro AND plan offers intro → request intro
-    // Otherwise → request regular
-    const requestedMode = (shouldShowIntroPrice && hasIntroDiscount) ? 'intro' : 'regular';
+    // Map frontend tier names to backend (beginner -> beginning)
+    const backendTier = tier.toLowerCase() === 'beginner' ? 'beginning' : tier.toLowerCase();
 
-    // Build checkout path with INTENT-ONLY params (NOT amount!)
-    const checkoutPath = buildPathWithParams('/checkout', {
-      tier: tier.toLowerCase(),
-      cycle: billingCycle,
-      mode: requestedMode
-    });
+    // For unauthenticated users, use old flow (auth gate will redirect)
+    if (!isAuthenticated) {
+      const selectedPlan = plans.find(p => p?.tier?.toLowerCase() === tier.toLowerCase());
+      const hasIntroDiscount = selectedPlan?.showcase?.pricingDisplay?.hasIntroDiscount;
+      const requestedMode = (shouldShowIntroPrice && hasIntroDiscount) ? 'intro' : 'regular';
 
-    // AUTH GATE: Capture intent before redirecting
-    // If unauthenticated → redirects to login with ?next=<checkoutPath>
-    // After login → restores checkoutPath
-    // If authenticated → proceeds to checkout immediately
-    requireAuth(checkoutPath, () => {
-      router.push(checkoutPath);
-    });
+      const checkoutPath = buildPathWithParams('/checkout', {
+        tier: backendTier,
+        cycle: billingCycle,
+        mode: requestedMode
+      });
+
+      requireAuth(checkoutPath, () => {
+        router.push(checkoutPath);
+      });
+      return;
+    }
+
+    // For authenticated users, call prepareIntent to get action type
+    try {
+      const result = await prepareIntent({
+        variables: {
+          intentData: {
+            tier: backendTier,
+            cycle: billingCycle
+          }
+        }
+      });
+
+      const intent = result.data?.prepareIntent;
+
+      if (!intent?.success) {
+        toast.error(intent?.error || 'Failed to determine action');
+        setSelectedTier(null);
+        return;
+      }
+
+      const action = intent.action;
+
+      // Route based on action type
+      switch (action) {
+        case 'subscribe':
+          // New subscription - go to checkout
+          router.push(buildPathWithParams('/checkout', {
+            tier: backendTier,
+            cycle: billingCycle,
+            mode: intent.pricingMode || 'regular',
+            action: 'subscribe'
+          }));
+          break;
+
+        case 'renew':
+          // Renewal - go to checkout with renew action
+          router.push(buildPathWithParams('/checkout', {
+            tier: backendTier,
+            cycle: billingCycle,
+            mode: 'regular',
+            action: 'renew'
+          }));
+          break;
+
+        case 'upgrade':
+          // Upgrade - go to checkout with upgrade action
+          router.push(buildPathWithParams('/checkout', {
+            tier: backendTier,
+            cycle: billingCycle,
+            mode: 'regular',
+            action: 'upgrade'
+          }));
+          break;
+
+        case 'downgrade':
+          // Downgrade - show confirmation modal (no checkout)
+          setDowngradeDialog({
+            open: true,
+            planName: intent.planName || tier,
+            currentPlan: intent.currentPlanName || 'Current Plan',
+            scheduleDate: intent.scheduleDate?.split('T')[0] || 'end of billing cycle'
+          });
+          break;
+
+        case 'already_on_plan':
+          // User is on this plan, not in renewal window
+          toast.info(intent.message || `You're already on ${intent.planName}`);
+          break;
+
+        default:
+          toast.error('Unknown action type');
+      }
+    } catch (error) {
+      console.error('PrepareIntent failed:', error);
+      toast.error('Failed to process plan selection');
+    } finally {
+      setSelectedTier(null);
+    }
+  };
+
+  // Handle downgrade confirmation
+  const handleConfirmDowngrade = async () => {
+    try {
+      // Call schedule-downgrade REST endpoint
+      const response = await fetch('/api/subscriptions/schedule-downgrade/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          new_plan_tier: selectedTier?.toLowerCase() === 'beginner' ? 'beginning' : selectedTier?.toLowerCase()
+        }),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        toast.success(`Downgrade scheduled for ${downgradeDialog.scheduleDate}`);
+        setDowngradeDialog({ open: false, planName: '', currentPlan: '', scheduleDate: '' });
+        // Refresh the page to update UI
+        router.refresh();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to schedule downgrade');
+      }
+    } catch (error) {
+      console.error('Downgrade failed:', error);
+      toast.error('Failed to schedule downgrade');
+    }
   };
 
   // Calculate yearly savings for badge
@@ -173,6 +300,7 @@ export function PricingPage({ className }: PricingPageProps) {
           if (!plan) return null;
 
           const isCurrentPlan = plan.tier === currentTier?.toUpperCase();
+          const isLoading = intentLoading && selectedTier?.toLowerCase() === plan.tier?.toLowerCase();
 
           return (
             <PricingCard
@@ -181,6 +309,7 @@ export function PricingPage({ className }: PricingPageProps) {
               billingCycle={billingCycle}
               isCurrentPlan={isCurrentPlan}
               onSelect={handlePlanSelect}
+              loading={isLoading}
               showIntroPrice={shouldShowIntroPrice}
             />
           );
@@ -211,6 +340,46 @@ export function PricingPage({ className }: PricingPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Downgrade Confirmation Dialog */}
+      <Dialog open={downgradeDialog.open} onOpenChange={(open) => !open && setDowngradeDialog({ ...downgradeDialog, open: false })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Schedule Downgrade
+            </DialogTitle>
+            <DialogDescription>
+              You are about to schedule a downgrade from <strong>{downgradeDialog.currentPlan}</strong> to <strong>{downgradeDialog.planName}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Your current plan features will remain active until <strong>{downgradeDialog.scheduleDate}</strong>.
+                After this date, your plan will automatically switch to {downgradeDialog.planName}.
+              </AlertDescription>
+            </Alert>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDowngradeDialog({ ...downgradeDialog, open: false })}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDowngrade}
+            >
+              Confirm Downgrade
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

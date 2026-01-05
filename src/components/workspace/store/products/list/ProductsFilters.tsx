@@ -18,55 +18,53 @@ import {
 import { Search, Filter, X } from 'lucide-react'
 
 interface ProductsFiltersProps {
+  searchValue?: string
   onSearchChange?: (search: string) => void
+  statusFilter?: string
   onStatusFilterChange?: (status: string) => void
+  categoryFilter?: string
   onCategoryFilterChange?: (category: string) => void
+  typeFilter?: string
   onTypeFilterChange?: (type: string) => void
 }
 
 export function ProductsFilters({
+  searchValue = '',
   onSearchChange,
+  statusFilter = '',
   onStatusFilterChange,
+  categoryFilter = '',
   onCategoryFilterChange,
+  typeFilter = '',
   onTypeFilterChange,
 }: ProductsFiltersProps) {
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
+  // Use props directly, no internal state for values
+
 
   const handleSearchChange = (value: string) => {
-    setSearch(value)
     onSearchChange?.(value)
   }
 
   const handleStatusChange = (value: string) => {
-    setStatusFilter(value)
     onStatusFilterChange?.(value)
   }
 
   const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value)
     onCategoryFilterChange?.(value)
   }
 
   const handleTypeChange = (value: string) => {
-    setTypeFilter(value)
     onTypeFilterChange?.(value)
   }
 
   const clearFilters = () => {
-    setSearch('')
-    setStatusFilter('')
-    setCategoryFilter('')
-    setTypeFilter('')
     onSearchChange?.('')
     onStatusFilterChange?.('')
     onCategoryFilterChange?.('')
     onTypeFilterChange?.('')
   }
 
-  const hasActiveFilters = search || statusFilter || categoryFilter || typeFilter
+  const hasActiveFilters = searchValue || statusFilter || categoryFilter || typeFilter
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,7 +73,7 @@ export function ProductsFilters({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search products by name or SKU..."
-            value={search}
+            value={searchValue}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10"
           />
@@ -154,9 +152,9 @@ export function ProductsFilters({
       {hasActiveFilters && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>Active filters:</span>
-          {search && (
+          {searchValue && (
             <span className="bg-muted px-2 py-1 rounded text-xs">
-              Search: "{search}"
+              Search: "{searchValue}"
             </span>
           )}
           {statusFilter && (

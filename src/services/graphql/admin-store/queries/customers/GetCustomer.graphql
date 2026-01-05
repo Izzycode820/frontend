@@ -25,5 +25,19 @@ query GetCustomer($id: ID!) {
     averageOrderValue
     lifetimeValue
     isHighValue
+
+    history {
+      id
+      action
+      displayMessage
+      details
+      createdAt
+      performedBy {
+        id
+        email
+        firstName
+        lastName
+      }
+    }
   }
 }

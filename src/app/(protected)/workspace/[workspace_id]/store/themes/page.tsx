@@ -109,8 +109,8 @@ function ThemesContent() {
   });
 
   const handleEditTheme = (customizationId: string) => {
-   // router.push(`/workspace/${workspaceId}/editor/${customizationId}`);
-    router.push(`/showcase/editor/${customizationId}`);
+  router.push(`/workspace/${workspaceId}/editor/${customizationId}`);
+  //router.push(`/showcase/editor/${customizationId}`);
 
   };
 

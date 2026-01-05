@@ -22,6 +22,7 @@ export default function CustomerDetailsContainer({ customerId }: CustomerDetails
   const { data, loading, error } = useQuery(GetCustomerDocument, {
     variables: { id: customerId },
     skip: !currentWorkspace,
+    fetchPolicy: 'cache-and-network',
   });
 
   const customer = data?.customer;
@@ -86,7 +87,21 @@ export default function CustomerDetailsContainer({ customerId }: CustomerDetails
               />
 
               {/* Timeline */}
-              <CustomerTimeline createdAt={customer.createdAt} />
+              <CustomerTimeline
+                events={(customer.history || [])
+                  .filter((event): event is NonNullable<typeof event> => event !== null)
+                  .map(event => ({
+                    id: event.id,
+                    type: 'HISTORY', // generic type for now
+                    message: event.displayMessage || 'Event occurred',
+                    createdAt: event.createdAt,
+                    author: event.performedBy ? {
+                      name: `${event.performedBy.firstName || ''} ${event.performedBy.lastName || ''}`.trim() || event.performedBy.email,
+                      initials: `${event.performedBy.firstName?.[0] || ''}${event.performedBy.lastName?.[0] || ''}`.toUpperCase() || 'U'
+                    } : undefined,
+                    metadata: event.details || {}
+                  }))}
+              />
             </div>
 
             {/* Right Column - Sidebar */}

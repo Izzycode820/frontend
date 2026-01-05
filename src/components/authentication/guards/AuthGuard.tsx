@@ -3,15 +3,17 @@
  * Protects routes requiring authentication using Zustand store
  * Follows 2024 best practices with proper loading states
  * OWASP-compliant context preservation with type-safe redirects
+ *
+ * v2.0 - Enhanced with full workspace context preservation
  */
 
 'use client'
 
 import React, { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore, authSelectors } from '@/stores/authentication/authStore'
+import { useAuthStore, authSelectors, WorkspaceContextManager } from '@/stores/authentication/authStore'
 import { AuthPageSpinner } from '../shared/AuthLoadingSpinner'
-import { redirectToLogin } from '@/utils/redirect-with-intent'
+import { storeAuthIntent } from '@/utils/redirect-with-intent'
 
 export interface AuthGuardProps {
   children: React.ReactNode
@@ -47,14 +49,20 @@ export function AuthGuard({
       // Call onUnauthorized callback
       onUnauthorized?.()
 
-      // Redirect with intent preservation (industry standard pattern)
-      // Captures current path + query params as the "intent"
+      // Capture FULL intent: path + workspace context
       const currentPath = typeof window !== 'undefined'
         ? window.location.pathname + window.location.search
         : '/workspace'
 
-      // Use unified redirect helper (handles sessionStorage + ?next param)
-      redirectToLogin(router, currentPath)
+      // Get current workspace from localStorage (if user was in one)
+      const currentWorkspaceId = WorkspaceContextManager.getCurrentWorkspace()
+
+      // Store full intent (path + workspace) for post-auth restoration
+      storeAuthIntent(currentPath, currentWorkspaceId)
+
+      // Redirect to login with ?next param (industry standard)
+      const loginUrl = `/auth/login?next=${encodeURIComponent(currentPath)}`
+      router.push(loginUrl)
     }
   }, [isClientMounted, isAuthInitialized, isLoading, isFullyAuthenticated, requireAuth, router, onUnauthorized])
 

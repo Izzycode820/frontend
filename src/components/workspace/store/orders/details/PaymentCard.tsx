@@ -28,10 +28,10 @@ export function PaymentCard({
 }: PaymentCardProps) {
   return (
     <Card>
-      <CardHeader className="bg-green-50 border-b">
+      <CardHeader className="bg-green-50 dark:bg-green-900/10 border-b">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-green-100 rounded">
-            <CreditCard className="h-4 w-4 text-green-700" />
+          <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded">
+            <CreditCard className="h-4 w-4 text-green-700 dark:text-green-400" />
           </div>
           <CardTitle className="text-base capitalize">
             {paymentStatus?.toLowerCase()}

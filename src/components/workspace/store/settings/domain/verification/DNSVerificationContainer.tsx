@@ -35,7 +35,7 @@ export function DNSVerificationContainer() {
   const domainId = params.customdomainid as string;
 
   const { data, loading, error, startPolling, stopPolling } = useQuery(CustomDomainDocument, {
-    variables: { id: domainId },
+    variables: { domainId: domainId },
     skip: !domainId,
     pollInterval: 12000, // Poll every 12 seconds
   });
@@ -91,31 +91,14 @@ export function DNSVerificationContainer() {
     );
   }
 
-  // Parse DNS records from JSON
-  let dnsRecords: DNSRecord[] = [];
-  try {
-    if (domain.dnsRecords) {
-      const parsed = typeof domain.dnsRecords === 'string'
-        ? JSON.parse(domain.dnsRecords)
-        : domain.dnsRecords;
+  // Use structured DNS records from GraphQL (filter nulls with type narrowing)
+  const recordsToRemove = (domain.dnsRecordsToRemove || []).filter((r): r is NonNullable<typeof r> => r !== null);
+  const recordsToAdd = (domain.dnsRecordsToAdd || []).filter((r): r is NonNullable<typeof r> => r !== null);
+  const recordsToUpdate = (domain.dnsRecordsToUpdate || []).filter((r): r is NonNullable<typeof r> => r !== null);
 
-      if (Array.isArray(parsed)) {
-        dnsRecords = parsed;
-      } else if (parsed.records) {
-        dnsRecords = parsed.records;
-      }
-    }
-  } catch (e) {
-    console.error('Failed to parse DNS records:', e);
-  }
-
-  const recordsToRemove = dnsRecords.filter(r => r.action === 'remove');
-  const recordsToAdd = dnsRecords.filter(r => r.action === 'add');
-  const recordsToUpdate = dnsRecords.filter(r => r.action === 'update');
-
-  const isVerified = domain.verified;
+  const isVerified = !!domain.verifiedAt;
   const isDNSValid = domain.status === WorkspaceHostingCustomDomainStatusChoices.Verified ||
-                     domain.status === WorkspaceHostingCustomDomainStatusChoices.Active;
+    domain.status === WorkspaceHostingCustomDomainStatusChoices.Active;
   const isSSLProvisioned = domain.sslEnabled;
 
   return (
@@ -135,7 +118,7 @@ export function DNSVerificationContainer() {
               )}
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              Managed by {domain.isPurchasedDomain ? 'Huzilerz' : 'External Provider'} •
+              Managed by External Provider •
               Added on {new Date(domain.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           </div>

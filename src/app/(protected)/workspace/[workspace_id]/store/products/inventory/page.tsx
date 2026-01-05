@@ -11,7 +11,7 @@
  * - Cursor-based pagination
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Card, CardContent } from '@/components/shadcn-ui/card'
 import { Input } from '@/components/shadcn-ui/input'
@@ -23,6 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shadcn-ui/select'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/shadcn-ui/pagination'
 import { InventoryTable } from '@/components/workspace/store/inventory/InventoryTable'
 import { GetInventoryDocument } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetInventory.generated'
 import { GetLocationsDocument } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetLocations.generated'
@@ -38,18 +47,33 @@ export default function InventoryPage() {
   const [locationFilter, setLocationFilter] = useState<string | undefined>()
   const [stockStatusFilter, setStockStatusFilter] = useState<string | undefined>()
 
+  // Pagination state
+  const pageSize = 20
+  const [currentPage, setCurrentPage] = useState(1)
+  const [cursors, setCursors] = useState<{ [page: number]: string }>({})
+
   // Fetch locations for filter
   const { data: locationsData } = useQuery(GetLocationsDocument, {
     skip: !currentWorkspace,
   })
 
   // Fetch inventory
-  const { data, loading, error, fetchMore, refetch } = useQuery(GetInventoryDocument, {
+  const { data, loading, error, refetch } = useQuery(GetInventoryDocument, {
     variables: {
-      first: 50,
+      first: pageSize,
+      after: cursors[currentPage] || undefined,
       location: locationFilter,
     },
     skip: !currentWorkspace,
+    onCompleted: (data) => {
+      // Store cursor for next page
+      if (data?.inventory?.pageInfo?.endCursor) {
+        setCursors(prev => ({
+          ...prev,
+          [currentPage + 1]: data.inventory.pageInfo.endCursor
+        }))
+      }
+    }
   })
 
   // Update inventory mutation
@@ -89,6 +113,7 @@ export default function InventoryPage() {
 
   const hasNextPage = data?.inventory?.pageInfo?.hasNextPage || false
   const totalCount = data?.inventory?.totalCount || 0
+  const totalPages = Math.ceil(totalCount / pageSize)
   const locations = (locationsData?.locations || []).filter((loc): loc is NonNullable<typeof loc> => loc !== null && loc !== undefined)
 
   // Handle inventory update
@@ -122,13 +147,21 @@ export default function InventoryPage() {
     }
   }
 
-  const handleLoadMore = () => {
-    if (hasNextPage && data?.inventory?.pageInfo?.endCursor) {
-      fetchMore({
-        variables: {
-          after: data.inventory.pageInfo.endCursor,
-        },
-      })
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (hasNextPage) {
+      handlePageChange(currentPage + 1)
     }
   }
 
@@ -137,7 +170,15 @@ export default function InventoryPage() {
     setSearchQuery('')
     setLocationFilter(undefined)
     setStockStatusFilter(undefined)
+    setCurrentPage(1)
+    setCursors({})
   }
+
+  // Reset to page 1 when location filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+    setCursors({})
+  }, [locationFilter])
 
   const hasFilters = searchQuery || locationFilter || stockStatusFilter
 
@@ -249,19 +290,63 @@ export default function InventoryPage() {
         <>
           <InventoryTable inventory={filteredInventory} onUpdateInventory={handleUpdateInventory} />
 
-          {/* Showing count */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div>
-              Showing {filteredInventory.length} of {totalCount} records
-            </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-2">
+              <div className="text-sm text-muted-foreground">
+                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} records
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={handlePreviousPage}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
 
-            {/* Load More */}
-            {hasNextPage && (
-              <Button variant="ghost" size="sm" onClick={handleLoadMore} disabled={loading}>
-                {loading ? 'Loading...' : 'Load more'}
-              </Button>
-            )}
-          </div>
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    let pageNumber;
+                    if (totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNumber = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNumber = totalPages - 4 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(pageNumber)}
+                          isActive={currentPage === pageNumber}
+                          className="cursor-pointer"
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={handleNextPage}
+                      className={!hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </>
       )}
     </div>

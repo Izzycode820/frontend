@@ -53,10 +53,29 @@ query GetOrder($id: ID!) {
     isPaid
     canBeCancelled
     canBeRefunded
+    canBeArchived
+    canBeUnarchived
     requiresPaymentProcessing
     isWhatsappOrder
     isCashOnDelivery
     canMarkAsPaid
+ 
+    # Unified timeline (comments + history)
+    timeline {
+      id
+      type
+      message
+      createdAt
+      isInternal
+      metadata
+      author {
+        id
+        email
+        firstName
+        lastName
+      }
+    }
+
 
     # Order items with product details
     items {

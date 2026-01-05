@@ -1,16 +1,17 @@
 /**
  * Landing Page - Clean Implementation
- * Modern coming soon page with proper shadcn/ui integration
+ * Modern landing page with a hero and interactive scroll section.
  * Organized component structure
  */
 
-import React from 'react'
-import { Layout, ComingSoon } from '@/components/landing'
+import React from 'react';
+import { Hero, SolutionScroll } from '@/components/landing/sections';
 
 export default function LandingPage() {
   return (
-    <Layout>
-      <ComingSoon />
-    </Layout>
-  )
+    <>
+      <Hero />
+      <SolutionScroll />
+    </>
+  );
 }

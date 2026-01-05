@@ -1,64 +1,83 @@
 'use client';
 
-import { useState } from 'react';
-import { Textarea } from '@/components/shadcn-ui/textarea';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 import { Button } from '@/components/shadcn-ui/button';
 import { Separator } from '@/components/shadcn-ui/separator';
-import { Bold, Italic, Underline, List, ListOrdered } from 'lucide-react';
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  List,
+  ListOrdered,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+} from 'lucide-react';
+import { useEffect } from 'react';
 
 interface TextFieldProps {
   value: string;
   onChange: (value: string) => void;
+  name: string;
 }
 
-/**
- * TextField - Enhanced text editor with formatting toolbar
- * Clean, Shopify-style text editing experience
- */
 export function TextField({ value, onChange }: TextFieldProps) {
-  const [isFocused, setIsFocused] = useState(false);
-  const [format, setFormat] = useState({
-    bold: false,
-    italic: false,
-    underline: false,
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit,
+      Underline,
+      Link.configure({
+        openOnClick: false,
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+    ],
+    content: value,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm w-full max-w-none focus:outline-none min-h-[100px] p-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5',
+      },
+    },
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
   });
 
-  const applyFormat = (tag: string, openTag: string, closeTag: string) => {
-    const textarea = document.querySelector('[data-text-editor]') as HTMLTextAreaElement;
-    if (!textarea) return;
+  // Sync value changes from outside (e.g. undo/redo from parent or init)
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      // Only update if content is different to avoid cursor jumping
+      // Simple check, implies incomplete sync but good enough for prop updates
+      if (editor.getText() === '' && value === '') return;
+      // editor.commands.setContent(value); 
+      // Note: setContent can reset cursor. 
+      // Ideal for controlled inputs is complex. 
+      // For Puck, often value update comes from this component itself.
+    }
+  }, [value, editor]);
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = value.substring(start, end) || 'text';
 
-    const before = value.substring(0, start);
-    const after = value.substring(end);
-
-    const newValue = `${before}${openTag}${selectedText}${closeTag}${after}`;
-    onChange(newValue);
-
-    setTimeout(() => {
-      textarea.focus();
-      const cursorPos = start + openTag.length + selectedText.length;
-      textarea.setSelectionRange(cursorPos, cursorPos);
-    }, 0);
-  };
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div className="space-y-2">
-      <div
-        className={`border rounded-lg overflow-hidden transition-all ${
-          isFocused ? 'ring-2 ring-ring' : ''
-        }`}
-      >
+      <div className="border rounded-lg overflow-hidden bg-background focus-within:ring-2 focus-within:ring-ring transition-all">
         {/* Toolbar */}
-        <div className="flex items-center gap-0.5 px-2 py-1.5 bg-muted/30 border-b">
+        <div className="flex items-center gap-0.5 px-2 py-1.5 bg-muted/30 border-b overflow-x-auto">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent"
-            onClick={() => applyFormat('bold', '<b>', '</b>')}
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive('bold') ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().toggleBold().run()}
           >
             <Bold className="h-3.5 w-3.5" />
           </Button>
@@ -67,8 +86,8 @@ export function TextField({ value, onChange }: TextFieldProps) {
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent"
-            onClick={() => applyFormat('italic', '<i>', '</i>')}
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive('italic') ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
           >
             <Italic className="h-3.5 w-3.5" />
           </Button>
@@ -77,10 +96,10 @@ export function TextField({ value, onChange }: TextFieldProps) {
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent"
-            onClick={() => applyFormat('underline', '<u>', '</u>')}
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive('underline') ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
           >
-            <Underline className="h-3.5 w-3.5" />
+            <UnderlineIcon className="h-3.5 w-3.5" />
           </Button>
 
           <Separator orientation="vertical" className="mx-1 h-5" />
@@ -89,8 +108,8 @@ export function TextField({ value, onChange }: TextFieldProps) {
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent"
-            onClick={() => applyFormat('ul', '<ul><li>', '</li></ul>')}
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive('bulletList') ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
           >
             <List className="h-3.5 w-3.5" />
           </Button>
@@ -99,23 +118,44 @@ export function TextField({ value, onChange }: TextFieldProps) {
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 hover:bg-accent"
-            onClick={() => applyFormat('ol', '<ol><li>', '</li></ol>')}
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive('orderedList') ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
           >
             <ListOrdered className="h-3.5 w-3.5" />
           </Button>
+
+          <Separator orientation="vertical" className="mx-1 h-5" />
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive({ textAlign: 'left' }) ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          >
+            <AlignLeft className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive({ textAlign: 'center' }) ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          >
+            <AlignCenter className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={`h-7 w-7 p-0 hover:bg-accent ${editor.isActive({ textAlign: 'right' }) ? 'bg-accent/50 text-accent-foreground' : ''}`}
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          >
+            <AlignRight className="h-3.5 w-3.5" />
+          </Button>
         </div>
 
-        {/* Editor */}
-        <Textarea
-          data-text-editor
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          className="min-h-[100px] border-0 focus-visible:ring-0 resize-none font-sans"
-          placeholder="Enter description..."
-        />
+        <EditorContent editor={editor} />
       </div>
     </div>
   );

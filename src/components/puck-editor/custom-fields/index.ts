@@ -11,3 +11,4 @@ export { Toggle } from './Toggle';
 export { Slider } from './Slider';
 export { Spacing } from './Spacing';
 export { ImagePicker } from './ImagePicker';
+export { VideoPicker } from './VideoPicker';

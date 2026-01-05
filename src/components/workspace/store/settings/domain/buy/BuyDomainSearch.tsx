@@ -19,7 +19,9 @@ export function BuyDomainSearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [searchDomains, { data, loading, error }] = useLazyQuery(SearchDomainsDocument);
+  const [searchDomains, { data, loading, error }] = useLazyQuery(SearchDomainsDocument, {
+    fetchPolicy: 'network-only', // Always fetch fresh data, don't use cache
+  });
 
   const handleSearch = async (e?: React.FormEvent, page = 1) => {
     if (e) {

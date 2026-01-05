@@ -22,32 +22,50 @@ export interface WorkspaceAuthContext {
 }
 
 // ============================================================================
-// Workspace Switching for Auth
+// Workspace Switching for Auth (Industry Standard: Shopify/Stripe/Linear)
 // ============================================================================
 
 export interface WorkspaceSwitchRequest {
   readonly workspace_id: string;
 }
 
+/**
+ * Workspace Switch Response (v3.0 - Header-Based Context)
+ *
+ * NO JWT regeneration - backend validates access and returns workspace details
+ * Frontend updates Zustand + sends X-Workspace-Id header on next request
+ *
+ * Response includes:
+ * - workspace: Full workspace details for UI/routing
+ * - membership: User's role and permissions in this workspace
+ */
 export interface WorkspaceSwitchResponse {
   readonly success: boolean;
-  readonly tokens?: {
-    readonly access_token: string;
-    readonly token_type: string;
-    readonly expires_in: number;
+  readonly workspace?: {
+    readonly id: string;
+    readonly name: string;
+    readonly type: 'store' | 'blog' | 'services' | 'portfolio';
+    readonly status: 'active' | 'suspended';
+    readonly owner_id: string;
+    readonly created_at: string | null;
   };
-  readonly workspace?: WorkspaceAuthContext;
+  readonly membership?: {
+    readonly role: 'owner' | 'admin' | 'member' | 'viewer';
+    readonly permissions: string[];
+    readonly joined_at: string | null;
+  };
   readonly message?: string;
   readonly error?: string;
 }
 
+/**
+ * Leave Workspace Response (v3.0 - Stateless)
+ *
+ * NO JWT regeneration - endpoint exists only for audit logging
+ * Frontend just stops sending X-Workspace-Id header
+ */
 export interface LeaveWorkspaceResponse {
   readonly success: boolean;
-  readonly tokens?: {
-    readonly access_token: string;
-    readonly token_type: string;
-    readonly expires_in: number;
-  };
   readonly message?: string;
   readonly error?: string;
 }

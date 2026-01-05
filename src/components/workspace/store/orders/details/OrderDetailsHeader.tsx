@@ -20,8 +20,14 @@ interface OrderDetailsHeaderProps {
   onEdit: () => void;
   onRefund: () => void;
   onCancel: () => void;
+  onArchive: () => void;
+  onUnarchive: () => void;
   canBeCancelled: boolean;
   canBeRefunded: boolean;
+  canBeArchived: boolean;
+  canBeUnarchived: boolean;
+  canMarkAsPaid?: boolean;
+  onMarkAsPaid?: () => void;
 }
 
 export function OrderDetailsHeader({
@@ -34,11 +40,17 @@ export function OrderDetailsHeader({
   onEdit,
   onRefund,
   onCancel,
+  onArchive,
+  onUnarchive,
   canBeCancelled,
   canBeRefunded,
+  canBeArchived,
+  canBeUnarchived,
+  canMarkAsPaid,
+  onMarkAsPaid,
 }: OrderDetailsHeaderProps) {
   return (
-    <div className="border-b bg-background sticky top-0 z-10">
+    <div className="border-b bg-background">
       <div className="px-4 lg:px-6 py-4">
         <div className="flex items-center gap-4 mb-2">
           <Link href={`/workspace/${workspaceId}/store/orders`}>
@@ -57,6 +69,11 @@ export function OrderDetailsHeader({
             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })} from {orderSource}
           </p>
           <div className="flex gap-2">
+            {canMarkAsPaid && (
+              <Button onClick={onMarkAsPaid}>
+                Mark as Paid
+              </Button>
+            )}
             {canBeRefunded && (
               <Button variant="outline" onClick={onRefund}>
                 Refund
@@ -77,7 +94,12 @@ export function OrderDetailsHeader({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>Duplicate order</DropdownMenuItem>
-                <DropdownMenuItem>Archive order</DropdownMenuItem>
+                {canBeArchived && (
+                  <DropdownMenuItem onClick={onArchive}>Archive order</DropdownMenuItem>
+                )}
+                {canBeUnarchived && (
+                  <DropdownMenuItem onClick={onUnarchive}>Unarchive order</DropdownMenuItem>
+                )}
                 {canBeCancelled && (
                   <DropdownMenuItem onClick={onCancel} className="text-destructive">
                     Cancel order

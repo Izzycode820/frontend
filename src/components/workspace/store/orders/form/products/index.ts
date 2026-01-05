@@ -1,5 +1,5 @@
 export { ProductsSection } from './ProductsSection';
-export { ProductSearchModal } from './ProductSearchModal';
+export { ProductSearchModal } from '../../../shared/products/ProductSearchModal';
 export { ProductItem } from './ProductItem';
 export { useProductsState } from './useProductsState';
 export type {

@@ -16,6 +16,11 @@ import {
 
 const settingsNavItems = [
   {
+    label: 'General',
+    href: '/general',
+    icon: Settings,
+  },
+  {
     label: 'Plan',
     href: '/plan',
     icon: Crown,
@@ -47,14 +52,10 @@ const settingsNavItems = [
   },
   {
     label: 'Team',
-    href: '/team',
+    href: '/staff',
     icon: Users,
   },
-  {
-    label: 'General',
-    href: '/general',
-    icon: Settings,
-  },
+  
 ];
 
 export function SettingsSidebar() {

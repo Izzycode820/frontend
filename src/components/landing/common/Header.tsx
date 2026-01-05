@@ -4,98 +4,95 @@
  * No dropdowns - just clean navigation links
  */
 
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { Menu } from 'lucide-react'
-import { Button } from '@/components/shadcn-ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/shadcn-ui/sheet'
-import { cn } from '@/lib/utils'
-import { HEADER_NAVIGATION, AUTH_ROUTES } from '@/routes'
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/shadcn-ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/shadcn-ui/sheet';
+import { cn } from '@/lib/utils';
+import { HEADER_NAVIGATION, AUTH_ROUTES } from '@/routes';
 
 interface HeaderProps {
-  className?: string
+  className?: string;
 }
 
 export default function Header({ className }: HeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      "absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 md:px-12",
       className
     )}>
-      <div className="container flex h-16 items-center">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="font-bold text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            HUZILERZ CAMP
-          </div>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex md:ml-auto md:items-center md:space-x-6">
-          {HEADER_NAVIGATION.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Desktop CTA */}
-        <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
-          <Button variant="ghost" asChild>
-            <Link href={AUTH_ROUTES.LOGIN}>Sign In</Link>
-          </Button>
-          <Button asChild>
-            <Link href={AUTH_ROUTES.SIGNUP}>Get Started</Link>
-          </Button>
+      {/* 1. Logo */}
+      <Link href="/" className="flex items-center space-x-2">
+        <div className="font-display text-xl font-bold tracking-tighter text-white">
+          HUZILERZ CAMP
         </div>
+      </Link>
 
-        {/* Mobile Menu */}
-        <div className="ml-auto md:hidden">
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <div className="flex flex-col space-y-6 mt-6">
-                {/* Mobile Navigation */}
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-foreground">Navigation</h3>
-                  {HEADER_NAVIGATION.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="block text-muted-foreground transition-colors hover:text-primary ml-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <div className="font-medium">{item.label}</div>
-                    </Link>
-                  ))}
-                </div>
+      {/* 2. Center Links (Desktop) */}
+      <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
+        {HEADER_NAVIGATION.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="transition-colors hover:text-white"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
 
-                <div className="pt-4 space-y-2 border-t">
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link href={AUTH_ROUTES.LOGIN}>Sign In</Link>
-                  </Button>
-                  <Button className="w-full" asChild>
-                    <Link href={AUTH_ROUTES.SIGNUP}>Get Started</Link>
-                  </Button>
-                </div>
+      {/* 3. Right Actions (Desktop) */}
+      <div className="hidden md:flex items-center gap-6">
+        <Button variant="ghost" asChild className="text-white hover:bg-white/10">
+          <Link href={AUTH_ROUTES.LOGIN}>Sign In</Link>
+        </Button>
+        <Button asChild className="rounded-md bg-white text-black hover:bg-huzilerz-lime">
+          <Link href={AUTH_ROUTES.SIGNUP}>Get Started</Link>
+        </Button>
+      </div>
+      
+      {/* Mobile Menu */}
+      <div className="ml-auto md:hidden">
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="bg-huzilerz-black text-white border-l-gray-800">
+            <div className="flex flex-col space-y-6 mt-6">
+              {/* Mobile Navigation */}
+              <div className="space-y-2">
+                {HEADER_NAVIGATION.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block font-medium text-gray-300 transition-colors hover:text-white py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+
+              <div className="pt-4 space-y-2 border-t border-gray-800">
+                <Button variant="outline" className="w-full border-gray-700 hover:bg-gray-800" asChild>
+                  <Link href={AUTH_ROUTES.LOGIN}>Sign In</Link>
+                </Button>
+                <Button className="w-full bg-white text-black hover:bg-huzilerz-lime" asChild>
+                  <Link href={AUTH_ROUTES.SIGNUP}>Get Started</Link>
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
-  )
+  );
 }

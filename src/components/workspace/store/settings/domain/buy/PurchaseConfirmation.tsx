@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { useRouter, useParams } from 'next/navigation';
 import { PurchaseDomainDocument } from '@/services/graphql/domains/mutations/purchases/__generated__/purchaseDomain.generated';
+import { PrepareDomainCheckoutDocument } from '@/services/graphql/domains/mutations/purchases/__generated__/prepareDomainCheckout.generated';
+import { GetPurchaseStatusDocument } from '@/services/graphql/domains/queries/purchases/__generated__/getPurchaseStatus.generated';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
@@ -25,12 +27,13 @@ interface PurchaseConfirmationProps {
   priceUsd?: number;
 }
 
-export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfirmationProps) {
+export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
   const router = useRouter();
   const params = useParams();
   const workspaceId = params.workspace_id as string;
 
   const [autoRenew, setAutoRenew] = useState(true);
+  const [pollingId, setPollingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -46,7 +49,45 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
     postalCode: '',
   });
 
-  const [purchaseDomain, { loading }] = useMutation(PurchaseDomainDocument);
+  // Prepare checkout mutation (to get authoritative pricing)
+  const [prepareCheckout, { data: prepareData, loading: prepareLoading, error: prepareError }] = useMutation(PrepareDomainCheckoutDocument);
+
+  // Purchase domain mutation
+  const [purchaseDomain, { loading: purchaseLoading }] = useMutation(PurchaseDomainDocument);
+
+  // Poll purchase status
+  const { data: statusData } = useQuery(GetPurchaseStatusDocument, {
+    variables: { purchaseId: pollingId || '' },
+    skip: !pollingId,
+    pollInterval: pollingId ? 2000 : 0, // Poll every 2 seconds only when pollingId is set
+  });
+
+  // Fetch pricing on mount
+  React.useEffect(() => {
+    if (domain && workspaceId) {
+      prepareCheckout({
+        variables: {
+          domain,
+          workspaceId
+        }
+      });
+    }
+  }, [domain, workspaceId, prepareCheckout]);
+
+  // Handle polling completion
+  React.useEffect(() => {
+    if (statusData?.purchaseStatus) {
+      const status = statusData.purchaseStatus.paymentStatus;
+      if (status === 'COMPLETED') {
+        toast.success('Domain purchase successful!');
+        router.push(`/workspace/${workspaceId}/store/settings/domains`);
+        setPollingId(null);
+      } else if (status === 'FAILED') {
+        toast.error(statusData.purchaseStatus.errorMessage || 'Purchase failed');
+        setPollingId(null);
+      }
+    }
+  }, [statusData, router, workspaceId]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -54,6 +95,11 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!prepareData?.prepareDomainCheckout?.success) {
+      toast.error('Unable to verify domain pricing. Please try refreshing.');
+      return;
+    }
 
     // Validate required fields
     const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'postalCode'];
@@ -79,11 +125,14 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
         },
       });
 
-      if (data?.purchaseDomain?.success) {
-        toast.success('Domain purchase initiated');
-        router.push(`/workspace/${workspaceId}/store/settings/domains`);
+      if (data?.purchaseDomain?.success && data.purchaseDomain.purchase?.id) {
+        setPollingId(data.purchaseDomain.purchase.id);
+        toast.message('Payment initiated', {
+          description: 'Please check your phone to confirm the transaction.',
+          duration: 10000,
+        });
       } else {
-        toast.error(data?.purchaseDomain?.error || 'Failed to purchase domain');
+        toast.error(data?.purchaseDomain?.error || 'Failed to initiate purchase');
       }
     } catch (err: any) {
       toast.error(err.message || 'Failed to purchase domain');
@@ -94,7 +143,43 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
   const renewalDate = new Date();
   renewalDate.setFullYear(renewalDate.getFullYear() + 1);
 
-  const priceFcfa = (priceUsd * 600).toFixed(2); // Approximate conversion
+  // Loading state
+  if (prepareLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground animate-pulse">Loading domain pricing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (prepareError || (prepareData?.prepareDomainCheckout && !prepareData.prepareDomainCheckout.success)) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Card className="w-full max-w-md border-red-200 bg-red-50">
+          <CardContent className="pt-6 text-center">
+            <h3 className="text-lg font-medium text-red-900">Unable to load purchase details</h3>
+            <p className="mt-2 text-sm text-red-700">
+              {prepareData?.prepareDomainCheckout?.error || prepareError?.message || 'Something went wrong.'}
+            </p>
+            <Button
+              variant="outline"
+              className="mt-4 border-red-200 bg-white text-red-900 hover:bg-red-50"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const pricing = prepareData?.prepareDomainCheckout;
+  const priceFcfa = pricing?.priceFcfa || 0;
+  const priceUsd = pricing?.priceUsd || 0;
 
   return (
     <div className="space-y-6">
@@ -135,7 +220,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
               </p>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form id="purchase-form" onSubmit={handleSubmit} className="space-y-4">
                 {/* Name Fields */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -145,6 +230,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       required
+                      disabled={purchaseLoading || !!pollingId}
                     />
                   </div>
                   <div className="space-y-2">
@@ -154,6 +240,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                       value={formData.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
                       required
+                      disabled={purchaseLoading || !!pollingId}
                     />
                   </div>
                 </div>
@@ -168,6 +255,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       required
+                      disabled={purchaseLoading || !!pollingId}
                     />
                   </div>
                   <div className="space-y-2">
@@ -176,6 +264,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                       id="storeName"
                       value={formData.storeName}
                       onChange={(e) => handleInputChange('storeName', e.target.value)}
+                      disabled={purchaseLoading || !!pollingId}
                     />
                   </div>
                 </div>
@@ -183,15 +272,19 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                 {/* Phone and Fax */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Phone (Mobile Money)</Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="+237"
+                      placeholder="e.g. 677123456"
                       required
+                      disabled={purchaseLoading || !!pollingId}
                     />
+                    <p className="text-[0.8rem] text-muted-foreground">
+                      Enter your MTN or Orange Money number (9 digits)
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="faxNumber">Fax number (Optional)</Label>
@@ -200,6 +293,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                       type="tel"
                       value={formData.faxNumber}
                       onChange={(e) => handleInputChange('faxNumber', e.target.value)}
+                      disabled={purchaseLoading || !!pollingId}
                     />
                   </div>
                 </div>
@@ -210,6 +304,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                   <Select
                     value={formData.country}
                     onValueChange={(value) => handleInputChange('country', value)}
+                    disabled={purchaseLoading || !!pollingId}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -231,6 +326,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                     value={formData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     required
+                    disabled={purchaseLoading || !!pollingId}
                   />
                 </div>
 
@@ -241,6 +337,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                     id="apartment"
                     value={formData.apartment}
                     onChange={(e) => handleInputChange('apartment', e.target.value)}
+                    disabled={purchaseLoading || !!pollingId}
                   />
                 </div>
 
@@ -252,6 +349,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                     value={formData.city}
                     onChange={(e) => handleInputChange('city', e.target.value)}
                     required
+                    disabled={purchaseLoading || !!pollingId}
                   />
                 </div>
 
@@ -264,6 +362,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                       value={formData.state}
                       onChange={(e) => handleInputChange('state', e.target.value)}
                       required
+                      disabled={purchaseLoading || !!pollingId}
                     />
                   </div>
                   <div className="space-y-2">
@@ -273,6 +372,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                       value={formData.postalCode}
                       onChange={(e) => handleInputChange('postalCode', e.target.value)}
                       required
+                      disabled={purchaseLoading || !!pollingId}
                     />
                   </div>
                 </div>
@@ -297,7 +397,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
             <CardContent>
               <Alert>
                 <AlertDescription>
-                  Payment via Mobile Money (MTN/Orange). Instructions will be provided after confirmation.
+                  Payment via Mobile Money (MTN/Orange). {priceFcfa.toLocaleString()} XAF will be requested from your phone.
                 </AlertDescription>
               </Alert>
             </CardContent>
@@ -317,7 +417,10 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                   <p className="font-medium">Today</p>
                   <p className="text-muted-foreground">Domain purchase</p>
                 </div>
-                <p className="font-medium">${priceUsd.toFixed(2)} USD</p>
+                <div className="text-right">
+                  <p className="font-medium">{priceFcfa.toLocaleString()} XAF</p>
+                  <p className="text-xs text-muted-foreground">(${priceUsd.toFixed(2)} USD)</p>
+                </div>
               </div>
 
               {/* Next Renewal */}
@@ -329,7 +432,7 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                   <p className="text-muted-foreground">Annual renewal</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">${priceUsd.toFixed(2)} USD</p>
+                  <p className="font-medium">{priceFcfa.toLocaleString()} XAF</p>
                   <p className="text-xs text-muted-foreground">Every year</p>
                 </div>
               </div>
@@ -343,19 +446,35 @@ export function PurchaseConfirmation({ domain, priceUsd = 16.00 }: PurchaseConfi
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold">${priceUsd.toFixed(2)} USD</p>
-                  <p className="text-xs text-muted-foreground">plus applicable taxes</p>
+                  <p className="font-semibold text-lg">{priceFcfa.toLocaleString()} XAF</p>
+                  <p className="text-xs text-muted-foreground">(${priceUsd.toFixed(2)} USD)</p>
                 </div>
               </div>
 
               {/* Buy Button */}
               <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="w-full bg-black hover:bg-black/90 text-white"
+                type="submit"
+                form="purchase-form"
+                disabled={purchaseLoading || !!pollingId}
+                className="w-full bg-black hover:bg-black/90 text-white relative"
               >
-                {loading ? 'Processing...' : 'Buy domain'}
+                {pollingId ? (
+                  <>
+                    <span className="animate-spin mr-2">⟳</span>
+                    Confirming Payment...
+                  </>
+                ) : purchaseLoading ? (
+                  'Processing...'
+                ) : (
+                  'Pay Now'
+                )}
               </Button>
+
+              {pollingId && (
+                <div className="text-center text-xs text-muted-foreground animate-pulse">
+                  Please check your phone to approve the transaction.
+                </div>
+              )}
 
               {/* Warning */}
               <Alert className="bg-blue-50 border-blue-200">

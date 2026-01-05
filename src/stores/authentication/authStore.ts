@@ -15,7 +15,7 @@ import type {
   WorkspaceAuthContext
 } from '../../types/authentication'
 import authService from '../../services/authentication/auth'
-import { extractSubscriptionFromJWT, extractWorkspaceFromJWT } from '../../utils/jwt'
+import { extractSubscriptionFromJWT } from '../../utils/jwt'
 import { CapabilitiesManager } from '../../utils/capabilities'
 import { useSubscriptionStore } from '../subscription/subscriptionStore'
 import { useWorkspaceStore } from './workspaceStore'
@@ -133,25 +133,16 @@ export const useAuthStore = create<AuthStoreState>()(
             get().syncCapabilities()
           }
 
-          // Extract workspace from JWT or response
-          if (accessToken) {
-            const jwtWorkspace = extractWorkspaceFromJWT(accessToken)
-            state.workspace = jwtWorkspace ? {
-              id: jwtWorkspace.id,
-              type: jwtWorkspace.type as 'store' | 'blog' | 'services' | 'portfolio',
-              name: response.workspace?.name || '',
-              status: response.workspace?.status || 'active',
-              permissions: jwtWorkspace.permissions,
-              role: jwtWorkspace.role,
-              is_default: response.workspace?.is_default ?? true
-            } : response.workspace || null
+          // Workspace from response only (NO JWT extraction - v3.0)
+          // Login typically doesn't set workspace context
+          // User must explicitly switch to a workspace after login
+          state.workspace = response.workspace || null
 
-            // Track workspace context if present (for refresh flow)
-            if (state.workspace?.id) {
-              WorkspaceContextManager.setCurrentWorkspace(state.workspace.id)
-            }
+          // Track workspace context if present
+          if (state.workspace?.id) {
+            WorkspaceContextManager.setCurrentWorkspace(state.workspace.id)
           } else {
-            state.workspace = response.workspace || null
+            WorkspaceContextManager.clearWorkspace()
           }
 
           state.lastActivity = Date.now()
@@ -213,34 +204,10 @@ export const useAuthStore = create<AuthStoreState>()(
               get().syncCapabilities()
             }
 
-            // Extract workspace from JWT (v2.0: Backend now includes workspace_id in refresh token)
-            // This ensures workspace context is preserved across token refreshes (Shopify pattern)
-            const jwtWorkspace = extractWorkspaceFromJWT(accessToken)
-            if (jwtWorkspace) {
-              // Merge JWT claims (id, type, role, permissions) with response data (name, status)
-              const completeWorkspace: WorkspaceAuthContext = {
-                id: jwtWorkspace.id,
-                type: jwtWorkspace.type as 'store' | 'blog' | 'services' | 'portfolio',
-                name: response.workspace?.name || state.workspace?.name || '',
-                status: response.workspace?.status || state.workspace?.status || 'active',
-                permissions: jwtWorkspace.permissions,
-                role: jwtWorkspace.role,
-                is_default: response.workspace?.is_default ?? (state.workspace?.is_default ?? true)
-              }
-
-              state.workspace = completeWorkspace
-
-              // Sync to workspaceStore for unified state management
-              useWorkspaceStore.getState().setCurrentWorkspace(completeWorkspace)
-
-              // Update workspace context tracking
-              WorkspaceContextManager.setCurrentWorkspace(completeWorkspace.id)
-            } else {
-              // No workspace claims in JWT - clear workspace context
-              state.workspace = null
-              useWorkspaceStore.getState().setCurrentWorkspace(null)
-              WorkspaceContextManager.clearWorkspace()
-            }
+            // Workspace context preserved in Zustand (v3.0 - Header-Based Context)
+            // Refresh tokens extend sessions, they don't change authorization scope
+            // Workspace stays unchanged unless user explicitly switches
+            // NO changes to state.workspace - it remains as-is
           }
 
           if (response.user && state.user) {
@@ -254,31 +221,17 @@ export const useAuthStore = create<AuthStoreState>()(
 
       setLeaveSuccess: (response) => {
         set((state) => {
-          const accessToken = response.tokens?.access_token
-          const expiresIn = response.tokens?.expires_in
+          // v3.0 - NO token regeneration on leave workspace
+          // Backend just logs the event, frontend clears workspace context
 
-          if (accessToken) {
-            // Update token (new token WITHOUT workspace claims)
-            state.token = accessToken
-            state.tokenExpiresAt = expiresIn
-              ? Date.now() + (expiresIn * 1000)
-              : null
+          // Clear workspace context (user left workspace)
+          state.workspace = null
 
-            // Extract subscription from JWT (unchanged)
-            state.subscription = extractSubscriptionFromJWT(accessToken)
+          // Sync to workspaceStore - clear currentWorkspace
+          useWorkspaceStore.getState().setCurrentWorkspace(null)
 
-            // Sync subscription to subscriptionStore
-            useSubscriptionStore.getState().syncFromAuth(state.subscription)
-
-            // Clear workspace context (user left workspace)
-            state.workspace = null
-
-            // Sync to workspaceStore - clear currentWorkspace
-            useWorkspaceStore.getState().setCurrentWorkspace(null)
-
-            // Clear localStorage tracking
-            WorkspaceContextManager.clearWorkspace()
-          }
+          // Clear localStorage tracking
+          WorkspaceContextManager.clearWorkspace()
 
           state.lastActivity = Date.now()
         })
@@ -572,19 +525,21 @@ if (typeof window !== 'undefined') {
 /**
  * Workspace Context Manager - Industry Standard for Multi-Tenant Apps
  *
- * v2.0 Update: Workspace context now preserved via refresh token (Shopify pattern)
- * - Backend includes workspace_id in refresh token payload
- * - On token refresh, backend automatically restores workspace context
- * - localStorage used as OPTIONAL override/fallback mechanism
+ * v3.0 - Header-Based Workspace Context (Shopify/Stripe/Linear Pattern):
+ * - Workspace sent via X-Workspace-Id header per-request (NOT in JWT)
+ * - Zustand maintains workspace state across refreshes
+ * - localStorage provides persistence across page reloads
+ * - Eliminates context drift, race conditions, and stale workspace bugs
  *
  * Security Note: workspace_id is a non-sensitive UUID reference, safe for localStorage
  * NEVER store tokens or PII here - only context identifiers
  *
  * Benefits:
- * - Seamless workspace context preservation across token refreshes ✅
- * - Cross-tab synchronization (user switches workspace, all tabs update)
- * - Survives page refresh (better UX than sessionStorage)
- * - Non-sensitive data (OWASP compliant)
+ * - No stale workspace context (header always current) ✅
+ * - No token re-issuance on switch (just update state) ✅
+ * - Instant workspace switching (no race conditions) ✅
+ * - Cross-tab synchronization (user switches workspace, all tabs update) ✅
+ * - Survives page refresh (better UX than sessionStorage) ✅
  */
 export const WorkspaceContextManager = {
   /**
@@ -628,6 +583,81 @@ export const WorkspaceContextManager = {
   hasWorkspaceContext: (): boolean => {
     return !!WorkspaceContextManager.getCurrentWorkspace()
   }
+}
+
+// ============================================================================
+// Workspace Restoration (Race Condition Safe)
+// ============================================================================
+
+import workspaceService from '../../services/authentication/workspace'
+
+let workspaceRestorePromise: Promise<WorkspaceAuthContext | null> | null = null
+
+/**
+ * Restore workspace context safely (prevents multiple parallel calls)
+ * Uses same promise-queuing pattern as refreshTokenSafe
+ *
+ * @param workspaceId - Workspace ID to restore
+ * @returns WorkspaceAuthContext if successful, null if failed
+ *
+ * When to use:
+ * - After successful login when intent has workspaceId
+ * - On page refresh to restore previous workspace context
+ */
+export async function restoreWorkspaceSafe(workspaceId: string): Promise<WorkspaceAuthContext | null> {
+  // Already restoring - return existing promise (prevents race condition)
+  if (workspaceRestorePromise) {
+    console.log('[Auth] Workspace restore already in progress, waiting...')
+    return workspaceRestorePromise
+  }
+
+  workspaceRestorePromise = (async () => {
+    try {
+      console.log('[Auth] Restoring workspace:', workspaceId)
+
+      const response = await workspaceService.switchWorkspace(workspaceId)
+
+      if (response.success && response.workspace && response.membership) {
+        const workspaceContext: WorkspaceAuthContext = {
+          id: response.workspace.id,
+          name: response.workspace.name,
+          type: response.workspace.type,
+          status: response.workspace.status,
+          role: response.membership.role,
+          permissions: response.membership.permissions,
+          is_default: false
+        }
+
+        // Update both stores
+        useAuthStore.getState().setWorkspace(workspaceContext)
+
+        console.log('✅ Workspace restored:', workspaceContext.name)
+        return workspaceContext
+      }
+
+      // Restoration failed (user lost access, workspace deleted, etc.)
+      console.warn('[Auth] Workspace restoration failed - clearing context')
+      WorkspaceContextManager.clearWorkspace()
+      return null
+    } catch (error) {
+      console.error('[Auth] Workspace restoration error:', error)
+      WorkspaceContextManager.clearWorkspace()
+      return null
+    }
+  })()
+
+  try {
+    return await workspaceRestorePromise
+  } finally {
+    workspaceRestorePromise = null
+  }
+}
+
+/**
+ * Check if workspace restoration is in progress
+ */
+export function isRestoringWorkspace(): boolean {
+  return workspaceRestorePromise !== null
 }
 
 // ============================================================================

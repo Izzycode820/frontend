@@ -9,6 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/shadcn-ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/shadcn-ui/dropdown-menu';
+import { Button } from '@/components/shadcn-ui/button';
+import { MoreHorizontal, Archive, ArchiveRestore } from 'lucide-react';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { formatCurrency } from '@/utils/currency';
 import type { GetOrdersQuery } from '@/services/graphql/admin-store/queries/orders/__generated__/getOrders.generated';
@@ -25,6 +33,8 @@ interface OrdersTableProps {
   onSelectOrder: (orderId: string) => void;
   onSelectAll: (selected: boolean) => void;
   workspaceId: string;
+  onArchiveOrder?: (orderId: string) => void;
+  onUnarchiveOrder?: (orderId: string) => void;
 }
 
 export function OrdersTable({
@@ -33,6 +43,8 @@ export function OrdersTable({
   onSelectOrder,
   onSelectAll,
   workspaceId,
+  onArchiveOrder,
+  onUnarchiveOrder,
 }: OrdersTableProps) {
   const allSelected = orders.length > 0 && selectedOrders.length === orders.length;
   const someSelected = selectedOrders.length > 0 && selectedOrders.length < orders.length;
@@ -72,6 +84,7 @@ export function OrdersTable({
             <TableHead>Fulfillment status</TableHead>
             <TableHead className="text-right">Items</TableHead>
             <TableHead>Delivery method</TableHead>
+            <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -133,6 +146,30 @@ export function OrdersTable({
                   ) : (
                     <span className="text-xs capitalize">{order.paymentMethod?.replace('_', ' ')}</span>
                   )}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {order.canBeArchived && onArchiveOrder && (
+                        <DropdownMenuItem onClick={() => onArchiveOrder(order.id)}>
+                          <Archive className="mr-2 h-4 w-4" />
+                          Archive
+                        </DropdownMenuItem>
+                      )}
+                      {order.canBeUnarchived && onUnarchiveOrder && (
+                        <DropdownMenuItem onClick={() => onUnarchiveOrder(order.id)}>
+                          <ArchiveRestore className="mr-2 h-4 w-4" />
+                          Unarchive
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))

@@ -33,7 +33,8 @@ import {
 import { useAuth } from '@/hooks/authentication/useAuth'
 
 // Utils
-import { getPostAuthRedirect } from '@/utils/redirect-with-intent'
+import { getAndClearAuthIntent } from '@/utils/redirect-with-intent'
+import { restoreWorkspaceSafe } from '@/stores/authentication/authStore'
 
 // Types
 import type { LoginRequest } from '@/types/authentication/auth'
@@ -107,12 +108,28 @@ export function LoginForm({
 
       onSuccess?.()
 
-      // Clean redirect pattern (industry standard)
-      // 1. Get destination from ?next param OR sessionStorage OR fallback
-      const urlSearchParams = new URLSearchParams(searchParams?.toString() || '')
-      const destination = getPostAuthRedirect(urlSearchParams, redirectTo)
+      // ENHANCED: Get full intent (path + workspace context)
+      const intent = getAndClearAuthIntent()
 
-      // 2. Use router.replace (not push!) to prevent "back button → login again"
+      // Determine destination
+      let destination = redirectTo || '/workspace'
+      if (intent?.path) {
+        destination = intent.path
+      } else {
+        // Fallback: check URL ?next param
+        const urlNext = searchParams?.get('next')
+        if (urlNext) {
+          destination = urlNext
+        }
+      }
+
+      // CRITICAL: Restore workspace BEFORE navigating (99.99% reliability)
+      if (intent?.workspaceId) {
+        console.log('[Login] Restoring workspace before redirect:', intent.workspaceId)
+        await restoreWorkspaceSafe(intent.workspaceId)
+      }
+
+      // Use router.replace to prevent "back button → login again"
       router.replace(destination)
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.'

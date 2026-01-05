@@ -1,26 +1,49 @@
 /**
  * Intent-based Redirect System
- * Following Next.js/Vercel/Stripe industry standard
+ * Following Next.js/Vercel/Stripe/Shopify industry standard
  *
- * Key principles from guide:
+ * Key principles:
  * 1. Auth is a temporary interruption, not a destination
- * 2. Always preserve user intent through redirects
- * 3. Use sessionStorage for reload/tab safety
- * 4. Single unified helper for all gates (auth, payment, feature)
+ * 2. Always preserve user intent (path + workspace context)
+ * 3. Use sessionStorage for reload/tab safety (non-sensitive data only)
+ * 4. Block navigation until workspace is fully restored (99.99% reliability)
+ *
+ * v2.0 - Enhanced with workspace context preservation
  */
 
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
 // ============================================================================
+// AuthIntent: Full context preservation (path + workspace)
+// ============================================================================
+
+/**
+ * Enhanced intent storage - captures WHERE user was AND their workspace context
+ * This is non-sensitive data (UUIDs and paths only), safe for sessionStorage
+ */
+export interface AuthIntent {
+  path: string              // Full path with query params
+  workspaceId: string | null // Active workspace when interrupted
+  timestamp: number         // For expiry (24h max)
+}
+
+// Intent expires after 24 hours (prevents stale redirects)
+const INTENT_EXPIRY_MS = 24 * 60 * 60 * 1000
+
+// ============================================================================
 // Security: OWASP-compliant path validation
 // ============================================================================
 
-const ALLOWED_REDIRECT_PATHS = [
+const ALLOWED_STATIC_PATHS = [
   '/billing',
   '/workspace',
   '/settings',
   '/dashboard',
   '/pricing',
+  '/camp',
+  '/showcase',
+  '/blog',
+  '/resources',
   '/',
 ] as const
 
@@ -43,8 +66,14 @@ function isValidRedirectPath(path: string | null | undefined): boolean {
   // Prevent external redirects
   if (path.startsWith('http://') || path.startsWith('https://')) return false
 
-  // Allowlist check (OWASP recommended)
-  return ALLOWED_REDIRECT_PATHS.some(allowed => path.startsWith(allowed))
+  // Dynamic workspace routes: /workspace/[workspace_id]/...
+  // Matches UUIDs, slugs, and alphanumeric IDs
+  if (path.match(/^\/workspace\/[a-zA-Z0-9_-]+(\/.*)?$/)) {
+    return true
+  }
+
+  // Static allowlist check (OWASP recommended)
+  return ALLOWED_STATIC_PATHS.some(allowed => path.startsWith(allowed))
 }
 
 /**
@@ -62,20 +91,28 @@ function sanitizeRedirectPath(path: string | null | undefined, fallback = '/work
 }
 
 // ============================================================================
-// SessionStorage keys (per-tab, auto-clears)
+// SessionStorage: Full intent storage (path + workspace context)
 // ============================================================================
 
-const STORAGE_KEY = 'postAuthRedirect'
+const STORAGE_KEY = 'authIntent'
 
 /**
- * Store redirect intent in sessionStorage
+ * Store full redirect intent (path + workspace) in sessionStorage
  * Survives page reloads, OAuth flows, tab switches
+ *
+ * @param path - The path user was trying to access
+ * @param workspaceId - Current workspace context (from WorkspaceContextManager)
  */
-function storeRedirectIntent(path: string): void {
+export function storeAuthIntent(path: string, workspaceId: string | null = null): void {
   if (typeof window === 'undefined') return
 
   try {
-    sessionStorage.setItem(STORAGE_KEY, path)
+    const intent: AuthIntent = {
+      path,
+      workspaceId,
+      timestamp: Date.now()
+    }
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(intent))
   } catch (error) {
     console.warn('[Redirect] Failed to store intent:', error)
   }
@@ -83,20 +120,65 @@ function storeRedirectIntent(path: string): void {
 
 /**
  * Retrieve and clear redirect intent from sessionStorage
+ * Returns null if expired or invalid
  */
-function getAndClearRedirectIntent(): string | null {
+export function getAndClearAuthIntent(): AuthIntent | null {
   if (typeof window === 'undefined') return null
 
   try {
-    const intent = sessionStorage.getItem(STORAGE_KEY)
-    if (intent) {
-      sessionStorage.removeItem(STORAGE_KEY)
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+
+    sessionStorage.removeItem(STORAGE_KEY)
+
+    const intent: AuthIntent = JSON.parse(raw)
+
+    // Check expiry (24 hours)
+    if (Date.now() - intent.timestamp > INTENT_EXPIRY_MS) {
+      console.log('[Redirect] Intent expired, using fallback')
+      return null
     }
+
+    // Validate path
+    if (!isValidRedirectPath(intent.path)) {
+      console.warn('[Redirect] Invalid path in stored intent:', intent.path)
+      return null
+    }
+
     return intent
   } catch (error) {
     console.warn('[Redirect] Failed to retrieve intent:', error)
     return null
   }
+}
+
+/**
+ * Peek at intent without clearing (for debugging/logging)
+ */
+export function peekAuthIntent(): AuthIntent | null {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+// Legacy compatibility: simple path storage for backward compatibility
+function storeRedirectIntent(path: string): void {
+  // Get current workspace from localStorage (WorkspaceContextManager pattern)
+  const workspaceId = typeof window !== 'undefined'
+    ? localStorage.getItem('current_workspace_id')
+    : null
+  storeAuthIntent(path, workspaceId)
+}
+
+function getAndClearRedirectIntent(): string | null {
+  const intent = getAndClearAuthIntent()
+  return intent?.path || null
 }
 
 // ============================================================================

@@ -5,6 +5,9 @@ mutation CreateCategory(
   $isVisible: Boolean
   $isFeatured: Boolean
   $sortOrder: Int
+  $slug: String
+  $metaTitle: String
+  $metaDescription: String
 ) {
   createCategory(
     name: $name
@@ -13,6 +16,9 @@ mutation CreateCategory(
     isVisible: $isVisible
     isFeatured: $isFeatured
     sortOrder: $sortOrder
+    slug: $slug
+    metaTitle: $metaTitle
+    metaDescription: $metaDescription
   ) {
     success
     category {
@@ -20,6 +26,8 @@ mutation CreateCategory(
       name
       description
       slug
+      metaTitle
+      metaDescription
       featuredMedia {
         id
         url

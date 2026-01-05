@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { Button } from '@/components/shadcn-ui/button'
 import { Card } from '@/components/shadcn-ui/card'
-import { CategoryTitleSection } from './CategoryTitleSection'
+import { CategoryTitleDescriptionSection } from './title-description'
+import { CategoryProductsSection } from './products'
+import { CategorySEOSection } from './seo'
 import { CategoryMediaSection } from './CategoryMediaSection'
 import { CategoryVisibilitySection } from './CategoryVisibilitySection'
 import { CategorySidebar } from './CategorySidebar'
@@ -11,15 +13,20 @@ import { Save, Eye } from 'lucide-react'
 import type { MediaItem } from '@/components/workspace/store/shared/files-and-media'
 
 // Form data based on CreateCategory mutation variables
-// name, description, featuredMediaId, isVisible, isFeatured, sortOrder
+// name, description, featuredMediaId, isVisible, isFeatured, sortOrder, productIds, SEO fields
 export interface CategoryFormData {
   name: string
   description?: string
   mediaItem?: MediaItem  // UI-only: manages category image
   featuredMediaId?: string  // Backend: upload ID for featured image
+  productIds: string[]  // Selected product IDs for this category
   isVisible: boolean
   isFeatured: boolean
   sortOrder?: number
+  // SEO fields (will be added to backend later)
+  metaTitle: string
+  metaDescription: string
+  slug: string
 }
 
 export interface CategoryFormProps {
@@ -48,9 +55,13 @@ export function CategoryForm({
     description: '',
     mediaItem: undefined,
     featuredMediaId: undefined,
+    productIds: [],
     isVisible: true,
     isFeatured: false,
     sortOrder: 0,
+    metaTitle: '',
+    metaDescription: '',
+    slug: '',
     ...initialData,
   })
 
@@ -76,27 +87,27 @@ export function CategoryForm({
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Main Form Column */}
       <div className="flex-1 space-y-6">
-        <CategoryTitleSection
-          name={formData.name}
+        <CategoryTitleDescriptionSection
+          title={formData.name}
           description={formData.description || ''}
-          onNameChange={(name) => updateFormData({ name })}
+          onTitleChange={(title) => updateFormData({ name: title })}
           onDescriptionChange={(description) => updateFormData({ description })}
         />
 
-        <CategoryMediaSection
-          mediaItem={formData.mediaItem}
-          onMediaChange={(mediaItem) => updateFormData({ mediaItem })}
-          existingImage={existingImage}
-          onRemoveExisting={onRemoveExistingImage}
+        <CategoryProductsSection
+          selectedProductIds={formData.productIds}
+          onProductsChange={(productIds) => updateFormData({ productIds })}
         />
 
-        <CategoryVisibilitySection
-          isVisible={formData.isVisible}
-          isFeatured={formData.isFeatured}
-          sortOrder={formData.sortOrder || 0}
-          onIsVisibleChange={(isVisible) => updateFormData({ isVisible })}
-          onIsFeaturedChange={(isFeatured) => updateFormData({ isFeatured })}
-          onSortOrderChange={(sortOrder) => updateFormData({ sortOrder })}
+        <CategorySEOSection
+          categoryName={formData.name}
+          categoryDescription={formData.description || ''}
+          metaTitle={formData.metaTitle}
+          metaDescription={formData.metaDescription}
+          slug={formData.slug}
+          onMetaTitleChange={(metaTitle) => updateFormData({ metaTitle })}
+          onMetaDescriptionChange={(metaDescription) => updateFormData({ metaDescription })}
+          onSlugChange={(slug) => updateFormData({ slug })}
         />
       </div>
 
@@ -109,6 +120,13 @@ export function CategoryForm({
           onIsVisibleChange={(isVisible) => updateFormData({ isVisible })}
           onIsFeaturedChange={(isFeatured) => updateFormData({ isFeatured })}
           onSortOrderChange={(sortOrder) => updateFormData({ sortOrder })}
+        />
+
+        <CategoryMediaSection
+          mediaItem={formData.mediaItem}
+          onMediaChange={(mediaItem) => updateFormData({ mediaItem })}
+          existingImage={existingImage}
+          onRemoveExisting={onRemoveExistingImage}
         />
 
         {/* Action Buttons */}

@@ -15,9 +15,24 @@ import { ProductsTable } from './ProductsTable';
 import { ProductsToolbar } from './ProductsToolbar';
 import { ProductsFilters } from './ProductsFilters';
 import { ProductsEmptyState } from './ProductsEmptyState';
+import { DuplicateProductModal } from './DuplicateProductModal';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/shadcn-ui/pagination';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GetProductsListDocument } from '@/services/graphql/admin-store/queries/products/__generated__/GetProductsList.generated';
+import {
+  GetProductsListDocument,
+  GetProductsListQuery,
+  GetProductsListQueryVariables
+} from '@/services/graphql/admin-store/queries/products/__generated__/GetProductsList.generated';
+import { WorkspaceStoreProductStatusChoices } from '@/types/workspace/store/graphql-base';
 import { DeleteProductDocument } from '@/services/graphql/admin-store/mutations/products/__generated__/DeleteProduct.generated';
 import { DuplicateProductDocument } from '@/services/graphql/admin-store/mutations/products/__generated__/DuplicateProduct.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
@@ -31,9 +46,18 @@ export default function ProductsListContainer() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
 
+  // Pagination state
+  const pageSize = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [cursors, setCursors] = useState<{ [page: number]: string }>({});
+
+  // Duplicate modal state
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
+  const [productToDuplicate, setProductToDuplicate] = useState<{ id: string; name: string } | null>(null);
+
   // Mutations
   const [deleteProduct] = useMutation(DeleteProductDocument);
-  const [duplicateProduct] = useMutation(DuplicateProductDocument);
+  const [duplicateProduct, { loading: isDuplicating }] = useMutation(DuplicateProductDocument);
 
   // Debug: Log workspace context
   console.log('[ProductsListContainer] Workspace context:', {
@@ -43,14 +67,32 @@ export default function ProductsListContainer() {
   });
 
   // Fetch products with GraphQL (skip until workspace is loaded)
-  const { data, loading, error, fetchMore, refetch } = useQuery(GetProductsListDocument, {
+  const { data, loading, error, refetch } = useQuery<GetProductsListQuery, GetProductsListQueryVariables>(GetProductsListDocument, {
     variables: {
-      first: 20,
+      first: pageSize,
+      after: cursors[currentPage] || undefined,
       search: search || undefined,
-      status: statusFilter,
+      status: statusFilter ? (statusFilter as WorkspaceStoreProductStatusChoices) : undefined,
     },
     skip: !currentWorkspace, // Don't query until workspace context is available
   });
+
+  // Store cursor for next page when data loads
+  React.useEffect(() => {
+    const endCursor = data?.products?.pageInfo?.endCursor;
+    if (endCursor) {
+      setCursors(prev => {
+        // Avoid unnecessary updates
+        if (prev[currentPage + 1] === endCursor) return prev;
+
+        console.log(`[ProductsList] Storing cursor for page ${currentPage + 1}:`, endCursor);
+        return {
+          ...prev,
+          [currentPage + 1]: endCursor
+        };
+      });
+    }
+  }, [data, currentPage]);
 
   // Debug: Log query state
   console.log('[ProductsListContainer] Query state:', {
@@ -80,6 +122,8 @@ export default function ProductsListContainer() {
   }).filter(Boolean) || [];
 
   const hasNextPage = data?.products?.pageInfo?.hasNextPage || false;
+  const totalCount = data?.products?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   // Handlers
   const handleAddProduct = () => {
@@ -95,22 +139,46 @@ export default function ProductsListContainer() {
     router.push(`/workspace/${currentWorkspace?.id}/store/products/${productId}/preview`);
   };
 
-  const handleDuplicateProduct = async (productId: string) => {
-    try {
-      const product = products.find(p => p.id === productId);
-      const newName = product ? `${product.name} (Copy)` : 'Product Copy';
+  const handleDuplicateProduct = (productId: string) => {
+    // Find product and open modal
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      setProductToDuplicate({ id: product.id, name: product.name });
+      setDuplicateModalOpen(true);
+    }
+  };
 
-      const { data: duplicateData } = await duplicateProduct({
-        variables: {
-          productId,
-          newName,
-          copyVariants: true,
-          copyInventory: false,
-        },
-      });
+  const handleConfirmDuplicate = async (
+    customName: string | null,
+    copyVariants: boolean,
+    copyInventory: boolean
+  ) => {
+    if (!productToDuplicate) return;
+
+    try {
+      const variables: any = {
+        productId: productToDuplicate.id,
+        copyVariants,
+        copyInventory,
+      };
+
+      // Only include newName if user provided a custom one
+      if (customName) {
+        variables.newName = customName;
+      }
+
+      const { data: duplicateData } = await duplicateProduct({ variables });
 
       if (duplicateData?.duplicateProduct?.success) {
-        toast.success(`Product duplicated: ${newName}`);
+        const newProductName = duplicateData?.duplicateProduct?.product?.name || 'Product';
+        const newProductSlug = duplicateData?.duplicateProduct?.product?.slug;
+
+        toast.success(
+          `Product duplicated: ${newProductName}${newProductSlug ? ` (${newProductSlug})` : ''}`
+        );
+
+        setDuplicateModalOpen(false);
+        setProductToDuplicate(null);
         refetch(); // Refresh the list
       } else {
         toast.error(duplicateData?.duplicateProduct?.error || 'Failed to duplicate product');
@@ -144,15 +212,29 @@ export default function ProductsListContainer() {
     toast.info(`Bulk ${action} ${selectedProducts.length} products - Coming soon!`);
   };
 
-  const handleLoadMore = () => {
-    if (hasNextPage && data?.products?.pageInfo?.endCursor) {
-      fetchMore({
-        variables: {
-          after: data.products.pageInfo.endCursor,
-        },
-      });
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
     }
   };
+
+  const handleNextPage = () => {
+    if (hasNextPage) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+    setCursors({});
+  }, [search, statusFilter]);
 
   // Error state
   if (error) {
@@ -237,17 +319,44 @@ export default function ProductsListContainer() {
         />
       )}
 
-      {/* Load More */}
-      {hasNextPage && (
-        <div className="flex justify-center">
-          <button
-            onClick={handleLoadMore}
-            disabled={loading}
-            className="text-sm text-primary hover:underline disabled:opacity-50"
-          >
-            {loading ? 'Loading...' : 'Load more products'}
-          </button>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-end px-2">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={handlePreviousPage}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+
+              <PaginationItem>
+                <div className="flex items-center justify-center px-4 font-medium min-w-[100px]">
+                  Page {currentPage} of {Math.ceil(totalCount / pageSize)}
+                </div>
+              </PaginationItem>
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={handleNextPage}
+                  className={!hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
+      )}
+
+      {/* Duplicate Product Modal */}
+      {productToDuplicate && (
+        <DuplicateProductModal
+          open={duplicateModalOpen}
+          onOpenChange={setDuplicateModalOpen}
+          productName={productToDuplicate.name}
+          onConfirm={handleConfirmDuplicate}
+          isLoading={isDuplicating}
+        />
       )}
     </div>
   );

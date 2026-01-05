@@ -1,7 +1,12 @@
 'use client';
 
-import { useQuery } from '@apollo/client/react';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { GetOrderDocument } from '@/services/graphql/admin-store/queries/orders/__generated__/getOrder.generated';
+import { CancelOrderDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/CancelOrder.generated';
+import { ArchiveOrderDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/ArchiveOrder.generated';
+import { UnarchiveOrderDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/UnarchiveOrder.generated';
+import { UpdateOrderStatusDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/UpdateOrderStatus.generated';
+import { MarkOrderAsPaidDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/MarkOrderAsPaid.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { OrderDetailsHeader } from './OrderDetailsHeader';
@@ -23,6 +28,31 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
     skip: !currentWorkspace,
   });
 
+  const [cancelOrder] = useMutation(CancelOrderDocument, {
+    refetchQueries: ['GetOrder', 'GetOrders'],
+    awaitRefetchQueries: true,
+  });
+
+  const [archiveOrder] = useMutation(ArchiveOrderDocument, {
+    refetchQueries: ['GetOrder', 'GetOrders'],
+    awaitRefetchQueries: true,
+  });
+
+  const [unarchiveOrder] = useMutation(UnarchiveOrderDocument, {
+    refetchQueries: ['GetOrder', 'GetOrders'],
+    awaitRefetchQueries: true,
+  });
+
+  const [updateOrderStatus] = useMutation(UpdateOrderStatusDocument, {
+    refetchQueries: ['GetOrder', 'GetOrders'],
+    awaitRefetchQueries: true,
+  });
+
+  const [markOrderAsPaid] = useMutation(MarkOrderAsPaidDocument, {
+    refetchQueries: ['GetOrder', 'GetOrders'],
+    awaitRefetchQueries: true,
+  });
+
   const order = data?.order;
 
   const handleEdit = () => {
@@ -33,13 +63,79 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
     toast.info('Refund functionality coming soon!');
   };
 
-  const handleCancel = () => {
-    toast.info('Cancel order functionality coming soon!');
+  const handleCancel = async () => {
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+
+    try {
+      const result = await cancelOrder({ variables: { orderId } });
+      if (result.data?.cancelOrder?.success) {
+        toast.success('Order cancelled successfully');
+      } else {
+        toast.error(result.data?.cancelOrder?.error || 'Failed to cancel order');
+      }
+    } catch (e) {
+      toast.error('An error occurred');
+    }
   };
 
-  const handleMarkAsFulfilled = () => {
-    toast.info('Mark as fulfilled functionality coming soon!');
-    // TODO: Call mutation to update order status
+  const handleArchive = async () => {
+    try {
+      const result = await archiveOrder({ variables: { orderId } });
+      if (result.data?.archiveOrder?.success) {
+        toast.success('Order archived successfully');
+      } else {
+        toast.error(result.data?.archiveOrder?.error || 'Failed to archive order');
+      }
+    } catch (e) {
+      toast.error('An error occurred');
+    }
+  };
+
+  const handleUnarchive = async () => {
+    try {
+      const result = await unarchiveOrder({ variables: { orderId } });
+      if (result.data?.unarchiveOrder?.success) {
+        toast.success('Order unarchived successfully');
+      } else {
+        toast.error(result.data?.unarchiveOrder?.error || 'Failed to unarchive order');
+      }
+    } catch (e) {
+      toast.error('An error occurred');
+    }
+  };
+
+  const handleMarkAsFulfilled = async () => {
+    try {
+      const result = await updateOrderStatus({
+        variables: {
+          orderId,
+          newStatus: 'fulfilled',
+        },
+      });
+
+      if (result.data?.updateOrderStatus?.success) {
+        toast.success('Order marked as fulfilled');
+      } else {
+        toast.error(result.data?.updateOrderStatus?.error || 'Failed to mark order as fulfilled');
+      }
+    } catch (e) {
+      toast.error('An error occurred');
+      console.error('Fulfill order error:', e);
+    }
+  };
+
+  const handleMarkAsPaid = async () => {
+    try {
+      const result = await markOrderAsPaid({ variables: { orderId } });
+      if (result.data?.markOrderAsPaid?.success) {
+        toast.success('Order marked as paid');
+      } else {
+        toast.error(result.data?.markOrderAsPaid?.error || 'Failed to mark order as paid');
+      }
+    } catch (e) {
+      toast.error('An error occurred');
+      console.error('Mark as paid error:', e);
+    }
   };
 
   // Loading state
@@ -89,8 +185,14 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
         onEdit={handleEdit}
         onRefund={handleRefund}
         onCancel={handleCancel}
-        canBeCancelled={order.canBeCancelled}
-        canBeRefunded={order.canBeRefunded}
+        onArchive={handleArchive}
+        onUnarchive={handleUnarchive}
+        canBeCancelled={order.canBeCancelled ?? false}
+        canBeRefunded={order.canBeRefunded ?? false}
+        canBeArchived={order.canBeArchived ?? false}
+        canBeUnarchived={order.canBeUnarchived ?? false}
+        canMarkAsPaid={order.canMarkAsPaid ?? false}
+        onMarkAsPaid={handleMarkAsPaid}
       />
 
       {/* Main Content */}
@@ -101,7 +203,15 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
             {/* Unfulfillment Card */}
             <UnfulfillmentCard
               status={order.status}
-              items={order.items || []}
+              items={order.items?.filter((item): item is NonNullable<typeof item> => item !== null).map(item => ({
+                id: item.id,
+                productName: item.productName,
+                productSku: item.productSku,
+                quantity: item.quantity,
+                unitPrice: String(item.unitPrice),
+                totalPrice: String(item.totalPrice ?? 0),
+                productData: item.productData
+              })) || []}
               onMarkAsFulfilled={handleMarkAsFulfilled}
             />
 
@@ -115,22 +225,34 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
               discountAmount={order.discountAmount}
               totalAmount={order.totalAmount}
               currency={order.currency}
-              itemCount={order.itemCount}
+              itemCount={order.itemCount ?? 0}
             />
 
             {/* Timeline */}
             <TimelineSection
-              createdAt={order.createdAt}
-              confirmedAt={order.confirmedAt}
-              shippedAt={order.shippedAt}
-              deliveredAt={order.deliveredAt}
-              orderNumber={order.orderNumber}
+              orderId={order.id}
+              events={(order.timeline || [])
+                .filter((event): event is NonNullable<typeof event> => event !== null)
+                .map(event => ({
+                  id: event.id,
+                  type: event.type as 'COMMENT' | 'STATUS_CHANGE' | 'NOTIFICATION' | 'ORDER_CREATED',
+                  message: event.message,
+                  createdAt: event.createdAt,
+                  author: event.author ? {
+                    name: `${event.author.firstName} ${event.author.lastName}`.trim() || event.author.email,
+                    initials: `${event.author.firstName?.[0] || ''}${event.author.lastName?.[0] || ''}`.toUpperCase() || 'U'
+                  } : undefined,
+                  metadata: event.metadata || {},
+                  isInternal: event.isInternal ?? true
+                }))}
+              onCommentAdded={() => refetch()}
             />
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="lg:col-span-1">
             <OrderSidebar
+              orderId={order.id}
               notes={order.notes}
               customer={order.customer}
               customerName={order.customerName}

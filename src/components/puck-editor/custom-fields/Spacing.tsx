@@ -16,11 +16,9 @@ interface SpacingProps {
   value: SpacingValue;
   onChange: (value: SpacingValue) => void;
   unit?: string;
+  name: string;
 }
 
-/**
- * Spacing - Visual box model editor (padding/margin)
- */
 export function Spacing({ value, onChange, unit = 'px' }: SpacingProps) {
   const [isLinked, setIsLinked] = useState(
     value.top === value.right && value.right === value.bottom && value.bottom === value.left
@@ -28,7 +26,6 @@ export function Spacing({ value, onChange, unit = 'px' }: SpacingProps) {
 
   const handleChange = (side: keyof SpacingValue, newValue: number) => {
     if (isLinked) {
-      // Update all sides
       onChange({
         top: newValue,
         right: newValue,
@@ -36,7 +33,6 @@ export function Spacing({ value, onChange, unit = 'px' }: SpacingProps) {
         left: newValue,
       });
     } else {
-      // Update single side
       onChange({
         ...value,
         [side]: newValue,
@@ -46,7 +42,6 @@ export function Spacing({ value, onChange, unit = 'px' }: SpacingProps) {
 
   return (
     <div className="space-y-2">
-      {/* Link Toggle */}
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
           {isLinked ? 'All sides linked' : 'Individual sides'}
@@ -66,10 +61,8 @@ export function Spacing({ value, onChange, unit = 'px' }: SpacingProps) {
         </Button>
       </div>
 
-      {/* Box Model Visualization */}
       <div className="border rounded-lg p-4 bg-muted/30">
         <div className="grid grid-cols-3 gap-2">
-          {/* Top Row */}
           <div />
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs text-muted-foreground">Top</span>
@@ -82,7 +75,6 @@ export function Spacing({ value, onChange, unit = 'px' }: SpacingProps) {
           </div>
           <div />
 
-          {/* Middle Row */}
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground">Left</span>
             <Input
@@ -107,7 +99,6 @@ export function Spacing({ value, onChange, unit = 'px' }: SpacingProps) {
             <span className="text-xs text-muted-foreground">Right</span>
           </div>
 
-          {/* Bottom Row */}
           <div />
           <div className="flex flex-col items-center gap-1">
             <Input

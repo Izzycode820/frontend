@@ -69,13 +69,13 @@ export interface TokenResponse {
 }
 
 /**
- * Refresh Token Response
+ * Refresh Token Response (Industry Standard: OAuth2)
  *
- * Workspace Context Preservation (v2.0 - Shopify Pattern):
- * - Backend automatically extracts workspace_id from refresh token
- * - If user was in workspace, new tokens maintain workspace context
- * - workspace field will be populated if context is preserved
- * - No frontend intervention needed - seamless workspace experience
+ * v3.0 - Simple Session Extension:
+ * - Refresh tokens extend sessions, they don't change authorization scope
+ * - NO workspace context in response (workspace sent via X-Workspace-Id header)
+ * - Frontend maintains workspace state in Zustand
+ * - Eliminates complex refresh logic and race conditions
  */
 export interface RefreshTokenResponse {
   success: boolean;
@@ -93,40 +93,42 @@ export interface RefreshTokenResponse {
     avatar?: string;
     email_verified: boolean;
   };
-  workspace?: WorkspaceAuthContext; // Auto-populated if user was in workspace
   message?: string;
   error?: string;
 }
 
 /**
- * JWT Payload Structure
+ * JWT Payload Structure (Industry Standard: Shopify/Stripe/Linear)
  *
- * Token Type Differences (v2.0):
- * - Access Token: Always includes workspace context if user is in workspace
- * - Refresh Token: NOW includes workspace_id for seamless context preservation
+ * v3.0 - Header-Based Workspace Context:
+ * - JWT contains ONLY user identity + subscription tier
+ * - NO workspace fields (workspace sent via X-Workspace-Id header per-request)
+ * - Eliminates context drift, race conditions, and stale workspace bugs
  *
- * Workspace Context (conditional fields):
- * - workspace_id: Present if user is in workspace context
- * - workspace_type, workspace_permissions, workspace_role: Only in access tokens
+ * Access Token = Identity + Global Roles + Subscription
+ * Refresh Token = Identity only (extends session, doesn't change scope)
  */
 export interface JWTPayload {
-  user_id: number; // Aligned with backend User model
+  // User identity claims
+  user_id: number;
   email: string;
   username: string;
-  workspace_id?: string; // NOW in both access & refresh tokens (v2.0)
-  workspace_type?: string; // Access token only
-  workspace_permissions?: string[]; // Access token only
-  workspace_role?: string; // Access token only
-  subscription?: SubscriptionData; // Full subscription data from JWT
-  feature_access?: {
-    bitmap: number;
-    tier: string;
-    expires?: string;
-  }; // Aligned with backend enhance_access_payload
+
+  // Global system roles (NOT workspace-specific)
+  is_staff?: boolean;
+  is_superuser?: boolean;
+  is_active?: boolean;
+
+  // Subscription data (tier, status, billing)
+  subscription?: SubscriptionData;
+
+  // Standard JWT claims
   iat: number;
   exp: number;
   type: 'access' | 'refresh';
   jti: string;
+  iss?: string;
+  aud?: string;
 }
 
 // ============================================================================

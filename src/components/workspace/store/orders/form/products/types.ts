@@ -24,12 +24,8 @@ export interface ProductsSectionProps {
   onItemsChange: (items: OrderItem[]) => void;
 }
 
-export interface ProductSearchModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onAddProduct: (product: ProductSearchResult) => void;
-  selectedProductIds: string[];
-}
+// Note: ProductSearchModalProps is now in shared/products/types.ts
+// We use the shared ProductSearchModal component
 
 export interface ProductItemProps {
   item: OrderItem;

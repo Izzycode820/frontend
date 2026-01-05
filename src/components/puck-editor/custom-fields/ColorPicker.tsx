@@ -9,6 +9,7 @@ import { Check } from 'lucide-react';
 interface ColorPickerProps {
   value: string;
   onChange: (value: string) => void;
+  name: string;
 }
 
 const PRESET_COLORS = [
@@ -18,9 +19,6 @@ const PRESET_COLORS = [
   '#F43F5E', '#64748B', '#6B7280', '#71717A', '#78716C', '#57534E',
 ];
 
-/**
- * ColorPicker - Visual color selector with presets
- */
 export function ColorPicker({ value, onChange }: ColorPickerProps) {
   const [customColor, setCustomColor] = useState(value || '#000000');
 
@@ -52,7 +50,6 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
         </PopoverTrigger>
         <PopoverContent className="w-64 p-3" align="start">
           <div className="space-y-3">
-            {/* Hex Input */}
             <div className="flex gap-2">
               <Input
                 type="text"
@@ -70,7 +67,6 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
               />
             </div>
 
-            {/* Preset Colors */}
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-2">Presets</p>
               <div className="grid grid-cols-8 gap-1.5">

@@ -78,6 +78,29 @@ export interface CheckoutBreakdown {
 export interface Mutation {
   __typename?: 'Mutation';
   /**
+   * Determine checkout action type based on user's current subscription state.
+   *
+   * Called by PricingPage BEFORE navigation to determine which flow to use.
+   * This is the source of truth for action type - frontend doesn't guess.
+   *
+   * Returns one of:
+   * - subscribe: No subscription or expired, go to checkout
+   * - renew: Same tier, in renewal window, go to checkout
+   * - upgrade: Higher tier selected, go to upgrade checkout
+   * - downgrade: Lower tier selected, show confirmation modal (no checkout)
+   * - already_on_plan: Same tier, not in renewal window
+   */
+  prepareIntent?: Maybe<PrepareIntent>;
+  /**
+   * Prepare renewal checkout - Returns AUTHORITATIVE PRICING for current plan
+   *
+   * Security:
+   * - Verifies user has active subscription
+   * - Validates renewal window (5 days)
+   * - Returns price of CURRENT plan (no user input needed)
+   */
+  prepareRenewalCheckout?: Maybe<PrepareRenewalCheckout>;
+  /**
    * Prepare subscription checkout - Returns AUTHORITATIVE PRICING
    *
    * SECURITY BOUNDARY: This mutation re-derives price from source of truth
@@ -92,6 +115,26 @@ export interface Mutation {
    * 4. Payment: Creates PaymentIntent with backend-computed amount
    */
   prepareSubscriptionCheckout?: Maybe<PrepareSubscriptionCheckout>;
+  /**
+   * Prepare upgrade checkout - Returns AUTHORITATIVE PRICING for upgrade
+   *
+   * Security:
+   * - Verifies user has active subscription
+   * - Validates target tier is higher than current
+   * - Returns upgrade amount (future: could include proration)
+   */
+  prepareUpgradeCheckout?: Maybe<PrepareUpgradeCheckout>;
+}
+
+
+/**
+ * Subscription mutations
+ *
+ * Platform-level mutations (auth required, no workspace):
+ * - prepareSubscriptionCheckout: Get authoritative pricing for checkout
+ */
+export interface MutationPrepareIntentArgs {
+  intentData: PrepareIntentInput;
 }
 
 
@@ -103,6 +146,17 @@ export interface Mutation {
  */
 export interface MutationPrepareSubscriptionCheckoutArgs {
   checkoutData: PrepareCheckoutInput;
+}
+
+
+/**
+ * Subscription mutations
+ *
+ * Platform-level mutations (auth required, no workspace):
+ * - prepareSubscriptionCheckout: Get authoritative pricing for checkout
+ */
+export interface MutationPrepareUpgradeCheckoutArgs {
+  upgradeData: PrepareUpgradeInput;
 }
 
 /** An object with an ID */
@@ -222,6 +276,83 @@ export interface PrepareCheckoutInput {
 }
 
 /**
+ * Determine checkout action type based on user's current subscription state.
+ *
+ * Called by PricingPage BEFORE navigation to determine which flow to use.
+ * This is the source of truth for action type - frontend doesn't guess.
+ *
+ * Returns one of:
+ * - subscribe: No subscription or expired, go to checkout
+ * - renew: Same tier, in renewal window, go to checkout
+ * - upgrade: Higher tier selected, go to upgrade checkout
+ * - downgrade: Lower tier selected, show confirmation modal (no checkout)
+ * - already_on_plan: Same tier, not in renewal window
+ */
+export interface PrepareIntent {
+  __typename?: 'PrepareIntent';
+  /** Action type: subscribe, renew, upgrade, downgrade, already_on_plan */
+  action?: Maybe<Scalars['String']['output']>;
+  /** Expected amount (for display) */
+  amount?: Maybe<Scalars['Float']['output']>;
+  /** Currency code */
+  currency?: Maybe<Scalars['String']['output']>;
+  /** Current plan name (for downgrade confirmation) */
+  currentPlanName?: Maybe<Scalars['String']['output']>;
+  /** Days until renewal window opens */
+  daysUntilRenewal?: Maybe<Scalars['Int']['output']>;
+  /** Error message if any */
+  error?: Maybe<Scalars['String']['output']>;
+  /** Error code */
+  errorCode?: Maybe<Scalars['String']['output']>;
+  /** User-friendly message */
+  message?: Maybe<Scalars['String']['output']>;
+  /** Target plan display name */
+  planName?: Maybe<Scalars['String']['output']>;
+  /** intro or regular */
+  pricingMode?: Maybe<Scalars['String']['output']>;
+  /** When downgrade takes effect (ISO date) */
+  scheduleDate?: Maybe<Scalars['String']['output']>;
+  success?: Maybe<Scalars['Boolean']['output']>;
+}
+
+/** Input for intent preparation - just the target tier */
+export interface PrepareIntentInput {
+  /** Billing cycle (monthly, yearly), defaults to monthly */
+  cycle?: InputMaybe<Scalars['String']['input']>;
+  /** Target plan tier (beginning, pro, enterprise) */
+  tier: Scalars['String']['input'];
+}
+
+/**
+ * Prepare renewal checkout - Returns AUTHORITATIVE PRICING for current plan
+ *
+ * Security:
+ * - Verifies user has active subscription
+ * - Validates renewal window (5 days)
+ * - Returns price of CURRENT plan (no user input needed)
+ */
+export interface PrepareRenewalCheckout {
+  __typename?: 'PrepareRenewalCheckout';
+  /** Authoritative renewal amount */
+  amount?: Maybe<Scalars['Float']['output']>;
+  /** Price breakdown */
+  breakdown?: Maybe<CheckoutBreakdown>;
+  /** Currency code */
+  currency?: Maybe<Scalars['String']['output']>;
+  /** Billing cycle duration */
+  cycleDurationDays?: Maybe<Scalars['Int']['output']>;
+  /** Error message if any */
+  error?: Maybe<Scalars['String']['output']>;
+  /** Error code */
+  errorCode?: Maybe<Scalars['String']['output']>;
+  /** User-friendly message */
+  message?: Maybe<Scalars['String']['output']>;
+  /** Plan display name */
+  planName?: Maybe<Scalars['String']['output']>;
+  success?: Maybe<Scalars['Boolean']['output']>;
+}
+
+/**
  * Prepare subscription checkout - Returns AUTHORITATIVE PRICING
  *
  * SECURITY BOUNDARY: This mutation re-derives price from source of truth
@@ -258,6 +389,45 @@ export interface PrepareSubscriptionCheckout {
   /** Plan display name */
   planName?: Maybe<Scalars['String']['output']>;
   success?: Maybe<Scalars['Boolean']['output']>;
+}
+
+/**
+ * Prepare upgrade checkout - Returns AUTHORITATIVE PRICING for upgrade
+ *
+ * Security:
+ * - Verifies user has active subscription
+ * - Validates target tier is higher than current
+ * - Returns upgrade amount (future: could include proration)
+ */
+export interface PrepareUpgradeCheckout {
+  __typename?: 'PrepareUpgradeCheckout';
+  /** Authoritative upgrade amount */
+  amount?: Maybe<Scalars['Float']['output']>;
+  /** Price breakdown */
+  breakdown?: Maybe<CheckoutBreakdown>;
+  /** Currency code */
+  currency?: Maybe<Scalars['String']['output']>;
+  /** Current plan name */
+  currentPlanName?: Maybe<Scalars['String']['output']>;
+  /** Billing cycle duration */
+  cycleDurationDays?: Maybe<Scalars['Int']['output']>;
+  /** Error message if any */
+  error?: Maybe<Scalars['String']['output']>;
+  /** Error code */
+  errorCode?: Maybe<Scalars['String']['output']>;
+  /** User-friendly message */
+  message?: Maybe<Scalars['String']['output']>;
+  /** Target plan display name */
+  planName?: Maybe<Scalars['String']['output']>;
+  success?: Maybe<Scalars['Boolean']['output']>;
+}
+
+/** Input for upgrade checkout preparation */
+export interface PrepareUpgradeInput {
+  /** Billing cycle (monthly, yearly) */
+  cycle?: InputMaybe<Scalars['String']['input']>;
+  /** Target plan tier (pro, enterprise) */
+  tier: Scalars['String']['input'];
 }
 
 /**
@@ -449,8 +619,8 @@ export enum SubscriptionSubscriptionHistoryStatusChoices {
 
 /** An enumeration. */
 export enum SubscriptionSubscriptionPlanTierChoices {
-  /** Beginner */
-  Beginner = 'BEGINNER',
+  /** Beginning */
+  Beginning = 'BEGINNING',
   /** Enterprise */
   Enterprise = 'ENTERPRISE',
   /** Free */

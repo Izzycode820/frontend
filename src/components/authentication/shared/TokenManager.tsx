@@ -2,12 +2,16 @@
  * Token Management Component
  * Handles silent token refresh and session management
  * Uses existing auth store and service infrastructure
+ *
+ * v2.0 - Enhanced with soft navigation and intent preservation
  */
 
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuthStore, authSelectors } from '@/stores/authentication/authStore'
+import { storeAuthIntent } from '@/utils/redirect-with-intent'
 
 interface TokenManagerProps {
   children: React.ReactNode
@@ -20,8 +24,10 @@ export function TokenManager({
   refreshBeforeExpiry = 5, // Refresh 5 minutes before expiry
   checkInterval = 60000 // Check every minute
 }: TokenManagerProps) {
+  const router = useRouter()
   const intervalRef = React.useRef<NodeJS.Timeout | null>(null)
   const refreshingRef = React.useRef(false)
+  const [shouldRedirectToLogin, setShouldRedirectToLogin] = React.useState(false)
 
   // Auth store selectors
   const isAuthenticated = useAuthStore(authSelectors.isAuthenticated)
@@ -29,6 +35,14 @@ export function TokenManager({
   const getTimeUntilExpiry = useAuthStore(state => state.getTimeUntilExpiry)
   const refreshTokenSafe = useAuthStore(state => state.refreshTokenSafe)
   const setLogoutSuccess = useAuthStore(state => state.setLogoutSuccess)
+
+  // Soft navigation effect - triggers after logout state update
+  React.useEffect(() => {
+    if (shouldRedirectToLogin) {
+      router.push('/auth/login?expired=true')
+      setShouldRedirectToLogin(false)
+    }
+  }, [shouldRedirectToLogin, router])
 
   const checkAndRefreshToken = React.useCallback(async () => {
     if (refreshingRef.current || !isAuthenticated) return
@@ -50,17 +64,17 @@ export function TokenManager({
         } catch (error) {
           console.error('Token refresh failed:', error)
 
-          // If refresh fails, logout user
+          // CRITICAL: Capture intent BEFORE logout (preserves workspace context)
+          const currentPath = window.location.pathname + window.location.search
+          const currentWorkspaceId = localStorage.getItem('current_workspace_id')
+          storeAuthIntent(currentPath, currentWorkspaceId)
+
+          // Now logout user (this clears workspace context in store)
           setLogoutSuccess()
 
-          // Redirect to login page
-          if (typeof window !== 'undefined') {
-            const currentPath = window.location.pathname
-            const returnUrl = currentPath !== '/auth/login' && currentPath !== '/auth/signup'
-              ? `?returnUrl=${encodeURIComponent(currentPath)}`
-              : ''
-            window.location.href = `/auth/login${returnUrl}`
-          }
+          // Use soft navigation (preserves React state where possible)
+          // router.push is called in useEffect below after state update
+          setShouldRedirectToLogin(true)
         }
       }
     } catch (error) {

@@ -29,11 +29,11 @@ export function UnfulfillmentCard({
 
   return (
     <Card>
-      <CardHeader className="bg-yellow-50 border-b">
+      <CardHeader className="bg-yellow-50 dark:bg-yellow-900/10 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-yellow-100 rounded">
-              <Package className="h-4 w-4 text-yellow-700" />
+            <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded">
+              <Package className="h-4 w-4 text-yellow-700 dark:text-yellow-400" />
             </div>
             <CardTitle className="text-base">
               {isFulfilled ? 'Fulfilled' : 'Unfulfilled'}
@@ -54,7 +54,9 @@ export function UnfulfillmentCard({
             let productImage = null;
             try {
               const productData = item.productData ? JSON.parse(item.productData) : null;
-              productImage = productData?.image;
+              if (productData?.images && Array.isArray(productData.images) && productData.images.length > 0) {
+                productImage = productData.images[0].url;
+              }
             } catch (e) {
               // Ignore parse errors
             }
@@ -62,16 +64,16 @@ export function UnfulfillmentCard({
             return (
               <div key={item.id} className="p-4 flex items-center gap-4">
                 {/* Product Image */}
-                <div className="w-12 h-12 bg-muted rounded overflow-hidden flex-shrink-0">
+                <div className="w-12 h-12 flex-shrink-0">
                   {productImage ? (
                     <img
                       src={productImage}
                       alt={item.productName}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full rounded-md object-cover border"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                      No image
+                    <div className="w-full h-full rounded-md bg-muted flex items-center justify-center border">
+                      <span className="text-[10px] text-muted-foreground">No image</span>
                     </div>
                   )}
                 </div>
@@ -101,7 +103,7 @@ export function UnfulfillmentCard({
         {/* Action Button */}
         {!isFulfilled && (
           <div className="p-4 border-t">
-            <Button onClick={onMarkAsFulfilled} className="w-full">
+            <Button onClick={onMarkAsFulfilled} size="sm">
               Mark as fulfilled
             </Button>
           </div>

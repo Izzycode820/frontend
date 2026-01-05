@@ -1,94 +1,154 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
-import { formatDistanceToNow, format } from 'date-fns';
+import { format } from 'date-fns';
+import { Button } from '@/components/shadcn-ui/button';
+import { Input } from '@/components/shadcn-ui/input';
+import { useMutation } from '@apollo/client/react';
+import { AddOrderCommentDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/AddOrderComment.generated';
+import { toast } from 'sonner';
 
-interface TimelineEvent {
-  type: 'created' | 'confirmed' | 'shipped' | 'delivered' | 'paid';
+export interface TimelineEvent {
+  id: string;
+  type: 'COMMENT' | 'STATUS_CHANGE' | 'NOTIFICATION' | 'ORDER_CREATED';
   message: string;
-  timestamp: string;
+  createdAt: string;
+  author?: {
+    name: string;
+    avatarUrl?: string;
+    initials: string;
+  };
+  metadata?: Record<string, any>;
+  isInternal?: boolean;
 }
 
 interface TimelineSectionProps {
-  createdAt: string;
-  confirmedAt?: string | null;
-  shippedAt?: string | null;
-  deliveredAt?: string | null;
-  orderNumber: string;
+  orderId: string;
+  events: TimelineEvent[];
+  onCommentAdded?: () => void;
 }
 
 export function TimelineSection({
-  createdAt,
-  confirmedAt,
-  shippedAt,
-  deliveredAt,
-  orderNumber,
+  orderId,
+  events = [],
+  onCommentAdded,
 }: TimelineSectionProps) {
-  const events: TimelineEvent[] = [];
+  const [comment, setComment] = useState('');
 
-  // Add events in reverse chronological order
-  if (deliveredAt) {
-    events.push({
-      type: 'delivered',
-      message: `Order #${orderNumber} was delivered`,
-      timestamp: deliveredAt,
-    });
-  }
+  // Sorting events: Newest first
+  const sortedEvents = [...events].sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
-  if (shippedAt) {
-    events.push({
-      type: 'shipped',
-      message: `Order #${orderNumber} was shipped`,
-      timestamp: shippedAt,
-    });
-  }
+  // Mutation
+  const [addComment, { loading: postingComment }] = useMutation(AddOrderCommentDocument);
 
-  if (confirmedAt) {
-    events.push({
-      type: 'confirmed',
-      message: `Confirmation #${orderNumber} was generated for this order`,
-      timestamp: confirmedAt,
-    });
-  }
+  const handlePostComment = async () => {
+    if (!comment.trim()) return;
 
-  // Always have creation event
-  events.push({
-    type: 'created',
-    message: `You created this order`,
-    timestamp: createdAt,
-  });
+    try {
+      const result = await addComment({
+        variables: {
+          orderId,
+          message: comment,
+          isInternal: true
+        }
+      });
+
+      if (result.data?.addOrderComment?.success) {
+        toast.success('Comment posted');
+        setComment('');
+        onCommentAdded?.();
+      } else {
+        toast.error(result.data?.addOrderComment?.error || 'Failed to post comment');
+      }
+    } catch (error) {
+      toast.error('An error occurred while posting comment');
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Timeline</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Comment Input Placeholder */}
-        <div className="border rounded-lg p-3">
-          <p className="text-sm text-muted-foreground">Leave a comment...</p>
+      <CardContent className="space-y-6">
+        {/* Comment Input */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Input
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Leave a comment..."
+                className="pr-16"
+                disabled={postingComment}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handlePostComment();
+                  }
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 text-muted-foreground hover:text-foreground"
+                onClick={handlePostComment}
+                disabled={postingComment || !comment.trim()}
+              >
+                Post
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 text-right">
+              Only you and other staff can see comments
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground text-center">
-          Only you and other staff can see comments
-        </p>
 
-        {/* Timeline Events */}
-        <div className="space-y-4">
-          {events.map((event, index) => {
-            const date = new Date(event.timestamp);
-            const dateStr = format(date, 'MMMM d');
+        {/* Timeline Feed */}
+        <div className="relative pl-4 border-l-2 border-muted space-y-8">
+          {sortedEvents.map((event, index) => {
+            const date = new Date(event.createdAt);
 
             return (
-              <div key={index}>
-                {index === 0 || format(new Date(events[index - 1].timestamp), 'MMMM d') !== dateStr ? (
-                  <p className="text-sm font-medium text-muted-foreground mb-2">{dateStr}</p>
-                ) : null}
+              <div key={event.id} className="relative">
+                <div className="flex items-start gap-4">
+                  {/* Timeline Dot */}
+                  <div className={`absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-background ${event.type === 'COMMENT' ? 'bg-blue-500' : 'bg-gray-300'
+                    }`} />
 
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-foreground mt-2" />
-                  <div className="flex-1">
-                    <p className="text-sm">{event.message}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(date, 'h:mm a')}
-                    </p>
+                  {/* Content */}
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-foreground">
+                        {event.author ? (
+                          <span className="font-medium mr-1">{event.author.name}</span>
+                        ) : (
+                          <span className="font-medium mr-1 text-muted-foreground">System</span>
+                        )}
+                        {event.message}
+                      </span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                        {format(date, 'MMM d, h:mm a')}
+                      </span>
+                    </div>
+
+                    {/* Metadata / Specifics */}
+                    {event.type === 'ORDER_CREATED' && event.metadata?.order_source && (
+                      <p className="text-xs text-muted-foreground">
+                        Order received from {event.metadata.order_source === 'whatsapp' ? 'WhatsApp' : event.metadata.order_source === 'payment' ? 'Payment Gateway' : 'Manual Entry'}
+                      </p>
+                    )}
+                    {event.type === 'STATUS_CHANGE' && event.metadata && (
+                      <p className="text-xs text-muted-foreground">
+                        {event.metadata.old_status && event.metadata.new_status ?
+                          `Changed from ${event.metadata.old_status} to ${event.metadata.new_status}` :
+                          event.metadata.tracking_number ?
+                            `Tracking: ${event.metadata.tracking_number}` :
+                            ''
+                        }
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

@@ -13,11 +13,7 @@ import {
   IconUsers,
   IconDiscount,
   IconWorldWww,
-  IconBuilding,
-  IconFileText,
-  IconSpeakerphone,
-  IconApps,
-  IconShoppingBag,
+  IconBell,
 } from "@tabler/icons-react"
 import type {
   NavMainItem,
@@ -115,8 +111,13 @@ export function getStoreSidebarConfig(
     },
   ]
 
-  // Secondary navigation (bottom)
+  // Secondary navigation (bottom) - Notifications above Settings
   const navSecondary: NavSecondaryItem[] = [
+    {
+      title: "Notifications",
+      url: `#notifications:${workspaceId}`, // Embed ID for robust extraction
+      icon: IconBell,
+    },
     {
       title: "Settings",
       url: STORE_ROUTES.SETTINGS.GENERAL(workspaceId),

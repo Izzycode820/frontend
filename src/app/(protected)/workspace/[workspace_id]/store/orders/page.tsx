@@ -1,3 +1,5 @@
+"use client"
+
 import OrdersListContainer from '@/components/workspace/store/orders/list/OrdersListContainer';
 
 export default function OrdersPage() {

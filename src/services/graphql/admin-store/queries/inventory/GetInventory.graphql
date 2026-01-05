@@ -28,6 +28,9 @@ query GetInventory($first: Int, $after: String, $variant: ID, $location: ID) {
           option3
           price
           trackInventory
+          product {
+            id
+          }
           featuredMedia {
             id
             url

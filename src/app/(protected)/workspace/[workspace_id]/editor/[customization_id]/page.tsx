@@ -8,9 +8,10 @@ import { themeClient } from '@/services/graphql/clients';
 import { ThemeCustomizationDocument } from '@/services/graphql/themes/queries/mythemes/__generated__/themeCustomization.generated';
 import { UpdateThemeCustomizationDocument } from '@/services/graphql/themes/mutations/mythemes/__generated__/updateThemeCustomization.generated';
 import { PublishThemeDocument } from '@/services/graphql/themes/mutations/mythemes/__generated__/publishTheme.generated';
-import { Editor } from '@/puck-visual-designer/puck';
+import UniversalEditorV2 from '@/components/puck-editor/UniversalEditorV2';
 import { type Data } from '@measured/puck';
 import { toast } from 'sonner';
+import { WorkspaceContextLoader } from '@/components/workspace/unique/WorkspaceContextLoader';
 
 function EditorContent() {
   const params = useParams();
@@ -33,7 +34,7 @@ function EditorContent() {
         variables: {
           id: customizationId,
           input: {
-            puckData: newData,
+            puckData: JSON.stringify(newData),
           },
         },
       });
@@ -110,7 +111,7 @@ function EditorContent() {
   const parsedPuckData = typeof puckData === 'string' ? JSON.parse(puckData) : puckData;
 
   return (
-    <Editor
+    <UniversalEditorV2
       themeSlug={themeSlug}
       puckData={parsedPuckData}
       onSave={handlePublish}
@@ -124,8 +125,10 @@ function EditorContent() {
 
 export default function ThemeEditorPage() {
   return (
-    <ApolloProvider client={themeClient}>
-      <EditorContent />
-    </ApolloProvider>
+    <WorkspaceContextLoader>
+      <ApolloProvider client={themeClient}>
+        <EditorContent />
+      </ApolloProvider>
+    </WorkspaceContextLoader>
   );
 }

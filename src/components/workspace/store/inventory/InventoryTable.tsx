@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore'
 import {
   Table,
   TableBody,
@@ -29,6 +31,7 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableProps) {
+  const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace)
   const [updatingCells, setUpdatingCells] = useState<Set<string>>(new Set())
 
   const getStockStatusBadge = (stockStatus: string | null) => {
@@ -132,7 +135,11 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
         <TableBody>
           {inventory.map((item) => {
             const variantId = item.variant?.id || ''
+            const productId = item.variant?.product?.id || ''
             const locationId = item.location?.id || ''
+            const variantUrl = productId && variantId
+              ? `/workspace/${currentWorkspace?.id}/store/products/${productId}/variants/${variantId}`
+              : null
 
             return (
               <TableRow key={item.id}>
@@ -151,7 +158,16 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
                       </div>
                     )}
                     <div>
-                      <div className="font-medium">{item.productName}</div>
+                      {variantUrl ? (
+                        <Link
+                          href={variantUrl}
+                          className="font-medium hover:underline"
+                        >
+                          {item.productName}
+                        </Link>
+                      ) : (
+                        <div className="font-medium">{item.productName}</div>
+                      )}
                     </div>
                   </div>
                 </TableCell>

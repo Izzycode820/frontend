@@ -77,9 +77,9 @@ export function ProductsTable({
   }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('fr-CM', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'XAF',
     }).format(price)
   }
 
@@ -130,9 +130,6 @@ export function ProductsTable({
                   )}
                   <div>
                     <div className="font-medium">{product.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      ID: {product.id}
-                    </div>
                   </div>
                 </div>
               </TableCell>

@@ -106,34 +106,15 @@ export function BillingPage() {
   // Determine if renew button should be shown
   const showRenewButton =
     (billingOverview?.daysUntilBill !== null &&
-     billingOverview?.daysUntilBill !== undefined &&
-     billingOverview.daysUntilBill <= 5) ||
+      billingOverview?.daysUntilBill !== undefined &&
+      billingOverview.daysUntilBill <= 5) ||
     status === 'grace_period';
 
-  const handleRenew = async () => {
-    if (!billingProfile?.userPhone) {
-      alert('Please add a phone number to your billing profile first.');
-      router.push('./billing/profile');
-      return;
-    }
-
-    setIsRenewing(true);
-    try {
-      const result = await renewSubscription({
-        phoneNumber: billingProfile.userPhone,
-        preferredProvider: billingProfile.primaryPaymentMethod || 'fapshi',
-      });
-
-      if (result.success) {
-        alert(`Renewal initiated! ${result.paymentInstructions || 'Please complete payment via USSD prompt on your phone.'}`);
-      } else {
-        alert(`Renewal failed: ${result.error || 'Unknown error'}`);
-      }
-    } catch (error: any) {
-      alert(`Renewal error: ${error.message || 'Failed to initiate renewal'}`);
-    } finally {
-      setIsRenewing(false);
-    }
+  const handleRenew = () => {
+    // Redirect to checkout with renewal action
+    // User completes the full checkout flow (same as initial subscription)
+    // Backend is source of truth for renewal - user enters phone number at checkout
+    router.push('/checkout?action=renew');
   };
 
   return (
@@ -163,118 +144,117 @@ export function BillingPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-          {overviewLoading ? (
-            <>
-              <Skeleton className="h-12 w-48" />
-              <Skeleton className="h-6 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </>
-          ) : (
-            <>
-              {/* Amount */}
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold">
-                    {formatCurrency(billingOverview?.upcomingBillAmount)}
-                  </span>
-                  <span className="text-muted-foreground">XAF</span>
+            {overviewLoading ? (
+              <>
+                <Skeleton className="h-12 w-48" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </>
+            ) : (
+              <>
+                {/* Amount */}
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold">
+                      {formatCurrency(billingOverview?.upcomingBillAmount)}
+                    </span>
+                    <span className="text-muted-foreground">XAF</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Next bill info */}
-              <p className="text-sm text-muted-foreground">
-                {billingOverview?.daysUntilBill !== null && billingOverview?.daysUntilBill !== undefined
-                  ? `Next bill in ${billingOverview.daysUntilBill} days${
-                      billingOverview?.upcomingBillAmount
-                        ? ` or when your ${formatCurrency(billingOverview.upcomingBillAmount)} XAF threshold is reached. You have ${formatCurrency(billingOverview.upcomingBillAmount)} remaining.`
-                        : '.'
+                {/* Next bill info */}
+                <p className="text-sm text-muted-foreground">
+                  {billingOverview?.daysUntilBill !== null && billingOverview?.daysUntilBill !== undefined
+                    ? `Next bill in ${billingOverview.daysUntilBill} days, you will pay ${billingOverview?.upcomingBillAmount
+                      // ? ` or when your ${formatCurrency(billingOverview.upcomingBillAmount)} XAF threshold is reached. You have ${formatCurrency(billingOverview.upcomingBillAmount)} remaining.`
+                      // : '.'
                     }`
-                  : 'No upcoming bill scheduled.'}
-              </p>
+                    : 'No upcoming bill scheduled.'}
+                </p>
 
-              {/* Payment Method */}
-              <Card className="bg-muted/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    {billingProfile?.primaryPaymentMethod ? (
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-12 h-8 bg-blue-600 rounded text-white font-bold text-sm">
-                          {billingProfile.primaryPaymentMethod === 'MTN' ? 'MTN' :
-                           billingProfile.primaryPaymentMethod === 'Orange' ? 'OM' :
-                           billingProfile.primaryPaymentMethod}
+                {/* Payment Method */}
+                <Card className="bg-muted/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      {billingProfile?.primaryPaymentMethod ? (
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-12 h-8 bg-blue-600 rounded text-white font-bold text-sm">
+                            {billingProfile.primaryPaymentMethod === 'MTN' ? 'MTN' :
+                              billingProfile.primaryPaymentMethod === 'Orange' ? 'OM' :
+                                billingProfile.primaryPaymentMethod}
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              {billingProfile.primaryPaymentMethod}{' '}
+                              {billingProfile.userPhone
+                                ? `•••• ${billingProfile.userPhone.slice(-4)}`
+                                : ''}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">
-                            {billingProfile.primaryPaymentMethod}{' '}
-                            {billingProfile.userPhone
-                              ? `•••• ${billingProfile.userPhone.slice(-4)}`
-                              : ''}
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-12 h-8 bg-gray-200 rounded text-gray-500 font-bold text-sm">
+                            --
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            No payment method added
                           </p>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-12 h-8 bg-gray-200 rounded text-gray-500 font-bold text-sm">
-                          --
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          No payment method added
-                        </p>
-                      </div>
-                    )}
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => router.push('./billing/profile')}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Renew button - shown in 5-day window or grace period */}
+                {showRenewButton && (
+                  <div className="pt-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => router.push('./billing/profile')}
+                      onClick={handleRenew}
+                      disabled={isRenewing}
+                      className="w-full sm:w-auto gap-2"
                     >
-                      <Edit className="h-4 w-4" />
+                      <RefreshCw className={`h-4 w-4 ${isRenewing ? 'animate-spin' : ''}`} />
+                      {isRenewing ? 'Processing...' : 'Renew subscription'}
                     </Button>
+                    {status === 'grace_period' && (
+                      <p className="text-sm text-red-600 mt-2">
+                        Your subscription is in grace period. Please renew to avoid service interruption.
+                      </p>
+                    )}
+                    {billingOverview?.daysUntilBill !== null &&
+                      billingOverview?.daysUntilBill !== undefined &&
+                      billingOverview.daysUntilBill <= 5 &&
+                      status !== 'grace_period' && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Renew now to extend your subscription without interruption.
+                        </p>
+                      )}
                   </div>
-                </CardContent>
-              </Card>
+                )}
 
-              {/* Renew button - shown in 5-day window or grace period */}
-              {showRenewButton && (
-                <div className="pt-2">
+                {/* Plan settings link */}
+                <p className="text-sm">
+                  To make changes to your plan,{' '}
                   <Button
-                    onClick={handleRenew}
-                    disabled={isRenewing}
-                    className="w-full sm:w-auto gap-2"
+                    variant="link"
+                    className="text-blue-600 p-0 h-auto"
+                    onClick={() => router.push('./plan')}
                   >
-                    <RefreshCw className={`h-4 w-4 ${isRenewing ? 'animate-spin' : ''}`} />
-                    {isRenewing ? 'Processing...' : 'Renew subscription'}
+                    visit plan settings
                   </Button>
-                  {status === 'grace_period' && (
-                    <p className="text-sm text-red-600 mt-2">
-                      Your subscription is in grace period. Please renew to avoid service interruption.
-                    </p>
-                  )}
-                  {billingOverview?.daysUntilBill !== null &&
-                   billingOverview?.daysUntilBill !== undefined &&
-                   billingOverview.daysUntilBill <= 5 &&
-                   status !== 'grace_period' && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Renew now to extend your subscription without interruption.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Plan settings link */}
-              <p className="text-sm">
-                To make changes to your plan,{' '}
-                <Button
-                  variant="link"
-                  className="text-blue-600 p-0 h-auto"
-                  onClick={() => router.push('./plan')}
-                >
-                  visit plan settings
-                </Button>
-              </p>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Past Bills Section */}
         <Card>
@@ -295,124 +275,124 @@ export function BillingPage() {
               </DropdownMenu>
             </div>
           </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Filters and Search */}
-          <div className="flex items-center justify-between gap-4">
-            <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="paid">Paid</TabsTrigger>
-                <TabsTrigger value="unpaid">Unpaid</TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <CardContent className="space-y-4">
+            {/* Filters and Search */}
+            <div className="flex items-center justify-between gap-4">
+              <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                <TabsList>
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="paid">Paid</TabsTrigger>
+                  <TabsTrigger value="unpaid">Unpaid</TabsTrigger>
+                </TabsList>
+              </Tabs>
 
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search bills..."
-                  className="pl-9 w-[200px]"
-                />
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search bills..."
+                    className="pl-9 w-[200px]"
+                  />
+                </div>
+                <Button variant="outline" size="icon">
+                  <Filter className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setSortOrder(sortOrder === 'newest_first' ? 'oldest_first' : 'newest_first')}
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                </Button>
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setSortOrder(sortOrder === 'newest_first' ? 'oldest_first' : 'newest_first')}
-              >
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
             </div>
-          </div>
 
-          {/* Table */}
-          {billsLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead>Bill number</TableHead>
-                    <TableHead>Date issued</TableHead>
-                    <TableHead>Bill reason</TableHead>
-                    <TableHead className="text-right">Bill total</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pastBills.length === 0 ? (
+            {/* Table */}
+            {billsLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : (
+              <>
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No bills found
-                      </TableCell>
+                      <TableHead className="w-12">
+                        <Checkbox />
+                      </TableHead>
+                      <TableHead>Bill number</TableHead>
+                      <TableHead>Date issued</TableHead>
+                      <TableHead>Bill reason</TableHead>
+                      <TableHead className="text-right">Bill total</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ) : (
-                    pastBills.map((bill) => (
-                      <TableRow key={bill?.billNumber}>
-                        <TableCell>
-                          <Checkbox />
-                        </TableCell>
-                        <TableCell className="font-medium">{bill?.billNumber}</TableCell>
-                        <TableCell>{bill?.createdAt ? formatDate(bill.createdAt) : '-'}</TableCell>
-                        <TableCell>{bill?.action ? getActionText(bill.action) : '-'}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(bill?.amountPaid)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={bill?.status === 'PAID' ? 'default' : 'secondary'}
-                            className={
-                              bill?.status === 'PAID'
-                                ? 'bg-green-100 text-green-800 hover:bg-green-100'
-                                : ''
-                            }
-                          >
-                            {bill?.status === 'PAID' ? 'Paid' : bill?.status === 'UNPAID' ? 'Unpaid' : 'Pending'}
-                          </Badge>
+                  </TableHeader>
+                  <TableBody>
+                    {pastBills.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No bills found
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      pastBills.map((bill) => (
+                        <TableRow key={bill?.billNumber}>
+                          <TableCell>
+                            <Checkbox />
+                          </TableCell>
+                          <TableCell className="font-medium">{bill?.billNumber}</TableCell>
+                          <TableCell>{bill?.createdAt ? formatDate(bill.createdAt) : '-'}</TableCell>
+                          <TableCell>{bill?.action ? getActionText(bill.action) : '-'}</TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(bill?.amountPaid)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={bill?.status === 'PAID' ? 'default' : 'secondary'}
+                              className={
+                                bill?.status === 'PAID'
+                                  ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                                  : ''
+                              }
+                            >
+                              {bill?.status === 'PAID' ? 'Paid' : bill?.status === 'UNPAID' ? 'Unpaid' : 'Pending'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
 
-              {/* Pagination */}
-              {pastBills.length >= pageSize && (
-                <div className="flex items-center justify-center gap-2 pt-4">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-                    disabled={currentPage === 0}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setCurrentPage((p) => p + 1)}
-                    disabled={pastBills.length < pageSize}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+                {/* Pagination */}
+                {pastBills.length >= pageSize && (
+                  <div className="flex items-center justify-center gap-2 pt-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                      disabled={currentPage === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage((p) => p + 1)}
+                      disabled={pastBills.length < pageSize}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

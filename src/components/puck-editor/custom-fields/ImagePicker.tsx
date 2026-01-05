@@ -1,41 +1,39 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/shadcn-ui/button';
-import { FilesAndMediaModal } from '@/components/workspace/store/shared/files-and-media';
-import type { MediaSelection } from '@/components/workspace/store/shared/files-and-media';
-import { Image as ImageIcon, X } from 'lucide-react';
+import { Image, X } from 'lucide-react';
+import { useMediaLibrary } from '../MediaLibraryProvider';
 
 interface ImagePickerProps {
-  value: string; // URL of selected image
+  value: string;
   onChange: (value: string) => void;
+  onOpenPicker?: () => void;
+  name: string;
 }
 
-/**
- * ImagePicker - Opens media library to select image
- */
-export function ImagePicker({ value, onChange }: ImagePickerProps) {
-  const [showModal, setShowModal] = useState(false);
-
-  const handleMediaSelect = (selection: MediaSelection) => {
-    // Get first image from selection
-    const firstImage = [...selection.newUploads, ...selection.existingUploads][0];
-
-    if (firstImage) {
-      onChange(firstImage.url);
-    }
-
-    setShowModal(false);
-  };
+export function ImagePicker({ value, onChange, onOpenPicker }: ImagePickerProps) {
+  const { open } = useMediaLibrary();
 
   const handleRemove = () => {
     onChange('');
   };
 
+  const handleOpenPicker = () => {
+    // If a custom onOpenPicker prop is passed, use it (backward compatibility)
+    if (onOpenPicker) {
+      onOpenPicker();
+      return;
+    }
+
+    // Otherwise use the Media Library context
+    open((url: string) => {
+      onChange(url);
+    }, { allowedTypes: ['image'] });
+  };
+
   return (
     <div className="space-y-2">
       {value ? (
-        // Show selected image
         <div className="relative group">
           <div className="border rounded-lg overflow-hidden bg-muted/30">
             <img
@@ -55,35 +53,18 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full mt-2"
-            onClick={() => setShowModal(true)}
-          >
-            Change Image
-          </Button>
         </div>
       ) : (
-        // Show select button
         <Button
           type="button"
           variant="outline"
-          className="w-full h-24 border-dashed flex flex-col gap-2"
-          onClick={() => setShowModal(true)}
+          className="w-full h-32 flex flex-col gap-2"
+          onClick={handleOpenPicker}
         >
-          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+          <Image className="h-8 w-8 text-muted-foreground" />
           <span className="text-sm">Select Image</span>
         </Button>
       )}
-
-      <FilesAndMediaModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        onSelect={handleMediaSelect}
-        allowedTypes={['image']}
-        maxSelection={1}
-      />
     </div>
   );
 }

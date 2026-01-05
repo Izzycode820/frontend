@@ -19,10 +19,15 @@ export default function AddOrderPage() {
     // Refetch orders list after creating an order to update cache
     refetchQueries: ['GetOrders'],
     awaitRefetchQueries: true,
-    onCompleted: (data) => {
+    onCompleted: async (data) => {
       if (data.createOrder?.success && data.createOrder?.order) {
         toast.success(`Order ${data.createOrder.order.orderNumber} has been created successfully.`);
-        // Navigate to orders list
+
+        // Add small delay to ensure cache is fully updated before navigation
+        // This prevents stale data from showing when the orders list loads
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Navigate to orders list - fresh data will be displayed from cache
         router.push(`/workspace/${currentWorkspace?.id}/store/orders`);
       } else {
         toast.error(data.createOrder?.error || "Failed to create order");

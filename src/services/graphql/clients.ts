@@ -14,7 +14,7 @@ Later (When You Move to CDN):
   3. Keep @apollo/client@4.x
 
   */
- 
+
 
 // Authentication middleware - integrates with Zustand stores
 const authLink = setContext((_, { headers }) => {
@@ -35,7 +35,8 @@ const authLink = setContext((_, { headers }) => {
     headers: {
       ...headers,
       authorization: token ? `Bearer ${token}` : '',
-      'X-Workspace-ID': currentWorkspace?.id || '',
+      // Backend reads from HTTP_X_WORKSPACE_ID (Django auto-converts)
+      'X-Workspace-Id': currentWorkspace?.id || '',
     }
   }
 })
@@ -144,5 +145,53 @@ export const subscriptionClient = new ApolloClient({
     errorLink,
     authLink.concat(subscriptionUploadLink), // ✅ Add authLink for authenticated queries/mutations
   ]),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          myNotifications: {
+            merge(existing, incoming) {
+              return incoming
+            },
+          },
+          workspaceNotifications: {
+            merge(existing, incoming) {
+              return incoming
+            },
+          },
+        },
+      },
+    },
+  }),
+})
+
+// Notification API Client (Authenticated)
+const notificationUploadLink = new UploadHttpLink({
+  uri: 'http://localhost:8000/api/notifications/graphql/',
+  credentials: 'include',
+})
+
+export const notificationClient = new ApolloClient({
+  link: from([
+    errorLink,
+    authLink.concat(notificationUploadLink),
+  ]),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          myNotifications: {
+            merge(existing, incoming) {
+              return incoming
+            },
+          },
+          workspaceNotifications: {
+            merge(existing, incoming) {
+              return incoming
+            },
+          },
+        },
+      },
+    },
+  }),
 })

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Search, MoreHorizontal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
-import { ProductSearchModal } from './ProductSearchModal';
+import { Input } from '@/components/shadcn-ui/input';
+import { ProductSearchModal } from '../../../shared/products/ProductSearchModal';
 import { ProductItem } from './ProductItem';
 import type { ProductsSectionProps, ProductSearchResult } from './types';
 
 export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleAddProduct = (product: ProductSearchResult) => {
     // Check if product already exists
@@ -26,6 +28,26 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
     };
 
     onItemsChange([...items, newItem]);
+  };
+
+  const handleAddProducts = (products: ProductSearchResult[]) => {
+    // Filter out products that already exist
+    const newProducts = products.filter(
+      product => !items.some(item => item.product_id === product.id)
+    );
+
+    // Create order items from products
+    const newItems = newProducts.map(product => ({
+      product_id: product.id,
+      product_name: product.name,
+      product_image: product.mediaGallery?.[0]?.thumbnailUrl || null,
+      variant_id: null,
+      quantity: 1,
+      unit_price: product.price.toString(),
+      subtotal: product.price.toString(),
+    }));
+
+    onItemsChange([...items, ...newItems]);
   };
 
   const handleQuantityChange = (productId: string, quantity: number) => {
@@ -61,15 +83,26 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal pl-9"
-                onClick={() => setIsModalOpen(true)}
-              >
-                <span className="text-muted-foreground">Search products</span>
-              </Button>
+              <Input
+                placeholder="Search products"
+                value={searchTerm}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchTerm(value);
+                  // Only open modal when user starts typing
+                  if (value.length > 0) {
+                    setIsModalOpen(true);
+                  }
+                }}
+                className="pl-9"
+              />
             </div>
-            <Button variant="outline">Browse</Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Browse
+            </Button>
             <Button variant="outline">Add custom item</Button>
           </div>
 
@@ -104,9 +137,10 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
 
       {/* Search Modal */}
       <ProductSearchModal
+        mode="order"
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        onAddProduct={handleAddProduct}
+        onAddProducts={handleAddProducts}
         selectedProductIds={selectedProductIds}
       />
     </>

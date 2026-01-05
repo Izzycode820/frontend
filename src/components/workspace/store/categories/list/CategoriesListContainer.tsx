@@ -11,11 +11,19 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CategoriesGrid } from './CategoriesGrid';
+import { CategoriesTable } from './CategoriesTable';
 import { CategoriesToolbar } from './CategoriesToolbar';
 import { CategoriesFilters } from './CategoriesFilters';
-import { CategoriesEmptyState } from './CategoriesEmptyState';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from '@/components/shadcn-ui/pagination';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { CategoriesDocument } from '@/services/graphql/admin-store/queries/categories/__generated__/categories.generated';
 import { DeleteCategoryDocument } from '@/services/graphql/admin-store/mutations/categories/__generated__/deleteCategory.generated';
@@ -32,6 +40,11 @@ export default function CategoriesListContainer() {
   const [visibilityFilter, setVisibilityFilter] = useState<string | undefined>();
   const [featuredFilter, setFeaturedFilter] = useState<string | undefined>();
 
+  // Pagination state
+  const pageSize = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [cursors, setCursors] = useState<{ [page: number]: string }>({});
+
   // Mutations
   const [deleteCategory] = useMutation(DeleteCategoryDocument);
   const [toggleCategoryVisibility] = useMutation(ToggleCategoryVisibilityDocument);
@@ -44,14 +57,24 @@ export default function CategoriesListContainer() {
   });
 
   // Fetch categories with GraphQL (skip until workspace is loaded)
-  const { data, loading, error, fetchMore, refetch } = useQuery(CategoriesDocument, {
+  const { data, loading, error, refetch } = useQuery(CategoriesDocument, {
     variables: {
-      first: 20,
+      first: pageSize,
+      after: cursors[currentPage] || undefined,
       search: search || undefined,
       isVisible: visibilityFilter ? visibilityFilter === 'visible' : undefined,
       isFeatured: featuredFilter ? featuredFilter === 'featured' : undefined,
     },
     skip: !currentWorkspace, // Don't query until workspace context is available
+    onCompleted: (data) => {
+      // Store cursor for next page
+      if (data?.categories?.pageInfo?.endCursor) {
+        setCursors(prev => ({
+          ...prev,
+          [currentPage + 1]: data.categories.pageInfo.endCursor
+        }));
+      }
+    }
   });
 
   // Debug: Log query state
@@ -72,18 +95,21 @@ export default function CategoriesListContainer() {
     isFeatured: edge?.node?.isFeatured || false,
     sortOrder: edge?.node?.sortOrder || 0,
     productCount: edge?.node?.productCount || 0,
-    image: edge?.node?.categoryImage ? {
-      id: edge.node.categoryImage.id,
-      thumbnail: edge.node.categoryImage.thumbnail,
-      thumbnailWebp: edge.node.categoryImage.thumbnailWebp,
-      width: edge.node.categoryImage.width,
-      height: edge.node.categoryImage.height,
+    featuredMedia: edge?.node?.featuredMedia ? {
+      id: edge.node.featuredMedia.id,
+      url: edge.node.featuredMedia.url,
+      thumbnailUrl: edge.node.featuredMedia.thumbnailUrl,
+      optimizedUrl: edge.node.featuredMedia.optimizedUrl,
+      width: edge.node.featuredMedia.width,
+      height: edge.node.featuredMedia.height,
     } : undefined,
     createdAt: edge?.node?.createdAt || '',
     updatedAt: edge?.node?.updatedAt || '',
   })).filter(Boolean) || [];
 
   const hasNextPage = data?.categories?.pageInfo?.hasNextPage || false;
+  const totalCount = data?.categories?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   // Handlers
   const handleAddCategory = () => {
@@ -143,15 +169,29 @@ export default function CategoriesListContainer() {
     toast.info(`Bulk ${action} ${selectedCategories.length} categories - Coming soon!`);
   };
 
-  const handleLoadMore = () => {
-    if (hasNextPage && data?.categories?.pageInfo?.endCursor) {
-      fetchMore({
-        variables: {
-          after: data.categories.pageInfo.endCursor,
-        },
-      });
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
     }
   };
+
+  const handleNextPage = () => {
+    if (hasNextPage) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+    setCursors({});
+  }, [search, visibilityFilter, featuredFilter]);
 
   // Error state
   if (error) {
@@ -169,14 +209,6 @@ export default function CategoriesListContainer() {
     );
   }
 
-  // Empty state
-  if (!loading && categories.length === 0 && !search && !visibilityFilter && !featuredFilter) {
-    return (
-      <div className="px-4 lg:px-6">
-        <CategoriesEmptyState onAddCategory={handleAddCategory} />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4 px-4 lg:px-6">
@@ -184,7 +216,7 @@ export default function CategoriesListContainer() {
       <div>
         <h1 className="text-2xl font-bold">Categories</h1>
         <p className="text-sm text-muted-foreground">
-          Organize your products into categories ({data?.categories?.totalCount || 0} total)
+          Organize your products into categories ({totalCount} total)
         </p>
       </div>
 
@@ -205,7 +237,7 @@ export default function CategoriesListContainer() {
         onAddCategory={handleAddCategory}
       />
 
-      {/* Categories Grid */}
+      {/* Categories Table */}
       {loading && categories.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
@@ -218,14 +250,15 @@ export default function CategoriesListContainer() {
       ) : categories.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No categories found</p>
-              <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">
+                {(search || visibilityFilter || featuredFilter) ? 'No categories found' : 'No categories yet'}
+              </p>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <CategoriesGrid
+        <CategoriesTable
           categories={categories}
           onEdit={handleEditCategory}
           onView={handleViewCategory}
@@ -234,16 +267,61 @@ export default function CategoriesListContainer() {
         />
       )}
 
-      {/* Load More */}
-      {hasNextPage && (
-        <div className="flex justify-center">
-          <button
-            onClick={handleLoadMore}
-            disabled={loading}
-            className="text-sm text-primary hover:underline disabled:opacity-50"
-          >
-            {loading ? 'Loading...' : 'Load more categories'}
-          </button>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} categories
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={handlePreviousPage}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+
+              {/* Page Numbers */}
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(pageNumber)}
+                      isActive={currentPage === pageNumber}
+                      className="cursor-pointer"
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              {totalPages > 5 && currentPage < totalPages - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={handleNextPage}
+                  className={!hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </div>

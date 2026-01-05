@@ -11,6 +11,13 @@ import { CreateCategoryDocument } from '@/services/graphql/admin-store/mutations
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { toast } from 'sonner';
 
+const stripHtmlTags = (html: string): string => {
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export default function AddCategoryPage() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
@@ -34,25 +41,28 @@ export default function AddCategoryPage() {
     await createCategory({
       variables: {
         name: data.name,
-        description: data.description || undefined,
+        description: data.description ? stripHtmlTags(data.description) : undefined,
         featuredMediaId: data.featuredMediaId,
         isVisible: data.isVisible,
         isFeatured: data.isFeatured,
         sortOrder: data.sortOrder,
+        metaTitle: data.metaTitle || undefined,
+        metaDescription: data.metaDescription ? data.metaDescription : (data.description ? stripHtmlTags(data.description) : undefined),
       },
     });
   };
 
   const handleSaveDraft = async (data: CategoryFormData) => {
-    // Save as draft by setting isVisible to false
     await createCategory({
       variables: {
         name: data.name,
-        description: data.description || undefined,
+        description: data.description ? stripHtmlTags(data.description) : undefined,
         featuredMediaId: data.featuredMediaId,
         isVisible: false,
         isFeatured: data.isFeatured,
         sortOrder: data.sortOrder,
+        metaTitle: data.metaTitle || undefined,
+        metaDescription: data.metaDescription ? data.metaDescription : (data.description ? stripHtmlTags(data.description) : undefined),
       },
     });
   };

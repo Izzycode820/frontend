@@ -13,6 +13,7 @@ import type { WorkspaceSidebarConfig } from "@/types/workspace/dashboard-ui/work
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/shadcn-ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/shadcn-ui/collapsible"
+import { NotificationBell } from "@/components/workspace/store/notifications"
 
 interface WorkspaceSidebarProps {
   config: WorkspaceSidebarConfig
@@ -301,6 +302,22 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
       {/* Secondary Navigation (Settings, etc.) - shadcn style */}
       <div className="space-y-1 border-t px-2 py-2">
         {config.navSecondary.map((item) => {
+          // Special handling for Notifications
+          if (item.url.startsWith("#notifications")) {
+            // Extract workspaceId from the URL string: #notifications:workspaceId
+            const workspaceId = item.url.split(':')[1]
+
+            if (!workspaceId) return null
+
+            return (
+              <NotificationBell
+                key={item.title}
+                workspaceId={workspaceId}
+                className="w-full justify-start px-2 py-2 h-auto font-medium"
+              />
+            )
+          }
+
           const Icon = item.icon
           const isActive = pathname === item.url
 
