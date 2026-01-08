@@ -167,7 +167,7 @@ export function ProductInventorySection({
         {trackInventory && (
           <>
             {/* Compact Table - Shopify Style */}
-            <div className="border rounded-md">
+            <div className="border rounded-md overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b bg-muted/30">

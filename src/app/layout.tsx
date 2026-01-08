@@ -6,8 +6,15 @@ import { TokenManager } from '@/components/authentication/shared/TokenManager';
 import { Toaster } from '@/components/shadcn-ui/sonner';
 
 export const metadata: Metadata = {
-  title: "Huzilaz - Coming Soon",
-  description: "Building something amazing for creators and entrepreneurs",
+  title: "Huzilaz Camp",
+  description: "For all business  owners and upcomming entrepreneurs",
+  manifest: "/manifest.json",
+  themeColor: "#000000",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Huzilaz",
+  },
 };
 
 export default function RootLayout({

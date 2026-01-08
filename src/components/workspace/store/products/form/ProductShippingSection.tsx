@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card'
 import { Input } from '@/components/shadcn-ui/input'
 import { Label } from '@/components/shadcn-ui/label'
-import { Checkbox } from '@/components/shadcn-ui/checkbox'
+import { Switch } from '@/components/shadcn-ui/switch'
 import { Button } from '@/components/shadcn-ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select'
 import { Plus, Loader2 } from 'lucide-react'
@@ -82,21 +82,22 @@ export function ProductShippingSection({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Shipping</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Requires Shipping Toggle */}
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="requires-shipping"
-            checked={requiresShipping}
-            onCheckedChange={onRequiresShippingChange}
-          />
-          <Label htmlFor="requires-shipping" className="text-sm">
-            This product requires shipping
-          </Label>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base">Shipping</CardTitle>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="requires-shipping" className="text-sm font-normal cursor-pointer">
+              Requires shipping
+            </Label>
+            <Switch
+              id="requires-shipping"
+              checked={requiresShipping}
+              onCheckedChange={onRequiresShippingChange}
+            />
+          </div>
         </div>
+      </CardHeader>
+      <CardContent className="space-y-4 pb-4">
 
         {requiresShipping && (
           <div className="space-y-4">
@@ -148,23 +149,23 @@ export function ProductShippingSection({
                       </div>
                     ) : (
                       packages.map((pkg) => {
-                      // Format regions for display - parse JSON string first
-                      let regions = 'No regions'
-                      if (pkg?.regionFees) {
-                        try {
-                          const regionFeesObj = JSON.parse(pkg.regionFees)
-                          regions = Object.keys(regionFeesObj).join(', ')
-                        } catch (error) {
-                          console.error('Failed to parse regionFees:', error)
-                          regions = 'Invalid regions'
+                        // Format regions for display - parse JSON string first
+                        let regions = 'No regions'
+                        if (pkg?.regionFees) {
+                          try {
+                            const regionFeesObj = JSON.parse(pkg.regionFees)
+                            regions = Object.keys(regionFeesObj).join(', ')
+                          } catch (error) {
+                            console.error('Failed to parse regionFees:', error)
+                            regions = 'Invalid regions'
+                          }
                         }
-                      }
-                      return (
-                        <SelectItem key={pkg?.id} value={pkg?.id || ''}>
-                          {pkg?.name} - {regions} ({pkg?.method})
-                        </SelectItem>
-                      )
-                    })
+                        return (
+                          <SelectItem key={pkg?.id} value={pkg?.id || ''}>
+                            {pkg?.name} - {regions} ({pkg?.method})
+                          </SelectItem>
+                        )
+                      })
                     )}
                   </SelectContent>
                 </Select>

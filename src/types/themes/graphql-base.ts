@@ -280,12 +280,21 @@ export interface PublishTheme {
   success?: Maybe<Scalars['Boolean']['output']>;
 }
 
+/** Response type for public puck data query */
+export interface PuckDataResponse {
+  __typename?: 'PuckDataResponse';
+  data?: Maybe<Scalars['JSONString']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  success?: Maybe<Scalars['Boolean']['output']>;
+}
+
 /**
  * Combined theme queries
  *
  * Public queries (no auth):
  * - themes: Browse theme store
  * - themeDetails: View single theme
+ * - publicPuckData: Fetch puck data for storefront (X-Store-Hostname header)
  *
  * Authenticated queries (requires workspace):
  * - myThemes: User's theme library
@@ -298,6 +307,8 @@ export interface Query {
   activeTheme?: Maybe<ThemeCustomizationType>;
   /** Get all themes in user's library (published + drafts) */
   myThemes?: Maybe<Array<Maybe<ThemeCustomizationType>>>;
+  /** Fetch active theme's puck data for storefront (uses X-Store-Hostname header) */
+  publicPuckData?: Maybe<PuckDataResponse>;
   /** Get specific theme customization for Puck editor */
   themeCustomization?: Maybe<ThemeCustomizationType>;
   /** Get detailed theme information by slug (PUBLIC) */
@@ -313,6 +324,7 @@ export interface Query {
  * Public queries (no auth):
  * - themes: Browse theme store
  * - themeDetails: View single theme
+ * - publicPuckData: Fetch puck data for storefront (X-Store-Hostname header)
  *
  * Authenticated queries (requires workspace):
  * - myThemes: User's theme library
@@ -330,6 +342,7 @@ export interface QueryActiveThemeArgs {
  * Public queries (no auth):
  * - themes: Browse theme store
  * - themeDetails: View single theme
+ * - publicPuckData: Fetch puck data for storefront (X-Store-Hostname header)
  *
  * Authenticated queries (requires workspace):
  * - myThemes: User's theme library
@@ -347,6 +360,7 @@ export interface QueryMyThemesArgs {
  * Public queries (no auth):
  * - themes: Browse theme store
  * - themeDetails: View single theme
+ * - publicPuckData: Fetch puck data for storefront (X-Store-Hostname header)
  *
  * Authenticated queries (requires workspace):
  * - myThemes: User's theme library
@@ -364,6 +378,7 @@ export interface QueryThemeCustomizationArgs {
  * Public queries (no auth):
  * - themes: Browse theme store
  * - themeDetails: View single theme
+ * - publicPuckData: Fetch puck data for storefront (X-Store-Hostname header)
  *
  * Authenticated queries (requires workspace):
  * - myThemes: User's theme library
@@ -381,6 +396,7 @@ export interface QueryThemeDetailsArgs {
  * Public queries (no auth):
  * - themes: Browse theme store
  * - themeDetails: View single theme
+ * - publicPuckData: Fetch puck data for storefront (X-Store-Hostname header)
  *
  * Authenticated queries (requires workspace):
  * - myThemes: User's theme library
@@ -429,7 +445,7 @@ export interface ShowcaseSectionType {
  * Contains user's puck data/config for the Puck editor
  * Workspace-scoped - only accessible to workspace owner
  */
-export interface ThemeCustomizationType {
+export interface ThemeCustomizationType extends Node {
   __typename?: 'ThemeCustomizationType';
   canDelete?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['DateTime']['output'];
@@ -437,6 +453,8 @@ export interface ThemeCustomizationType {
   /** Whether this theme is currently published and live on the workspace */
   isActive: Scalars['Boolean']['output'];
   isDraft?: Maybe<Scalars['Boolean']['output']>;
+  /** Whether the published storefront is password protected */
+  isPasswordProtected?: Maybe<Scalars['Boolean']['output']>;
   isPublished?: Maybe<Scalars['Boolean']['output']>;
   /** When customization was last modified */
   lastEditedAt: Scalars['DateTime']['output'];
@@ -446,6 +464,8 @@ export interface ThemeCustomizationType {
   puckConfig: Scalars['JSONString']['output'];
   /** Current page layout and content data for Puck editor */
   puckData: Scalars['JSONString']['output'];
+  /** Current password for password-protected storefront (for merchant to share) */
+  storefrontPassword?: Maybe<Scalars['String']['output']>;
   /** Master template being customized */
   template: ThemeDetailsType;
   /** User-friendly name for this theme (can be renamed) */

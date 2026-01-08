@@ -3,6 +3,8 @@
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ProductForm, type ProductFormData } from '@/components/workspace/store/products/form/ProductForm';
+import type { VariantFormState } from '@/components/workspace/store/products/form/variants';
+import type { MediaItem } from '@/components/workspace/store/products/form/media';
 import { Button } from '@/components/shadcn-ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -72,9 +74,9 @@ export default function EditProductPage() {
           paymentCharges: formData.paymentCharges,
           chargesAmount: formData.chargesAmount?.toString(),
 
-          // Images
-          images: formData.images.length > 0 ? formData.images : undefined,
-          removeImageIds: removedImageIds.length > 0 ? removedImageIds : undefined,
+          // Media (upload-first system)
+          featuredMediaId: formData.featuredMediaId,
+          mediaIds: formData.mediaGalleryIds,
 
           // Inventory
           inventory: {
@@ -97,7 +99,7 @@ export default function EditProductPage() {
 
           // Organization
           organization: {
-            productType: formData.productType,
+            productType: formData.productType?.toLowerCase() || 'physical',
             vendor: formData.vendor,
             categoryId: formData.categoryId || undefined,
             tags: JSON.stringify(formData.tags || []),
@@ -125,8 +127,8 @@ export default function EditProductPage() {
             compareAtPrice: variant.compare_at_price?.toString(),
             isActive: variant.is_active ?? true,
             position: variant.position,
-            // Variant images (backend expects array)
-            images: variant.image ? [variant.image] : undefined,
+            // Variant featured media (upload-first system)
+            featuredMediaId: variant.featuredMediaId,
             // Variant inventory
             inventory: {
               sku: variant.sku || '',
@@ -165,9 +167,9 @@ export default function EditProductPage() {
           paymentCharges: formData.paymentCharges,
           chargesAmount: formData.chargesAmount?.toString(),
 
-          // Images
-          images: formData.images.length > 0 ? formData.images : undefined,
-          removeImageIds: removedImageIds.length > 0 ? removedImageIds : undefined,
+          // Media (upload-first system)
+          featuredMediaId: formData.featuredMediaId,
+          mediaIds: formData.mediaGalleryIds,
 
           // Inventory
           inventory: {
@@ -190,7 +192,7 @@ export default function EditProductPage() {
 
           // Organization
           organization: {
-            productType: formData.productType,
+            productType: formData.productType?.toLowerCase() || 'physical',
             vendor: formData.vendor,
             categoryId: formData.categoryId || undefined,
             tags: JSON.stringify(formData.tags || []),
@@ -218,8 +220,8 @@ export default function EditProductPage() {
             compareAtPrice: variant.compare_at_price?.toString(),
             isActive: variant.is_active ?? true,
             position: variant.position,
-            // Variant images (backend expects array)
-            images: variant.image ? [variant.image] : undefined,
+            // Variant featured media (upload-first system)
+            featuredMediaId: variant.featuredMediaId,
             // Variant inventory
             inventory: {
               sku: variant.sku || '',
@@ -239,21 +241,21 @@ export default function EditProductPage() {
 
   const handlePreview = () => {
     // Navigate to preview page
-    router.push(`/workspace/${workspaceId}/store/products/${productId}/preview`);
+    router.push(`/workspace/${currentWorkspace?.id}/store/products/${productId}/preview`);
   };
 
   const handleDiscard = () => {
     // Navigate back to products list
-    router.push(`/workspace/${workspaceId}/store/products`);
+    router.push(`/workspace/${currentWorkspace?.id}/store/products`);
   };
 
   const handleBackClick = () => {
     if (confirmNavigationFn) {
       confirmNavigationFn(() => {
-        router.push(`/workspace/${workspaceId}/store/products`);
+        router.push(`/workspace/${currentWorkspace?.id}/store/products`);
       });
     } else {
-      router.push(`/workspace/${workspaceId}/store/products`);
+      router.push(`/workspace/${currentWorkspace?.id}/store/products`);
     }
   };
 
@@ -292,11 +294,118 @@ export default function EditProductPage() {
 
   const product = data.product;
 
+  // Build mediaItems from featuredMedia + mediaGallery for the form
+  const buildMediaItems = (): MediaItem[] => {
+    const items: MediaItem[] = [];
+
+    // Add featured media first (becomes first item)
+    if (product.featuredMedia) {
+      items.push({
+        uploadId: product.featuredMedia.id,
+        url: product.featuredMedia.url || '',
+        type: 'image',
+        filename: `product-${product.id}-featured`,
+        fileSize: 0, // Not available from API, using placeholder
+        width: product.featuredMedia.width || undefined,
+        height: product.featuredMedia.height || undefined,
+        uploadedAt: product.createdAt,
+        mimeType: 'image/jpeg', // Default, not available from API
+        status: 'ready',
+        thumbnailUrl: product.featuredMedia.thumbnailUrl || undefined,
+        optimizedUrl: product.featuredMedia.optimizedUrl || undefined,
+      });
+    }
+
+    // Add media gallery items (excluding featured if duplicate)
+    if (product.mediaGallery) {
+      product.mediaGallery.forEach((media, index) => {
+        if (media && media.id !== product.featuredMedia?.id) {
+          items.push({
+            uploadId: media.id,
+            url: media.url || '',
+            type: 'image',
+            filename: `product-${product.id}-gallery-${index}`,
+            fileSize: 0,
+            width: media.width || undefined,
+            height: media.height || undefined,
+            uploadedAt: product.createdAt,
+            mimeType: 'image/jpeg',
+            status: 'ready',
+            thumbnailUrl: media.thumbnailUrl || undefined,
+            optimizedUrl: media.optimizedUrl || undefined,
+          });
+        }
+      });
+    }
+
+    return items;
+  };
+
+  // Parse options from JSON (stored as [{ optionName, optionValues }])
+  const parseOptions = () => {
+    if (!product.options) return [];
+    try {
+      const parsed = typeof product.options === 'string'
+        ? JSON.parse(product.options)
+        : product.options;
+      return Array.isArray(parsed) ? parsed.map((opt: any) => ({
+        optionName: opt.optionName || opt.option_name || '',
+        optionValues: opt.optionValues || opt.option_values || [],
+      })) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  // Map variants from GraphQL to form state
+  const mapVariants = (): VariantFormState[] => {
+    if (!product.variants || !product.hasVariants) return [];
+
+    return product.variants
+      .filter((v): v is NonNullable<typeof v> => v !== null)
+      .map(variant => {
+        // Get inventory data from first inventory entry (primary location)
+        const primaryInventory = variant.inventory?.[0];
+
+        return {
+          id: variant.id,
+          option1: variant.option1 || undefined,
+          option2: variant.option2 || undefined,
+          option3: variant.option3 || undefined,
+          price: variant.price ? parseFloat(variant.price) : undefined,
+          costPrice: variant.costPrice ? parseFloat(variant.costPrice) : undefined,
+          compareAtPrice: variant.compareAtPrice ? parseFloat(variant.compareAtPrice) : undefined,
+          sku: variant.sku || '',
+          barcode: variant.barcode || undefined,
+          isActive: variant.isActive,
+          position: variant.position,
+          inventoryQuantity: primaryInventory?.quantity || variant.totalStock || 0,
+          // Map variant media
+          featuredMediaId: variant.featuredMedia?.id,
+          mediaItem: variant.featuredMedia ? {
+            uploadId: variant.featuredMedia.id,
+            url: variant.featuredMedia.url || '',
+            type: 'image' as const,
+            filename: `variant-${variant.id}-featured`,
+            fileSize: 0,
+            width: variant.featuredMedia.width || undefined,
+            height: variant.featuredMedia.height || undefined,
+            uploadedAt: product.createdAt,
+            mimeType: 'image/jpeg',
+            status: 'ready',
+            thumbnailUrl: variant.featuredMedia.thumbnailUrl || undefined,
+            optimizedUrl: variant.featuredMedia.optimizedUrl || undefined,
+          } : undefined,
+        };
+      });
+  };
+
   // Map GraphQL product data to form data
   const initialData: Partial<ProductFormData> = {
     name: product.name,
     description: product.description,
-    images: [],
+    // Media handling - use the new mediaItems format
+    mediaItems: buildMediaItems(),
     price: parseFloat(product.price),
     compareAtPrice: product.compareAtPrice ? parseFloat(product.compareAtPrice as string) : undefined,
     costPrice: product.costPrice ? parseFloat(product.costPrice as string) : undefined,
@@ -307,26 +416,25 @@ export default function EditProductPage() {
     barcode: product.barcode,
     trackInventory: product.trackInventory,
     onhand: product.inventoryQuantity,
-    available: product.available,
-    condition: product.condition,
-    locationId: product.locationId,
+    available: product.inventoryQuantity, // Use inventoryQuantity as available
+    condition: 'new', // Default condition
     allowBackorders: product.allowBackorders,
     requiresShipping: product.requiresShipping,
-    packageId: product.packageId,
+    packageId: product.package?.id,
     weight: product.weight ? parseFloat(product.weight) : undefined,
     weightUnit: 'kg',
-    length: product.length ? parseFloat(product.length) : undefined,
-    width: product.width ? parseFloat(product.width) : undefined,
-    height: product.height ? parseFloat(product.height) : undefined,
-    dimensionUnit: 'cm',
-    status: product.status.toLowerCase() as 'draft' | 'published' | 'archived',
+    status: product.status.toLowerCase() as 'draft' | 'published',
     categoryId: product.category?.id || '',
-    productType: product.productType,
+    productType: (product.productType || 'physical').toLowerCase(),  // Normalize to lowercase
     vendor: product.vendor,
     tags: typeof product.tags === 'string' ? JSON.parse(product.tags) : (product.tags || []),
     metaTitle: product.metaTitle,
     metaDescription: product.metaDescription,
     slug: product.slug,
+    // Variants support
+    hasVariants: product.hasVariants,
+    options: parseOptions(),
+    variants: mapVariants(),
   };
 
   return (
@@ -362,18 +470,6 @@ export default function EditProductPage() {
             isEditing={true}
             isLoading={updateLoading}
             categories={categories}
-            existingImages={(product.mediaUploads || [])
-              .filter((img): img is NonNullable<typeof img> => img !== null)
-              .map(img => ({
-                id: img.id || '',
-                url: img.url || '',
-                width: img.width || 0,
-                height: img.height || 0,
-                thumbnail: img.thumbnail || '',
-                thumbnailWebp: img.thumbnailWebp || '',
-                optimized: img.optimized || '',
-                optimizedWebp: img.optimizedWebp || '',
-              }))}
             onRemoveExistingImage={handleRemoveExistingImage}
           />
         </div>

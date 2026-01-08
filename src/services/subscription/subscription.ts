@@ -18,6 +18,8 @@ import type {
   ResumeSubscriptionResponse,
   VoidPendingPaymentResponse,
   ReactivateSubscriptionResponse,
+  RetrySubscriptionPaymentRequest,
+  RetrySubscriptionPaymentResponse,
 } from '../../types/subscription/subscription'
 
 // ============================================================================
@@ -116,6 +118,26 @@ export class SubscriptionService extends BaseService {
    */
   async getCapabilities(): Promise<import('../../types/authentication/auth').CapabilitiesResponse> {
     return this.get<import('../../types/authentication/auth').CapabilitiesResponse>('/me/capabilities/')
+  }
+
+  /**
+   * Retry payment for pending_payment subscription
+   * Backend: POST /api/subscriptions/retry-payment/
+   *
+   * Use cases:
+   * - User's USSD session expired
+   * - User closed app without completing payment
+   * - Network error during payment
+   *
+   * Logic:
+   * - If active PaymentIntent exists -> returns it (resume)
+   * - If expired -> creates new PaymentIntent (retry)
+   * - NEVER recreates subscription (preserves intent)
+   */
+  async retrySubscriptionPayment(request: RetrySubscriptionPaymentRequest): Promise<RetrySubscriptionPaymentResponse> {
+    this.validateRequired(request as unknown as Record<string, unknown>, ['phone_number'])
+
+    return this.post<RetrySubscriptionPaymentResponse>('/retry-payment/', request)
   }
 }
 

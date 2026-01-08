@@ -38,6 +38,7 @@ export interface RegisterRequest {
   password: string;
   first_name: string;
   last_name: string;
+  phone_number?: string;
   username?: string;
 }
 
@@ -144,6 +145,7 @@ export interface UserData {
   avatar?: string;
   bio?: string;
   email_verified: boolean;
+  phone_number?: string;
   phone_verified: boolean;
   two_factor_enabled: boolean;
   preferred_auth_method: string;
@@ -241,46 +243,46 @@ import type { WorkspaceAuthContext, WorkspaceSwitchResponse } from './workspace'
 // Discriminated union for type-safe auth states - ONLY this pattern allowed
 export type AuthState =
   | {
-      status: 'idle';
-      user: null;
-      error: null;
-      isAuthenticated: false;
-      isLoading: false;
-      tokens: null;
-      workspace: null;
-    }
+    status: 'idle';
+    user: null;
+    error: null;
+    isAuthenticated: false;
+    isLoading: false;
+    tokens: null;
+    workspace: null;
+  }
   | {
-      status: 'loading';
-      user: null;
-      error: null;
-      isAuthenticated: false;
-      isLoading: true;
-      tokens: null;
-      workspace: null;
-    }
+    status: 'loading';
+    user: null;
+    error: null;
+    isAuthenticated: false;
+    isLoading: true;
+    tokens: null;
+    workspace: null;
+  }
   | {
-      status: 'authenticated';
-      user: UserData;
-      error: null;
-      isAuthenticated: true;
-      isLoading: false;
-      tokens: {
-        access_token: string;
-        token_type: string;
-        expires_in: number;
-      };
-      workspace: WorkspaceAuthContext | null;
-      lastActivity: number;
-    }
-  | {
-      status: 'error';
-      user: null;
-      error: AuthError;
-      isAuthenticated: false;
-      isLoading: false;
-      tokens: null;
-      workspace: null;
+    status: 'authenticated';
+    user: UserData;
+    error: null;
+    isAuthenticated: true;
+    isLoading: false;
+    tokens: {
+      access_token: string;
+      token_type: string;
+      expires_in: number;
     };
+    workspace: WorkspaceAuthContext | null;
+    lastActivity: number;
+  }
+  | {
+    status: 'error';
+    user: null;
+    error: AuthError;
+    isAuthenticated: false;
+    isLoading: false;
+    tokens: null;
+    workspace: null;
+  };
 
 // REMOVED: AuthStatus - replaced with AuthState discriminated union
 

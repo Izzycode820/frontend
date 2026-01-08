@@ -10,6 +10,8 @@ query MyThemes($workspaceId: ID!) {
     createdAt
     lastEditedAt
     publishedAt
+    isPasswordProtected
+    storefrontPassword
     template {
       id
       name

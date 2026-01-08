@@ -12,19 +12,37 @@ import { UpdateStorefrontSeoDocument } from '@/services/graphql/hosting/mutation
 import { IconInfoCircle } from '@tabler/icons-react';
 
 interface SeoSettingsCardProps {
-  initialSeoTitle: string;
+  initialSeoTitle?: string | null;
+  initialSeoDescription?: string | null;
+  initialSeoImageUrl?: string | null;
   assignedDomain: string;
 }
 
-export function SeoSettingsCard({ initialSeoTitle, assignedDomain }: SeoSettingsCardProps) {
+export function SeoSettingsCard({
+  initialSeoTitle,
+  initialSeoDescription,
+  initialSeoImageUrl,
+  assignedDomain
+}: SeoSettingsCardProps) {
   const params = useParams();
   const workspaceId = params?.workspace_id as string;
 
   const [title, setTitle] = useState(initialSeoTitle || '');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [description, setDescription] = useState(initialSeoDescription || '');
+  const [imageUrl, setImageUrl] = useState(initialSeoImageUrl || '');
+  const [hasChanges, setHasChanges] = useState(false);
 
   const [updateSeo, { loading }] = useMutation(UpdateStorefrontSeoDocument);
+
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    setHasChanges(true);
+  };
+
+  const handleDescriptionChange = (val: string) => {
+    setDescription(val);
+    setHasChanges(true);
+  };
 
   const handleSave = async () => {
     try {
@@ -38,6 +56,7 @@ export function SeoSettingsCard({ initialSeoTitle, assignedDomain }: SeoSettings
           },
         },
       });
+      setHasChanges(false);
     } catch (error) {
       console.error('Failed to save SEO settings:', error);
     }
@@ -89,7 +108,7 @@ export function SeoSettingsCard({ initialSeoTitle, assignedDomain }: SeoSettings
                 id="title"
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => handleTitleChange(e.target.value)}
                 maxLength={70}
                 placeholder={assignedDomain || ''}
               />
@@ -104,7 +123,7 @@ export function SeoSettingsCard({ initialSeoTitle, assignedDomain }: SeoSettings
               <Textarea
                 id="description"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
                 maxLength={320}
                 rows={5}
                 placeholder="Enter a description to be shown on search engines like Google"
@@ -113,6 +132,17 @@ export function SeoSettingsCard({ initialSeoTitle, assignedDomain }: SeoSettings
               <p className="text-xs text-muted-foreground">
                 {descriptionLength} of 320 characters used
               </p>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end pt-2">
+              <Button
+                onClick={handleSave}
+                disabled={!hasChanges || loading}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {loading ? 'Saving...' : 'Save changes'}
+              </Button>
             </div>
           </div>
         </div>

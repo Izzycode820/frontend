@@ -18,6 +18,11 @@ export {
   EmailSecurityUtils
 } from './email'
 export {
+  default as PhoneService,
+  PhoneValidationUtils,
+  PhoneSecurityUtils
+} from './phone'
+export {
   default as OAuth2Service,
   OAuth2StateManager,
   OAuth2Utils

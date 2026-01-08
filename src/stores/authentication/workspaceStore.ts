@@ -218,7 +218,15 @@ export const workspaceSelectors = {
   isCurrentWorkspaceOwner: (state: WorkspaceStoreState) =>
     state.currentWorkspace?.role === 'owner',
   isCurrentWorkspaceAdmin: (state: WorkspaceStoreState) =>
-    state.currentWorkspace?.role === 'admin' || state.currentWorkspace?.role === 'owner'
+    state.currentWorkspace?.role === 'admin' || state.currentWorkspace?.role === 'owner',
+
+  // Staff-aware selectors
+  isCurrentWorkspaceStaff: (state: WorkspaceStoreState) =>
+    state.currentWorkspace?.role !== 'owner',
+  isCurrentWorkspaceRestricted: (state: WorkspaceStoreState) =>
+    state.currentWorkspace?.restricted_mode === true,
+  currentWorkspaceStatus: (state: WorkspaceStoreState) =>
+    state.currentWorkspace?.status || null,
 }
 
 // ============================================================================

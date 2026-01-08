@@ -123,7 +123,7 @@ export function ChargesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -132,9 +132,9 @@ export function ChargesPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-3xl font-bold">Charges</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Charges</h1>
         </div>
-        <Button variant="default" className="bg-black hover:bg-black/90 text-white">
+        <Button variant="default" className="bg-black hover:bg-black/90 text-white w-full sm:w-auto">
           Export
         </Button>
       </div>
@@ -142,11 +142,11 @@ export function ChargesPage() {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-6 overflow-x-auto pb-2">
             {/* Date Filter */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 whitespace-nowrap">
                   Date
                   <ChevronDown className="h-4 w-4" />
                 </Button>
@@ -169,7 +169,7 @@ export function ChargesPage() {
             {/* Bill Number Filter - Placeholder for now */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 whitespace-nowrap">
                   Bill number
                   <ChevronDown className="h-4 w-4" />
                 </Button>
@@ -182,7 +182,7 @@ export function ChargesPage() {
             {/* Charge Type Filter */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 whitespace-nowrap">
                   Charge type
                   <ChevronDown className="h-4 w-4" />
                 </Button>
@@ -212,38 +212,42 @@ export function ChargesPage() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Bill number</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Charge type</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {charges.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                        No charges found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    charges.map((charge) => (
-                      <TableRow key={charge?.reference}>
-                        <TableCell className="font-medium">#{charge?.reference}</TableCell>
-                        <TableCell>{charge?.createdAt ? formatDate(charge.createdAt) : '-'}</TableCell>
-                        <TableCell>{charge?.chargeType ? getChargeTypeLabel(charge.chargeType) : '-'}</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(charge?.amount)}
-                        </TableCell>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="min-w-[500px] px-4 sm:px-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="whitespace-nowrap">Bill number</TableHead>
+                        <TableHead className="whitespace-nowrap">Date</TableHead>
+                        <TableHead className="whitespace-nowrap">Charge type</TableHead>
+                        <TableHead className="whitespace-nowrap">Source</TableHead>
+                        <TableHead className="text-right whitespace-nowrap">Amount</TableHead>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {charges.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                            No charges found
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        charges.map((charge) => (
+                          <TableRow key={charge?.reference}>
+                            <TableCell className="font-medium whitespace-nowrap">#{charge?.reference}</TableCell>
+                            <TableCell className="whitespace-nowrap">{charge?.createdAt ? formatDate(charge.createdAt) : '-'}</TableCell>
+                            <TableCell className="whitespace-nowrap">{charge?.chargeType ? getChargeTypeLabel(charge.chargeType) : '-'}</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell className="text-right whitespace-nowrap">
+                              {formatCurrency(charge?.amount)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
 
               {/* Pagination */}
               {charges.length >= pageSize && (

@@ -41,6 +41,7 @@ import {
     IconCheck,
     IconMapPin,
     IconChevronDown,
+    IconArrowLeft,
 } from '@tabler/icons-react';
 
 /**
@@ -210,9 +211,16 @@ export function ShippingPackagesListPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="w-full max-w-[1200px] mx-auto px-6">
-                <Card className="p-6">
-                    <div className="flex items-center justify-between">
+            <div className="w-full max-w-[1200px] mx-auto px-4 md:px-6">
+                <div className="flex items-center gap-2 mb-4 md:hidden">
+                    <Button variant="ghost" size="icon" onClick={() => router.push(`/workspace/${workspaceId}/store/settings`)}>
+                        <IconArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="text-xl font-bold">Shipping</h1>
+                </div>
+
+                <Card className="p-4 md:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <IconPackage className="w-6 h-6 text-muted-foreground" />
                             <div>
@@ -222,7 +230,7 @@ export function ShippingPackagesListPage() {
                                 </p>
                             </div>
                         </div>
-                        <Button onClick={goToAddPage} className="gap-2">
+                        <Button onClick={goToAddPage} className="gap-2 w-full sm:w-auto">
                             <IconPlus className="w-4 h-4" />
                             Add package
                         </Button>
@@ -248,80 +256,82 @@ export function ShippingPackagesListPage() {
                     </Card>
                 </div>
             ) : (
-                <div className="w-full max-w-[1200px] mx-auto px-6">
-                    <Card>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Size</TableHead>
-                                    <TableHead>Method</TableHead>
-                                    <TableHead>Region Fees</TableHead>
-                                    <TableHead>Est. Days</TableHead>
-                                    <TableHead>Products</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="w-[100px]">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {packages.map((pkg) => {
-                                    if (!pkg) return null;
-                                    return (
-                                        <TableRow key={pkg.id}>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium">{pkg.name}</span>
-                                                    {pkg.useAsDefault && (
-                                                        <Badge variant="secondary" className="text-xs">
-                                                            Default
+                <div className="w-full max-w-[1200px] mx-auto px-4 md:px-6">
+                    <Card className="overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Type</TableHead>
+                                        <TableHead>Size</TableHead>
+                                        <TableHead>Method</TableHead>
+                                        <TableHead>Region Fees</TableHead>
+                                        <TableHead>Est. Days</TableHead>
+                                        <TableHead>Products</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="w-[100px]">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {packages.map((pkg) => {
+                                        if (!pkg) return null;
+                                        return (
+                                            <TableRow key={pkg.id}>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium">{pkg.name}</span>
+                                                        {pkg.useAsDefault && (
+                                                            <Badge variant="secondary" className="text-xs">
+                                                                Default
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>{formatPackageType(pkg.packageType)}</TableCell>
+                                                <TableCell>{formatSize(pkg.size)}</TableCell>
+                                                <TableCell>{pkg.method || '-'}</TableCell>
+                                                <TableCell><RegionFeesCell regionFees={pkg.regionFees} /></TableCell>
+                                                <TableCell>{pkg.estimatedDays}</TableCell>
+                                                <TableCell>{pkg.productCount || 0}</TableCell>
+                                                <TableCell>
+                                                    {pkg.isActive ? (
+                                                        <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                            <IconCheck className="w-3 h-3 mr-1" />
+                                                            Active
                                                         </Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary">Inactive</Badge>
                                                     )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{formatPackageType(pkg.packageType)}</TableCell>
-                                            <TableCell>{formatSize(pkg.size)}</TableCell>
-                                            <TableCell>{pkg.method || '-'}</TableCell>
-                                            <TableCell><RegionFeesCell regionFees={pkg.regionFees} /></TableCell>
-                                            <TableCell>{pkg.estimatedDays}</TableCell>
-                                            <TableCell>{pkg.productCount || 0}</TableCell>
-                                            <TableCell>
-                                                {pkg.isActive ? (
-                                                    <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                                        <IconCheck className="w-3 h-3 mr-1" />
-                                                        Active
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge variant="secondary">Inactive</Badge>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-1">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => goToEditPage(pkg.id)}
-                                                    >
-                                                        <IconPencil className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => {
-                                                            setSelectedPackage({ id: pkg.id, name: pkg.name });
-                                                            setShowDeleteModal(true);
-                                                        }}
-                                                        className="text-destructive hover:text-destructive"
-                                                    >
-                                                        <IconTrash className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => goToEditPage(pkg.id)}
+                                                        >
+                                                            <IconPencil className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => {
+                                                                setSelectedPackage({ id: pkg.id, name: pkg.name });
+                                                                setShowDeleteModal(true);
+                                                            }}
+                                                            className="text-destructive hover:text-destructive"
+                                                        >
+                                                            <IconTrash className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </Card>
                 </div>
             )}

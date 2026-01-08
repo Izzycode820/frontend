@@ -138,6 +138,20 @@ export default function EditCategoryPage() {
     metaTitle: category.metaTitle || '',
     metaDescription: category.metaDescription || '',
     slug: category.slug || '',
+    // Media - populate both for proper display
+    featuredMediaId: category.featuredMedia?.id,
+    mediaItem: category.featuredMedia ? {
+      uploadId: category.featuredMedia.id,
+      url: category.featuredMedia.url || '',
+      type: 'image' as const,
+      filename: `category-${category.id}-featured`,
+      fileSize: 0,
+      width: category.featuredMedia.width || undefined,
+      height: category.featuredMedia.height || undefined,
+      uploadedAt: new Date().toISOString(),
+      mimeType: 'image/jpeg',
+      status: 'ready',
+    } : undefined,
   };
 
   return (

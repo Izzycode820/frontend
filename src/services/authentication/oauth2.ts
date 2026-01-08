@@ -39,14 +39,14 @@ export class OAuth2Service extends BaseService {
    * Backend: POST /api/auth/oauth2/initiate/
    */
   async initiate(data: OAuth2InitiateRequest): Promise<OAuth2InitiateResponse['data']> {
-    this.validateRequired(data, ['provider'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['provider'])
 
     const cleanedData = this.cleanData({
       provider: data.provider,
       redirect_uri: data.redirect_uri,
       state: data.state,
       scopes: data.scopes
-    })
+    } as Record<string, unknown>)
 
     const response = await this.postPublic<OAuth2InitiateResponse>('/oauth2/initiate/', cleanedData)
 
@@ -62,7 +62,7 @@ export class OAuth2Service extends BaseService {
    * Backend: POST /api/auth/oauth2/callback/
    */
   async handleCallback(data: OAuth2CallbackRequest): Promise<OAuth2CallbackResponse> {
-    this.validateRequired(data, ['state'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['state'])
 
     // Either code or error must be present
     if (!data.code && !data.error) {
@@ -78,7 +78,7 @@ export class OAuth2Service extends BaseService {
       provider: data.provider,
       code: data.code,
       state: data.state
-    })
+    } as Record<string, unknown>)
 
     const response = await this.postPublic<OAuth2CallbackResponse>('/oauth2/callback/', cleanedData)
 
@@ -99,12 +99,12 @@ export class OAuth2Service extends BaseService {
    * Backend: POST /api/auth/oauth2/refresh/
    */
   async refreshToken(data: OAuth2TokenRefreshRequest): Promise<OAuth2TokenRefreshResponse> {
-    this.validateRequired(data, ['provider', 'refresh_token'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['provider', 'refresh_token'])
 
     const cleanedData = this.cleanData({
       provider: data.provider,
       refresh_token: data.refresh_token
-    })
+    } as Record<string, unknown>)
 
     return this.postPublic<OAuth2TokenRefreshResponse>('/oauth2/refresh/', cleanedData)
   }
@@ -118,7 +118,7 @@ export class OAuth2Service extends BaseService {
     message: string
     linked_provider: string
   }> {
-    this.validateRequired(data, ['state'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['state'])
 
     if (!data.code && !data.error) {
       throw new Error('Either authorization code or error must be provided')
@@ -132,7 +132,7 @@ export class OAuth2Service extends BaseService {
       provider: data.provider,
       code: data.code,
       state: data.state
-    })
+    } as Record<string, unknown>)
 
     return this.post('/oauth2/link/', cleanedData)
   }
@@ -162,8 +162,8 @@ export class OAuth2Service extends BaseService {
 
       // Must be HTTPS in production or localhost for development
       if (!url.protocol.startsWith('https:') &&
-          !url.hostname.includes('localhost') &&
-          !url.hostname.includes('127.0.0.1')) {
+        !url.hostname.includes('localhost') &&
+        !url.hostname.includes('127.0.0.1')) {
         throw new Error('Redirect URI must use HTTPS or be localhost')
       }
 
@@ -314,7 +314,7 @@ export class OAuth2Utils {
   static isOAuth2Callback(url: string = window.location.href): boolean {
     const urlObj = new URL(url)
     return urlObj.searchParams.has('state') &&
-           (urlObj.searchParams.has('code') || urlObj.searchParams.has('error'))
+      (urlObj.searchParams.has('code') || urlObj.searchParams.has('error'))
   }
 
   /**
@@ -356,8 +356,8 @@ export class OAuth2Utils {
     try {
       const url = new URL(uri)
       return url.protocol === 'https:' ||
-             url.hostname === 'localhost' ||
-             url.hostname === '127.0.0.1'
+        url.hostname === 'localhost' ||
+        url.hostname === '127.0.0.1'
     } catch {
       return false
     }

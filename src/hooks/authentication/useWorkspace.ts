@@ -96,7 +96,16 @@ export function useWorkspace(): UseWorkspaceReturn {
       // v3.0 - NO token regeneration, just validate access and get workspace details
       const response = await workspaceService.switchWorkspace(workspaceId)
 
-      if (response.success && response.workspace && response.membership) {
+      // Handle structured error responses from backend gating
+      if (!response.success) {
+        cancelWorkspaceSwitch()
+        // Return structured error for component to handle with contextual toasts
+        // Error codes: WORKSPACE_RESTRICTED, WORKSPACE_NONCOMPLIANT, SUBSCRIPTION_RESTRICTED
+        setError(response.error || 'Workspace switch failed')
+        return response
+      }
+
+      if (response.workspace && response.membership) {
         // Build WorkspaceAuthContext from response
         const workspaceContext: WorkspaceAuthContext = {
           id: response.workspace.id,
@@ -123,10 +132,10 @@ export function useWorkspace(): UseWorkspaceReturn {
             themeClient.resetStore(),          // Reset theme cache (soft clear)
             subscriptionClient.resetStore()    // Reset subscription cache (soft clear)
           ])
-          console.log('✅ Apollo cache cleared after workspace switch')
+          console.log('Apollo cache cleared after workspace switch')
         } catch (cacheError) {
           // Non-blocking - cache clear failure shouldn't break workspace switch
-          console.warn('⚠️ Apollo cache clear failed (non-critical):', cacheError)
+          console.warn('Apollo cache clear failed (non-critical):', cacheError)
         }
 
         // Mark switch as complete

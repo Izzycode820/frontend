@@ -30,6 +30,9 @@ import { useWorkspaceStore, workspaceSelectors } from "@/stores/authentication/w
 import workspaceService from "@/services/authentication/workspace"
 import { AuthPageSpinner } from "@/components/authentication/shared/AuthLoadingSpinner"
 import type { WorkspaceAuthContext } from "@/types/authentication/workspace"
+import { MobileBottomNav } from "@/components/workspace/layouts/mobile/mobile-bottom-nav"
+import { MobileHeader } from "@/components/workspace/layouts/mobile/mobile-header"
+import { MobileMenuDrawer } from "@/components/workspace/layouts/mobile/mobile-menu-drawer"
 
 // ============================================================================
 // Configuration
@@ -115,6 +118,7 @@ export function StoreLayoutClient({ children }: StoreLayoutClientProps) {
 
   // Local state
   const [isRestoring, setIsRestoring] = useState(true)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const restorationAttemptedRef = useRef(false)
 
   // Mark as hydrated on client
@@ -229,12 +233,25 @@ export function StoreLayoutClient({ children }: StoreLayoutClientProps) {
     avatar: user.avatar || "/avatars/default.jpg"
   })
 
+
+
   return (
-    <WorkspaceLayout
-      sidebar={<WorkspaceSidebar config={sidebarConfig} />}
-      header={<WorkspaceHeader title={`${currentWorkspace.name} - Store`} />}
-    >
-      {children}
-    </WorkspaceLayout>
+    <>
+      <WorkspaceLayout
+        sidebar={<WorkspaceSidebar config={sidebarConfig} />}
+        header={<WorkspaceHeader title={`${currentWorkspace.name} - Store`} />}
+        mobileHeader={<MobileHeader user={{ name: user.username, email: user.email, avatar: user.avatar }} />}
+        mobileNav={<MobileBottomNav config={sidebarConfig} onMenuClick={() => setIsMobileMenuOpen(true)} />}
+      >
+        {children}
+      </WorkspaceLayout>
+
+      {/* Mobile Drawer (Portal based) */}
+      <MobileMenuDrawer
+        config={sidebarConfig}
+        isOpen={isMobileMenuOpen}
+        onClose={setIsMobileMenuOpen}
+      />
+    </>
   )
 }

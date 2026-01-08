@@ -88,16 +88,26 @@ export function ProductOrganizationSection({
           <CardTitle>Product organization</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Product Type */}
+          {/* Product Type - Dropdown with 3 options */}
           <div className="space-y-2">
-            <Label htmlFor="product-type">Type</Label>
-            <Input
+            <Label htmlFor="product-type">Product Type</Label>
+            <select
               id="product-type"
-              placeholder="e.g., Device, Accessory"
               value={productType}
               onChange={(e) => onProductTypeChange(e.target.value)}
-            />
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="physical">Physical Product</option>
+              <option value="digital">Digital Product</option>
+              <option value="service">Service</option>
+            </select>
+            <p className="text-xs text-muted-foreground">
+              {productType === 'digital' && 'Downloadable files, licenses, etc.'}
+              {productType === 'service' && 'Appointments, consultations, subscriptions, etc.'}
+              {productType === 'physical' && 'Tangible goods that require shipping.'}
+            </p>
           </div>
+
 
           {/* Vendor */}
           <div className="space-y-2">

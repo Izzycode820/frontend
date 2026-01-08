@@ -50,9 +50,13 @@ export function PreferencesContainer() {
       <StoreAccessCard
         initialPassword={settings.password}
         assignedDomain={settings.assignedDomain}
+        initialEnabled={settings.passwordEnabled}
+        initialDescription={settings.passwordDescription}
       />
       <SeoSettingsCard
         initialSeoTitle={settings.seoTitle}
+        initialSeoDescription={settings.seoDescription}
+        initialSeoImageUrl={settings.seoImageUrl}
         assignedDomain={settings.assignedDomain}
       />
     </div>

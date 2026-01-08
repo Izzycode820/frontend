@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthStore, authSelectors } from '@/stores/authentication/authStore';
+import { playNotificationSound } from './useNotificationSound';
 
 export interface WebSocketNotification {
     id: string;
@@ -93,6 +94,9 @@ export function useNotificationSocket(options?: UseNotificationSocketOptions) {
                                 lastNotification: notification,
                             }));
                             options?.onNewNotification?.(notification);
+
+                            // Play system notification sound
+                            playNotificationSound(notification);
                             break;
 
                         case 'unread_count_update':

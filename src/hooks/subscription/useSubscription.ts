@@ -21,8 +21,8 @@ import type {
   ResumeSubscriptionResponse,
   VoidPendingPaymentResponse,
   ReactivateSubscriptionResponse,
-  RetryPaymentRequest,
-  RetryPaymentResponse,
+  RetrySubscriptionPaymentRequest,
+  RetrySubscriptionPaymentResponse,
   SubscriptionError,
 } from '../../types/subscription/subscription'
 import type { SubscriptionData } from '../../types/authentication/auth'
@@ -55,7 +55,7 @@ export interface UseSubscriptionReturn {
   resumeSubscription: () => Promise<ResumeSubscriptionResponse>
   voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>
   reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>
-  retryPayment: (request: RetryPaymentRequest) => Promise<RetryPaymentResponse>
+  retrySubscriptionPayment: (request: RetrySubscriptionPaymentRequest) => Promise<RetrySubscriptionPaymentResponse>
   clearError: () => void
 }
 
@@ -85,7 +85,7 @@ export function useSubscription(): UseSubscriptionReturn {
   const resumeSubscriptionAction = useSubscriptionStore(subscriptionSelectors.resumeSubscription)
   const voidPendingPaymentAction = useSubscriptionStore(subscriptionSelectors.voidPendingPayment)
   const reactivateSubscriptionAction = useSubscriptionStore(subscriptionSelectors.reactivateSubscription)
-  const retryPaymentAction = useSubscriptionStore(subscriptionSelectors.retryPayment)
+  const retrySubscriptionPaymentAction = useSubscriptionStore(subscriptionSelectors.retrySubscriptionPayment)
   const clearError = useSubscriptionStore(subscriptionSelectors.clearError)
 
   // ============================================================================
@@ -124,9 +124,9 @@ export function useSubscription(): UseSubscriptionReturn {
     return reactivateSubscriptionAction()
   }, [reactivateSubscriptionAction])
 
-  const retryPayment = useCallback(async (request: RetryPaymentRequest): Promise<RetryPaymentResponse> => {
-    return retryPaymentAction(request)
-  }, [retryPaymentAction])
+  const retrySubscriptionPayment = useCallback(async (request: RetrySubscriptionPaymentRequest): Promise<RetrySubscriptionPaymentResponse> => {
+    return retrySubscriptionPaymentAction(request)
+  }, [retrySubscriptionPaymentAction])
 
   // ============================================================================
   // Return Hook Interface
@@ -156,7 +156,7 @@ export function useSubscription(): UseSubscriptionReturn {
     resumeSubscription,
     voidPendingPayment,
     reactivateSubscription,
-    retryPayment,
+    retrySubscriptionPayment,
     clearError,
   }
 }
@@ -207,7 +207,7 @@ export function useSubscriptionActions() {
   const resumeSubscription = useSubscriptionStore(subscriptionSelectors.resumeSubscription)
   const voidPendingPayment = useSubscriptionStore(subscriptionSelectors.voidPendingPayment)
   const reactivateSubscription = useSubscriptionStore(subscriptionSelectors.reactivateSubscription)
-  const retryPayment = useSubscriptionStore(subscriptionSelectors.retryPayment)
+  const retrySubscriptionPayment = useSubscriptionStore(subscriptionSelectors.retrySubscriptionPayment)
   const clearError = useSubscriptionStore(subscriptionSelectors.clearError)
 
   const isLoading = useSubscriptionStore(subscriptionSelectors.isLoading)
@@ -223,7 +223,7 @@ export function useSubscriptionActions() {
     resumeSubscription,
     voidPendingPayment,
     reactivateSubscription,
-    retryPayment,
+    retrySubscriptionPayment,
     clearError,
 
     // Minimal state for action feedback

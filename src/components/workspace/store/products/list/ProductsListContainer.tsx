@@ -16,6 +16,8 @@ import { ProductsToolbar } from './ProductsToolbar';
 import { ProductsFilters } from './ProductsFilters';
 import { ProductsEmptyState } from './ProductsEmptyState';
 import { DuplicateProductModal } from './DuplicateProductModal';
+import { MobileProductsList } from './mobile';
+import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import {
   Pagination,
@@ -41,6 +43,7 @@ import { toast } from 'sonner';
 export default function ProductsListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const isMobile = useIsMobile();
 
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [search, setSearch] = useState('');
@@ -230,6 +233,44 @@ export default function ProductsListContainer() {
     }
   };
 
+  // Long press handler for mobile selection
+  const handleLongPressProduct = (productId: string) => {
+    if (!selectedProducts.includes(productId)) {
+      setSelectedProducts([productId]);
+    }
+  };
+
+  // Clear selection handler
+  const handleClearSelection = () => {
+    setSelectedProducts([]);
+  };
+
+  // Select product handler (toggle)
+  const handleSelectProduct = (productId: string) => {
+    setSelectedProducts(prev =>
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  // Bulk delete handler for mobile
+  const handleBulkDelete = async () => {
+    if (selectedProducts.length === 0) return;
+    if (!confirm(`Delete ${selectedProducts.length} product(s)?`)) return;
+
+    try {
+      await Promise.all(
+        selectedProducts.map(id => deleteProduct({ variables: { productId: id } }))
+      );
+      toast.success(`${selectedProducts.length} product(s) deleted`);
+      setSelectedProducts([]);
+      refetch();
+    } catch (err) {
+      toast.error('Failed to delete products');
+    }
+  };
+
   // Reset to page 1 when filters change
   React.useEffect(() => {
     setCurrentPage(1);
@@ -261,6 +302,51 @@ export default function ProductsListContainer() {
     );
   }
 
+  // Mobile filter chips
+  const mobileFilterChips = [
+    { value: 'all', label: 'All' },
+    { value: 'published', label: 'Active' },
+    { value: 'archived', label: 'Archived' },
+  ];
+
+  // Map status filter to chip value
+  const activeChip = statusFilter || 'all';
+
+  // Handle chip change for mobile
+  const handleChipChange = (value: string) => {
+    setStatusFilter(value === 'all' ? undefined : value);
+  };
+
+  // Mobile View
+  if (isMobile) {
+    return (
+      <div className="px-4 pt-4">
+        <MobileProductsList
+          products={products as any}
+          workspaceId={currentWorkspace?.id || ''}
+          searchTerm={search}
+          onSearchChange={setSearch}
+          chips={mobileFilterChips}
+          activeChip={activeChip}
+          onChipChange={handleChipChange}
+          selectedProducts={selectedProducts}
+          onSelectProduct={handleSelectProduct}
+          onLongPressProduct={handleLongPressProduct}
+          onClearSelection={handleClearSelection}
+          onBulkArchive={() => handleBulkAction('archive')}
+          onBulkDelete={handleBulkDelete}
+          onEdit={handleEditProduct}
+          onView={handleViewProduct}
+          onDuplicate={handleDuplicateProduct}
+          onDelete={handleDeleteProduct}
+          onCategoryUpdate={refetch}
+          isLoading={loading}
+        />
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}

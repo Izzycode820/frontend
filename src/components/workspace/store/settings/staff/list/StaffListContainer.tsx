@@ -21,7 +21,7 @@ import { StaffToolbar } from './StaffToolbar';
 import { Button } from '@/components/shadcn-ui/button';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { toast } from 'sonner';
-import { Users } from 'lucide-react';
+import { Users, ArrowLeft } from 'lucide-react';
 
 export default function StaffListContainer() {
   const router = useRouter();
@@ -274,16 +274,24 @@ export default function StaffListContainer() {
   return (
     <div className="max-w-5xl mx-auto space-y-4">
       {/* Header with actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push(`/workspace/${currentWorkspace?.id}/store/settings`)}
+            className="md:hidden"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <Users className="h-5 w-5" />
           <h1 className="text-2xl font-bold">Users</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={handleExport}>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Button variant="outline" onClick={handleExport} className="flex-1 sm:flex-none">
             Export
           </Button>
-          <Button onClick={handleAddStaff}>
+          <Button onClick={handleAddStaff} className="flex-1 sm:flex-none">
             Add users
           </Button>
         </div>

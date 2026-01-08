@@ -20,9 +20,13 @@ import {
     IconInfoCircle,
     IconDeviceFloppy,
     IconLoader2,
+    IconArrowLeft,
 } from '@tabler/icons-react';
+import { useRouter, useParams } from 'next/navigation';
 
 export function GeneralSettingsPage() {
+    const router = useRouter();
+    const params = useParams();
 
     // Form state
     const [storeName, setStoreName] = useState('');
@@ -146,8 +150,15 @@ export function GeneralSettingsPage() {
     return (
         <div className="space-y-6">
             {/* Store Identity Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-6">
-                <Card className="p-6">
+            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+                <div className="flex items-center gap-2 mb-4 md:hidden">
+                    <Button variant="ghost" size="icon" onClick={() => router.push(`/workspace/${params.workspace_id}/store/settings`)}>
+                        <IconArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="text-xl font-bold">General Settings</h1>
+                </div>
+
+                <Card className="p-4 md:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <IconBuilding className="w-5 h-5 text-muted-foreground" />
                         <h2 className="text-base font-semibold">Store identity</h2>
@@ -195,8 +206,8 @@ export function GeneralSettingsPage() {
             </div>
 
             {/* Contact Information Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-6">
-                <Card className="p-6">
+            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+                <Card className="p-4 md:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <IconMail className="w-5 h-5 text-muted-foreground" />
                         <h2 className="text-base font-semibold">Contact information</h2>
@@ -265,8 +276,8 @@ export function GeneralSettingsPage() {
             </div>
 
             {/* WhatsApp Settings Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-6">
-                <Card className="p-6">
+            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+                <Card className="p-4 md:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <IconBrandWhatsapp className="w-5 h-5 text-green-600" />
                         <h2 className="text-base font-semibold">WhatsApp checkout</h2>
@@ -306,7 +317,7 @@ export function GeneralSettingsPage() {
             </div>
 
             {/* Save Button */}
-            <div className="w-full max-w-[1000px] mx-auto px-6 pb-6">
+            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6 pb-6">
                 <div className="flex justify-end">
                     <Button
                         onClick={handleSave}

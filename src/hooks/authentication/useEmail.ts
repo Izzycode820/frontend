@@ -1,7 +1,7 @@
 /**
  * Email Hook - 2024 Best Practices with Zustand
  * Custom hook layer for email store - handles verification and email management
- * Following patterns: single responsibility, selective subscriptions, error boundaries
+ * Refactored to match useAuth pattern with success handlers
  */
 
 import { useCallback } from 'react'
@@ -32,10 +32,10 @@ export interface UseEmailReturn {
   error: string | null
 
   // Computed state
-  canRequestVerification: boolean
-  verificationAttemptsCount: number
-  lastVerificationRequest: number | null
   isEmailVerified: boolean
+  pendingEmailChange: string | null
+  passwordResetSuccess: boolean
+  emailChangeSuccess: boolean
 
   // Actions (stable references)
   requestVerificationCode: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>
@@ -44,8 +44,11 @@ export interface UseEmailReturn {
   confirmPasswordReset: (data: PasswordResetConfirmRequest) => Promise<PasswordResetResponse>
   requestEmailChange: (data: EmailChangeRequest) => Promise<EmailChangeResponse>
   confirmEmailChange: (data: EmailChangeConfirmRequest) => Promise<EmailChangeResponse>
-  clearError: () => void
   getVerificationStatus: () => Promise<EmailVerificationStatus>
+  clearError: () => void
+  resetVerificationFlow: () => void
+  resetPasswordResetFlow: () => void
+  resetEmailChangeFlow: () => void
 }
 
 // ============================================================================
@@ -58,34 +61,41 @@ export function useEmail(): UseEmailReturn {
   const verificationInProgress = useEmailStore(emailSelectors.verificationInProgress)
   const isLoading = useEmailStore(emailSelectors.isLoading)
   const error = useEmailStore(emailSelectors.error)
-  const canRequestVerification = useEmailStore(emailSelectors.canRequestVerification)
-  const verificationAttemptsCount = useEmailStore(emailSelectors.verificationAttemptsCount)
-  const lastVerificationRequest = useEmailStore(state => state.lastVerificationRequest || null)
   const isEmailVerified = useEmailStore(emailSelectors.isEmailVerified)
+  const pendingEmailChange = useEmailStore(emailSelectors.pendingEmailChange)
+  const passwordResetSuccess = useEmailStore(emailSelectors.passwordResetSuccess)
+  const emailChangeSuccess = useEmailStore(emailSelectors.emailChangeSuccess)
 
-  // Store actions (direct references for performance)
+  // Store success handlers (matching authStore pattern)
+  const setVerificationRequestSuccess = useEmailStore(state => state.setVerificationRequestSuccess)
+  const setVerificationConfirmSuccess = useEmailStore(state => state.setVerificationConfirmSuccess)
+  const setPasswordResetRequestSuccess = useEmailStore(state => state.setPasswordResetRequestSuccess)
+  const setPasswordResetConfirmSuccess = useEmailStore(state => state.setPasswordResetConfirmSuccess)
+  const setEmailChangeRequestSuccess = useEmailStore(state => state.setEmailChangeRequestSuccess)
+  const setEmailChangeConfirmSuccess = useEmailStore(state => state.setEmailChangeConfirmSuccess)
   const setVerificationStatus = useEmailStore(state => state.setVerificationStatus)
-  const setVerificationInProgress = useEmailStore(state => state.setVerificationInProgress)
-  const setVerificationCode = useEmailStore(state => state.setVerificationCode)
-  const setVerificationError = useEmailStore(state => state.setVerificationError)
-  const setPasswordResetInProgress = useEmailStore(state => state.setPasswordResetInProgress)
-  const setEmailChangeInProgress = useEmailStore(state => state.setEmailChangeInProgress)
+
+  // UI State actions
   const setLoading = useEmailStore(state => state.setLoading)
   const setError = useEmailStore(state => state.setError)
   const clearError = useEmailStore(state => state.clearError)
+  const resetVerificationFlow = useEmailStore(state => state.resetVerificationFlow)
+  const resetPasswordResetFlow = useEmailStore(state => state.resetPasswordResetFlow)
+  const resetEmailChangeFlow = useEmailStore(state => state.resetEmailChangeFlow)
 
   // ============================================================================
-  // Stable Action Implementations
+  // Stable Action Implementations (matching useAuth pattern)
   // ============================================================================
 
   const requestVerificationCode = useCallback(async (data: EmailVerificationRequest): Promise<EmailVerificationResponse> => {
     try {
-      setVerificationInProgress(true)
+      setLoading(true)
       setError(null)
 
       const response = await emailService.requestVerificationCode(data)
 
       if (response.success) {
+        setVerificationRequestSuccess(response)
         return response
       }
 
@@ -95,19 +105,19 @@ export function useEmail(): UseEmailReturn {
       setError(errorMessage)
       throw error
     } finally {
-      setVerificationInProgress(false)
+      setLoading(false)
     }
-  }, [setVerificationInProgress, setError])
+  }, [setLoading, setError, setVerificationRequestSuccess])
 
   const verifyCode = useCallback(async (data: EmailVerificationConfirmRequest): Promise<EmailVerificationResponse> => {
     try {
-      setVerificationInProgress(true)
+      setLoading(true)
       setError(null)
 
       const response = await emailService.verifyCode(data)
 
       if (response.success) {
-        setVerificationCode('')
+        setVerificationConfirmSuccess(response)
         return response
       }
 
@@ -117,18 +127,19 @@ export function useEmail(): UseEmailReturn {
       setError(errorMessage)
       throw error
     } finally {
-      setVerificationInProgress(false)
+      setLoading(false)
     }
-  }, [setVerificationInProgress, setError, setVerificationCode])
+  }, [setLoading, setError, setVerificationConfirmSuccess])
 
   const requestPasswordReset = useCallback(async (data: PasswordResetRequest): Promise<PasswordResetResponse> => {
     try {
-      setPasswordResetInProgress(true)
+      setLoading(true)
       setError(null)
 
       const response = await emailService.requestPasswordReset(data)
 
       if (response.success) {
+        setPasswordResetRequestSuccess(response)
         return response
       }
 
@@ -138,18 +149,19 @@ export function useEmail(): UseEmailReturn {
       setError(errorMessage)
       throw error
     } finally {
-      setPasswordResetInProgress(false)
+      setLoading(false)
     }
-  }, [setPasswordResetInProgress, setError])
+  }, [setLoading, setError, setPasswordResetRequestSuccess])
 
   const confirmPasswordReset = useCallback(async (data: PasswordResetConfirmRequest): Promise<PasswordResetResponse> => {
     try {
-      setPasswordResetInProgress(true)
+      setLoading(true)
       setError(null)
 
       const response = await emailService.confirmPasswordReset(data)
 
       if (response.success) {
+        setPasswordResetConfirmSuccess(response)
         return response
       }
 
@@ -159,18 +171,19 @@ export function useEmail(): UseEmailReturn {
       setError(errorMessage)
       throw error
     } finally {
-      setPasswordResetInProgress(false)
+      setLoading(false)
     }
-  }, [setPasswordResetInProgress, setError])
+  }, [setLoading, setError, setPasswordResetConfirmSuccess])
 
   const requestEmailChange = useCallback(async (data: EmailChangeRequest): Promise<EmailChangeResponse> => {
     try {
-      setEmailChangeInProgress(true)
+      setLoading(true)
       setError(null)
 
       const response = await emailService.requestEmailChange(data)
 
       if (response.success) {
+        setEmailChangeRequestSuccess(response, data.new_email)
         return response
       }
 
@@ -180,18 +193,19 @@ export function useEmail(): UseEmailReturn {
       setError(errorMessage)
       throw error
     } finally {
-      setEmailChangeInProgress(false)
+      setLoading(false)
     }
-  }, [setEmailChangeInProgress, setError])
+  }, [setLoading, setError, setEmailChangeRequestSuccess])
 
   const confirmEmailChange = useCallback(async (data: EmailChangeConfirmRequest): Promise<EmailChangeResponse> => {
     try {
-      setEmailChangeInProgress(true)
+      setLoading(true)
       setError(null)
 
       const response = await emailService.confirmEmailChange(data)
 
       if (response.success) {
+        setEmailChangeConfirmSuccess(response)
         return response
       }
 
@@ -201,9 +215,9 @@ export function useEmail(): UseEmailReturn {
       setError(errorMessage)
       throw error
     } finally {
-      setEmailChangeInProgress(false)
+      setLoading(false)
     }
-  }, [setEmailChangeInProgress, setError])
+  }, [setLoading, setError, setEmailChangeConfirmSuccess])
 
   const getVerificationStatus = useCallback(async (): Promise<EmailVerificationStatus> => {
     try {
@@ -211,10 +225,8 @@ export function useEmail(): UseEmailReturn {
       setError(null)
 
       const response = await emailService.getVerificationStatus()
-
       setVerificationStatus(response)
       return response
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to get verification status'
       setError(errorMessage)
@@ -236,10 +248,10 @@ export function useEmail(): UseEmailReturn {
     error,
 
     // Computed state
-    canRequestVerification,
-    verificationAttemptsCount,
-    lastVerificationRequest: lastVerificationRequest as number | null,
     isEmailVerified,
+    pendingEmailChange,
+    passwordResetSuccess,
+    emailChangeSuccess,
 
     // Actions (stable)
     requestVerificationCode,
@@ -248,8 +260,11 @@ export function useEmail(): UseEmailReturn {
     confirmPasswordReset,
     requestEmailChange,
     confirmEmailChange,
+    getVerificationStatus,
     clearError,
-    getVerificationStatus
+    resetVerificationFlow,
+    resetPasswordResetFlow,
+    resetEmailChangeFlow
   }
 }
 
@@ -269,23 +284,24 @@ export function useEmailVerificationStatus() {
 }
 
 /**
- * Hook for verification actions only - minimal re-renders
- */
-export function useEmailVerification() {
-  return {
-    verificationInProgress: useEmailStore(emailSelectors.verificationInProgress),
-    verificationAttemptsCount: useEmailStore(emailSelectors.verificationAttemptsCount),
-    canRequestVerification: useEmailStore(emailSelectors.canRequestVerification)
-  }
-}
-
-/**
  * Hook for password reset functionality only - minimal re-renders
  */
 export function usePasswordReset() {
   return {
     passwordResetInProgress: useEmailStore(emailSelectors.passwordResetInProgress),
-    passwordResetSuccess: useEmailStore(emailSelectors.passwordResetSuccess)
+    passwordResetSuccess: useEmailStore(emailSelectors.passwordResetSuccess),
+    passwordResetError: useEmailStore(emailSelectors.passwordResetError)
+  }
+}
+
+/**
+ * Hook for email change functionality only - minimal re-renders
+ */
+export function useEmailChange() {
+  return {
+    emailChangeInProgress: useEmailStore(emailSelectors.emailChangeInProgress),
+    emailChangeSuccess: useEmailStore(emailSelectors.emailChangeSuccess),
+    pendingEmailChange: useEmailStore(emailSelectors.pendingEmailChange)
   }
 }
 

@@ -131,7 +131,7 @@ export function AddPaymentMethodsPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="w-full max-w-[1000px] mx-auto px-6">
+            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
                 <div className="flex items-center gap-4 mb-2">
                     <Button variant="ghost" size="icon" onClick={goBack}>
                         <IconArrowLeft className="w-5 h-5" />
@@ -155,12 +155,12 @@ export function AddPaymentMethodsPage() {
                         return (
                             <Card
                                 key={provider.provider}
-                                className={`p-6 ${isAlreadyAdded ? 'bg-muted/30' : ''}`}
+                                className={`p-4 sm:p-6 ${isAlreadyAdded ? 'bg-muted/30' : ''}`}
                             >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <IconCreditCard className="w-6 h-6 text-green-600" />
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 sm:gap-4">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <IconCreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                                         </div>
                                         <div>
                                             <h3 className="font-semibold">{provider.displayName}</h3>
@@ -178,7 +178,7 @@ export function AddPaymentMethodsPage() {
                                         ) : (
                                             <Button
                                                 onClick={() => handleAddClick(provider.provider)}
-                                                className="bg-green-600 hover:bg-green-700"
+                                                className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                                             >
                                                 Activate
                                             </Button>

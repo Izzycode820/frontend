@@ -98,52 +98,54 @@ export function StaffTable({
   };
 
   return (
-    <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">
-              <Checkbox
-                checked={isAllSelected}
-                onCheckedChange={handleSelectAll}
-                aria-label="Select all"
-              />
-            </TableHead>
-            <TableHead>User</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Role</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {members.map((member) => (
-            <TableRow
-              key={member.id}
-              className="cursor-pointer"
-              onClick={() => onViewMember(member.id)}
-            >
-              <TableCell onClick={(e) => e.stopPropagation()}>
+    <Card className="overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">
                 <Checkbox
-                  checked={selectedStaff.includes(member.id)}
-                  onCheckedChange={() => handleSelectMember(member.id)}
-                  aria-label={`Select ${getUserDisplay(member)}`}
+                  checked={isAllSelected}
+                  onCheckedChange={handleSelectAll}
+                  aria-label="Select all"
                 />
-              </TableCell>
-              <TableCell className="font-medium">
-                {getUserDisplay(member)}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  {getStatusBadge(member.status)}
-                  {getStatusIcon(member.status)}
-                </div>
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {member.roles.join(', ')}
-              </TableCell>
+              </TableHead>
+              <TableHead className="whitespace-nowrap">User</TableHead>
+              <TableHead className="whitespace-nowrap">Status</TableHead>
+              <TableHead className="whitespace-nowrap">Role</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {members.map((member) => (
+              <TableRow
+                key={member.id}
+                className="cursor-pointer"
+                onClick={() => onViewMember(member.id)}
+              >
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selectedStaff.includes(member.id)}
+                    onCheckedChange={() => handleSelectMember(member.id)}
+                    aria-label={`Select ${getUserDisplay(member)}`}
+                  />
+                </TableCell>
+                <TableCell className="font-medium whitespace-nowrap">
+                  {getUserDisplay(member)}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(member.status)}
+                    {getStatusIcon(member.status)}
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground whitespace-nowrap">
+                  {member.roles.join(', ')}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </Card>
   );
 }

@@ -28,68 +28,60 @@ export class EmailService extends BaseService {
 
   /**
    * Request email verification code
-   * Backend: POST /api/auth/email/request-verification/
+   * Backend: POST /api/auth/email/verify-request/
    */
   async requestVerificationCode(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
-    this.validateRequired(data, ['email', 'code_type'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['email', 'code_type'])
 
-    const cleanedData = this.cleanData({
+    return this.postPublic<EmailVerificationResponse>('/email/verify-request/', {
       email: data.email.toLowerCase().trim(),
       code_type: data.code_type
     })
-
-    return this.postPublic<EmailVerificationResponse>('/email/request-verification/', cleanedData)
   }
 
   /**
    * Verify email verification code
-   * Backend: POST /api/auth/email/verify-code/
+   * Backend: POST /api/auth/email/verify-confirm/
    */
   async verifyCode(data: EmailVerificationConfirm): Promise<EmailVerificationResponse> {
-    this.validateRequired(data, ['email', 'code_type', 'code'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['email', 'code_type', 'code'])
 
-    const cleanedData = this.cleanData({
+    return this.postPublic<EmailVerificationResponse>('/email/verify-confirm/', {
       email: data.email.toLowerCase().trim(),
       code_type: data.code_type,
       code: data.code.replace(/\D/g, '') // Remove non-digits
     })
-
-    return this.postPublic<EmailVerificationResponse>('/email/verify-code/', cleanedData)
   }
 
   /**
    * Request password reset
-   * Backend: POST /api/auth/email/password-reset/
+   * Backend: POST /api/auth/password/reset-request/
    */
   async requestPasswordReset(data: PasswordResetRequest): Promise<PasswordResetResponse> {
-    this.validateRequired(data, ['email'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['email'])
 
-    const cleanedData = this.cleanData({
+    return this.postPublic<PasswordResetResponse>('/password/reset-request/', {
       email: data.email.toLowerCase().trim()
     })
-
-    return this.postPublic<PasswordResetResponse>('/email/password-reset/', cleanedData)
   }
 
   /**
    * Confirm password reset with token
-   * Backend: POST /api/auth/email/password-reset/confirm/
+   * Backend: POST /api/auth/password/reset-confirm/
    */
   async confirmPasswordReset(data: PasswordResetConfirm): Promise<PasswordResetResponse> {
-    this.validateRequired(data, ['token', 'new_password', 'confirm_password'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['token', 'new_password', 'confirm_password'])
 
     // Validate passwords match
     if (data.new_password !== data.confirm_password) {
       throw new Error('Passwords do not match')
     }
 
-    const cleanedData = this.cleanData({
+    return this.postPublic<PasswordResetResponse>('/password/reset-confirm/', {
       token: data.token.trim(),
       new_password: data.new_password,
       confirm_password: data.confirm_password
     })
-
-    return this.postPublic<PasswordResetResponse>('/email/password-reset/confirm/', cleanedData)
   }
 
   /**
@@ -97,13 +89,11 @@ export class EmailService extends BaseService {
    * Backend: POST /api/auth/email/change-request/
    */
   async requestEmailChange(data: EmailChangeRequest): Promise<EmailChangeResponse> {
-    this.validateRequired(data, ['new_email'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['new_email'])
 
-    const cleanedData = this.cleanData({
+    return this.post<EmailChangeResponse>('/email/change-request/', {
       new_email: data.new_email.toLowerCase().trim()
     })
-
-    return this.post<EmailChangeResponse>('/email/change-request/', cleanedData)
   }
 
   /**
@@ -111,14 +101,12 @@ export class EmailService extends BaseService {
    * Backend: POST /api/auth/email/change-confirm/
    */
   async confirmEmailChange(data: EmailChangeConfirm): Promise<EmailChangeResponse> {
-    this.validateRequired(data, ['new_email', 'code'])
+    this.validateRequired(data as unknown as Record<string, unknown>, ['new_email', 'code'])
 
-    const cleanedData = this.cleanData({
+    return this.post<EmailChangeResponse>('/email/change-confirm/', {
       new_email: data.new_email.toLowerCase().trim(),
       code: data.code.replace(/\D/g, '') // Remove non-digits
     })
-
-    return this.post<EmailChangeResponse>('/email/change-confirm/', cleanedData)
   }
 
   /**

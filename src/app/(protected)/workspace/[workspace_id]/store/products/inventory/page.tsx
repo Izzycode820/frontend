@@ -33,6 +33,8 @@ import {
   PaginationEllipsis,
 } from '@/components/shadcn-ui/pagination'
 import { InventoryTable } from '@/components/workspace/store/inventory/InventoryTable'
+import { MobileInventoryList } from '@/components/workspace/store/inventory/mobile'
+import { useIsMobile } from '@/hooks/shadcn/use-mobile'
 import { GetInventoryDocument } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetInventory.generated'
 import { GetLocationsDocument } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetLocations.generated'
 import { UpdateInventoryDocument } from '@/services/graphql/admin-store/mutations/inventory/__generated__/UpdateInventory.generated'
@@ -42,10 +44,12 @@ import { Search, Package } from 'lucide-react'
 
 export default function InventoryPage() {
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace)
+  const isMobile = useIsMobile()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [locationFilter, setLocationFilter] = useState<string | undefined>()
   const [stockStatusFilter, setStockStatusFilter] = useState<string | undefined>()
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
 
   // Pagination state
   const pageSize = 20
@@ -198,6 +202,61 @@ export default function InventoryPage() {
     )
   }
 
+  // Mobile selection handlers
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev =>
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const handleLongPressItem = (itemId: string) => {
+    if (!selectedItems.includes(itemId)) {
+      setSelectedItems([itemId]);
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedItems([]);
+  };
+
+  // Mobile filter chips
+  const mobileFilterChips = [
+    { value: 'all', label: 'All' },
+    { value: 'in_stock', label: 'In Stock' },
+    { value: 'low_stock', label: 'Low Stock' },
+    { value: 'out_of_stock', label: 'Out of Stock' },
+  ];
+
+  // Handle chip change for mobile
+  const handleChipChange = (value: string) => {
+    setStockStatusFilter(value === 'all' ? undefined : value);
+  };
+
+  // Mobile View
+  if (isMobile) {
+    return (
+      <div className="px-4 pt-4">
+        <MobileInventoryList
+          inventory={filteredInventory}
+          workspaceId={currentWorkspace?.id || ''}
+          searchTerm={searchQuery}
+          onSearchChange={setSearchQuery}
+          chips={mobileFilterChips}
+          activeChip={stockStatusFilter || 'all'}
+          onChipChange={handleChipChange}
+          selectedItems={selectedItems}
+          onSelectItem={handleSelectItem}
+          onLongPressItem={handleLongPressItem}
+          onClearSelection={handleClearSelection}
+          isLoading={loading}
+        />
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}

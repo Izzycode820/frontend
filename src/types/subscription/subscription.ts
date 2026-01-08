@@ -260,6 +260,34 @@ export interface RetryPaymentResponse {
   error_code?: string;
 }
 
+// Subscription-specific retry (simpler interface - user context from auth)
+export interface RetrySubscriptionPaymentRequest {
+  phone_number: string;
+  provider?: string;  // default: 'fapshi'
+  idempotency_key?: string;
+}
+
+export interface RetrySubscriptionPaymentResponse {
+  success: boolean;
+  subscription_id?: string;
+  payment_intent_id?: string;
+  payment_instructions?: string;
+  redirect_url?: string;
+  amount?: number;
+  plan?: SubscriptionTier;
+  billing_cycle?: BillingCycle;
+  billing_phase?: BillingPhase;
+  cycle_duration_days?: number;
+  retry_count?: number;
+  status?: string;
+  expires_at?: string;
+  existing_payment?: boolean;  // true if returning active PaymentIntent
+  already_processed?: boolean;  // true if idempotency key match
+  message?: string;
+  error?: string;
+  error_code?: string;
+}
+
 // ============================================================================
 // Error Types
 // ============================================================================
@@ -314,29 +342,29 @@ export type SubscriptionErrorCode =
 
 export type SubscriptionState =
   | {
-      status: 'idle';
-      subscription: null;
-      error: null;
-      isLoading: false;
-    }
+    status: 'idle';
+    subscription: null;
+    error: null;
+    isLoading: false;
+  }
   | {
-      status: 'loading';
-      subscription: null;
-      error: null;
-      isLoading: true;
-    }
+    status: 'loading';
+    subscription: null;
+    error: null;
+    isLoading: true;
+  }
   | {
-      status: 'loaded';
-      subscription: SubscriptionStatusResponse;
-      error: null;
-      isLoading: false;
-    }
+    status: 'loaded';
+    subscription: SubscriptionStatusResponse;
+    error: null;
+    isLoading: false;
+  }
   | {
-      status: 'error';
-      subscription: null;
-      error: SubscriptionError;
-      isLoading: false;
-    };
+    status: 'error';
+    subscription: null;
+    error: SubscriptionError;
+    isLoading: false;
+  };
 
 // ============================================================================
 // Hook Return Types

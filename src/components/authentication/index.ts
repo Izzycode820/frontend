@@ -16,6 +16,9 @@ export { RoleGuard } from './guards/RoleGuard'
 export { UserProfile } from './profile/UserProfile'
 export { AvatarUpload } from './profile/AvatarUpload'
 
+// Verification
+export { PhoneVerificationCard, EmailVerificationCard } from './verification'
+
 // Shared
 export { AuthLoadingSpinner, TokenManager } from './shared'
 export { AuthErrorBoundary } from './shared/AuthErrorBoundary'

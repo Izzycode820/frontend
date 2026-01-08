@@ -34,13 +34,6 @@ export type {
   LocationInfo,
 } from './auth';
 
-export type {
-  // Feature bitmap system
-  FeatureBitmap,
-  FeatureKey,
-  SubscriptionAuthClaims,
-  hasFeature,
-} from './subscription';
 
 export type {
   // Workspace context
@@ -57,6 +50,7 @@ export type {
 // ============================================================================
 // import { MFAStatus, TOTPDevice } from './mfa'
 // import { EmailVerificationRequest } from './email'
+// import { PhoneVerificationRequest } from './phone'
 // import { OAuth2Provider } from './oauth2'
 // import { UserSecurityEvent } from './security'
 // import { UserProfile, UserSession } from './user'
@@ -229,18 +223,18 @@ import type { WorkspaceAuthContext } from './workspace';
 
 export const hasValidToken = (payload: unknown): payload is JWTPayload => {
   return typeof payload === 'object' && payload !== null && 'user_id' in payload && 'exp' in payload && 'type' in payload &&
-         typeof payload.user_id === 'number' && // Aligned with backend
-         typeof payload.exp === 'number' &&
-         payload.exp > Date.now() / 1000 &&
-         (payload.type === 'access' || payload.type === 'refresh');
+    typeof payload.user_id === 'number' && // Aligned with backend
+    typeof payload.exp === 'number' &&
+    payload.exp > Date.now() / 1000 &&
+    (payload.type === 'access' || payload.type === 'refresh');
 };
 
 export const isWorkspaceAuthContext = (context: unknown): context is WorkspaceAuthContext => {
   return typeof context === 'object' && context !== null && 'id' in context && 'name' in context && 'role' in context && 'permissions' in context &&
-         typeof context.id === 'string' &&
-         typeof context.name === 'string' &&
-         typeof context.role === 'string' &&
-         Array.isArray(context.permissions);
+    typeof context.id === 'string' &&
+    typeof context.name === 'string' &&
+    typeof context.role === 'string' &&
+    Array.isArray(context.permissions);
 };
 
 // Auth state type guards for discriminated union

@@ -127,11 +127,6 @@ export function AuthPageSpinner() {
             <span className="w-2 h-2 bg-primary rounded-full animate-bounce" />
           </div>
         </div>
-
-        {/* Subtle text */}
-        <p className="text-sm text-muted-foreground">
-          Preparing your workspace...
-        </p>
       </div>
     </div>
   )

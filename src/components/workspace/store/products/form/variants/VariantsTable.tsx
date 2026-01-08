@@ -181,191 +181,191 @@ export function VariantsTable({
           </div>
         )}
 
-      {/* Variants Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="w-12">
-                <Checkbox />
-              </TableHead>
-              <TableHead className="w-[80px]">Image</TableHead>
-              <TableHead>Variant</TableHead>
-              <TableHead className="w-[150px]">Price (FCFA)</TableHead>
-              <TableHead className="w-[120px]">Available</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {flatVariants.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No variants yet. Add option values above to create variants.
-                </TableCell>
+        {/* Variants Table */}
+        <div className="border rounded-lg overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="w-12">
+                  <Checkbox />
+                </TableHead>
+                <TableHead className="w-[80px]">Image</TableHead>
+                <TableHead>Variant</TableHead>
+                <TableHead className="w-[150px]">Price (FCFA)</TableHead>
+                <TableHead className="w-[120px]">Available</TableHead>
               </TableRow>
-            ) : (
-              flatVariants.map((variant) => {
-                const hasChildren = variant.children && variant.children.length > 0;
-                const isLeaf = isLeafVariant(variant);
-                const variantValue = getVariantLevelValue(variant);
-                const indentPx = variant.renderLevel * 40; // Indentation for all elements
+            </TableHeader>
+            <TableBody>
+              {flatVariants.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    No variants yet. Add option values above to create variants.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                flatVariants.map((variant) => {
+                  const hasChildren = variant.children && variant.children.length > 0;
+                  const isLeaf = isLeafVariant(variant);
+                  const variantValue = getVariantLevelValue(variant);
+                  const indentPx = variant.renderLevel * 40; // Indentation for all elements
 
-                return (
-                  <TableRow key={variant.id} className={hasChildren ? 'bg-muted/30' : ''}>
-                    {/* Checkbox - Indented */}
-                    <TableCell>
-                      <div style={{ paddingLeft: `${indentPx}px` }}>
-                        <Checkbox />
-                      </div>
-                    </TableCell>
+                  return (
+                    <TableRow key={variant.id} className={hasChildren ? 'bg-muted/30' : ''}>
+                      {/* Checkbox - Indented */}
+                      <TableCell>
+                        <div style={{ paddingLeft: `${indentPx}px` }}>
+                          <Checkbox />
+                        </div>
+                      </TableCell>
 
-                    {/* Image Upload - ALL rows have image */}
-                    <TableCell>
-                      <div style={{ paddingLeft: `${indentPx}px` }}>
-                        {variant.mediaItem ? (
-                          <div className="relative group h-12 w-12">
-                            <img
-                              src={variant.mediaItem.thumbnailUrl || variant.mediaItem.url}
-                              alt={variantValue}
-                              className="h-12 w-12 object-cover rounded border"
-                            />
-                            <button
+                      {/* Image Upload - ALL rows have image */}
+                      <TableCell>
+                        <div style={{ paddingLeft: `${indentPx}px` }}>
+                          {variant.mediaItem ? (
+                            <div className="relative group h-12 w-12">
+                              <img
+                                src={variant.mediaItem.thumbnailUrl || variant.mediaItem.url}
+                                alt={variantValue}
+                                className="h-12 w-12 object-cover rounded border"
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => handleImageRemove(variant.id!, e)}
+                                className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <Button
                               type="button"
-                              onClick={(e) => handleImageRemove(variant.id!, e)}
-                              className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                              variant="outline"
+                              size="icon"
+                              className="h-12 w-12 hover:bg-accent"
+                              onClick={() => handleOpenMediaModal(variant.id!)}
                             >
-                              <X className="h-3 w-3" />
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+
+                      {/* Variant Value (Clickable for leaf, expandable for parents) */}
+                      <TableCell>
+                        <div
+                          className="flex items-center gap-2"
+                          style={{ paddingLeft: `${indentPx}px` }}
+                        >
+                          {hasChildren && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 p-0 flex-shrink-0"
+                              onClick={() => toggleExpand(variant.id!)}
+                            >
+                              {variant.isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
+
+                          {isLeaf ? (
+                            <button
+                              onClick={() => setEditingVariant(variant)}
+                              className="text-left hover:underline font-medium"
+                            >
+                              {variantValue}
                             </button>
-                          </div>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className="h-12 w-12 hover:bg-accent"
-                            onClick={() => handleOpenMediaModal(variant.id!)}
-                          >
-                            <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+                          ) : (
+                            <span className="font-medium">{variantValue}</span>
+                          )}
 
-                    {/* Variant Value (Clickable for leaf, expandable for parents) */}
-                    <TableCell>
-                      <div
-                        className="flex items-center gap-2"
-                        style={{ paddingLeft: `${indentPx}px` }}
-                      >
-                        {hasChildren && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 p-0 flex-shrink-0"
-                            onClick={() => toggleExpand(variant.id!)}
-                          >
-                            {variant.isExpanded ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </Button>
-                        )}
+                          {hasChildren && (
+                            <span className="text-sm text-muted-foreground ml-1">
+                              {variant.children!.length} variant{variant.children!.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
 
+                      {/* Price (Editable ONLY for leaf nodes) */}
+                      <TableCell>
                         {isLeaf ? (
-                          <button
-                            onClick={() => setEditingVariant(variant)}
-                            className="text-left hover:underline font-medium"
-                          >
-                            {variantValue}
-                          </button>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={variant.price || ""}
+                            onChange={(e) =>
+                              handleVariantUpdate({
+                                ...variant,
+                                price: parseFloat(e.target.value) || undefined
+                              })
+                            }
+                            className="w-full"
+                          />
                         ) : (
-                          <span className="font-medium">{variantValue}</span>
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
+                      </TableCell>
 
-                        {hasChildren && (
-                          <span className="text-sm text-muted-foreground ml-1">
-                            {variant.children!.length} variant{variant.children!.length > 1 ? 's' : ''}
-                          </span>
+                      {/* Available (Editable for leaf) */}
+                      <TableCell>
+                        {isLeaf ? (
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={variant.inventoryQuantity || ""}
+                            onChange={(e) =>
+                              handleVariantUpdate({
+                                ...variant,
+                                inventoryQuantity: parseInt(e.target.value) || 0
+                              })
+                            }
+                            className="w-full"
+                          />
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
-                      </div>
-                    </TableCell>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-                    {/* Price (Editable ONLY for leaf nodes) */}
-                    <TableCell>
-                      {isLeaf ? (
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          value={variant.price || ""}
-                          onChange={(e) =>
-                            handleVariantUpdate({
-                              ...variant,
-                              price: parseFloat(e.target.value) || undefined
-                            })
-                          }
-                          className="w-full"
-                        />
-                      ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
-                      )}
-                    </TableCell>
-
-                    {/* Available (Editable for leaf) */}
-                    <TableCell>
-                      {isLeaf ? (
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          value={variant.inventoryQuantity || ""}
-                          onChange={(e) =>
-                            handleVariantUpdate({
-                              ...variant,
-                              inventoryQuantity: parseInt(e.target.value) || 0
-                            })
-                          }
-                          className="w-full"
-                        />
-                      ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+        {/* Summary */}
+        {flatVariants.length > 0 && (
+          <div className="text-sm text-muted-foreground">
+            Inventory is not tracked at Shop location
+          </div>
+        )}
       </div>
 
-      {/* Summary */}
-      {flatVariants.length > 0 && (
-        <div className="text-sm text-muted-foreground">
-          Inventory is not tracked at Shop location
-        </div>
+      {/* Edit Modal */}
+      {editingVariant && (
+        <VariantEditModal
+          open={!!editingVariant}
+          onOpenChange={(open) => !open && setEditingVariant(null)}
+          variant={editingVariant}
+          onSave={handleVariantUpdate}
+        />
       )}
-    </div>
 
-    {/* Edit Modal */}
-    {editingVariant && (
-      <VariantEditModal
-        open={!!editingVariant}
-        onOpenChange={(open) => !open && setEditingVariant(null)}
-        variant={editingVariant}
-        onSave={handleVariantUpdate}
+      {/* Media Modal for Variant Images */}
+      <FilesAndMediaModal
+        open={showMediaModal}
+        onClose={() => {
+          setShowMediaModal(false);
+          setEditingImageForVariant(null);
+        }}
+        onSelect={handleMediaSelect}
+        allowedTypes={['image']}
+        maxSelection={1}
       />
-    )}
-
-    {/* Media Modal for Variant Images */}
-    <FilesAndMediaModal
-      open={showMediaModal}
-      onClose={() => {
-        setShowMediaModal(false);
-        setEditingImageForVariant(null);
-      }}
-      onSelect={handleMediaSelect}
-      allowedTypes={['image']}
-      maxSelection={1}
-    />
     </>
   );
 }

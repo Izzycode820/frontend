@@ -21,13 +21,12 @@ import type {
   ResumeSubscriptionResponse,
   VoidPendingPaymentResponse,
   ReactivateSubscriptionResponse,
-  RetryPaymentRequest,
-  RetryPaymentResponse,
+  RetrySubscriptionPaymentRequest,
+  RetrySubscriptionPaymentResponse,
   SubscriptionError,
 } from '../../types/subscription/subscription'
 import type { SubscriptionData } from '../../types/authentication/auth'
 import subscriptionService from '../../services/subscription/subscription'
-import paymentService from '../../services/payment/payment'
 
 // ============================================================================
 // Subscription Store State Interface
@@ -47,7 +46,7 @@ interface SubscriptionStoreState {
   resumeSubscription: () => Promise<ResumeSubscriptionResponse>
   voidPendingPayment: (subscriptionId: string) => Promise<VoidPendingPaymentResponse>
   reactivateSubscription: () => Promise<ReactivateSubscriptionResponse>
-  retryPayment: (request: RetryPaymentRequest) => Promise<RetryPaymentResponse>
+  retrySubscriptionPayment: (request: RetrySubscriptionPaymentRequest) => Promise<RetrySubscriptionPaymentResponse>
 
   // UI Actions
   setLoading: (loading: boolean) => void
@@ -311,14 +310,14 @@ export const useSubscriptionStore = create<SubscriptionStoreState>()(
         }
       },
 
-      retryPayment: async (request) => {
+      retrySubscriptionPayment: async (request) => {
         set((state) => {
           state.isLoading = true
           state.error = null
         })
 
         try {
-          const response = await paymentService.retryPayment(request)
+          const response = await subscriptionService.retrySubscriptionPayment(request)
 
           set((state) => {
             state.isLoading = false
@@ -406,7 +405,7 @@ export const subscriptionSelectors = {
   resumeSubscription: (state: SubscriptionStoreState) => state.resumeSubscription,
   voidPendingPayment: (state: SubscriptionStoreState) => state.voidPendingPayment,
   reactivateSubscription: (state: SubscriptionStoreState) => state.reactivateSubscription,
-  retryPayment: (state: SubscriptionStoreState) => state.retryPayment,
+  retrySubscriptionPayment: (state: SubscriptionStoreState) => state.retrySubscriptionPayment,
   clearError: (state: SubscriptionStoreState) => state.clearError,
   syncFromAuth: (state: SubscriptionStoreState) => state.syncFromAuth,
 }

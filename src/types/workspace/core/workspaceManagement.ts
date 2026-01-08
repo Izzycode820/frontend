@@ -13,6 +13,7 @@ import { z } from 'zod';
 export const WorkspaceStatus = {
   ACTIVE: 'active',
   SUSPENDED: 'suspended',
+  SUSPENDED_BY_PLAN: 'suspended_by_plan',
   DELETED: 'deleted',
 } as const;
 
@@ -105,6 +106,8 @@ export interface WorkspaceListItem {
   readonly name: string;
   readonly type: WorkspaceTypeType;
   readonly status: WorkspaceStatusType;
+  readonly role: 'owner' | 'staff';  // User's role in this workspace
+  readonly restricted_mode?: boolean; // True if actions are blocked due to subscription
   readonly permissions: WorkspacePermissionType[];
   readonly member_count: number;
   readonly createdAt: string;
@@ -236,6 +239,12 @@ export const WORKSPACE_ERRORS = {
   INVALID_FIELDS: 'INVALID_FIELDS',
   NO_VALID_FIELDS: 'NO_VALID_FIELDS',
   INVALID_NAME: 'INVALID_NAME',
+  // Subscription restriction errors (aligned with backend gating.py)
+  WORKSPACE_RESTRICTED: 'WORKSPACE_RESTRICTED',
+  WORKSPACE_NONCOMPLIANT: 'WORKSPACE_NONCOMPLIANT',
+  SUBSCRIPTION_RESTRICTED: 'SUBSCRIPTION_RESTRICTED',
+  WORKSPACE_NOT_FOUND: 'WORKSPACE_NOT_FOUND',
+  ACCESS_DENIED: 'ACCESS_DENIED',
 } as const;
 
 export type WorkspaceErrorCode = typeof WORKSPACE_ERRORS[keyof typeof WORKSPACE_ERRORS];
@@ -421,7 +430,7 @@ export function isWorkspaceActive(workspace: WorkspaceData): boolean {
  */
 export function canManageWorkspace(workspace: WorkspaceData): boolean {
   return hasWorkspacePermission(workspace, WorkspacePermission.ADMIN) ||
-         hasWorkspacePermission(workspace, WorkspacePermission.MANAGE_SETTINGS);
+    hasWorkspacePermission(workspace, WorkspacePermission.MANAGE_SETTINGS);
 }
 
 /**
@@ -429,5 +438,5 @@ export function canManageWorkspace(workspace: WorkspaceData): boolean {
  */
 export function canManageMembers(workspace: WorkspaceData): boolean {
   return hasWorkspacePermission(workspace, WorkspacePermission.ADMIN) ||
-         hasWorkspacePermission(workspace, WorkspacePermission.MANAGE_MEMBERS);
+    hasWorkspacePermission(workspace, WorkspacePermission.MANAGE_MEMBERS);
 }

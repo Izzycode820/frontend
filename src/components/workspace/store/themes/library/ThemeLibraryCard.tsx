@@ -60,11 +60,12 @@ export function ThemeLibraryCard({
 
   return (
     <Card className="overflow-hidden">
-      <CardContent className="p-5">
-        <div className="flex gap-4 items-start">
+      <CardContent className="p-4 sm:p-5">
+        {/* Main container - stack on mobile, row on desktop */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-start">
           {/* Preview Image */}
           <div className="flex-shrink-0">
-            <div className="relative w-28 h-20 rounded-md overflow-hidden border border-border bg-muted/30">
+            <div className="relative w-full sm:w-28 h-32 sm:h-20 rounded-md overflow-hidden border border-border bg-muted/30">
               {previewImage ? (
                 <Image
                   src={previewImage}
@@ -82,7 +83,7 @@ export function ThemeLibraryCard({
 
           {/* Theme Info */}
           <div className="flex-1 min-w-0">
-            <h4 className="text-base font-semibold mb-1.5">
+            <h4 className="text-base font-semibold mb-1.5 truncate">
               {themeName}
             </h4>
             <div className="space-y-0.5">
@@ -98,14 +99,15 @@ export function ThemeLibraryCard({
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-start gap-2">
+          {/* Actions - full width on mobile, auto on desktop */}
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start flex-wrap sm:flex-nowrap">
             {!isPublished && onPublish && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={onPublish}
                 disabled={isPublishing}
+                className="flex-1 sm:flex-none"
               >
                 {isPublishing ? 'Publishing...' : 'Publish'}
               </Button>
@@ -115,12 +117,13 @@ export function ThemeLibraryCard({
               size="sm"
               onClick={onEditTheme}
               disabled={isPublishing}
+              className="flex-1 sm:flex-none"
             >
               Edit theme
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0">
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Open menu</span>
                 </Button>

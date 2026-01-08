@@ -59,75 +59,77 @@ export function PendingInvitesTable({
                     </CardTitle>
                 </div>
             </CardHeader>
-            <CardContent className="p-0">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Invited By</TableHead>
-                            <TableHead>Sent</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {invites.map((invite) => (
-                            <TableRow key={invite.id}>
-                                <TableCell className="font-medium">
-                                    <div className="flex items-center gap-2">
-                                        <Mail className="h-4 w-4 text-muted-foreground" />
-                                        {invite.email}
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-muted-foreground">
-                                    {invite.role}
-                                </TableCell>
-                                <TableCell className="text-muted-foreground">
-                                    {invite.invitedBy}
-                                </TableCell>
-                                <TableCell className="text-muted-foreground">
-                                    {formatDistanceToNow(new Date(invite.createdAt), { addSuffix: true })}
-                                </TableCell>
-                                <TableCell>
-                                    {isExpired(invite.expiresAt) ? (
-                                        <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-                                            Expired
-                                        </Badge>
-                                    ) : (
-                                        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                                            Pending
-                                        </Badge>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        {onResendInvite && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => onResendInvite(invite.id)}
-                                                disabled={!isExpired(invite.expiresAt)}
-                                            >
-                                                Resend
-                                            </Button>
-                                        )}
-                                        {onCancelInvite && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-destructive hover:text-destructive"
-                                                onClick={() => onCancelInvite(invite.id)}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </TableCell>
+            <CardContent className="p-0 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="whitespace-nowrap">Email</TableHead>
+                                <TableHead className="whitespace-nowrap">Role</TableHead>
+                                <TableHead className="whitespace-nowrap">Invited By</TableHead>
+                                <TableHead className="whitespace-nowrap">Sent</TableHead>
+                                <TableHead className="whitespace-nowrap">Status</TableHead>
+                                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {invites.map((invite) => (
+                                <TableRow key={invite.id}>
+                                    <TableCell className="font-medium whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <Mail className="h-4 w-4 text-muted-foreground" />
+                                            {invite.email}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground whitespace-nowrap">
+                                        {invite.role}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground whitespace-nowrap">
+                                        {invite.invitedBy}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground whitespace-nowrap">
+                                        {formatDistanceToNow(new Date(invite.createdAt), { addSuffix: true })}
+                                    </TableCell>
+                                    <TableCell className="whitespace-nowrap">
+                                        {isExpired(invite.expiresAt) ? (
+                                            <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+                                                Expired
+                                            </Badge>
+                                        ) : (
+                                            <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+                                                Pending
+                                            </Badge>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-right whitespace-nowrap">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {onResendInvite && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => onResendInvite(invite.id)}
+                                                    disabled={!isExpired(invite.expiresAt)}
+                                                >
+                                                    Resend
+                                                </Button>
+                                            )}
+                                            {onCancelInvite && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-destructive hover:text-destructive"
+                                                    onClick={() => onCancelInvite(invite.id)}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             </CardContent>
         </Card>
     );

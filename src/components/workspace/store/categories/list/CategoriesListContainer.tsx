@@ -14,6 +14,8 @@ import { useRouter } from 'next/navigation';
 import { CategoriesTable } from './CategoriesTable';
 import { CategoriesToolbar } from './CategoriesToolbar';
 import { CategoriesFilters } from './CategoriesFilters';
+import { MobileCategoriesList } from './mobile';
+import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import {
   Pagination,
@@ -34,6 +36,7 @@ import { toast } from 'sonner';
 export default function CategoriesListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const isMobile = useIsMobile();
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [search, setSearch] = useState('');
@@ -209,7 +212,45 @@ export default function CategoriesListContainer() {
     );
   }
 
+  // Mobile selection handlers
+  const handleSelectCategory = (categoryId: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
 
+  const handleLongPressCategory = (categoryId: string) => {
+    if (!selectedCategories.includes(categoryId)) {
+      setSelectedCategories([categoryId]);
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedCategories([]);
+  };
+
+  // Mobile View
+  if (isMobile) {
+    return (
+      <div className="px-4 pt-4">
+        <MobileCategoriesList
+          categories={categories as any}
+          workspaceId={currentWorkspace?.id || ''}
+          searchTerm={search}
+          onSearchChange={setSearch}
+          selectedCategories={selectedCategories}
+          onSelectCategory={handleSelectCategory}
+          onLongPressCategory={handleLongPressCategory}
+          onClearSelection={handleClearSelection}
+          isLoading={loading}
+        />
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}

@@ -3,18 +3,19 @@
  * Main entry point for product variants UI
  *
  * Features:
- * - Progressive disclosure (starts with just a button)
+ * - Toggle-based enable/disable (consistent with inventory/shipping)
  * - Add up to 3 options (like Shopify)
  * - Auto-generate variant combinations
  * - Inline editing of variants
  * - Bulk operations
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/shadcn-ui/card';
-import { Button } from '@/components/shadcn-ui/button';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
+import { Switch } from '@/components/shadcn-ui/switch';
+import { Label } from '@/components/shadcn-ui/label';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { OptionsForm } from './OptionsForm';
 import { VariantsTable } from './VariantsTable';
 import type { ProductOption, VariantFormState } from './types';
@@ -40,15 +41,7 @@ export function ProductVariantsSection({
   onOptionsChange,
   onVariantsChange
 }: ProductVariantsSectionProps) {
-  const [showOptionsForm, setShowOptionsForm] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-
-  // Auto-show options form if variants exist
-  useEffect(() => {
-    if (hasVariants && options.length > 0) {
-      setShowOptionsForm(true);
-    }
-  }, [hasVariants, options.length]);
 
   // Validate option names for duplicates
   useEffect(() => {
@@ -83,101 +76,78 @@ export function ProductVariantsSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, basePrice]);
 
-  const handleStartAddingOptions = () => {
-    setShowOptionsForm(true);
-    onHasVariantsChange(true);
+  const handleToggleVariants = (enabled: boolean) => {
+    onHasVariantsChange(enabled);
 
-    // Add first empty option
-    if (options.length === 0) {
+    if (enabled && options.length === 0) {
+      // Add first empty option when enabling
       onOptionsChange([
         {
           optionName: "",
           optionValues: [""]
         }
       ]);
-    }
-  };
-
-  const handleRemoveVariants = () => {
-    if (confirm('Remove all variants? This will delete all variant data.')) {
-      onHasVariantsChange(false);
+    } else if (!enabled) {
+      // Clear variants when disabling
       onOptionsChange([]);
       onVariantsChange([]);
-      setShowOptionsForm(false);
     }
   };
 
-  // Initial state - no variants
-  if (!showOptionsForm && !hasVariants) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Variants</CardTitle>
-          <CardDescription>
-            Add variants if this product comes in multiple options (e.g., size, color, material)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            variant="outline"
-            onClick={handleStartAddingOptions}
-            className="w-full justify-start text-muted-foreground hover:text-foreground"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add options like size or color
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Active state - showing options and variants
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Variants</CardTitle>
-            <CardDescription>
-              Manage product variants and their pricing
-            </CardDescription>
+          <CardTitle className="text-base">Variants</CardTitle>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="has-variants" className="text-sm font-normal cursor-pointer">
+              This product has variants
+            </Label>
+            <Switch
+              id="has-variants"
+              checked={hasVariants}
+              onCheckedChange={handleToggleVariants}
+            />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRemoveVariants}
-            className="text-destructive hover:text-destructive"
-          >
-            Remove variants
-          </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Options Form */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">Options</h3>
-          <OptionsForm
-            options={options}
-            setOptions={onOptionsChange}
-          />
-        </div>
 
-        {/* Validation Error */}
-        {validationError && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{validationError}</AlertDescription>
-          </Alert>
-        )}
+      <CardContent className="space-y-4 pb-4">
+        {hasVariants ? (
+          <>
+            {/* Options Form */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Options</h3>
+              <OptionsForm
+                options={options}
+                setOptions={onOptionsChange}
+              />
+            </div>
 
-        {/* Variants Table - Auto-appears when variants exist */}
-        {variants.length > 0 && (
-          <div>
-            <VariantsTable
-              options={options}
-              variants={variants}
-              setVariants={onVariantsChange}
-            />
+            {/* Validation Error */}
+            {validationError && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{validationError}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Variants Table - Auto-appears when variants exist */}
+            {variants.length > 0 && (
+              <div>
+                <VariantsTable
+                  options={options}
+                  variants={variants}
+                  setVariants={onVariantsChange}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="bg-muted/30 px-3 py-2 rounded-md border">
+            <p className="text-xs text-muted-foreground">
+              Enable variants if this product comes in multiple options (e.g., size, color, material).
+            </p>
           </div>
         )}
       </CardContent>

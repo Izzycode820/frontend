@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shadcn-ui/select';
-import { Globe, Info } from 'lucide-react';
+import { Globe, Info, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PurchaseConfirmationProps {
@@ -185,8 +185,16 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push(`/workspace/${workspaceId}/store/settings/domains/buy`)}
+          className="md:hidden"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <Globe className="h-6 w-6 text-muted-foreground" />
-        <h1 className="text-2xl font-bold">Buy new domain</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Buy new domain</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -222,7 +230,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
             <CardContent>
               <form id="purchase-form" onSubmit={handleSubmit} className="space-y-4">
                 {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First name</Label>
                     <Input
@@ -246,7 +254,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
                 </div>
 
                 {/* Email and Store Name */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -270,7 +278,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
                 </div>
 
                 {/* Phone and Fax */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone (Mobile Money)</Label>
                     <Input
@@ -354,7 +362,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
                 </div>
 
                 {/* State and Postal Code (if needed, add grid) */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="state">State/Province</Label>
                     <Input

@@ -109,8 +109,8 @@ function ThemesContent() {
   });
 
   const handleEditTheme = (customizationId: string) => {
-  router.push(`/workspace/${workspaceId}/editor/${customizationId}`);
-  //router.push(`/showcase/editor/${customizationId}`);
+    router.push(`/workspace/${workspaceId}/editor/${customizationId}`);
+    //router.push(`/showcase/editor/${customizationId}`);
 
   };
 
@@ -214,24 +214,24 @@ function ThemesContent() {
   const libraryThemes = themes.filter((t) => !t.isActive);
 
   return (
-    <div className="w-full max-w-[1000px] mx-auto px-6">
-      <div className="flex flex-col gap-6 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+    <div className="w-full max-w-[1000px] mx-auto px-4 sm:px-6">
+      <div className="flex flex-col gap-4 sm:gap-6 py-4 sm:py-6">
+        {/* Header - stack on mobile */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-lg">
+            <div className="p-2 bg-primary rounded-lg flex-shrink-0">
               <Package className="w-5 h-5 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold">Themes</h1>
+            <h1 className="text-xl sm:text-2xl font-bold">Themes</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleViewStore}>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="outline" onClick={handleViewStore} size="sm" className="flex-1 sm:flex-none">
               <Eye className="w-4 h-4 mr-2" />
-              View your store
+              <span className="hidden xs:inline">View your </span>store
             </Button>
-            <Button onClick={handleImportTheme}>
+            <Button onClick={handleImportTheme} size="sm" className="flex-1 sm:flex-none">
               <Plus className="w-4 h-4 mr-2" />
-              Import theme
+              Import<span className="hidden xs:inline"> theme</span>
             </Button>
           </div>
         </div>
@@ -245,6 +245,8 @@ function ThemesContent() {
               previewImage={activeTheme.template.previewImage}
               version={activeTheme.template.version}
               createdAt={activeTheme.createdAt}
+              isPasswordProtected={activeTheme.isPasswordProtected}
+              storefrontPassword={activeTheme.storefrontPassword}
               onEditTheme={() => handleEditTheme(activeTheme.id)}
               onDuplicate={() => handleDuplicate(activeTheme.id, activeTheme.themeName)}
               onRename={() => openRenameDialog(activeTheme.id, activeTheme.themeName)}

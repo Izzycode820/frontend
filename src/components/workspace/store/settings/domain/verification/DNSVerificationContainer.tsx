@@ -5,7 +5,15 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, useRouter } from 'next/navigation';
 import { CustomDomainDocument } from '@/services/graphql/domains/queries/custom-domains/__generated__/customDomain.generated';
 import { VerifyCustomDomainDocument } from '@/services/graphql/domains/mutations/custom-domains/__generated__/verifyCustomDomain.generated';
-import { WorkspaceHostingCustomDomainStatusChoices } from '@/types/hosting/graphql-base';
+// import { WorkspaceHostingCustomDomainStatusChoices } from '@/types/hosting/graphql-base';
+
+// Define enum locally since it's missing in generated types
+enum WorkspaceHostingCustomDomainStatusChoices {
+  Verified = 'VERIFIED',
+  Active = 'ACTIVE',
+  Pending = 'PENDING',
+  Failed = 'FAILED'
+}
 import { Card, CardContent, CardHeader } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
@@ -18,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/shadcn-ui/table';
-import { AlertCircle, ArrowRight, CheckCircle2, Info, Loader2, Globe } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, Info, Loader2, Globe, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DNSRecord {
@@ -104,12 +112,20 @@ export function DNSVerificationContainer() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push(`/workspace/${params.workspace_id}/store/settings/domains`)}
+            className="md:hidden"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <Globe className="h-6 w-6 text-muted-foreground" />
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{domain.domain}</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-bold">{domain.domain}</h1>
               {!isVerified && (
                 <Badge variant="destructive" className="text-xs">Invalid DNS</Badge>
               )}
@@ -174,25 +190,27 @@ export function DNSVerificationContainer() {
               {recordsToRemove.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium">2. Remove these existing records</p>
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader className="bg-muted/50">
-                        <TableRow>
-                          <TableHead className="w-24">Type</TableHead>
-                          <TableHead className="w-32">Name</TableHead>
-                          <TableHead>Current values</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {recordsToRemove.map((record, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell className="font-medium">{record.type}</TableCell>
-                            <TableCell>{record.name}</TableCell>
-                            <TableCell className="text-muted-foreground">{record.currentValue}</TableCell>
+                  <div className="border rounded-lg overflow-x-auto">
+                    <div className="min-w-[400px]">
+                      <Table>
+                        <TableHeader className="bg-muted/50">
+                          <TableRow>
+                            <TableHead className="w-24">Type</TableHead>
+                            <TableHead className="w-32">Name</TableHead>
+                            <TableHead>Current values</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {recordsToRemove.map((record, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell className="font-medium">{record.type}</TableCell>
+                              <TableCell>{record.name}</TableCell>
+                              <TableCell className="text-muted-foreground">{record.currentValue}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 </div>
               )}
@@ -201,31 +219,33 @@ export function DNSVerificationContainer() {
               {recordsToAdd.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium">3. Add these new DNS records</p>
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader className="bg-muted/50">
-                        <TableRow>
-                          <TableHead className="w-24">Type</TableHead>
-                          <TableHead className="w-32">Name</TableHead>
-                          <TableHead>Current value</TableHead>
-                          <TableHead className="w-12"></TableHead>
-                          <TableHead>Update to</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {recordsToAdd.map((record, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell className="font-medium">{record.type}</TableCell>
-                            <TableCell>{record.name}</TableCell>
-                            <TableCell className="text-muted-foreground">(empty)</TableCell>
-                            <TableCell>
-                              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                            </TableCell>
-                            <TableCell className="font-medium">{record.updateTo}</TableCell>
+                  <div className="border rounded-lg overflow-x-auto">
+                    <div className="min-w-[500px]">
+                      <Table>
+                        <TableHeader className="bg-muted/50">
+                          <TableRow>
+                            <TableHead className="w-24">Type</TableHead>
+                            <TableHead className="w-32">Name</TableHead>
+                            <TableHead>Current value</TableHead>
+                            <TableHead className="w-12"></TableHead>
+                            <TableHead>Update to</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {recordsToAdd.map((record, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell className="font-medium">{record.type}</TableCell>
+                              <TableCell>{record.name}</TableCell>
+                              <TableCell className="text-muted-foreground">(empty)</TableCell>
+                              <TableCell>
+                                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                              </TableCell>
+                              <TableCell className="font-medium">{record.updateTo}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 </div>
               )}

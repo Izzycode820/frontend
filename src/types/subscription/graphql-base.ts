@@ -14,6 +14,7 @@ export interface Scalars {
   Float: { input: number; output: number; }
   DateTime: { input: string; output: string; }
   Decimal: { input: string; output: string; }
+  UUID: { input: string; output: string; }
 }
 
 /**
@@ -643,6 +644,8 @@ export enum SubscriptionSubscriptionStatusChoices {
   GracePeriod = 'GRACE_PERIOD',
   /** Pending Payment */
   PendingPayment = 'PENDING_PAYMENT',
+  /** Restricted */
+  Restricted = 'RESTRICTED',
   /** Suspended */
   Suspended = 'SUSPENDED'
 }
@@ -652,6 +655,7 @@ export interface SubscriptionType {
   __typename?: 'SubscriptionType';
   billingCycle?: Maybe<Scalars['String']['output']>;
   expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['UUID']['output'];
   introEndsAt?: Maybe<Scalars['DateTime']['output']>;
   isOnIntroPricing?: Maybe<Scalars['Boolean']['output']>;
   plan?: Maybe<SubscriptionPlanType>;

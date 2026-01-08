@@ -31,9 +31,13 @@ import {
     IconExternalLink,
     IconLoader2,
     IconInfoCircle,
+    IconArrowLeft,
 } from '@tabler/icons-react';
+import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 
 export function PaymentMethodsPage() {
+    const router = useRouter();
+    const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -236,11 +240,17 @@ export function PaymentMethodsPage() {
     return (
         <div className="space-y-6">
             {/* Header Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-6">
-                <Card className="p-6">
-                    <div className="flex items-center justify-between">
+            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+                <Card className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <IconCreditCard className="w-6 h-6 text-muted-foreground" />
+                            <button
+                                onClick={() => router.push(`/workspace/${currentWorkspace?.id}/store/settings`)}
+                                className="md:hidden p-2 -ml-2 rounded-lg hover:bg-muted"
+                            >
+                                <IconArrowLeft className="w-5 h-5" />
+                            </button>
+                            <IconCreditCard className="w-6 h-6 text-muted-foreground flex-shrink-0" />
                             <div>
                                 <h2 className="text-base font-semibold">Payment providers</h2>
                                 <p className="text-sm text-muted-foreground">
@@ -249,7 +259,7 @@ export function PaymentMethodsPage() {
                             </div>
                         </div>
                         {canAddFapshi && (
-                            <Button onClick={() => setShowAddModal(true)} className="gap-2">
+                            <Button onClick={() => setShowAddModal(true)} className="gap-2 w-full sm:w-auto">
                                 <IconPlus className="w-4 h-4" />
                                 Add Fapshi
                             </Button>
@@ -281,15 +291,15 @@ export function PaymentMethodsPage() {
                 methods.map((method) => {
                     if (!method) return null;
                     return (
-                        <div key={method.id} className="w-full max-w-[1000px] mx-auto px-6">
-                            <Card className="p-6">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <IconCreditCard className="w-6 h-6 text-primary" />
+                        <div key={method.id} className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+                            <Card className="p-4 sm:p-6">
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                    <div className="flex items-start gap-3 sm:gap-4">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <IconCreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                                         </div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <h3 className="font-semibold">{method.displayName || method.providerName}</h3>
                                                 {method.verified && (
                                                     <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded">
@@ -302,14 +312,14 @@ export function PaymentMethodsPage() {
                                             </p>
                                             {method.checkoutUrl && (
                                                 <div className="flex items-center gap-2 mt-2">
-                                                    <code className="text-xs bg-muted px-2 py-1 rounded max-w-[300px] truncate block">
+                                                    <code className="text-xs bg-muted px-2 py-1 rounded max-w-[200px] sm:max-w-[300px] truncate block">
                                                         {method.checkoutUrl}
                                                     </code>
                                                     <a
                                                         href={method.checkoutUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-muted-foreground hover:text-foreground"
+                                                        className="text-muted-foreground hover:text-foreground flex-shrink-0"
                                                     >
                                                         <IconExternalLink className="w-4 h-4" />
                                                     </a>
@@ -322,7 +332,7 @@ export function PaymentMethodsPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 self-end sm:self-auto">
                                         <Switch
                                             checked={method.enabled}
                                             onCheckedChange={(checked) => handleToggle(method.id, checked)}
@@ -352,7 +362,7 @@ export function PaymentMethodsPage() {
             )}
 
             {/* Info Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-6">
+            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
                 <Alert className="bg-blue-500/10 border-blue-500/20">
                     <IconInfoCircle className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="ml-2 text-sm text-blue-900 dark:text-blue-300">

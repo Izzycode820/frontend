@@ -3311,8 +3311,8 @@ export interface OrderType extends Node {
   __typename?: 'OrderType';
   /** When order was archived */
   archivedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** Billing address if different from shipping */
-  billingAddress: Scalars['JSONString']['output'];
+  /** Billing address if different from shipping (optional for MoMo/COD) */
+  billingAddress?: Maybe<Scalars['JSONString']['output']>;
   canBeArchived?: Maybe<Scalars['Boolean']['output']>;
   canBeCancelled?: Maybe<Scalars['Boolean']['output']>;
   canBeRefunded?: Maybe<Scalars['Boolean']['output']>;
@@ -3693,6 +3693,8 @@ export interface ProductUpdateInput {
   description?: InputMaybe<Scalars['String']['input']>;
   /** Featured image ID (product thumbnail) */
   featuredMediaId?: InputMaybe<Scalars['String']['input']>;
+  /** Whether product has variants */
+  hasVariants?: InputMaybe<Scalars['Boolean']['input']>;
   /** Inventory-related fields */
   inventory?: InputMaybe<InventoryInput>;
   /** Array of media IDs for gallery (images/videos/3D models) */

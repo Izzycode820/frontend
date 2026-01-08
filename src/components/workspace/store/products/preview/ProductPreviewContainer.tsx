@@ -24,8 +24,8 @@ export function ProductPreviewContainer({
     ) || [];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+    <div className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-16">
         {/* Left: Images Section */}
         <div className="order-1">
           <ProductImagesSection images={images} productName={product.name} />

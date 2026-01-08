@@ -11,7 +11,9 @@ import {
   IconDots,
   IconRefresh,
   IconClock,
-  IconTrash
+  IconTrash,
+  IconLock,
+  IconUserCheck
 } from '@tabler/icons-react';
 
 // Shadcn/UI Components
@@ -65,7 +67,7 @@ const workspaceTypeConfig = {
   },
 } as const;
 
-// Status configurations
+// Status configurations - aligned with backend WorkspaceStatus
 const statusConfig = {
   active: {
     variant: 'default' as const,
@@ -78,6 +80,11 @@ const statusConfig = {
   suspended: {
     variant: 'destructive' as const,
     label: 'Suspended',
+  },
+  suspended_by_plan: {
+    variant: 'outline' as const,
+    label: 'Plan Limit Exceeded',
+    className: 'border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950',
   },
   deleted: {
     variant: 'destructive' as const,
@@ -93,11 +100,17 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
   const { deleteWorkspace, restoreWorkspace, isDeleting, isRestoring } = useWorkspaceManagement();
   const [isActionLoading, setIsActionLoading] = React.useState(false);
 
+  // Staff-aware checks
+  const isOwner = workspace.role === 'owner';
+  const isStaff = workspace.role === 'staff';
   const isDeleted = workspace.status === 'suspended';
+  const isSuspendedByPlan = workspace.status === 'suspended_by_plan';
+  const isRestricted = workspace.restricted_mode;
   const canRestore = workspace.deletionInfo?.canRestore || false;
+  const isClickable = !isDeleted && !isSuspendedByPlan;
 
   // Real-time countdown
-  const [timeRemaining, setTimeRemaining] = React.useState<{days: number, hours: number, minutes: number} | null>(null);
+  const [timeRemaining, setTimeRemaining] = React.useState<{ days: number, hours: number, minutes: number } | null>(null);
 
   React.useEffect(() => {
     if (!isDeleted || !workspace.deletionInfo?.scheduledFor) return;
@@ -184,10 +197,11 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
         transition-all duration-200
         hover:from-primary/10 hover:to-card
         hover:shadow-md
-        ${isDeleted ? 'opacity-60 bg-muted/50' : 'cursor-pointer'}
+        ${isDeleted || isSuspendedByPlan ? 'opacity-60 bg-muted/50' : 'cursor-pointer'}
+        ${isRestricted ? 'border-amber-500/40' : ''}
         ${className}
       `}
-      onClick={isDeleted ? undefined : onClick}
+      onClick={isClickable ? onClick : undefined}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -207,7 +221,18 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
                 <Badge variant="outline" className="text-xs">
                   {typeConfig.label}
                 </Badge>
-                <Badge variant={status.variant} className="text-xs">
+                {/* Role badge - staff-aware */}
+                <Badge
+                  variant={isOwner ? 'default' : 'secondary'}
+                  className="text-xs"
+                >
+                  {isOwner ? 'Owner' : 'Staff'}
+                </Badge>
+                {/* Status badge with custom class for suspended_by_plan */}
+                <Badge
+                  variant={status.variant}
+                  className={`text-xs ${'className' in status ? status.className : ''}`}
+                >
                   {status.label}
                 </Badge>
               </CardDescription>
@@ -236,14 +261,17 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
                   </DropdownMenuItem>
                 )
               ) : (
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  disabled={isActionLoading}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <IconTrash className="mr-2 h-4 w-4" />
-                  <span>Delete</span>
-                </DropdownMenuItem>
+                /* SECURITY: Only owners can delete workspaces */
+                isOwner && (
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    disabled={isActionLoading}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <IconTrash className="mr-2 h-4 w-4" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                )
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -251,6 +279,36 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
       </CardHeader>
 
       <CardContent className="pt-0">
+        {/* Restricted Mode Warning Banner */}
+        {isRestricted && !isDeleted && !isSuspendedByPlan && (
+          <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-amber-600">
+              <IconLock className="h-4 w-4" />
+              <span className="font-medium">Write access restricted</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isOwner
+                ? 'Renew subscription to restore full access'
+                : 'Contact workspace owner to resolve'}
+            </p>
+          </div>
+        )}
+
+        {/* Plan Limit Exceeded Warning Banner */}
+        {isSuspendedByPlan && (
+          <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-amber-600">
+              <IconLock className="h-4 w-4" />
+              <span className="font-medium">Workspace inaccessible</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isOwner
+                ? 'Upgrade plan or delete excess workspaces to access'
+                : 'Contact workspace owner for access'}
+            </p>
+          </div>
+        )}
+
         {/* Deletion Warning Banner */}
         {isDeleted && workspace.deletionInfo && timeRemaining && (
           <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
@@ -267,7 +325,7 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
         )}
 
         {/* Workspace Stats */}
-        {!isDeleted && (
+        {!isDeleted && !isSuspendedByPlan && (
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="flex items-center gap-2 text-sm">
               <IconUsers className="h-4 w-4 text-muted-foreground" />
@@ -275,14 +333,14 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
               <span className="text-muted-foreground">members</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{workspace.permissions || 'Owner'}</span>
+              <IconUserCheck className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium capitalize">{workspace.role}</span>
             </div>
           </div>
         )}
 
         {/* Description placeholder - WorkspaceListItem doesn't include description */}
-        {!isDeleted && (
+        {!isDeleted && !isSuspendedByPlan && (
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
             {workspace.type.charAt(0).toUpperCase() + workspace.type.slice(1)} workspace
           </p>

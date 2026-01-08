@@ -13,6 +13,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { OrdersTable } from './OrdersTable';
 import { OrdersFilters } from './OrdersFilters';
+import { MobileOrdersList } from './mobile';
+import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/shadcn-ui/tabs';
@@ -47,6 +49,7 @@ type TabValue = 'all' | 'unfulfilled' | 'unpaid' | 'open' | 'archived';
 export default function OrdersListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const isMobile = useIsMobile();
 
   // State
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
@@ -198,6 +201,14 @@ export default function OrdersListContainer() {
     // Reset payment status when changing tabs (except for unpaid tab)
     if (value !== 'unpaid') {
       setPaymentStatus(null);
+    }
+  };
+
+  // Long press handler for mobile selection
+  const handleLongPressOrder = (orderId: string) => {
+    // Start selection mode and select this order
+    if (!selectedOrders.includes(orderId)) {
+      setSelectedOrders([orderId]);
     }
   };
 
@@ -388,6 +399,43 @@ export default function OrdersListContainer() {
     );
   }
 
+  // Mobile filter chips based on tabs
+  const mobileFilterChips = [
+    { value: 'all', label: 'All' },
+    { value: 'unfulfilled', label: 'Unfulfilled' },
+    { value: 'unpaid', label: 'Unpaid' },
+    { value: 'open', label: 'Open' },
+    { value: 'archived', label: 'Archived' },
+  ];
+
+  // Mobile View
+  if (isMobile) {
+    return (
+      <div className="px-4 pt-4">
+        <MobileOrdersList
+          orders={orders}
+          workspaceId={currentWorkspace?.id || ''}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          chips={mobileFilterChips}
+          activeChip={activeTab}
+          onChipChange={handleTabChange}
+          selectedOrders={selectedOrders}
+          onSelectOrder={handleSelectOrder}
+          onLongPressOrder={handleLongPressOrder}
+          onClearSelection={() => setSelectedOrders([])}
+          onBulkArchive={handleBulkArchive}
+          onBulkMarkAsPaid={handleBulkMarkAsPaid}
+          onBulkCancel={handleBulkCancel}
+          onBulkMarkAsShipped={() => handleBulkStatusUpdate('shipped', 'shipped')}
+          onBulkMarkAsDelivered={() => handleBulkStatusUpdate('delivered', 'delivered')}
+          isLoading={loading}
+        />
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}

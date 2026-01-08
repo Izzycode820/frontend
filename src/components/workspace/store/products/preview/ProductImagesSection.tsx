@@ -30,8 +30,8 @@ export function ProductImagesSection({
   if (validImages.length === 0) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="aspect-square w-full bg-muted rounded-lg flex items-center justify-center">
-          <p className="text-muted-foreground">No image available</p>
+        <div className="aspect-square w-full bg-muted flex items-center justify-center text-muted-foreground">
+          No image available
         </div>
       </div>
     );
@@ -41,39 +41,38 @@ export function ProductImagesSection({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Featured Image */}
-      <div className="aspect-square w-full bg-muted rounded-lg overflow-hidden relative">
+      {/* Main Image - matching sneaker theme aspect ratio */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted sm:aspect-square md:aspect-[3/4] lg:aspect-square">
         <Image
           src={selectedImage.optimizedUrl || selectedImage.url || ""}
           alt={productName}
           fill
-          className="object-contain"
+          className="object-cover"
           priority
         />
       </div>
 
-      {/* Thumbnail Gallery - Only show if multiple images */}
+      {/* Thumbnails - matching sneaker theme scrollable row with h-20 w-20 */}
       {validImages.length > 1 && (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
           {validImages.map((image, index) => (
             <button
               key={image.id}
               onClick={() => setSelectedImageIndex(index)}
               className={cn(
-                "aspect-square rounded-md overflow-hidden border-2 transition-all",
+                "relative h-20 w-20 flex-none overflow-hidden border-2 bg-muted transition-all",
                 selectedImageIndex === index
                   ? "border-primary"
-                  : "border-transparent hover:border-muted-foreground/50"
+                  : "border-transparent hover:border-primary/50"
               )}
             >
-              <div className="relative w-full h-full">
-                <Image
-                  src={image.thumbnailUrl || image.url || ""}
-                  alt={`${productName} thumbnail ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              <Image
+                src={image.thumbnailUrl || image.url || ""}
+                alt={`${productName} thumbnail ${index + 1}`}
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
             </button>
           ))}
         </div>

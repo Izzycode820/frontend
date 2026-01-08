@@ -1,24 +1,17 @@
 /**
  * Email Store - Zustand 2024 Best Practices
  * Manages email verification, password reset, and email change flows
- * Works directly with EmailService and comprehensive types
+ * Refactored to match authStore pattern with success handlers
  */
 
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import type {
-  EmailVerificationRequest,
   EmailVerificationResponse,
-  EmailVerificationConfirmRequest,
-  PasswordResetRequest,
-  PasswordResetConfirmRequest,
   PasswordResetResponse,
-  EmailChangeRequest,
-  EmailChangeConfirmRequest,
   EmailChangeResponse,
-  EmailVerificationStatus,
-  EmailCodeType
+  EmailVerificationStatus
 } from '../../types/authentication/email'
 
 // ============================================================================
@@ -29,61 +22,46 @@ interface EmailStoreState {
   // Email Verification Flow
   verificationStatus: EmailVerificationStatus | null
   verificationInProgress: boolean
-  verificationCode: string
   verificationError: string | null
-  lastVerificationRequest: number | null
 
   // Password Reset Flow
   passwordResetInProgress: boolean
-  passwordResetToken: string | null
-  passwordResetError: string | null
   passwordResetSuccess: boolean
-  lastPasswordResetRequest: number | null
+  passwordResetError: string | null
 
   // Email Change Flow
   emailChangeInProgress: boolean
   pendingEmailChange: string | null
-  emailChangeError: string | null
   emailChangeSuccess: boolean
-  lastEmailChangeRequest: number | null
+  emailChangeError: string | null
 
   // UI State
   isLoading: boolean
   error: string | null
-  currentCodeType: EmailCodeType | null
 
-  // Actions
+  // Success Handlers (matching authStore pattern)
+  setVerificationRequestSuccess: (response: EmailVerificationResponse) => void
+  setVerificationConfirmSuccess: (response: EmailVerificationResponse) => void
+  setPasswordResetRequestSuccess: (response: PasswordResetResponse) => void
+  setPasswordResetConfirmSuccess: (response: PasswordResetResponse) => void
+  setEmailChangeRequestSuccess: (response: EmailChangeResponse, newEmail: string) => void
+  setEmailChangeConfirmSuccess: (response: EmailChangeResponse) => void
   setVerificationStatus: (status: EmailVerificationStatus | null) => void
-  setVerificationCode: (code: string) => void
-  setVerificationInProgress: (inProgress: boolean) => void
-  setVerificationError: (error: string | null) => void
-  setPasswordResetInProgress: (inProgress: boolean) => void
-  setPasswordResetToken: (token: string | null) => void
-  setPasswordResetError: (error: string | null) => void
-  setPasswordResetSuccess: (success: boolean) => void
-  setEmailChangeInProgress: (inProgress: boolean) => void
-  setPendingEmailChange: (email: string | null) => void
-  setEmailChangeError: (error: string | null) => void
-  setEmailChangeSuccess: (success: boolean) => void
+
+  // UI State Actions
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
-  setCurrentCodeType: (codeType: EmailCodeType | null) => void
   clearError: () => void
-  markVerificationRequested: () => void
-  markPasswordResetRequested: () => void
-  markEmailChangeRequested: () => void
+
+  // Flow Control
+  setVerificationInProgress: (inProgress: boolean) => void
+  setPasswordResetInProgress: (inProgress: boolean) => void
+  setEmailChangeInProgress: (inProgress: boolean) => void
   resetVerificationFlow: () => void
   resetPasswordResetFlow: () => void
   resetEmailChangeFlow: () => void
 
   // Helper Methods
-  canRequestVerification: () => boolean
-  canRequestPasswordReset: () => boolean
-  canRequestEmailChange: () => boolean
-  getTimeUntilNextVerification: () => number | null
-  getTimeUntilNextPasswordReset: () => number | null
-  getTimeUntilNextEmailChange: () => number | null
-  isVerificationCodeValid: () => boolean
   isEmailVerified: () => boolean
 }
 
@@ -99,186 +77,82 @@ export const useEmailStore = create<EmailStoreState>()(
       // ========================================================================
       verificationStatus: null,
       verificationInProgress: false,
-      verificationCode: '',
       verificationError: null,
-      lastVerificationRequest: null,
       passwordResetInProgress: false,
-      passwordResetToken: null,
-      passwordResetError: null,
       passwordResetSuccess: false,
-      lastPasswordResetRequest: null,
+      passwordResetError: null,
       emailChangeInProgress: false,
       pendingEmailChange: null,
-      emailChangeError: null,
       emailChangeSuccess: false,
-      lastEmailChangeRequest: null,
+      emailChangeError: null,
       isLoading: false,
       error: null,
-      currentCodeType: null,
 
       // ========================================================================
-      // Email Verification Actions
+      // Success Handlers (matching authStore pattern)
       // ========================================================================
+
+      setVerificationRequestSuccess: (response) => {
+        set((state) => {
+          state.verificationInProgress = true
+          state.verificationError = null
+          state.error = null
+        })
+      },
+
+      setVerificationConfirmSuccess: (response) => {
+        set((state) => {
+          state.verificationInProgress = false
+          state.verificationError = null
+          state.error = null
+          // Update verification status if we have it
+          if (state.verificationStatus) {
+            state.verificationStatus.is_email_verified = true
+          }
+        })
+      },
+
+      setPasswordResetRequestSuccess: (response) => {
+        set((state) => {
+          state.passwordResetInProgress = true
+          state.passwordResetError = null
+          state.passwordResetSuccess = false
+          state.error = null
+        })
+      },
+
+      setPasswordResetConfirmSuccess: (response) => {
+        set((state) => {
+          state.passwordResetInProgress = false
+          state.passwordResetSuccess = true
+          state.passwordResetError = null
+          state.error = null
+        })
+      },
+
+      setEmailChangeRequestSuccess: (response, newEmail) => {
+        set((state) => {
+          state.emailChangeInProgress = true
+          state.pendingEmailChange = newEmail
+          state.emailChangeError = null
+          state.emailChangeSuccess = false
+          state.error = null
+        })
+      },
+
+      setEmailChangeConfirmSuccess: (response) => {
+        set((state) => {
+          state.emailChangeInProgress = false
+          state.emailChangeSuccess = true
+          state.pendingEmailChange = null
+          state.emailChangeError = null
+          state.error = null
+        })
+      },
 
       setVerificationStatus: (status) => {
         set((state) => {
           state.verificationStatus = status
-        })
-      },
-
-      setVerificationCode: (code) => {
-        set((state) => {
-          state.verificationCode = code.replace(/\D/g, '').substring(0, 8)
-          state.verificationError = null
-        })
-      },
-
-      setVerificationInProgress: (inProgress) => {
-        set((state) => {
-          state.verificationInProgress = inProgress
-          if (inProgress) {
-            state.verificationError = null
-          }
-        })
-      },
-
-      setVerificationError: (error) => {
-        set((state) => {
-          state.verificationError = error
-          if (error) {
-            state.verificationInProgress = false
-          }
-        })
-      },
-
-      markVerificationRequested: () => {
-        set((state) => {
-          state.lastVerificationRequest = Date.now()
-          state.verificationCode = ''
-          state.verificationError = null
-        })
-      },
-
-      resetVerificationFlow: () => {
-        set((state) => {
-          state.verificationInProgress = false
-          state.verificationCode = ''
-          state.verificationError = null
-          state.currentCodeType = null
-        })
-      },
-
-      // ========================================================================
-      // Password Reset Actions
-      // ========================================================================
-
-      setPasswordResetInProgress: (inProgress) => {
-        set((state) => {
-          state.passwordResetInProgress = inProgress
-          if (inProgress) {
-            state.passwordResetError = null
-            state.passwordResetSuccess = false
-          }
-        })
-      },
-
-      setPasswordResetToken: (token) => {
-        set((state) => {
-          state.passwordResetToken = token
-        })
-      },
-
-      setPasswordResetError: (error) => {
-        set((state) => {
-          state.passwordResetError = error
-          if (error) {
-            state.passwordResetInProgress = false
-          }
-        })
-      },
-
-      setPasswordResetSuccess: (success) => {
-        set((state) => {
-          state.passwordResetSuccess = success
-          if (success) {
-            state.passwordResetInProgress = false
-            state.passwordResetError = null
-            state.passwordResetToken = null
-          }
-        })
-      },
-
-      markPasswordResetRequested: () => {
-        set((state) => {
-          state.lastPasswordResetRequest = Date.now()
-          state.passwordResetError = null
-          state.passwordResetSuccess = false
-        })
-      },
-
-      resetPasswordResetFlow: () => {
-        set((state) => {
-          state.passwordResetInProgress = false
-          state.passwordResetToken = null
-          state.passwordResetError = null
-          state.passwordResetSuccess = false
-        })
-      },
-
-      // ========================================================================
-      // Email Change Actions
-      // ========================================================================
-
-      setEmailChangeInProgress: (inProgress) => {
-        set((state) => {
-          state.emailChangeInProgress = inProgress
-          if (inProgress) {
-            state.emailChangeError = null
-            state.emailChangeSuccess = false
-          }
-        })
-      },
-
-      setPendingEmailChange: (email) => {
-        set((state) => {
-          state.pendingEmailChange = email
-        })
-      },
-
-      setEmailChangeError: (error) => {
-        set((state) => {
-          state.emailChangeError = error
-          if (error) {
-            state.emailChangeInProgress = false
-          }
-        })
-      },
-
-      setEmailChangeSuccess: (success) => {
-        set((state) => {
-          state.emailChangeSuccess = success
-          if (success) {
-            state.emailChangeInProgress = false
-            state.emailChangeError = null
-            state.pendingEmailChange = null
-          }
-        })
-      },
-
-      markEmailChangeRequested: () => {
-        set((state) => {
-          state.lastEmailChangeRequest = Date.now()
-          state.emailChangeError = null
-          state.emailChangeSuccess = false
-        })
-      },
-
-      resetEmailChangeFlow: () => {
-        set((state) => {
-          state.emailChangeInProgress = false
-          state.pendingEmailChange = null
-          state.emailChangeError = null
-          state.emailChangeSuccess = false
         })
       },
 
@@ -304,12 +178,6 @@ export const useEmailStore = create<EmailStoreState>()(
         })
       },
 
-      setCurrentCodeType: (codeType) => {
-        set((state) => {
-          state.currentCodeType = codeType
-        })
-      },
-
       clearError: () => {
         set((state) => {
           state.error = null
@@ -320,67 +188,65 @@ export const useEmailStore = create<EmailStoreState>()(
       },
 
       // ========================================================================
-      // Helper Methods
+      // Flow Control Actions
       // ========================================================================
 
-      canRequestVerification: () => {
-        const { lastVerificationRequest } = get()
-        if (!lastVerificationRequest) return true
-
-        // Rate limit: 1 request per 60 seconds
-        const timeElapsed = Date.now() - lastVerificationRequest
-        return timeElapsed >= 60000
+      setVerificationInProgress: (inProgress) => {
+        set((state) => {
+          state.verificationInProgress = inProgress
+          if (inProgress) {
+            state.verificationError = null
+          }
+        })
       },
 
-      canRequestPasswordReset: () => {
-        const { lastPasswordResetRequest } = get()
-        if (!lastPasswordResetRequest) return true
-
-        // Rate limit: 1 request per 5 minutes
-        const timeElapsed = Date.now() - lastPasswordResetRequest
-        return timeElapsed >= 300000
+      setPasswordResetInProgress: (inProgress) => {
+        set((state) => {
+          state.passwordResetInProgress = inProgress
+          if (inProgress) {
+            state.passwordResetError = null
+            state.passwordResetSuccess = false
+          }
+        })
       },
 
-      canRequestEmailChange: () => {
-        const { lastEmailChangeRequest } = get()
-        if (!lastEmailChangeRequest) return true
-
-        // Rate limit: 1 request per 10 minutes
-        const timeElapsed = Date.now() - lastEmailChangeRequest
-        return timeElapsed >= 600000
+      setEmailChangeInProgress: (inProgress) => {
+        set((state) => {
+          state.emailChangeInProgress = inProgress
+          if (inProgress) {
+            state.emailChangeError = null
+            state.emailChangeSuccess = false
+          }
+        })
       },
 
-      getTimeUntilNextVerification: () => {
-        const { lastVerificationRequest } = get()
-        if (!lastVerificationRequest) return null
-
-        const timeElapsed = Date.now() - lastVerificationRequest
-        const timeRemaining = 60000 - timeElapsed
-        return timeRemaining > 0 ? timeRemaining : null
+      resetVerificationFlow: () => {
+        set((state) => {
+          state.verificationInProgress = false
+          state.verificationError = null
+        })
       },
 
-      getTimeUntilNextPasswordReset: () => {
-        const { lastPasswordResetRequest } = get()
-        if (!lastPasswordResetRequest) return null
-
-        const timeElapsed = Date.now() - lastPasswordResetRequest
-        const timeRemaining = 300000 - timeElapsed
-        return timeRemaining > 0 ? timeRemaining : null
+      resetPasswordResetFlow: () => {
+        set((state) => {
+          state.passwordResetInProgress = false
+          state.passwordResetError = null
+          state.passwordResetSuccess = false
+        })
       },
 
-      getTimeUntilNextEmailChange: () => {
-        const { lastEmailChangeRequest } = get()
-        if (!lastEmailChangeRequest) return null
-
-        const timeElapsed = Date.now() - lastEmailChangeRequest
-        const timeRemaining = 600000 - timeElapsed
-        return timeRemaining > 0 ? timeRemaining : null
+      resetEmailChangeFlow: () => {
+        set((state) => {
+          state.emailChangeInProgress = false
+          state.pendingEmailChange = null
+          state.emailChangeError = null
+          state.emailChangeSuccess = false
+        })
       },
 
-      isVerificationCodeValid: () => {
-        const { verificationCode } = get()
-        return verificationCode.length >= 4 && verificationCode.length <= 8
-      },
+      // ========================================================================
+      // Helper Methods
+      // ========================================================================
 
       isEmailVerified: () => {
         const { verificationStatus } = get()
@@ -398,57 +264,30 @@ export const emailSelectors = {
   // Core selectors
   verificationStatus: (state: EmailStoreState) => state.verificationStatus,
   verificationInProgress: (state: EmailStoreState) => state.verificationInProgress,
-  verificationCode: (state: EmailStoreState) => state.verificationCode,
   verificationError: (state: EmailStoreState) => state.verificationError,
   passwordResetInProgress: (state: EmailStoreState) => state.passwordResetInProgress,
-  passwordResetError: (state: EmailStoreState) => state.passwordResetError,
   passwordResetSuccess: (state: EmailStoreState) => state.passwordResetSuccess,
+  passwordResetError: (state: EmailStoreState) => state.passwordResetError,
   emailChangeInProgress: (state: EmailStoreState) => state.emailChangeInProgress,
-  emailChangeError: (state: EmailStoreState) => state.emailChangeError,
   emailChangeSuccess: (state: EmailStoreState) => state.emailChangeSuccess,
+  emailChangeError: (state: EmailStoreState) => state.emailChangeError,
   pendingEmailChange: (state: EmailStoreState) => state.pendingEmailChange,
   isLoading: (state: EmailStoreState) => state.isLoading,
   error: (state: EmailStoreState) => state.error,
-  currentCodeType: (state: EmailStoreState) => state.currentCodeType,
 
   // Computed selectors
   isEmailVerified: (state: EmailStoreState) => state.verificationStatus?.is_email_verified === true,
-  hasVerificationCode: (state: EmailStoreState) => state.verificationCode.length > 0,
-  isVerificationCodeValid: (state: EmailStoreState) =>
-    state.verificationCode.length >= 4 && state.verificationCode.length <= 8,
   hasAnyError: (state: EmailStoreState) =>
     !!(state.error || state.verificationError || state.passwordResetError || state.emailChangeError),
   hasAnyInProgress: (state: EmailStoreState) =>
     state.verificationInProgress || state.passwordResetInProgress || state.emailChangeInProgress || state.isLoading,
 
-  // Rate limiting selectors
-  canRequestVerification: (state: EmailStoreState) => {
-    if (!state.lastVerificationRequest) return true
-    const timeElapsed = Date.now() - state.lastVerificationRequest
-    return timeElapsed >= 60000
-  },
-  canRequestPasswordReset: (state: EmailStoreState) => {
-    if (!state.lastPasswordResetRequest) return true
-    const timeElapsed = Date.now() - state.lastPasswordResetRequest
-    return timeElapsed >= 300000
-  },
-  canRequestEmailChange: (state: EmailStoreState) => {
-    if (!state.lastEmailChangeRequest) return true
-    const timeElapsed = Date.now() - state.lastEmailChangeRequest
-    return timeElapsed >= 600000
-  },
-
   // Status selectors
   verificationStatusText: (state: EmailStoreState) => {
     if (!state.verificationStatus) return 'Unknown'
     if (state.verificationStatus.is_email_verified) return 'Verified'
-    if (state.verificationStatus.recent_verifications?.some(v => v.status === 'pending')) return 'Pending'
     return 'Not Verified'
-  },
-  lastVerificationAttempt: (state: EmailStoreState) =>
-    state.verificationStatus?.recent_verifications?.[0]?.created_at,
-  verificationAttemptsCount: (state: EmailStoreState) =>
-    state.verificationStatus?.recent_verifications?.length || 0
+  }
 }
 
 // ============================================================================

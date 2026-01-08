@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
-import { Globe, Plus, Settings, Info } from 'lucide-react';
+import { Globe, Plus, Settings, Info, ArrowLeft } from 'lucide-react';
 import { ChangeSubdomainModal } from '../change-subdomain/ChangeSubdomainModal';
 
 export function DomainsListContainer() {
@@ -69,6 +69,18 @@ export function DomainsListContainer() {
 
   return (
     <div className="space-y-6">
+      {/* Header with back button for mobile */}
+      <div className="flex items-center gap-3 md:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push(`/workspace/${workspaceId}/store/settings`)}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-xl font-bold">Domains</h1>
+      </div>
+
       {/* Info Banner */}
       <Alert>
         <Info className="h-4 w-4" />
@@ -80,7 +92,7 @@ export function DomainsListContainer() {
 
       {/* Change Default Subdomain Card */}
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex-1">
             <CardTitle className="text-lg">Change to a new .huzilerz.com domain</CardTitle>
             <p className="text-sm text-muted-foreground mt-2">
@@ -88,7 +100,7 @@ export function DomainsListContainer() {
               You can also buy or connect a custom domain.
             </p>
           </div>
-          <div className="ml-4">
+          <div className="hidden sm:block">
             <Globe className="h-16 w-16 text-primary" />
           </div>
         </CardHeader>
@@ -169,12 +181,12 @@ export function DomainsListContainer() {
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button onClick={handleConnectDomain} variant="outline">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Button onClick={handleConnectDomain} variant="outline" className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
           Connect existing domain
         </Button>
-        <Button onClick={handleBuyDomain} variant="outline">
+        <Button onClick={handleBuyDomain} variant="outline" className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
           Buy new domain
         </Button>

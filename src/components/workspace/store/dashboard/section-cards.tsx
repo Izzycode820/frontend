@@ -33,26 +33,32 @@ export function SectionCards({ cards }: SectionCardsProps) {
   }
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="
+        flex overflow-x-auto pb-4 gap-4 px-4 snap-x snap-mandatory 
+        lg:grid lg:grid-cols-4 lg:pb-0 lg:overflow-visible
+        scrollbar-none
+    ">
       {validCards.map((card, index) => {
         const isUp = card.trendDirection === 'up'
         const TrendIcon = isUp ? IconTrendingUp : IconTrendingDown
 
         return (
-          <Card key={index} className="@container/card">
-            <CardHeader>
-              <CardDescription>{card.title}</CardDescription>
-              <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                {card.value}
-              </CardTitle>
-              <CardAction>
-                <Badge variant="outline">
-                  <TrendIcon className="size-3" />
-                  {card.trend}
-                </Badge>
-              </CardAction>
-            </CardHeader>
-          </Card>
+          <div key={index} className="min-w-[85%] sm:min-w-[45%] snap-center lg:min-w-0">
+            <Card className="@container/card h-full">
+              <CardHeader>
+                <CardDescription>{card.title}</CardDescription>
+                <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                  {card.value}
+                </CardTitle>
+                <CardAction>
+                  <Badge variant="outline">
+                    <TrendIcon className="size-3" />
+                    {card.trend}
+                  </Badge>
+                </CardAction>
+              </CardHeader>
+            </Card>
+          </div>
         )
       })}
     </div>

@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuthContext } from '@/components/shared/auth/AuthProvider';
+import { useOAuth2 } from '@/hooks/authentication/useOAuth2';
 import { Loader2 } from 'lucide-react';
 
 export default function OAuth2CallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { handleOAuth2Callback } = useAuthContext();
-  
+  const { handleCallback } = useOAuth2();
+
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [error, setError] = useState('');
 
@@ -19,29 +19,29 @@ export default function OAuth2CallbackPage() {
         const code = searchParams.get('code');
         const state = searchParams.get('state');
         const provider = searchParams.get('provider') || 'google';
-        
+
         if (!code) {
           throw new Error('No authorization code received');
         }
 
-        await handleOAuth2Callback({
+        await handleCallback({
           provider,
           code,
           state: state || ''
         });
 
         setStatus('success');
-        
+
         // Redirect to workspace after successful auth
         setTimeout(() => {
           router.replace('/workspace');
         }, 2000);
-        
+
       } catch (err: any) {
         console.error('OAuth2 callback error:', err);
         setError(err.message || 'Authentication failed');
         setStatus('error');
-        
+
         // Redirect to login page after error
         setTimeout(() => {
           router.replace('/auth/login?error=oauth_failed');
@@ -50,7 +50,7 @@ export default function OAuth2CallbackPage() {
     };
 
     processCallback();
-  }, [searchParams, handleOAuth2Callback, router]);
+  }, [searchParams, handleCallback, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-stone-900 flex items-center justify-center p-4">

@@ -14,7 +14,9 @@ import { useRouter } from 'next/navigation';
 import { DiscountsTable } from './DiscountsTable';
 import { DiscountsFilters } from './DiscountsFilters';
 import { DiscountsEmptyState } from './DiscountsEmptyState';
+import { MobileDiscountsList } from './mobile';
 import { SelectDiscountTypeModal } from '../create/SelectDiscountTypeModal';
+import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -36,10 +38,12 @@ import * as Types from '@/types/workspace/store/graphql-base';
 export default function DiscountsListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const isMobile = useIsMobile();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
   const [showTypeModal, setShowTypeModal] = useState(false);
+  const [selectedDiscounts, setSelectedDiscounts] = useState<string[]>([]);
 
   // Pagination state
   const pageSize = 20;
@@ -200,6 +204,61 @@ export default function DiscountsListContainer() {
     );
   }
 
+  // Mobile selection handlers
+  const handleSelectDiscount = (discountId: string) => {
+    setSelectedDiscounts(prev =>
+      prev.includes(discountId)
+        ? prev.filter(id => id !== discountId)
+        : [...prev, discountId]
+    );
+  };
+
+  const handleLongPressDiscount = (discountId: string) => {
+    if (!selectedDiscounts.includes(discountId)) {
+      setSelectedDiscounts([discountId]);
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedDiscounts([]);
+  };
+
+  // Mobile filter chips
+  const mobileFilterChips = [
+    { value: 'all', label: 'All' },
+    { value: 'active', label: 'Active' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'expired', label: 'Expired' },
+  ];
+
+  // Handle chip change for mobile
+  const handleChipChange = (value: string) => {
+    setStatusFilter(value === 'all' ? undefined : value);
+  };
+
+  // Mobile View
+  if (isMobile) {
+    return (
+      <div className="px-4 pt-4">
+        <MobileDiscountsList
+          discounts={discounts as any}
+          workspaceId={currentWorkspace?.id || ''}
+          searchTerm={search}
+          onSearchChange={setSearch}
+          chips={mobileFilterChips}
+          activeChip={statusFilter || 'all'}
+          onChipChange={handleChipChange}
+          selectedDiscounts={selectedDiscounts}
+          onSelectDiscount={handleSelectDiscount}
+          onLongPressDiscount={handleLongPressDiscount}
+          onClearSelection={handleClearSelection}
+          isLoading={loading}
+        />
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}

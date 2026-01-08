@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CustomersTable } from './CustomersTable';
 import { CustomersFilters } from './CustomersFilters';
+import { MobileCustomersList } from './mobile';
+import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/shadcn-ui/tabs';
@@ -26,6 +28,7 @@ type TabValue = 'all' | 'active' | 'inactive';
 export default function CustomersListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const isMobile = useIsMobile();
 
   // State
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
@@ -64,19 +67,21 @@ export default function CustomersListContainer() {
       isActive: getIsActiveFilter(),
     },
     skip: !currentWorkspace,
-    onCompleted: (data) => {
-      // Store cursor for next page
-      if (data?.customers?.pageInfo?.endCursor) {
-        setCursors(prev => ({
-          ...prev,
-          [currentPage + 1]: data.customers.pageInfo.endCursor
-        }));
-      }
-    }
+    skip: !currentWorkspace,
   });
 
+  // Store cursor for next page when data changes
+  React.useEffect(() => {
+    if (data?.customers?.pageInfo?.endCursor) {
+      setCursors(prev => ({
+        ...prev,
+        [currentPage + 1]: data.customers.pageInfo.endCursor! // Non-null assertion safe due to check
+      }));
+    }
+  }, [data, currentPage]);
+
   // Transform GraphQL data
-  const customers = data?.customers?.edges?.map(edge => edge?.node).filter(Boolean) || [];
+  const customers = data?.customers?.edges?.map(edge => edge?.node).filter((node): node is NonNullable<typeof node> => !!node) || [];
   const totalCount = data?.customers?.totalCount || 0;
   const hasNextPage = data?.customers?.pageInfo?.hasNextPage || false;
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -96,7 +101,7 @@ export default function CustomersListContainer() {
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      setSelectedCustomers(customers.map(customer => customer.id));
+      setSelectedCustomers(customers.map(customer => customer.id).filter((id): id is string => !!id));
     } else {
       setSelectedCustomers([]);
     }
@@ -150,6 +155,53 @@ export default function CustomersListContainer() {
     );
   }
 
+  // Long press handler for mobile selection
+  const handleLongPressCustomer = (customerId: string) => {
+    if (!selectedCustomers.includes(customerId)) {
+      setSelectedCustomers([customerId]);
+    }
+  };
+
+  // Clear selection handler
+  const handleClearSelection = () => {
+    setSelectedCustomers([]);
+  };
+
+  // Mobile filter chips
+  const mobileFilterChips = [
+    { value: 'all', label: 'All' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+  ];
+
+  // Handle chip change for mobile (maps to tab)
+  const handleChipChange = (value: string) => {
+    handleTabChange(value);
+  };
+
+  // Mobile View
+  if (isMobile) {
+    return (
+      <div className="px-4 pt-4">
+        <MobileCustomersList
+          customers={customers as any}
+          workspaceId={currentWorkspace?.id || ''}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          chips={mobileFilterChips}
+          activeChip={activeTab}
+          onChipChange={handleChipChange}
+          selectedCustomers={selectedCustomers}
+          onSelectCustomer={handleSelectCustomer}
+          onLongPressCustomer={handleLongPressCustomer}
+          onClearSelection={handleClearSelection}
+          isLoading={loading}
+        />
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}

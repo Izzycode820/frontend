@@ -54,6 +54,10 @@ const signupSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email address'),
+  phone_number: z
+    .string()
+    .min(1, 'Phone number is required')
+    .regex(/^\+?[0-9]{8,15}$/, 'Please enter a valid phone number'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -100,6 +104,7 @@ export function SignupForm({
       first_name: '',
       last_name: '',
       email: '',
+      phone_number: '',
       password: '',
       confirmPassword: '',
       acceptTerms: false
@@ -124,6 +129,7 @@ export function SignupForm({
         first_name: values.first_name.trim(),
         last_name: values.last_name.trim(),
         email: values.email.toLowerCase().trim(),
+        phone_number: values.phone_number.replace(/\D/g, '').replace(/^/, '+'),
         password: values.password
       }
 
@@ -134,16 +140,13 @@ export function SignupForm({
       // ENHANCED: Get full intent (path + workspace context)
       const intent = getAndClearAuthIntent()
 
-      // Determine destination
-      let destination = redirectTo || '/workspace'
-      if (intent?.path) {
+      // BETA: Always redirect to verification page after signup
+      // Users can skip if they want, or verify their phone/email
+      let destination = '/auth/verify'
+
+      // Only override if there's an explicit intent path (not default workspace)
+      if (intent?.path && intent.path !== '/workspace') {
         destination = intent.path
-      } else {
-        // Fallback: check URL ?next param
-        const urlNext = searchParams?.get('next')
-        if (urlNext) {
-          destination = urlNext
-        }
       }
 
       // CRITICAL: Restore workspace BEFORE navigating (99.99% reliability)
@@ -238,6 +241,28 @@ export function SignupForm({
                     type="email"
                     placeholder="Enter your email"
                     autoComplete="email"
+                    disabled={isLoading}
+                    className="h-11"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Phone Number Field */}
+          <FormField
+            control={form.control}
+            name="phone_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone number</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="tel"
+                    placeholder="+237 6XX XXX XXX"
+                    autoComplete="tel"
                     disabled={isLoading}
                     className="h-11"
                   />

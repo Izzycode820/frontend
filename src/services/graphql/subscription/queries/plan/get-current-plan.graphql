@@ -1,5 +1,6 @@
 query GetCurrentPlan {
   currentPlan {
+    id
     plan {
       name
       introPrice

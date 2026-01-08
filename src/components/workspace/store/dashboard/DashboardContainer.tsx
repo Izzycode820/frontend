@@ -29,7 +29,7 @@ export function DashboardContainer() {
     // Loading state
     if (loading) {
         return (
-            <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="@container/main flex flex-1 flex-col gap-2 relative">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                     <Card>
                         <CardContent className="pt-6">
@@ -47,7 +47,7 @@ export function DashboardContainer() {
     // Error state
     if (error || !analytics) {
         return (
-            <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="@container/main flex flex-1 flex-col gap-2 relative">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                     <Card>
                         <CardContent className="pt-6">
@@ -67,7 +67,7 @@ export function DashboardContainer() {
     // No access state (free tier)
     if (!analytics.hasAccess) {
         return (
-            <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="@container/main flex flex-1 flex-col gap-2 relative">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                     <Card>
                         <CardContent className="pt-6">
@@ -90,7 +90,7 @@ export function DashboardContainer() {
     }
 
     return (
-        <div className="@container/main flex flex-1 flex-col gap-2">
+        <div className="@container/main flex flex-1 flex-col gap-2 relative pb-24 md:pb-0">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                 {/* Cards Section - BASIC tier */}
                 <SectionCards cards={analytics.cards || []} />

@@ -69,7 +69,14 @@ export function WorkspaceSelectionModal({
     }
 
     try {
-      // Step 1: Add theme to workspace
+      // Step 1: FIRST switch workspace context (updates Zustand store + localStorage)
+      // This ensures X-Workspace-Id header is set for subsequent GraphQL calls
+      await switchWorkspace(selectedWorkspaceId)
+
+      // Small delay to ensure store propagation (React state update)
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Step 2: NOW add theme (authLink will read workspace from store)
       const { data } = await addTheme({
         variables: {
           workspaceId: selectedWorkspaceId,
@@ -88,9 +95,6 @@ export function WorkspaceSelectionModal({
       }
 
       toast.success('Theme added successfully!')
-
-      // Step 2: Switch workspace context
-      await switchWorkspace(selectedWorkspaceId)
 
       // Close modal
       onOpenChange(false)
@@ -140,10 +144,9 @@ export function WorkspaceSelectionModal({
                       className={`
                         relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer
                         transition-colors hover:bg-accent/50
-                        ${
-                          selectedWorkspaceId === workspace.id
-                            ? 'border-primary bg-accent/50'
-                            : 'border-border'
+                        ${selectedWorkspaceId === workspace.id
+                          ? 'border-primary bg-accent/50'
+                          : 'border-border'
                         }
                       `}
                       onClick={() => setSelectedWorkspaceId(workspace.id)}

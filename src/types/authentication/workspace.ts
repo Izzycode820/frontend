@@ -13,12 +13,15 @@ export interface WorkspaceAuthContext {
   readonly id: string;
   readonly name: string;
   readonly type: 'store' | 'blog' | 'services' | 'portfolio';
-  readonly status: 'active' | 'suspended';
+  readonly status: 'active' | 'suspended' | 'suspended_by_plan';
 
   // From JWT claims (workspace_role, workspace_permissions)
   readonly role?: string;
   readonly permissions?: string[];
   readonly is_default?: boolean;
+
+  // Restriction state (from backend gating)
+  readonly restricted_mode?: boolean;
 }
 
 // ============================================================================
@@ -45,9 +48,10 @@ export interface WorkspaceSwitchResponse {
     readonly id: string;
     readonly name: string;
     readonly type: 'store' | 'blog' | 'services' | 'portfolio';
-    readonly status: 'active' | 'suspended';
+    readonly status: 'active' | 'suspended' | 'suspended_by_plan';
     readonly owner_id: string;
     readonly created_at: string | null;
+    readonly restricted_mode?: boolean;
   };
   readonly membership?: {
     readonly role: 'owner' | 'admin' | 'member' | 'viewer';
@@ -56,6 +60,10 @@ export interface WorkspaceSwitchResponse {
   };
   readonly message?: string;
   readonly error?: string;
+  // Structured error fields for gating (aligned with backend)
+  readonly error_code?: 'WORKSPACE_RESTRICTED' | 'WORKSPACE_NONCOMPLIANT' | 'SUBSCRIPTION_RESTRICTED' | 'WORKSPACE_NOT_FOUND' | 'ACCESS_DENIED';
+  readonly suggestion?: string;
+  readonly reactivation_required?: boolean;
 }
 
 /**
@@ -80,7 +88,9 @@ export interface AvailableWorkspace {
   readonly type: 'store' | 'blog' | 'services' | 'portfolio';
   readonly is_default: boolean;
   readonly user_role: string;
-  readonly status: 'active' | 'suspended';
+  readonly role: 'owner' | 'staff';  // Staff-aware role
+  readonly status: 'active' | 'suspended' | 'suspended_by_plan';
+  readonly restricted_mode?: boolean;
   readonly permissions: string[];
   readonly member_count: number;
   readonly createdAt: string;
@@ -140,6 +150,7 @@ export const WORKSPACE_ROLES = {
 export const WORKSPACE_STATUS = {
   ACTIVE: 'active',
   SUSPENDED: 'suspended',
+  SUSPENDED_BY_PLAN: 'suspended_by_plan',
 } as const;
 
 export type WorkspaceType = typeof WORKSPACE_TYPES[keyof typeof WORKSPACE_TYPES];

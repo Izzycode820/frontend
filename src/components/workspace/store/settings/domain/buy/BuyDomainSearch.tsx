@@ -9,7 +9,7 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
-import { Globe, Search, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Globe, Search, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 
 export function BuyDomainSearch() {
   const router = useRouter();
@@ -57,8 +57,16 @@ export function BuyDomainSearch() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push(`/workspace/${workspaceId}/store/settings/domains`)}
+          className="md:hidden"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <Globe className="h-6 w-6 text-muted-foreground" />
-        <h1 className="text-2xl font-bold">Buy new domain</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Buy new domain</h1>
       </div>
 
       {/* Search Card */}
@@ -70,7 +78,7 @@ export function BuyDomainSearch() {
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSearch} className="flex gap-2">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -80,7 +88,7 @@ export function BuyDomainSearch() {
             <Button
               type="submit"
               disabled={loading || !searchQuery.trim()}
-              className="bg-black hover:bg-black/90 text-white px-6"
+              className="bg-black hover:bg-black/90 text-white px-6 w-full sm:w-auto"
             >
               <Search className="h-4 w-4 mr-2" />
               Search

@@ -7,6 +7,7 @@ import { GetBillingOverviewDocument } from '@/services/graphql/subscription/quer
 import { GetPastBillsDocument } from '@/services/graphql/subscription/queries/billing/__generated__/get-past-bills.generated';
 import { GetBillingProfileDocument } from '@/services/graphql/subscription/queries/billing/__generated__/get-billing-profile.generated';
 import { useSubscription } from '@/hooks/subscription/useSubscription';
+import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
@@ -43,6 +44,7 @@ import {
 
 export function BillingPage() {
   const router = useRouter();
+  const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
@@ -118,15 +120,25 @@ export function BillingPage() {
   };
 
   return (
-    <div className="w-full max-w-[1000px] mx-auto px-6">
+    <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Billing</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push(`/workspace/${currentWorkspace?.id}/store/settings`)}
+              className="md:hidden"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold">Billing</h1>
+          </div>
           <Button
             variant="outline"
             onClick={() => router.push('./billing/profile')}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <FileText className="h-4 w-4" />
             Billing profile
@@ -166,8 +178,8 @@ export function BillingPage() {
                 <p className="text-sm text-muted-foreground">
                   {billingOverview?.daysUntilBill !== null && billingOverview?.daysUntilBill !== undefined
                     ? `Next bill in ${billingOverview.daysUntilBill} days, you will pay ${billingOverview?.upcomingBillAmount
-                      // ? ` or when your ${formatCurrency(billingOverview.upcomingBillAmount)} XAF threshold is reached. You have ${formatCurrency(billingOverview.upcomingBillAmount)} remaining.`
-                      // : '.'
+                    // ? ` or when your ${formatCurrency(billingOverview.upcomingBillAmount)} XAF threshold is reached. You have ${formatCurrency(billingOverview.upcomingBillAmount)} remaining.`
+                    // : '.'
                     }`
                     : 'No upcoming bill scheduled.'}
                 </p>
@@ -277,31 +289,32 @@ export function BillingPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Filters and Search */}
-            <div className="flex items-center justify-between gap-4">
-              <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-                <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="paid">Paid</TabsTrigger>
-                  <TabsTrigger value="unpaid">Unpaid</TabsTrigger>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="all" className="flex-1 sm:flex-none">All</TabsTrigger>
+                  <TabsTrigger value="paid" className="flex-1 sm:flex-none">Paid</TabsTrigger>
+                  <TabsTrigger value="unpaid" className="flex-1 sm:flex-none">Unpaid</TabsTrigger>
                 </TabsList>
               </Tabs>
 
               <div className="flex items-center gap-2">
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-none">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search bills..."
-                    className="pl-9 w-[200px]"
+                    className="pl-9 w-full sm:w-[200px]"
                   />
                 </div>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" className="flex-shrink-0">
                   <Filter className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
+                  className="flex-shrink-0"
                   onClick={() => setSortOrder(sortOrder === 'newest_first' ? 'oldest_first' : 'newest_first')}
                 >
                   <ArrowUpDown className="h-4 w-4" />
@@ -318,55 +331,59 @@ export function BillingPage() {
               </div>
             ) : (
               <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
-                        <Checkbox />
-                      </TableHead>
-                      <TableHead>Bill number</TableHead>
-                      <TableHead>Date issued</TableHead>
-                      <TableHead>Bill reason</TableHead>
-                      <TableHead className="text-right">Bill total</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pastBills.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                          No bills found
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      pastBills.map((bill) => (
-                        <TableRow key={bill?.billNumber}>
-                          <TableCell>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="min-w-[600px] px-4 sm:px-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-10 sm:w-12">
                             <Checkbox />
-                          </TableCell>
-                          <TableCell className="font-medium">{bill?.billNumber}</TableCell>
-                          <TableCell>{bill?.createdAt ? formatDate(bill.createdAt) : '-'}</TableCell>
-                          <TableCell>{bill?.action ? getActionText(bill.action) : '-'}</TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(bill?.amountPaid)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={bill?.status === 'PAID' ? 'default' : 'secondary'}
-                              className={
-                                bill?.status === 'PAID'
-                                  ? 'bg-green-100 text-green-800 hover:bg-green-100'
-                                  : ''
-                              }
-                            >
-                              {bill?.status === 'PAID' ? 'Paid' : bill?.status === 'UNPAID' ? 'Unpaid' : 'Pending'}
-                            </Badge>
-                          </TableCell>
+                          </TableHead>
+                          <TableHead className="whitespace-nowrap">Bill number</TableHead>
+                          <TableHead className="whitespace-nowrap">Date issued</TableHead>
+                          <TableHead className="whitespace-nowrap">Bill reason</TableHead>
+                          <TableHead className="text-right whitespace-nowrap">Bill total</TableHead>
+                          <TableHead className="whitespace-nowrap">Status</TableHead>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {pastBills.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                              No bills found
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          pastBills.map((bill) => (
+                            <TableRow key={bill?.billNumber}>
+                              <TableCell>
+                                <Checkbox />
+                              </TableCell>
+                              <TableCell className="font-medium whitespace-nowrap">{bill?.billNumber}</TableCell>
+                              <TableCell className="whitespace-nowrap">{bill?.createdAt ? formatDate(bill.createdAt) : '-'}</TableCell>
+                              <TableCell className="whitespace-nowrap">{bill?.action ? getActionText(bill.action) : '-'}</TableCell>
+                              <TableCell className="text-right whitespace-nowrap">
+                                {formatCurrency(bill?.amountPaid)}
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={bill?.status === 'PAID' ? 'default' : 'secondary'}
+                                  className={
+                                    bill?.status === 'PAID'
+                                      ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                                      : ''
+                                  }
+                                >
+                                  {bill?.status === 'PAID' ? 'Paid' : bill?.status === 'UNPAID' ? 'Unpaid' : 'Pending'}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
 
                 {/* Pagination */}
                 {pastBills.length >= pageSize && (

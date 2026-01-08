@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useRouter, useParams } from 'next/navigation';
 import { ConnectCustomDomainDocument } from '@/services/graphql/domains/mutations/custom-domains/__generated__/connectCustomDomain.generated';
+import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps
   const params = useParams();
   const workspaceId = params.workspace_id as string;
   const [domain, setDomain] = useState('');
+  const isMobile = useIsMobile();
 
   const [connectDomain, { loading }] = useMutation(ConnectCustomDomainDocument);
 
@@ -84,7 +86,7 @@ export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps
               onChange={(e) => setDomain(e.target.value)}
               placeholder="steve.com"
               className="h-10"
-              autoFocus
+              autoFocus={!isMobile}
             />
           </div>
 
