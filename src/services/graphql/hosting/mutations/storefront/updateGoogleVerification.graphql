@@ -1,0 +1,7 @@
+mutation UpdateGoogleVerification($verificationCode: String!) {
+  updateGoogleVerification(verificationCode: $verificationCode) {
+    success
+    message
+    error
+  }
+}

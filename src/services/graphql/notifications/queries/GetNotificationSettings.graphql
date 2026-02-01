@@ -1,0 +1,12 @@
+query GetNotificationSettings($workspaceId: ID!) {
+  workspaceNotificationSettings(workspaceId: $workspaceId) {
+    id
+    inAppSoundEnabled
+    inAppBrowserNotifications
+    quietHoursEnabled
+    quietHoursStart
+    quietHoursEnd
+    inAppEvents
+    notificationEvents
+  }
+}

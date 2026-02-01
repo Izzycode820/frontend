@@ -1,0 +1,14 @@
+mutation UpdateStorefrontSEO($input: UpdateStorefrontSEOInput!) {
+  updateStorefrontSeo(input: $input) {
+    success
+    message
+    warnings
+    seoSettings {
+      title
+      description
+      keywords
+      imageUrl
+      faviconUrl
+    }
+  }
+}

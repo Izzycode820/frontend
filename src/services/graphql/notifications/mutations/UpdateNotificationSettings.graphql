@@ -1,0 +1,14 @@
+mutation UpdateNotificationSettings($workspaceId: ID!, $input: UpdateNotificationSettingsInput!) {
+  updateNotificationSettings(workspaceId: $workspaceId, input: $input) {
+    success
+    settings {
+      id
+      inAppSoundEnabled
+      inAppBrowserNotifications
+      quietHoursEnabled
+      quietHoursStart
+      quietHoursEnd
+      inAppEvents
+    }
+  }
+}

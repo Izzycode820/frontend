@@ -1,0 +1,30 @@
+{
+    "name": "HUZILERZ",
+    "short_name": "HUZILERZ",
+    "description": "For all business owners and upcoming entrepreneurs built in Cameroon for Cameroon",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#000000",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "business",
+        "productivity"
+    ],
+    "screenshots": [],
+    "prefer_related_applications": false
+}
