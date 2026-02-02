@@ -69,7 +69,7 @@ function scanThemePackages() {
       const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
       themes.push({
-        slug: manifest.id,
+        slug: manifest.slug || manifest.id,
         packageName: pkgName,
         name: manifest.name,
         description: manifest.description,

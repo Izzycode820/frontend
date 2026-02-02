@@ -1,15 +1,15 @@
 /**
- * Theme Registry - Production Multi-Tenant Architecture
+ * Theme Registry - NPM Package Based
  *
- * Loads master Puck configs (with render functions) from theme source.
+ * Loads Puck configs from npm packages.
  * User customizations (puck.data) are stored in database per workspace.
  *
  * Architecture:
- * - Master Config: Shared puck.config.tsx (this registry) - Read Only
+ * - Master Config: Installed npm packages - Read Only
  * - User Data: Per-workspace puck_data JSON (from DB) - Customizable
  *
  * ⚠️  AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
- * Generated on: 2026-01-22T00:14:58.211Z
+ * Generated on: 2026-02-02T03:41:39.292Z
  * Total themes: 2
  *
  * To update this file, run:
@@ -26,56 +26,40 @@ type ThemeConfigLoader = () => Promise<{
 /**
  * Theme Registry
  *
- * Maps theme slugs to puck.config.tsx modules.
- * Each config contains render functions (cannot be serialized to DB).
+ * Maps theme slugs to npm package imports.
  */
 export const THEME_REGISTRY: Record<string, ThemeConfigLoader> = {
   // Premium Apple-style tech store with minimalist design, smooth animations, and immersive product showcases
-  'ecommerce-apple-forest': () => import('@themes/khendu-apple') as Promise<any>,
+  'ecommerce-apple-forest': () => import('@huzilerz/theme-khendu-apple') as Promise<any>,
   // Clean Shoe e-commerce template with modern design
-  'ecommerce-sneakers': () => import('@themes/sneakers') as Promise<any>,
+  'ecommerce-sneakers': () => import('@huzilerz/theme-sneakers') as Promise<any>,
 };
 
 /**
- * Load master theme Puck config (shared by all users)
+ * Load master theme Puck config
  *
- * @param themeSlug - Theme identifier (e.g., 'ecommerce-sneakers')
+ * @param themeSlug - Theme identifier (e.g., 'ecommerce-apple-forest')
  * @returns Full Puck Config with render functions
  * @throws Error if theme not found in registry
  */
 export async function loadThemeConfig(themeSlug: string): Promise<Config> {
-  console.log('🔵 [ThemeRegistry] Loading master config for:', themeSlug);
-
   const loader = THEME_REGISTRY[themeSlug];
 
   if (!loader) {
     const availableThemes = Object.keys(THEME_REGISTRY);
-    console.error('❌ [ThemeRegistry] Theme not found:', themeSlug);
-    console.error('📋 [ThemeRegistry] Available:', availableThemes);
     throw new Error(
       `Theme "${themeSlug}" not found. Available: ${availableThemes.join(', ')}`
     );
   }
 
-  try {
-    const startTime = performance.now();
-    const themeModule = await loader();
+  const themeModule = await loader();
+  const config = themeModule.config || themeModule.default;
 
-    const config = themeModule.config || themeModule.default;
-
-    if (!config) {
-      throw new Error(`Theme "${themeSlug}" missing puck.config export`);
-    }
-
-    const loadTime = performance.now() - startTime;
-    console.log(`✅ [ThemeRegistry] Config loaded in ${loadTime.toFixed(2)}ms`);
-    console.log('📦 [ThemeRegistry] Components:', Object.keys(config.components || {}));
-
-    return config;
-  } catch (error) {
-    console.error('❌ [ThemeRegistry] Failed to load:', error);
-    throw error;
+  if (!config) {
+    throw new Error(`Theme "${themeSlug}" missing puck.config export`);
   }
+
+  return config;
 }
 
 /**
@@ -98,13 +82,11 @@ export function isThemeAvailable(themeSlug: string): boolean {
 export function preloadTheme(themeSlug: string): void {
   const loader = THEME_REGISTRY[themeSlug];
   if (loader) {
-    loader().catch((error) => {
-      console.warn(`Failed to preload theme "${themeSlug}":`, error);
+    loader().catch(() => {
+      // Silently fail preload
     });
   }
 }
 
 export const REGISTRY_SIZE = 2;
 export const REGISTRY_THEMES = ['ecommerce-apple-forest', 'ecommerce-sneakers'];
-
-console.log(`📦 [ThemeRegistry] Initialized with ${REGISTRY_SIZE} theme(s)`);
