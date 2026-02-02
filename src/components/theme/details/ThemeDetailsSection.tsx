@@ -34,7 +34,7 @@ export function ThemeDetailsSection({
   const formatPrice = () => {
     if (priceTier === 'free') return 'Free';
     if (priceTier === 'exclusive') return 'Exclusive';
-    return `$${priceAmount}`;
+    return `FCFA ${priceAmount}`;
   };
 
   return (
