@@ -139,64 +139,7 @@ const AUTH_ROUTES = ['/auth/login', '/auth/signup', '/auth/register'];
 // Public routes (accessible without auth)
 const PUBLIC_ROUTES = ['/', '/pricing', '/features', '/about', '/contact', '/camp', '/showcase', '/blog', '/resources', '/billing'];
 
-/**
- * Check if hostname is a custom domain (not system domain)
- */
-function isCustomDomain(hostname: string): boolean {
-  return !SYSTEM_DOMAINS.includes(hostname) && !hostname.endsWith(SUBDOMAIN_SUFFIX);
-}
-
-/**
- * Check if hostname is a subdomain
- */
-function isSubdomain(hostname: string): boolean {
-  return hostname.endsWith(SUBDOMAIN_SUFFIX) && hostname !== 'huzilerz.com';
-}
-
-/**
- * Extract subdomain from hostname
- */
-function extractSubdomain(hostname: string): string {
-  return hostname.replace(SUBDOMAIN_SUFFIX, '');
-}
-
-/**
- * Handle custom domain routing
- */
-function handleCustomDomain(request: NextRequest, hostname: string): NextResponse {
-  const url = request.nextUrl.clone();
-
-  // Rewrite to store page with custom domain flag
-  url.pathname = `/store/custom-domain`;
-  url.searchParams.set('domain', hostname);
-  url.searchParams.set('path', request.nextUrl.pathname);
-
-  return NextResponse.rewrite(url);
-}
-
-/**
- * Handle subdomain routing
- */
-function handleSubdomain(request: NextRequest, hostname: string): NextResponse {
-  const subdomain = extractSubdomain(hostname);
-  const url = request.nextUrl.clone();
-
-  // Skip if accessing system routes
-  if (url.pathname.startsWith('/workspace') ||
-    url.pathname.startsWith('/auth') ||
-    url.pathname.startsWith('/api')) {
-    return NextResponse.next();
-  }
-
-  // Rewrite to store page with subdomain
-  if (url.pathname === '/') {
-    url.pathname = `/store/${subdomain}`;
-  } else {
-    url.pathname = `/store/${subdomain}${url.pathname}`;
-  }
-
-  return NextResponse.rewrite(url);
-}
+// Domain Helper functions removed as this frontend does not handle Storefront Routing.
 
 /**
  * Check if route requires authentication
@@ -299,17 +242,8 @@ export function middleware(request: NextRequest) {
     if (authResponse) return authResponse;
   }
 
-  // Handle custom domains
-  if (isCustomDomain(hostname)) {
-    return handleCustomDomain(request, hostname);
-  }
 
-  // Handle subdomains
-  if (isSubdomain(hostname)) {
-    return handleSubdomain(request, hostname);
-  }
-
-  // Default behavior for system domain
+  // Default behavior
   const response = NextResponse.next();
 
   // Apply Security Headers (CSP, X-Frame-Options, etc.)
