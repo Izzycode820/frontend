@@ -214,136 +214,138 @@ function ThemesContent() {
   const libraryThemes = themes.filter((t) => !t.isActive);
 
   return (
-    <div className="w-full max-w-[1000px] mx-auto px-4 sm:px-6">
-      <div className="flex flex-col gap-4 sm:gap-6 py-4 sm:py-6">
-        {/* Header - stack on mobile */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-lg flex-shrink-0">
-              <Package className="w-5 h-5 text-primary-foreground" />
+    <div className="@container/main flex flex-1 flex-col gap-2 relative">
+      <div className="w-full max-w-[1000px] mx-auto px-4 md:px-0">
+        <div className="flex flex-col gap-4 sm:gap-6">
+          {/* Header - stack on mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary rounded-lg flex-shrink-0">
+                <Package className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold">Themes</h1>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold">Themes</h1>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Button variant="outline" onClick={handleViewStore} size="sm" className="flex-1 sm:flex-none">
-              <Eye className="w-4 h-4 mr-2" />
-              <span className="hidden xs:inline">View your </span>store
-            </Button>
-            <Button onClick={handleAddTheme} size="sm" className="flex-1 sm:flex-none">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="sm:hidden">Add</span>
-              <span className="hidden sm:inline">Add theme</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* Active Theme Section */}
-        {activeTheme && (
-          <div>
-            <ActiveThemeCard
-              id={activeTheme.id}
-              themeName={activeTheme.themeName}
-              previewImage={activeTheme.template.previewImage}
-              version={activeTheme.template.version}
-              createdAt={activeTheme.createdAt}
-              isPasswordProtected={activeTheme.isPasswordProtected}
-              storefrontPassword={activeTheme.storefrontPassword}
-              onEditTheme={() => handleEditTheme(activeTheme.id)}
-              onDuplicate={() => handleDuplicate(activeTheme.id, activeTheme.themeName)}
-              onRename={() => openRenameDialog(activeTheme.id, activeTheme.themeName)}
-            />
-          </div>
-        )}
-
-        {/* Theme Library Section */}
-        {libraryThemes.length > 0 && (
-          <div>
-            <div className="mb-4">
-              <h2 className="text-base font-semibold">Theme library</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                These themes are only visible to you.{' '}
-                <span className="text-blue-600 dark:text-blue-400">Publishing a theme from your library</span>{' '}
-                will switch it to your current theme.
-              </p>
-            </div>
-            <div className="space-y-3">
-              {libraryThemes.map((theme) => (
-                <ThemeLibraryCard
-                  key={theme.id}
-                  id={theme.id}
-                  themeName={theme.themeName}
-                  previewImage={theme.template.previewImage}
-                  version={theme.template.version}
-                  createdAt={theme.createdAt}
-                  isPublished={theme.isPublished}
-                  canDelete={theme.canDelete}
-                  isPublishing={publishingThemeId === theme.id}
-                  isDuplicating={duplicatingThemeId === theme.id}
-                  onEditTheme={() => handleEditTheme(theme.id)}
-                  onPublish={() => handlePublish(theme.id)}
-                  onDelete={() => handleDelete(theme.id)}
-                  onDuplicate={() => handleDuplicate(theme.id, theme.themeName)}
-                  onRename={() => openRenameDialog(theme.id, theme.themeName)}
-                />
-              ))}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button variant="outline" onClick={handleViewStore} size="sm" className="flex-1 sm:flex-none">
+                <Eye className="w-4 h-4 mr-2" />
+                <span className="hidden xs:inline">View your </span>store
+              </Button>
+              <Button onClick={handleAddTheme} size="sm" className="flex-1 sm:flex-none">
+                <Plus className="w-4 h-4 mr-2" />
+                <span className="sm:hidden">Add</span>
+                <span className="hidden sm:inline">Add theme</span>
+              </Button>
             </div>
           </div>
-        )}
 
-        {/* Empty State */}
-        {themes.length === 0 && (
-          <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/50 mb-4">
-              <Package className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">No themes yet</h3>
-            <p className="text-muted-foreground mb-6">Add a theme from our showcase to get started</p>
-            <Button onClick={handleAddTheme}>
-              <Plus className="w-4 h-4 mr-2" />
-              Browse themes
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Rename Dialog */}
-      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rename theme</DialogTitle>
-            <DialogDescription>
-              Enter a new name for your theme
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="theme-name">Theme name</Label>
-              <Input
-                id="theme-name"
-                value={renameThemeName}
-                onChange={(e) => setRenameThemeName(e.target.value)}
-                placeholder="Enter theme name"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleRenameSubmit();
-                  }
-                }}
+          {/* Active Theme Section */}
+          {activeTheme && (
+            <div>
+              <ActiveThemeCard
+                id={activeTheme.id}
+                themeName={activeTheme.themeName}
+                previewImage={activeTheme.template.previewImage}
+                version={activeTheme.template.version}
+                createdAt={activeTheme.createdAt}
+                isPasswordProtected={activeTheme.isPasswordProtected}
+                storefrontPassword={activeTheme.storefrontPassword}
+                onEditTheme={() => handleEditTheme(activeTheme.id)}
+                onDuplicate={() => handleDuplicate(activeTheme.id, activeTheme.themeName)}
+                onRename={() => openRenameDialog(activeTheme.id, activeTheme.themeName)}
               />
             </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setRenameDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleRenameSubmit}>
-              Rename
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          )}
+
+          {/* Theme Library Section */}
+          {libraryThemes.length > 0 && (
+            <div>
+              <div className="mb-4">
+                <h2 className="text-base font-semibold">Theme library</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  These themes are only visible to you.{' '}
+                  <span className="text-blue-600 dark:text-blue-400">Publishing a theme from your library</span>{' '}
+                  will switch it to your current theme.
+                </p>
+              </div>
+              <div className="space-y-3">
+                {libraryThemes.map((theme) => (
+                  <ThemeLibraryCard
+                    key={theme.id}
+                    id={theme.id}
+                    themeName={theme.themeName}
+                    previewImage={theme.template.previewImage}
+                    version={theme.template.version}
+                    createdAt={theme.createdAt}
+                    isPublished={theme.isPublished}
+                    canDelete={theme.canDelete}
+                    isPublishing={publishingThemeId === theme.id}
+                    isDuplicating={duplicatingThemeId === theme.id}
+                    onEditTheme={() => handleEditTheme(theme.id)}
+                    onPublish={() => handlePublish(theme.id)}
+                    onDelete={() => handleDelete(theme.id)}
+                    onDuplicate={() => handleDuplicate(theme.id, theme.themeName)}
+                    onRename={() => openRenameDialog(theme.id, theme.themeName)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {themes.length === 0 && (
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/50 mb-4">
+                <Package className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No themes yet</h3>
+              <p className="text-muted-foreground mb-6">Add a theme from our showcase to get started</p>
+              <Button onClick={handleAddTheme}>
+                <Plus className="w-4 h-4 mr-2" />
+                Browse themes
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Rename Dialog */}
+        <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Rename theme</DialogTitle>
+              <DialogDescription>
+                Enter a new name for your theme
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="theme-name">Theme name</Label>
+                <Input
+                  id="theme-name"
+                  value={renameThemeName}
+                  onChange={(e) => setRenameThemeName(e.target.value)}
+                  placeholder="Enter theme name"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleRenameSubmit();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setRenameDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleRenameSubmit}>
+                Rename
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

@@ -18,7 +18,7 @@ interface WorkspaceLayoutProps {
 
 export function WorkspaceLayout({ sidebar, header, children, mobileHeader, mobileNav }: WorkspaceLayoutProps) {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
+    <div className="flex h-[100dvh] w-full overflow-hidden bg-background">
       {/* Sidebar - Fixed 288px (18rem) width like shadcn, scrollable. HIDDEN on mobile. */}
       <aside className="hidden md:block w-72 flex-shrink-0 overflow-y-auto border-r bg-sidebar text-sidebar-foreground">
         {sidebar}

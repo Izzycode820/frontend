@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from './providers';
 import { Toaster } from '@/components/shadcn-ui/sonner';
+import { Analytics } from "@vercel/analytics/react";
 
 // Viewport configuration (Next.js 15+ - themeColor moved here)
 export const viewport: Viewport = {
@@ -110,6 +111,7 @@ export default function RootLayout({
           {children}
           <Toaster position="top-right" richColors closeButton />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

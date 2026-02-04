@@ -95,22 +95,20 @@ export default function BetaPage() {
           </Link>
         </div>
 
-        {/* Large Demo Video Placeholder */}
+        {/* Large Demo Video */}
         <div className="w-full max-w-5xl aspect-video bg-gray-900/50 border border-white/10 rounded-3xl shadow-2xl overflow-hidden relative group backdrop-blur-xl">
-          <div className="absolute inset-0 flex items-center justify-center">
-            {/* Play Button */}
-            <div className="relative z-10 p-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 group-hover:scale-110 transition-transform duration-500 cursor-pointer">
-              <Play className="w-12 h-12 text-white fill-white ml-2" />
-            </div>
-
-            <div className="absolute bottom-8 left-0 right-0 text-center">
-              <p className="text-gray-400 text-sm font-medium tracking-wide uppercase">Watch the 2-minute demo</p>
-            </div>
-          </div>
+          <video
+            src="/landing/demo.mp4"
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
 
           {/* Subtle Grid Overlay */}
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40" />
         </div>
 
       </main>
