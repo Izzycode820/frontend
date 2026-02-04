@@ -122,6 +122,9 @@ function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
                             </AvatarFallback>
                         </Avatar>
                         <span className="font-semibold text-sm">My Store</span>
+                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider dark:bg-blue-900/40 dark:text-blue-300">
+                            Beta
+                        </span>
                     </div>
 
                     {/* Right: Actions */}

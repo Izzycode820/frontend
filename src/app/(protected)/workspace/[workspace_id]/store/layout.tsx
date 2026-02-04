@@ -17,6 +17,8 @@ import "@/app/(protected)/workspace/[workspace_id]/store/theme.css"
  * - All data from Zustand stores (auth + workspace context)
  */
 
+import { SubscriptionLockoutModal } from "@/components/workspace/restricted/SubscriptionLockoutModal";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -25,6 +27,7 @@ export default function DashboardLayout({
   return (
     <ApolloProvider client={adminStoreClient}>
       <ThemeWrapper>
+        <SubscriptionLockoutModal />
         <StoreLayoutClient>
           {children}
         </StoreLayoutClient>

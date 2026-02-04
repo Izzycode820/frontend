@@ -131,7 +131,7 @@ const SYSTEM_DOMAINS = ['localhost', 'localhost:3000', 'huzilerz.com', 'www.huzi
 const SUBDOMAIN_SUFFIX = '.huzilerz.com';
 
 // Protected routes that require authentication
-const PROTECTED_ROUTES = ['/workspace', '/settings'];
+const PROTECTED_ROUTES = ['/workspace', '/checkout'];
 
 // Auth routes (public - no auth required)
 const AUTH_ROUTES = ['/auth/login', '/auth/signup', '/auth/register'];
@@ -206,10 +206,12 @@ function isProtectedRoute(pathname: string): boolean {
 }
 
 /**
- * Check if user is authenticated via refresh token
+ * Check if user is authenticated via tokens
+ * Checks for either refresh_token (long-lived) or access_token (short-lived)
+ * to ensure valid session detection even if one cookie is momentarily missing/expired
  */
 function isAuthenticated(request: NextRequest): boolean {
-  return request.cookies.has('refresh_token');
+  return request.cookies.has('refresh_token') || request.cookies.has('access_token');
 }
 
 /**
@@ -238,66 +240,13 @@ function getSubscriptionStatus(request: NextRequest): { tier: string; status: st
 
 /**
  * Handle authentication for protected routes
- * Following guide's pattern: middleware adds ?next param for SSR protection
+ * (Currently disabled to rely on Client Side AuthGuard)
  */
 function handleAuth(request: NextRequest): NextResponse | null {
-  const { pathname, search } = request.nextUrl;
-
-  // 1. Protected route check - redirect to login with intent
-  if (isProtectedRoute(pathname) && !isAuthenticated(request)) {
-    const url = request.nextUrl.clone();
-
-    // Build intended destination (path + query params)
-    const intendedDestination = pathname + search;
-
-    // Redirect to login with ?next param (industry standard)
-    url.pathname = '/auth/login';
-    url.search = `?next=${encodeURIComponent(intendedDestination)}`;
-
-    return NextResponse.redirect(url);
-  }
-
-  // 2. Subscription suspension check - redirect to reactivation page
-  // Stateless check via JWT (0-15 min delay acceptable)
-  // For immediate blocking on writes, see API layer comment below
-  //
-  // IMPORTANT: Only redirect 'suspended' status (non-payment)
-  // 'cancelled' status = user cancelled but keeps access until expires_at (honor paid period)
-  if (pathname.startsWith('/workspace') && pathname !== '/workspace/reactivate' && isAuthenticated(request)) {
-    const subscription = getSubscriptionStatus(request);
-
-    if (subscription?.status === 'suspended') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/workspace/reactivate';
-      url.search = ''; // Clear any query params
-
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // 3. Auth route check - if already logged in, redirect to workspace
-  // (prevents logged-in users from seeing login/signup pages)
-  if (AUTH_ROUTES.includes(pathname) && isAuthenticated(request)) {
-    const url = request.nextUrl.clone();
-
-    // Check if there's a ?next param to redirect to instead
-    const next = request.nextUrl.searchParams.get('next');
-
-    if (next && isValidRedirectPath(next)) {
-      // User came from protected route, send them back
-      url.pathname = next.split('?')[0];
-      url.search = next.includes('?') ? '?' + next.split('?')[1] : '';
-    } else {
-      // Default redirect to workspace
-      url.pathname = '/workspace';
-      url.search = '';
-    }
-
-    return NextResponse.redirect(url);
-  }
-
   return null;
 }
+
+
 
 /**
  * Validate redirect path for middleware (OWASP-compliant)
@@ -325,6 +274,24 @@ function isValidRedirectPath(path: string): boolean {
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
+
+  // 0. BETA GATE: Cookie Check (Highest Priority)
+  // If user tries to access /camp or /workspace without cookie, redirect to Home (Beta Page)
+  const isProtectedBetaRoute =
+    request.nextUrl.pathname.startsWith('/camp') ||
+    request.nextUrl.pathname.startsWith('/workspace') ||
+    request.nextUrl.pathname.startsWith('/auth');
+
+  if (isProtectedBetaRoute) {
+    const betaCookie = request.cookies.get('beta_token');
+
+    // Check if cookie exists and has valid value (simple check)
+    if (!betaCookie || betaCookie.value !== 'authorized') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+  }
 
   // Handle authentication for system domain
   if (SYSTEM_DOMAINS.includes(hostname)) {

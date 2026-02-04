@@ -48,7 +48,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
   return (
     <div className="flex h-full flex-col gap-2">
       {/* Workspace Header - shadcn style */}
-      <div className="flex h-14 items-center border-b px-4">
+      <div className="flex h-14 items-center border-b px-4 justify-between">
         <Link
           href={config.workspaceConfig.url || "#"}
           className="flex items-center gap-2 font-semibold text-sidebar-foreground hover:text-sidebar-foreground/80"
@@ -56,6 +56,9 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
           <config.workspaceConfig.icon className="h-5 w-5" />
           <span className="text-base">{config.workspaceConfig.name}</span>
         </Link>
+        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider dark:bg-blue-900/40 dark:text-blue-300">
+          Beta
+        </span>
       </div>
 
       {/* Main Navigation - shadcn style with collapsible support */}
