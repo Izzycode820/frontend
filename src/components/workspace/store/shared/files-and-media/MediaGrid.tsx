@@ -15,7 +15,8 @@ export function MediaGrid({
   loading = false,
   viewMode = 'grid',
 }: MediaGridProps) {
-  if (loading) {
+  // Stale-While-Revalidate: Only show skeletons if we have no items
+  if (loading && items.length === 0) {
     return (
       <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         {Array.from({ length: 12 }).map((_, i) => (
@@ -48,11 +49,10 @@ export function MediaGrid({
           return (
             <div
               key={item.uploadId}
-              className={`flex items-center gap-3 p-2 rounded-md border cursor-pointer transition-all ${
-                isSelected
+              className={`flex items-center gap-3 p-2 rounded-md border cursor-pointer transition-all ${isSelected
                   ? 'border-primary bg-primary/5'
                   : 'border-transparent hover:bg-muted'
-              }`}
+                }`}
               onClick={() => {
                 if (selectionEnabled && canSelect) {
                   onToggleSelect(item.uploadId)
@@ -119,11 +119,10 @@ export function MediaGrid({
         return (
           <div
             key={item.uploadId}
-            className={`relative group cursor-pointer rounded-md overflow-hidden border-2 transition-all ${
-              isSelected
+            className={`relative group cursor-pointer rounded-md overflow-hidden border-2 transition-all ${isSelected
                 ? 'border-primary ring-2 ring-primary/20'
                 : 'border-transparent hover:border-muted-foreground/30'
-            }`}
+              }`}
             onClick={() => {
               if (selectionEnabled && canSelect) {
                 onToggleSelect(item.uploadId)
@@ -167,9 +166,8 @@ export function MediaGrid({
             {selectionEnabled && (
               <div className="absolute top-2 left-2 z-10">
                 <div
-                  className={`bg-background/90 rounded-sm ${
-                    isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                  } transition-opacity`}
+                  className={`bg-background/90 rounded-sm ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    } transition-opacity`}
                   onClick={(e) => {
                     e.stopPropagation()
                     if (canSelect) {
