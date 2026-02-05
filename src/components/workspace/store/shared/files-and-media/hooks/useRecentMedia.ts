@@ -62,7 +62,8 @@ export function useRecentMedia(options: UseRecentMediaOptions = {}) {
       sortOrder,
     },
     skip: !enabled,
-    fetchPolicy: 'network-only', // Always fetch fresh data for search/filters
+    fetchPolicy: 'cache-and-network', // Return cache immediately, then refresh in background
+    nextFetchPolicy: 'cache-first',   // Use cache for subsequent updates to prevent flicker
   })
 
   const recentMedia: MediaItem[] =
