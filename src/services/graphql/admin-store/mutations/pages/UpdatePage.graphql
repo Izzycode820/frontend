@@ -1,0 +1,15 @@
+mutation UpdatePage($id: ID!, $input: PageInput!) {
+  pageUpdate(id: $id, input: $input) {
+    success
+    page {
+      id
+      title
+      handle
+      bodyHtml
+      isPublished
+      publishedAt
+      updatedAt
+    }
+    error
+  }
+}

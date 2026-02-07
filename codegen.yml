@@ -29,8 +29,11 @@ schema:
 
 documents:
   # Incremental development - change domain as needed
- # - "src/services/graphql/admin-store/queries/discounts/*.graphql"
-  - "src/services/graphql/admin-store/mutations/products/DuplicateProduct.graphql"
+  # - "src/services/graphql/admin-store/queries/discounts/*.graphql"
+  - "src/services/graphql/admin-store/mutations/navigation/*.graphql"
+  - "src/services/graphql/admin-store/mutations/pages/*.graphql"
+  - "src/services/graphql/admin-store/queries/navigation/*.graphql"
+  - "src/services/graphql/admin-store/queries/pages/*.graphql"
   # - "src/services/graphql/admin-store/queries/customers/GetCustomers.graphql"
 
 generates:

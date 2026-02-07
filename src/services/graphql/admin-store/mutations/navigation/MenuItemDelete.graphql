@@ -1,0 +1,6 @@
+mutation MenuItemDelete($id: ID!) {
+  menuItemDelete(id: $id) {
+    success
+    error
+  }
+}

@@ -1,0 +1,15 @@
+mutation MenuItemReorder($id: ID!, $newPosition: Int!, $newParentId: ID) {
+  menuItemReorder(
+    id: $id
+    newPosition: $newPosition
+    newParentId: $newParentId
+  ) {
+    success
+    menuItem {
+      id
+      position
+      parentId
+    }
+    error
+  }
+}

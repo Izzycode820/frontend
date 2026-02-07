@@ -1,0 +1,33 @@
+query GetNavigation($id: ID!) {
+  navigation(id: $id) {
+    id
+    title
+    handle
+    items {
+      id
+      title
+      type
+      value
+      url
+      position
+      parentId
+      children {
+        id
+        title
+        type
+        value
+        url
+        position
+        parentId
+        children {
+          id
+          title
+          type
+          children {
+            id
+          }
+        }
+      }
+    }
+  }
+}

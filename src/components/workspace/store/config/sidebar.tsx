@@ -96,10 +96,14 @@ export function getStoreSidebarConfig(
               title: "Themes",
               url: STORE_ROUTES.CHANNELS.THEMES(workspaceId),
             },
-            // {
-            //   title: "Pages",
-            //   url: STORE_ROUTES.CHANNELS.PAGES(workspaceId),
-            // },
+            {
+               title: "Pages",
+               url: STORE_ROUTES.CHANNELS.PAGES.LIST(workspaceId),
+            },
+            {
+              title: "Navigation",
+              url: STORE_ROUTES.CHANNELS.NAVIGATION.LIST(workspaceId),
+            },
             {
               title: "Preferences",
               url: STORE_ROUTES.CHANNELS.PREFERENCES(workspaceId),

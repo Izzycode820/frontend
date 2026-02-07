@@ -76,8 +76,16 @@ export const STORE_ROUTES = {
   CHANNELS: {
     ONLINE_STORE: (workspaceId: string) => `/workspace/${workspaceId}/store/themes`,
     THEMES: (workspaceId: string) => `/workspace/${workspaceId}/store/themes`,
-    PAGES: (workspaceId: string) => `/workspace/${workspaceId}/store/pages`,
+    PAGES: {
+        LIST: (workspaceId: string) => `/workspace/${workspaceId}/store/themes/pages`,
+        NEW: (workspaceId: string) => `/workspace/${workspaceId}/store/themes/pages/new`,
+        EDIT: (workspaceId: string, pageId: string) => `/workspace/${workspaceId}/store/themes/pages/${pageId}`,
+    },
     PREFERENCES: (workspaceId: string) => `/workspace/${workspaceId}/store/themes/preferences`,
+    NAVIGATION: {
+        LIST: (workspaceId: string) => `/workspace/${workspaceId}/store/themes/navigation`,
+        EDIT: (workspaceId: string, menuId: string) => `/workspace/${workspaceId}/store/themes/navigation/${menuId}`,
+    },
     // SHOP: (workspaceId: string) => `/workspace/${workspaceId}/store/channels/shop`,
     // POINT_OF_SALE: (workspaceId: string) => `/workspace/${workspaceId}/store/channels/pos`,
   },

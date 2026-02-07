@@ -1,0 +1,11 @@
+mutation CreateNavigation($workspaceId: ID!, $input: NavigationInput!) {
+  navigationCreate(workspaceId: $workspaceId, input: $input) {
+    success
+    navigation {
+      id
+      title
+      handle
+    }
+    error
+  }
+}

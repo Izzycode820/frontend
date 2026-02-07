@@ -1,0 +1,15 @@
+mutation MenuItemCreate($navigationId: ID!, $input: NavigationItemInput!) {
+  menuItemCreate(navigationId: $navigationId, input: $input) {
+    success
+    menuItem {
+      id
+      title
+      type
+      value
+      url
+      position
+      parentId
+    }
+    error
+  }
+}

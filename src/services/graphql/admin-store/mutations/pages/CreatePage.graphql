@@ -1,0 +1,12 @@
+mutation CreatePage($workspaceId: ID!, $input: PageInput!) {
+  pageCreate(workspaceId: $workspaceId, input: $input) {
+    success
+    page {
+      id
+      title
+      handle
+      createdAt
+    }
+    error
+  }
+}

@@ -1,0 +1,9 @@
+query GetNavigations($workspaceId: ID!) {
+  navigations(workspaceId: $workspaceId) {
+    id
+    title
+    handle
+    createdAt
+    updatedAt
+  }
+}

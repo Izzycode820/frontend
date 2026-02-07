@@ -1,0 +1,6 @@
+mutation DeleteNavigation($id: ID!) {
+  navigationDelete(id: $id) {
+    success
+    error
+  }
+}

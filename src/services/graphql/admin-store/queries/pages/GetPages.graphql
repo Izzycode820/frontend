@@ -1,0 +1,12 @@
+query GetPages($workspaceId: ID!, $isPublished: Boolean) {
+  pages(workspaceId: $workspaceId, isPublished: $isPublished) {
+    id
+    title
+    handle
+    isPublished
+    publishedAt
+    url
+    createdAt
+    updatedAt
+  }
+}

@@ -1,0 +1,15 @@
+mutation MenuItemUpdate($id: ID!, $input: NavigationItemInput!) {
+  menuItemUpdate(id: $id, input: $input) {
+    success
+    menuItem {
+      id
+      title
+      type
+      value
+      url
+      position
+      parentId
+    }
+    error
+  }
+}

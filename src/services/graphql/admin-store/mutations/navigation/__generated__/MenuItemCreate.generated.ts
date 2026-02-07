@@ -1,0 +1,13 @@
+import * as Types from '../../../../../../types/admin-store/graphql-base';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type MenuItemCreateMutationVariables = Types.Exact<{
+  navigationId: Types.Scalars['ID']['input'];
+  input: Types.NavigationItemInput;
+}>;
+
+
+export type MenuItemCreateMutation = { __typename?: 'Mutation', menuItemCreate: { __typename?: 'MenuItemCreate', success: boolean | null, error: string | null, menuItem: { __typename?: 'NavigationItemType', id: string, title: string, type: Types.WorkspaceStoreNavigationItemTypeChoices, value: string, url: string | null, position: number, parentId: string | null } | null } | null };
+
+
+export const MenuItemCreateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MenuItemCreate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"navigationId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"NavigationItemInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"menuItemCreate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"navigationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"navigationId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"menuItem"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}}]}},{"kind":"Field","name":{"kind":"Name","value":"error"}}]}}]}}]} as unknown as DocumentNode<MenuItemCreateMutation, MenuItemCreateMutationVariables>;

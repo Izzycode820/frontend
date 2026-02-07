@@ -1,0 +1,16 @@
+query GetPage($id: ID!) {
+  page(id: $id) {
+    id
+    title
+    handle
+    bodyHtml
+    templateSuffix
+    isPublished
+    publishedAt
+    metaTitle
+    metaDescription
+    url
+    createdAt
+    updatedAt
+  }
+}
