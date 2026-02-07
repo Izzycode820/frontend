@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { Check, ChevronsUpDown, ChevronRight, ArrowLeft, Search as SearchIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/shadcn-ui/button';
@@ -26,7 +26,7 @@ import { GetPagesDocument } from '@/services/graphql/admin-store/queries/pages/_
 
 export type LinkType = 'HTTP' | 'PAGE' | 'COLLECTION' | 'PRODUCT' | 'BLOG' | 'ARTICLE' | 'POLICY' | 'SYSTEM_ROUTE';
 
-interface LinkResult {
+export interface LinkResult {
   title: string;
   value: string;
   type: LinkType;
@@ -37,11 +37,12 @@ interface LinkPickerProps {
   value?: string;
   onChange: (result: LinkResult) => void;
   className?: string;
+  workspaceId: string;
 }
 
 type PickerView = 'ROOT' | 'COLLECTIONS' | 'PAGES';
 
-export function LinkPicker({ value, onChange, className }: LinkPickerProps) {
+export function LinkPicker({ value, onChange, className, workspaceId }: LinkPickerProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<PickerView>('ROOT');
   const [search, setSearch] = useState('');
@@ -53,8 +54,8 @@ export function LinkPicker({ value, onChange, className }: LinkPickerProps) {
   });
 
   const { data: pagesData } = useQuery(GetPagesDocument, {
-     variables: { workspaceId: '' }, 
-     skip: view !== 'PAGES' && !open
+     variables: { workspaceId }, 
+     skip: view !== 'PAGES' && !open || !workspaceId
   });
   
   const handleSelectRoot = (type: string, label: string) => {

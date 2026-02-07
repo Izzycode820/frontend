@@ -39,12 +39,12 @@ export default function StageInspiration() {
     }, []);
 
     return (
-        <section className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-20 bg-[#Fdfbf7] dark:bg-zinc-950 overflow-hidden">
+        <section className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-20 bg-[#Fdfbf7] overflow-hidden">
             <div className="relative w-full h-full flex flex-col justify-center max-w-7xl mx-auto">
 
                 {/* Header Area: Relative Flow */}
                 <div className="w-full mb-12 z-20">
-                    <h2 className="text-3xl md:text-5xl lg:text-7xl font-thin tracking-tight text-black dark:text-white leading-none whitespace-normal md:whitespace-nowrap">
+                    <h2 className="text-3xl md:text-5xl lg:text-7xl font-thin tracking-tight text-black leading-none whitespace-normal md:whitespace-nowrap">
                         Or choose from the <span className="font-normal font-serif text-amber-700 italic">different hustles</span> we offer
                     </h2>
                 </div>
@@ -65,10 +65,10 @@ export default function StageInspiration() {
                                 <span className="text-sm font-bold text-black/40 uppercase tracking-widest">
                                     Option {index + 1} of {HUSTLES.length}
                                 </span>
-                                <h3 className="text-4xl md:text-5xl font-medium text-black dark:text-white">
+                                <h3 className="text-4xl md:text-5xl font-medium text-black">
                                     {HUSTLES[index].title}
                                 </h3>
-                                <p className="text-xl md:text-2xl font-light text-black/60 dark:text-zinc-400 max-w-md leading-relaxed">
+                                <p className="text-xl md:text-2xl font-light text-black/60 max-w-md leading-relaxed">
                                     {HUSTLES[index].description}
                                 </p>
                             </motion.div>

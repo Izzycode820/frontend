@@ -13,7 +13,8 @@ import { ArrowLeft, Plus, Loader2, GripVertical, Trash, Pencil } from 'lucide-re
 
 import { CreateNavigationDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/CreateNavigation.generated';
 import { UpdateNavigationDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/UpdateNavigation.generated';
-import { GetNavigationDocument }    from '@/services/graphql/admin-store/queries/navigation/__generated__/GetNavigation.generated';
+import { GetNavigationDocument, GetNavigationQuery }    from '@/services/graphql/admin-store/queries/navigation/__generated__/GetNavigation.generated';
+import { GetNavigationsDocument } from '@/services/graphql/admin-store/queries/navigation/__generated__/GetNavigations.generated';
 import { MenuItemCreateDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/MenuItemCreate.generated';
 import { MenuItemUpdateDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/MenuItemUpdate.generated';
 import { MenuItemDeleteDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/MenuItemDelete.generated';
@@ -27,7 +28,7 @@ interface MenuFormProps {
 export default function MenuForm({ menuId }: MenuFormProps) {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
-  const isEditing = !!menuId;
+  const isEditing = !!menuId && menuId !== 'new'; // Ensure 'new' param doesn't trigger edit mode
 
   const [title, setTitle] = useState('');
   const [handle, setHandle] = useState('');
@@ -38,35 +39,41 @@ export default function MenuForm({ menuId }: MenuFormProps) {
   const [editingItem, setEditingItem] = useState<MenuItemData | null>(null);
 
   // Mutations
-  const [createNavigation, { loading: isCreating }] = useMutation(CreateNavigationDocument);
+  const [createNavigation, { loading: isCreating }] = useMutation(CreateNavigationDocument, {
+      refetchQueries: [
+          {
+              query: GetNavigationsDocument,
+              variables: { workspaceId: currentWorkspace?.id || '' }
+          }
+      ]
+  });
   const [updateNavigation, { loading: isUpdating }] = useMutation(UpdateNavigationDocument);
   const [createMenuItem] = useMutation(MenuItemCreateDocument);
   const [updateMenuItem] = useMutation(MenuItemUpdateDocument);
   const [deleteMenuItem] = useMutation(MenuItemDeleteDocument);
 
   // Query
-  const { loading: isLoadingData } = useQuery(GetNavigationDocument, {
-     variables: { id: menuId },
+  const { data: navigationData, loading: isLoadingData } = useQuery(GetNavigationDocument, {
+     variables: { id: (menuId || '') as string },
      skip: !isEditing,
-     onCompleted: (data) => {
-        if(data?.navigation) {
-           setTitle(data.navigation.title || '');
-           setHandle(data.navigation.handle || '');
-           // Map items
-           const mappedItems = (data.navigation.items || []).map((item: any) => ({
-               id: item.id,
-               title: item.title,
-               type: item.type,
-               value: item.value || item.url,
-               // Ideally we fetch pageId/collectionId if they exist in the query, 
-               // but for now we might lose them on re-edit if the query doesn't return them.
-               // We should update GetNavigation to include these fields if possible.
-               // Using current data for now.
-           }));
-           setItems(mappedItems);
-        }
-     }
+     fetchPolicy: 'cache-and-network'
   });
+
+  useEffect(() => {
+    if (navigationData?.navigation) {
+        setTitle(navigationData.navigation.title || '');
+        setHandle(navigationData.navigation.handle || '');
+        // Map items
+        const mappedItems = (navigationData.navigation.items || []).map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            type: item.type,
+            value: item.value || item.url,
+            // Add other fields if needed
+        }));
+        setItems(mappedItems);
+    }
+  }, [navigationData]);
 
   const handleAddItem = () => {
       setEditingItem(null);
@@ -89,32 +96,37 @@ export default function MenuForm({ menuId }: MenuFormProps) {
       setIsSheetOpen(false);
   };
   
-  // Auto-handle generation
-  useEffect(() => {
-     if (!isEditing && title && !handle) {
-         setHandle(title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
-     }
-  }, [title, isEditing, handle]);
-
-
   const handleSubmit = async () => {
-      if (!title.trim() || !handle.trim()) {
-          toast.error('Title and handle are required');
+      if (!title.trim()) {
+          toast.error('Title is required');
           return;
       }
 
-      const input = {
+      const input: any = {
           title,
-          handle,
-          workspaceId: currentWorkspace?.id,
       };
+
+      if (isEditing && handle) {
+          input.handle = handle;
+      }
 
       try {
          let navId = menuId;
          if (isEditing) {
-            await updateNavigation({ variables: { id: menuId, input } });
+            await updateNavigation({ 
+               variables: { 
+                  workspaceId: currentWorkspace?.id || '',
+                  id: menuId as string, 
+                  input 
+               } 
+            });
          } else {
-            const { data } = await createNavigation({ variables: { input } });
+            const { data } = await createNavigation({ 
+               variables: { 
+                  workspaceId: currentWorkspace?.id || '',
+                  input 
+               } 
+            });
             if(data?.navigationCreate?.navigation?.id) {
                navId = data.navigationCreate.navigation.id;
             } else {
@@ -140,7 +152,7 @@ export default function MenuForm({ menuId }: MenuFormProps) {
                      // Update
                      await updateMenuItem({ 
                         variables: { 
-                             menuItemId: item.id, 
+                             id: item.id, 
                              input: itemInput
                         } 
                      });
@@ -203,10 +215,23 @@ export default function MenuForm({ menuId }: MenuFormProps) {
                       <Label>Title</Label>
                       <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Main Menu" />
                   </div>
+              {isEditing && (
                   <div className="grid gap-2">
-                      <Label>Handle</Label>
-                      <Input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="main-menu" />
+                      <Label className="flex items-center gap-2">
+                          Handle
+                          <span className="text-xs font-normal text-muted-foreground">(System ID)</span>
+                      </Label>
+                      <Input 
+                          value={handle} 
+                          readOnly
+                          className="bg-muted text-muted-foreground cursor-not-allowed font-mono text-sm"
+                          title="This unique identifier is used by themes"
+                      />
+                      <p className="text-[0.8rem] text-muted-foreground">
+                          A unique identifier (slug) reserved by the system to display this menu in your theme.
+                      </p>
                   </div>
+              )}
               </CardContent>
           </Card>
 
@@ -222,13 +247,13 @@ export default function MenuForm({ menuId }: MenuFormProps) {
                       </div>
                   )}
                   {items.map((item, index) => (
-                      <div key={index} className="flex gap-3 items-center p-3 border rounded-md bg-white hover:bg-muted/10 transition-colors">
+                      <div key={index} className="flex gap-3 items-center p-3 border rounded-md bg-white dark:bg-muted/10 hover:bg-muted/20 transition-colors">
                           <div className="text-muted-foreground cursor-grab">
                               <GripVertical className="h-5 w-5" />
                           </div>
-                          <div className="flex-1">
-                             <div className="font-medium">{item.title}</div>
-                             <div className="text-xs text-muted-foreground">{item.type} • {item.value}</div>
+                          <div className="flex-1 min-w-0">
+                             <div className="font-medium truncate">{item.title}</div>
+                             <div className="text-xs text-muted-foreground truncate">{item.type} • {item.value}</div>
                           </div>
                           <div className="flex items-center gap-1">
                               <Button 
@@ -266,6 +291,7 @@ export default function MenuForm({ menuId }: MenuFormProps) {
           onOpenChange={setIsSheetOpen} 
           initialItem={editingItem} 
           onSave={handleSheetSave}
+          workspaceId={currentWorkspace?.id || ''}
        />
     </div>
   );

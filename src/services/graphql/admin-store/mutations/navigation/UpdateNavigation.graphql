@@ -1,0 +1,15 @@
+mutation UpdateNavigation(
+  $workspaceId: ID!
+  $id: ID!
+  $input: NavigationInput!
+) {
+  navigationUpdate(workspaceId: $workspaceId, id: $id, input: $input) {
+    success
+    navigation {
+      id
+      title
+      handle
+    }
+    error
+  }
+}

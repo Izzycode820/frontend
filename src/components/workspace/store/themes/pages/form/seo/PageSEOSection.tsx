@@ -1,9 +1,9 @@
 /**
- * ProductSEOSection Component
+ * PageSEOSection Component
  *
  * Features:
  * - Collapsed preview showing search engine listing
- * - Auto-populates from product name and description
+ * - Auto-populates from page title and content
  * - Expands to show editable fields
  * - Character count validation
  * - Real-time slug generation
@@ -23,66 +23,67 @@ import {
   generateMetaDescription,
   getCharacterCount,
   getUrlBreadcrumbs,
+  truncateText,
 } from './utils';
 
-interface ProductSEOSectionProps {
+interface PageSEOSectionProps {
   // Auto-populated from main form
-  productName: string;
-  productDescription: string;
-  productPrice?: number;
-
+  pageTitle: string;
+  pageContent: string; // Used for meta description auto-gen
+  
   // Controlled SEO values
-  metaTitle: string;
-  metaDescription: string;
-  slug: string;
+  seoTitle: string;
+  seoDescription: string;
+  handle: string;
 
   // Change handlers
-  onMetaTitleChange: (value: string) => void;
-  onMetaDescriptionChange: (value: string) => void;
-  onSlugChange: (value: string) => void;
+  onSeoTitleChange: (value: string) => void;
+  onSeoDescriptionChange: (value: string) => void;
+  onHandleChange: (value: string) => void;
 }
 
-export function ProductSEOSection({
-  productName,
-  productDescription,
-  productPrice,
-  metaTitle,
-  metaDescription,
-  slug,
-  onMetaTitleChange,
-  onMetaDescriptionChange,
-  onSlugChange,
-}: ProductSEOSectionProps) {
+export function PageSEOSection({
+  pageTitle,
+  pageContent,
+  seoTitle,
+  seoDescription,
+  handle,
+  onSeoTitleChange,
+  onSeoDescriptionChange,
+  onHandleChange,
+}: PageSEOSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   // Track if handle has been manually edited
-  const [isHandleTouched, setIsHandleTouched] = useState(!!slug);
+  const [isHandleTouched, setIsHandleTouched] = useState(!!handle);
 
-  // Auto-generate slug from product name when name changes (only if slug hasn't been manually touched)
+  // Auto-generate slug from page title when title changes (only if handle hasn't been manually touched)
   useEffect(() => {
-    if (productName && !isHandleTouched) {
-       const newSlug = generateSlug(productName);
-       if (slug !== newSlug) {
-         onSlugChange(newSlug);
+    if (pageTitle && !isHandleTouched) {
+       const newSlug = generateSlug(pageTitle);
+       if (handle !== newSlug) {
+         onHandleChange(newSlug);
        }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productName, isHandleTouched]); 
+  }, [pageTitle, isHandleTouched]); 
 
-  // Display values (use utility functions for proper truncation)
-  const displayTitle = generateMetaTitle(productName, metaTitle);
-  const displayDescription = generateMetaDescription(productDescription, metaDescription);
-  const displaySlug = slug || generateSlug(productName) || 'product-slug';
+  // Display values (use utility functions for proper truncation/defaults)
+  const displayTitle = generateMetaTitle(pageTitle, seoTitle);
+  // Strip HTML from content for description generation if needed
+  const plainContent = pageContent.replace(/<[^>]*>?/gm, '');
+  const displayDescription = generateMetaDescription(plainContent, seoDescription);
+  const displaySlug = handle || generateSlug(pageTitle) || 'page-handle';
 
   // Character counts
-  const titleCount = getCharacterCount(metaTitle || productName, SEO_LIMITS.TITLE);
-  const descCount = getCharacterCount(metaDescription || productDescription, SEO_LIMITS.DESCRIPTION);
+  const titleCount = getCharacterCount(seoTitle || pageTitle, SEO_LIMITS.TITLE);
+  const descCount = getCharacterCount(seoDescription || plainContent, SEO_LIMITS.DESCRIPTION);
 
   const handleSlugChange = (value: string) => {
     setIsHandleTouched(true);
     // Auto-format slug as user types
     const formatted = generateSlug(value);
-    onSlugChange(formatted);
+    onHandleChange(formatted);
   };
 
   return (
@@ -110,13 +111,8 @@ export function ProductSEOSection({
             {displayTitle}
           </h3>
           <p className="text-sm text-muted-foreground line-clamp-2 break-words">
-            {displayDescription}
+             {displayDescription || 'Add a description to see how this page might appear in search engine listings.'}
           </p>
-          {productPrice !== undefined && productPrice > 0 && (
-            <p className="text-sm font-medium">
-              FCFA {productPrice.toLocaleString()} XAF
-            </p>
-          )}
         </div>
 
         {/* Editable Fields (shown when editing) */}
@@ -124,12 +120,12 @@ export function ProductSEOSection({
           <div className="space-y-4 pt-4 border-t">
             {/* Page Title */}
             <div className="space-y-2">
-              <Label htmlFor="meta-title">Page title</Label>
+              <Label htmlFor="seo-title">Page title</Label>
               <Input
-                id="meta-title"
-                placeholder={productName || "Enter product name first"}
-                value={metaTitle}
-                onChange={(e) => onMetaTitleChange(e.target.value)}
+                id="seo-title"
+                placeholder={pageTitle || "Enter page title first"}
+                value={seoTitle}
+                onChange={(e) => onSeoTitleChange(e.target.value)}
                 maxLength={SEO_LIMITS.TITLE}
               />
               <p className={`text-xs ${titleCount.isExceeding ? 'text-destructive' : 'text-muted-foreground'}`}>
@@ -139,12 +135,12 @@ export function ProductSEOSection({
 
             {/* Meta Description */}
             <div className="space-y-2">
-              <Label htmlFor="meta-description">Meta description</Label>
+              <Label htmlFor="seo-description">Meta description</Label>
               <Textarea
-                id="meta-description"
-                placeholder={productDescription || "Enter product description first"}
-                value={metaDescription}
-                onChange={(e) => onMetaDescriptionChange(e.target.value)}
+                id="seo-description"
+                placeholder={plainContent ? truncateText(plainContent, 150) : "Enter page content to auto-generate description"}
+                value={seoDescription}
+                onChange={(e) => onSeoDescriptionChange(e.target.value)}
                 maxLength={SEO_LIMITS.DESCRIPTION}
                 rows={3}
               />
@@ -156,14 +152,20 @@ export function ProductSEOSection({
             {/* URL Handle */}
             <div className="space-y-2">
               <Label htmlFor="url-handle">URL handle</Label>
-              <Input
-                id="url-handle"
-                placeholder="product-slug"
-                value={slug}
-                onChange={(e) => handleSlugChange(e.target.value)}
-              />
+              <div className="flex rounded-md shadow-sm">
+                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
+                    /pages/
+                  </span>
+                  <Input
+                    id="url-handle"
+                    placeholder="page-slug"
+                    value={handle}
+                    onChange={(e) => handleSlugChange(e.target.value)}
+                    className="rounded-l-none"
+                  />
+              </div>
               <p className="text-xs text-muted-foreground">
-                https://mystore.com/products/{displaySlug}
+                https://mystore.com/pages/{displaySlug}
               </p>
             </div>
           </div>
@@ -172,7 +174,7 @@ export function ProductSEOSection({
         {/* Info text when not editing */}
         {!isEditing && (
           <p className="text-xs text-muted-foreground">
-            Add a title and description to see how this product might appear in a search engine listing.
+            Add a title and description to see how this page might appear in a search engine listing.
           </p>
         )}
       </CardContent>

@@ -29,9 +29,10 @@ interface MenuItemSheetProps {
   onOpenChange: (open: boolean) => void;
   initialItem?: MenuItemData | null;
   onSave: (item: MenuItemData) => void;
+  workspaceId: string;
 }
 
-export function MenuItemSheet({ open, onOpenChange, initialItem, onSave }: MenuItemSheetProps) {
+export function MenuItemSheet({ open, onOpenChange, initialItem, onSave, workspaceId }: MenuItemSheetProps) {
   const [title, setTitle] = useState('');
   const [linkValue, setLinkValue] = useState(''); // Display value for the picker button
   const [currentItem, setCurrentItem] = useState<Partial<MenuItemData>>({
@@ -119,6 +120,7 @@ export function MenuItemSheet({ open, onOpenChange, initialItem, onSave }: MenuI
             <LinkPicker 
                 value={linkValue} 
                 onChange={handleLinkChange} 
+                workspaceId={workspaceId}
             />
           </div>
         </div>

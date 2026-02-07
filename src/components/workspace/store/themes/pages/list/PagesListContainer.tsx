@@ -10,7 +10,8 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Plus, Search } from 'lucide-react';
 
-import { PagesTable, Page } from './PagesTable';
+import { PagesTable, Page } from '@/components/workspace/store/themes/pages/list/PagesTable';
+import { MobilePagesList } from '@/components/workspace/store/themes/pages/list/MobilePagesList';
 import { useIsMobile } from '@/hooks/shadcn/use-mobile'; 
 
 // Generated Documents
@@ -21,6 +22,7 @@ import { DomainsDocument } from '@/services/graphql/domains/queries/custom-domai
 export default function PagesListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
 
   const [deletePage] = useMutation(DeletePageDocument);
@@ -140,6 +142,13 @@ export default function PagesListContainer() {
                <p className="text-muted-foreground">No pages found.</p>
             </CardContent>
           </Card>
+       ) : isMobile ? (
+          <MobilePagesList
+             pages={filteredPages}
+             onEdit={handleEditPage}
+             onView={handleViewPage}
+             onDelete={handleDeletePage}
+          />
        ) : (
           <PagesTable
              pages={filteredPages}

@@ -65,77 +65,77 @@ export function PagesTable({
 
   return (
     <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">
-              <Checkbox
-                checked={selectedPages.length === pages.length && pages.length > 0}
-                onCheckedChange={handleSelectAll}
-                aria-label="Select all"
-              />
-            </TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Handle</TableHead>
-            <TableHead>Last Updated</TableHead>
-            <TableHead className="w-12"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {pages.map((page) => (
-            <TableRow key={page.id}>
-              <TableCell>
+        <Table>
+            <TableHeader>
+            <TableRow>
+                <TableHead className="w-12">
                 <Checkbox
-                  checked={selectedPages.includes(page.id)}
-                  onCheckedChange={(checked) => handleSelectPage(page.id, checked as boolean)}
-                  aria-label={`Select ${page.title}`}
+                    checked={selectedPages.length === pages.length && pages.length > 0}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all"
                 />
-              </TableCell>
-              <TableCell className="font-medium">
-                <span className="font-semibold block">{page.title}</span>
-              </TableCell>
-              <TableCell>
-                 <Badge variant={page.isPublished ? 'outline' : 'secondary'} className={page.isPublished ? 'bg-green-50 text-green-700 border-green-200' : ''}>
-                    {page.isPublished ? 'Published' : 'Hidden'}
-                 </Badge>
-              </TableCell>
-              <TableCell>
-                 <span className="text-sm font-mono text-muted-foreground">/{page.handle}</span>
-              </TableCell>
-              <TableCell>
-                 <span className="text-sm text-muted-foreground">{format(new Date(page.updatedAt), 'MMM d, yyyy')}</span>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => onEdit(page.id)}>
-                      <Pencil className="mr-2 h-4 w-4" /> Edit page
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onView(page.id)}>
-                      <ExternalLink className="mr-2 h-4 w-4" /> View in store
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                        onClick={() => onDelete(page.id)}
-                        className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                    >
-                      <Trash className="mr-2 h-4 w-4" /> Delete page
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
+                </TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Handle</TableHead>
+                <TableHead>Last Updated</TableHead>
+                <TableHead className="w-12"></TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+            </TableHeader>
+            <TableBody>
+            {pages.map((page) => (
+                <TableRow key={page.id}>
+                <TableCell>
+                    <Checkbox
+                    checked={selectedPages.includes(page.id)}
+                    onCheckedChange={(checked) => handleSelectPage(page.id, checked as boolean)}
+                    aria-label={`Select ${page.title}`}
+                    />
+                </TableCell>
+                <TableCell className="font-medium">
+                    <span className="font-semibold block">{page.title}</span>
+                </TableCell>
+                <TableCell>
+                    <Badge variant={page.isPublished ? 'outline' : 'secondary'} className={page.isPublished ? 'bg-green-50 text-green-700 border-green-200' : ''}>
+                        {page.isPublished ? 'Published' : 'Hidden'}
+                    </Badge>
+                </TableCell>
+                <TableCell>
+                    <span className="text-sm font-mono text-muted-foreground">/{page.handle}</span>
+                </TableCell>
+                <TableCell>
+                    <span className="text-sm text-muted-foreground">{format(new Date(page.updatedAt), 'MMM d, yyyy')}</span>
+                </TableCell>
+                <TableCell>
+                    <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => onEdit(page.id)}>
+                        <Pencil className="mr-2 h-4 w-4" /> Edit page
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onView(page.id)}>
+                        <ExternalLink className="mr-2 h-4 w-4" /> View in store
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                            onClick={() => onDelete(page.id)}
+                            className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                        >
+                        <Trash className="mr-2 h-4 w-4" /> Delete page
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                    </DropdownMenu>
+                </TableCell>
+                </TableRow>
+            ))}
+            </TableBody>
+        </Table>
     </div>
   )
 }

@@ -30,12 +30,12 @@ const itemVariants = {
 
 export default function StageFashion() {
     return (
-        <section className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-20 bg-[#ffe4e9] dark:bg-zinc-950 overflow-hidden">
+        <section className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-20 bg-[#ffe4e9] overflow-hidden">
             <div className="relative w-full h-full flex flex-col justify-center max-w-7xl mx-auto">
 
                 {/* 1. Header Area: Relative Flow */}
                 <div className="w-full mb-12 md:mb-0 z-20">
-                    <h2 className="text-3xl md:text-5xl lg:text-7xl font-thin tracking-tight text-black dark:text-white leading-none whitespace-normal md:whitespace-nowrap">
+                    <h2 className="text-3xl md:text-5xl lg:text-7xl font-thin tracking-tight text-black leading-none whitespace-normal md:whitespace-nowrap">
                         Ever wanted to start a <span className="font-normal font-serif text-emerald-800 italic">fashion brand?</span>
                     </h2>
                     <motion.p
@@ -43,9 +43,9 @@ export default function StageFashion() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
-                        className="mt-4 text-xl md:text-2xl lg:text-3xl font-light text-zinc-600 dark:text-zinc-400 leading-none tracking-tight max-w-lg"
+                        className="mt-4 text-xl md:text-2xl lg:text-3xl font-light text-zinc-600 leading-none tracking-tight max-w-lg"
                     >
-                        It gets easy here at <strong className="font-semibold text-black dark:text-white">huzilerz</strong>.
+                        It gets easy here at <strong className="font-semibold text-black">huzilerz</strong>.
                     </motion.p>
                 </div>
 
@@ -89,7 +89,7 @@ export default function StageFashion() {
                             whileInView={{ scale: 1, opacity: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
-                            className="relative w-80 h-80 md:w-[500px] md:h-[500px] rounded-full bg-white dark:bg-zinc-900 border-[6px] border-white shadow-2xl overflow-hidden flex items-center justify-center"
+                            className="relative w-80 h-80 md:w-[500px] md:h-[500px] rounded-full bg-white border-[6px] border-white shadow-2xl overflow-hidden flex items-center justify-center"
                         >
                             <div className="relative w-full h-full p-8 md:p-12">
                                 <Image

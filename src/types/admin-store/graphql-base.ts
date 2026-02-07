@@ -2107,6 +2107,8 @@ export interface Mutation {
   /** Create a new menu (e.g. 'Footer Menu') */
   navigationCreate?: Maybe<NavigationCreate>;
   navigationDelete?: Maybe<NavigationDelete>;
+  /** Update an existing menu */
+  navigationUpdate?: Maybe<NavigationUpdate>;
   pageCreate?: Maybe<PageCreate>;
   pageDelete?: Maybe<PageDelete>;
   pageUpdate?: Maybe<PageUpdate>;
@@ -2868,6 +2870,18 @@ export interface MutationNavigationDeleteArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationNavigationUpdateArgs {
+  id: Scalars["ID"]["input"];
+  input: NavigationInput;
+  workspaceId: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationPageCreateArgs {
   input: PageInput;
   workspaceId: Scalars["ID"]["input"];
@@ -3283,7 +3297,7 @@ export interface NavigationDelete {
 }
 
 export interface NavigationInput {
-  handle: Scalars["String"]["input"];
+  handle?: InputMaybe<Scalars["String"]["input"]>;
   title: Scalars["String"]["input"];
 }
 
@@ -3341,6 +3355,14 @@ export interface NavigationType extends Node {
   /** Menu title (e.g. 'Main Menu') */
   title: Scalars["String"]["output"];
   updatedAt: Scalars["DateTime"]["output"];
+}
+
+/** Update an existing menu */
+export interface NavigationUpdate {
+  __typename?: "NavigationUpdate";
+  error?: Maybe<Scalars["String"]["output"]>;
+  navigation?: Maybe<NavigationType>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
 /** An object with an ID */
@@ -3657,7 +3679,7 @@ export interface PageInput {
   bodyHtml?: InputMaybe<Scalars["String"]["input"]>;
   /** URL slug (auto-generated if empty) */
   handle?: InputMaybe<Scalars["String"]["input"]>;
-  isPublished?: InputMaybe<Scalars["Boolean"]["input"]>;
+  isPublished: Scalars["Boolean"]["input"];
   metaDescription?: InputMaybe<Scalars["String"]["input"]>;
   metaTitle?: InputMaybe<Scalars["String"]["input"]>;
   publishedAt?: InputMaybe<Scalars["DateTime"]["input"]>;

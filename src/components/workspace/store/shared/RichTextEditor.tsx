@@ -42,7 +42,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
     content: value,
     editorProps: {
       attributes: {
-        class: `prose prose-sm w-full max-w-none focus:outline-none ${minHeight} p-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5`,
+        class: `prose prose-sm w-full max-w-none break-words break-all focus:outline-none ${minHeight} max-h-[60vh] overflow-y-auto overflow-x-hidden p-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5`,
       },
     },
     onUpdate: ({ editor }) => {
@@ -155,7 +155,9 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
           </Button>
         </div>
 
-        <EditorContent editor={editor} />
+        <div className="w-full max-w-full overflow-hidden">
+          <EditorContent editor={editor} className="w-full [&_.ProseMirror]:min-w-0 [&_.ProseMirror]:break-all [&_.ProseMirror]:whitespace-pre-wrap" />
+        </div>
       </div>
        {/* Helper text for placeholder if empty */}
        {editor.isEmpty && placeholder && (

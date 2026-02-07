@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
@@ -9,8 +9,9 @@ import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Plus } from 'lucide-react';
 
-import { MenusTable } from './MenusTable';
-
+import { MenusTable } from '@/components/workspace/store/themes/menus/list/MenusTable';
+import { MobileMenusList } from '@/components/workspace/store/themes/menus/list/MobileMenusList';
+import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 // Placeholder imports for generated documents - replace when codegen runs
 import { GetNavigationsDocument } from '@/services/graphql/admin-store/queries/navigation/__generated__/GetNavigations.generated';
 import { DeleteNavigationDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/DeleteNavigation.generated'; 
@@ -18,6 +19,8 @@ import { DeleteNavigationDocument } from '@/services/graphql/admin-store/mutatio
 export default function MenusListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const isMobile = useIsMobile();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const [deleteNavigation] = useMutation(DeleteNavigationDocument);
   
@@ -25,15 +28,16 @@ export default function MenusListContainer() {
     variables: {
       workspaceId: currentWorkspace?.id || ''
     },
-    skip: !currentWorkspace?.id
+    skip: !currentWorkspace?.id,
+    fetchPolicy: 'cache-and-network'
   });
 
   const handleAddMenu = () => {
-     router.push(`/workspace/${currentWorkspace?.id}/store/themes/menus/new`);
+     router.push(`/workspace/${currentWorkspace?.id}/store/themes/navigation/new`);
   };
 
   const handleEditMenu = (menuId: string) => {
-     router.push(`/workspace/${currentWorkspace?.id}/store/themes/menus/${menuId}`);
+     router.push(`/workspace/${currentWorkspace?.id}/store/themes/navigation/${menuId}`);
   };
 
   const handleDeleteMenu = async (menuId: string) => {
@@ -79,6 +83,12 @@ export default function MenusListContainer() {
                <Button variant="link" onClick={handleAddMenu}>Create your first menu</Button>
             </CardContent>
           </Card>
+       ) : isMobile ? (
+          <MobileMenusList
+             menus={menus}
+             onEdit={handleEditMenu}
+             onDelete={handleDeleteMenu}
+           />
        ) : (
           <MenusTable
              menus={menus}
