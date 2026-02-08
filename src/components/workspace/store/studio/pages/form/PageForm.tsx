@@ -102,7 +102,7 @@ export default function PageForm({ pageId }: PageFormProps) {
                 toast.error(data?.pageUpdate?.error || 'Update failed');
             } else {
                 toast.success('Page updated successfully');
-                router.push(`/workspace/${currentWorkspace?.id}/store/themes/pages`);
+                router.push(`/workspace/${currentWorkspace?.id}/store/studio/pages`);
             }
         } else {
            // CreatePage takes: workspaceId, input
@@ -117,7 +117,7 @@ export default function PageForm({ pageId }: PageFormProps) {
                 toast.error(data?.pageCreate?.error || 'Create failed');
             } else {
                 toast.success('Page created successfully');
-                router.push(`/workspace/${currentWorkspace?.id}/store/themes/pages`);
+                router.push(`/workspace/${currentWorkspace?.id}/store/studio/pages`);
             }
         }
      } catch (err: unknown) {

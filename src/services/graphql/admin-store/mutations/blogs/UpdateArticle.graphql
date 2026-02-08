@@ -1,0 +1,13 @@
+mutation UpdateArticle($id: ID!, $input: ArticleInput!) {
+  updateArticle(id: $id, input: $input) {
+    success
+    article {
+      id
+      title
+      handle
+      isPublished
+      statusDisplay
+    }
+    message
+  }
+}

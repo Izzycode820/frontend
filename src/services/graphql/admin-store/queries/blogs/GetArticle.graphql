@@ -1,0 +1,25 @@
+query GetArticle($id: ID, $handle: String) {
+  article(id: $id, handle: $handle) {
+    id
+    title
+    handle
+    image
+    author
+    summaryHtml
+    bodyHtml
+    tags
+    isPublished
+    publishedAt
+    templateSuffix
+    metaTitle
+    metaDescription
+    blog {
+      id
+      title
+      handle
+    }
+    url
+    createdAt
+    updatedAt
+  }
+}

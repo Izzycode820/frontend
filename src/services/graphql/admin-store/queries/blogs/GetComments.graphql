@@ -1,0 +1,26 @@
+query GetComments($articleId: ID, $status: String) {
+  comments(articleId: $articleId, status: $status) {
+    edges {
+      node {
+        id
+        content
+        nickname
+        email
+        phoneNumber
+        status
+        statusDisplay
+        guestSessionId
+        createdAt
+        article {
+          id
+          title
+          blog {
+            id
+            title
+          }
+        }
+      }
+    }
+    totalCount
+  }
+}

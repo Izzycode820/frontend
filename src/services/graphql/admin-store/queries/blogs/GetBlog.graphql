@@ -1,0 +1,10 @@
+query GetBlog($id: ID, $handle: String) {
+  blog(id: $id, handle: $handle) {
+    id
+    title
+    handle
+    commentPolicy
+    articleCount
+    url
+  }
+}

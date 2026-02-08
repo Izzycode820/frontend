@@ -14,6 +14,7 @@ import {
   IconDiscount,
   IconWorldWww,
   IconBell,
+  IconPencil,
 } from "@tabler/icons-react"
 import type {
   NavMainItem,
@@ -79,6 +80,22 @@ export function getStoreSidebarConfig(
       url: STORE_ROUTES.DISCOUNTS.LIST(workspaceId),
       icon: IconDiscount,
     },
+    {
+      title: "Studio",
+      url: STORE_ROUTES.STUDIO.BLOGS.LIST(workspaceId),
+      icon: IconPencil,
+      navigateToFirstChild: true,
+      items: [
+        {
+          title: "Blog posts",
+          url: STORE_ROUTES.STUDIO.BLOGS.LIST(workspaceId),
+        },
+        {
+          title: "Pages",
+          url: STORE_ROUTES.STUDIO.PAGES.LIST(workspaceId),
+        },
+      ],
+    },
   ]
 
   // Multiple sections (Shopify-style: Sales channels + Apps)
@@ -97,10 +114,6 @@ export function getStoreSidebarConfig(
               url: STORE_ROUTES.CHANNELS.THEMES(workspaceId),
             },
             {
-               title: "Pages",
-               url: STORE_ROUTES.CHANNELS.PAGES.LIST(workspaceId),
-            },
-            {
               title: "Navigation",
               url: STORE_ROUTES.CHANNELS.NAVIGATION.LIST(workspaceId),
             },
@@ -110,7 +123,6 @@ export function getStoreSidebarConfig(
             },
           ],
         },
-
       ],
     },
   ]

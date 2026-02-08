@@ -1,0 +1,12 @@
+mutation UpdateBlog($id: ID!, $input: BlogInput!) {
+  updateBlog(id: $id, input: $input) {
+    success
+    blog {
+      id
+      title
+      handle
+      commentPolicy
+    }
+    message
+  }
+}

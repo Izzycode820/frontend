@@ -1,0 +1,11 @@
+mutation ManageComment($id: ID!, $status: String!) {
+  manageComment(id: $id, status: $status) {
+    success
+    comment {
+      id
+      status
+      statusDisplay
+    }
+    message
+  }
+}

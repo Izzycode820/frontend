@@ -1,0 +1,13 @@
+mutation CreateArticle($input: ArticleInput!) {
+  createArticle(input: $input) {
+    success
+    article {
+      id
+      title
+      handle
+      isPublished
+      statusDisplay
+    }
+    message
+  }
+}

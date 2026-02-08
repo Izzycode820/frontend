@@ -1,0 +1,14 @@
+query GetBlogs {
+  blogs {
+    edges {
+      node {
+        id
+        title
+        handle
+        commentPolicy
+        articleCount
+      }
+    }
+    totalCount
+  }
+}

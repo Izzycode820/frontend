@@ -42,7 +42,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
     content: value,
     editorProps: {
       attributes: {
-        class: `prose prose-sm w-full max-w-none break-words break-all focus:outline-none ${minHeight} max-h-[60vh] overflow-y-auto overflow-x-hidden p-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5`,
+        class: `prose prose-sm w-full max-w-none break-words focus:outline-none ${minHeight} max-h-[60vh] overflow-y-auto overflow-x-hidden p-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_*]:overflow-wrap-anywhere`,
       },
     },
     onUpdate: ({ editor }) => {
@@ -69,7 +69,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
 
   return (
     <div className="space-y-2">
-      <div className="border rounded-lg overflow-hidden bg-background focus-within:ring-2 focus-within:ring-ring transition-all">
+      <div className="border rounded-lg overflow-x-hidden bg-background focus-within:ring-2 focus-within:ring-ring transition-all max-w-full">
         {/* Toolbar */}
         <div className="flex items-center gap-0.5 px-2 py-1.5 bg-muted/30 border-b overflow-x-auto">
           <Button
@@ -155,8 +155,11 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
           </Button>
         </div>
 
-        <div className="w-full max-w-full overflow-hidden">
-          <EditorContent editor={editor} className="w-full [&_.ProseMirror]:min-w-0 [&_.ProseMirror]:break-all [&_.ProseMirror]:whitespace-pre-wrap" />
+        <div className="w-full max-w-full overflow-x-hidden">
+          <EditorContent 
+            editor={editor} 
+            className="w-full max-w-full [&_.ProseMirror]:w-full [&_.ProseMirror]:max-w-full [&_.ProseMirror]:overflow-x-hidden [&_.ProseMirror]:overflow-wrap-anywhere [&_.ProseMirror]:whitespace-pre-wrap [&_.ProseMirror]:word-break-break-word" 
+          />
         </div>
       </div>
        {/* Helper text for placeholder if empty */}

@@ -123,6 +123,66 @@ export interface ArchiveOrder {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+export interface ArticleConnection {
+  __typename?: "ArticleConnection";
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<ArticleEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars["Int"]["output"]>;
+}
+
+/** A Relay edge containing a `Article` and its cursor. */
+export interface ArticleEdge {
+  __typename?: "ArticleEdge";
+  /** A cursor for use in pagination */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge */
+  node?: Maybe<ArticleType>;
+}
+
+export interface ArticleInput {
+  author?: InputMaybe<Scalars["String"]["input"]>;
+  blogId: Scalars["ID"]["input"];
+  bodyHtml?: InputMaybe<Scalars["String"]["input"]>;
+  image?: InputMaybe<Scalars["String"]["input"]>;
+  isPublished?: InputMaybe<Scalars["Boolean"]["input"]>;
+  metaDescription?: InputMaybe<Scalars["String"]["input"]>;
+  metaTitle?: InputMaybe<Scalars["String"]["input"]>;
+  publishedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  summaryHtml?: InputMaybe<Scalars["String"]["input"]>;
+  tags?: InputMaybe<Array<InputMaybe<Scalars["String"]["input"]>>>;
+  templateSuffix?: InputMaybe<Scalars["String"]["input"]>;
+  title: Scalars["String"]["input"];
+}
+
+/** Article type for individual posts */
+export interface ArticleType extends Node {
+  __typename?: "ArticleType";
+  author: Scalars["String"]["output"];
+  blog: BlogType;
+  /** Main article content */
+  bodyHtml: Scalars["String"]["output"];
+  commentCount?: Maybe<Scalars["Int"]["output"]>;
+  createdAt: Scalars["DateTime"]["output"];
+  handle: Scalars["String"]["output"];
+  id: Scalars["ID"]["output"];
+  image?: Maybe<Scalars["String"]["output"]>;
+  isPublished: Scalars["Boolean"]["output"];
+  metaDescription: Scalars["String"]["output"];
+  metaTitle: Scalars["String"]["output"];
+  publishedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  statusDisplay?: Maybe<Scalars["String"]["output"]>;
+  /** Excerpt for listing page */
+  summaryHtml: Scalars["String"]["output"];
+  tags: Scalars["JSONString"]["output"];
+  /** Custom template suffix (e.g., 'story' for article.story.liquid) */
+  templateSuffix: Scalars["String"]["output"];
+  title: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+  url?: Maybe<Scalars["String"]["output"]>;
+}
+
 /**
  * GraphQL type for available payment providers.
  * Used when adding new payment methods.
@@ -136,6 +196,42 @@ export interface AvailableProviderType {
   provider: Scalars["String"]["output"];
   /** Whether checkout URL is required */
   requiresUrl?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+export interface BlogConnection {
+  __typename?: "BlogConnection";
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<BlogEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars["Int"]["output"]>;
+}
+
+/** A Relay edge containing a `Blog` and its cursor. */
+export interface BlogEdge {
+  __typename?: "BlogEdge";
+  /** A cursor for use in pagination */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge */
+  node?: Maybe<BlogType>;
+}
+
+export interface BlogInput {
+  commentPolicy?: InputMaybe<Scalars["String"]["input"]>;
+  title: Scalars["String"]["input"];
+}
+
+/** Blog container type (e.g. 'News') */
+export interface BlogType extends Node {
+  __typename?: "BlogType";
+  articleCount?: Maybe<Scalars["Int"]["output"]>;
+  commentPolicy: WorkspaceStoreBlogCommentPolicyChoices;
+  createdAt: Scalars["DateTime"]["output"];
+  handle: Scalars["String"]["output"];
+  id: Scalars["ID"]["output"];
+  title: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+  url?: Maybe<Scalars["String"]["output"]>;
 }
 
 /**
@@ -642,6 +738,41 @@ export interface ClearImportProgress {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+export interface CommentConnection {
+  __typename?: "CommentConnection";
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<CommentEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars["Int"]["output"]>;
+}
+
+/** A Relay edge containing a `Comment` and its cursor. */
+export interface CommentEdge {
+  __typename?: "CommentEdge";
+  /** A cursor for use in pagination */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge */
+  node?: Maybe<CommentType>;
+}
+
+/** Comment type with moderation fields */
+export interface CommentType extends Node {
+  __typename?: "CommentType";
+  article: ArticleType;
+  articleTitle?: Maybe<Scalars["String"]["output"]>;
+  content: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
+  email?: Maybe<Scalars["String"]["output"]>;
+  guestSessionId?: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["ID"]["output"];
+  nickname: Scalars["String"]["output"];
+  phoneNumber?: Maybe<Scalars["String"]["output"]>;
+  status: WorkspaceStoreCommentStatusChoices;
+  statusDisplay?: Maybe<Scalars["String"]["output"]>;
+  updatedAt: Scalars["DateTime"]["output"];
+}
+
 /**
  * Conversion funnel data - PRO tier
  * Shows customer journey: Page View -> Cart -> Checkout -> Order
@@ -652,6 +783,20 @@ export interface ConversionFunnel {
   metrics?: Maybe<FunnelMetrics>;
   /** Funnel stages */
   stages: Array<Maybe<FunnelStage>>;
+}
+
+export interface CreateArticle {
+  __typename?: "CreateArticle";
+  article?: Maybe<ArticleType>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+export interface CreateBlog {
+  __typename?: "CreateBlog";
+  blog?: Maybe<BlogType>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
 /**
@@ -955,6 +1100,18 @@ export interface DashboardCard {
   trendDirection: Scalars["String"]["output"];
   /** Formatted display value */
   value: Scalars["String"]["output"];
+}
+
+export interface DeleteArticle {
+  __typename?: "DeleteArticle";
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+export interface DeleteBlog {
+  __typename?: "DeleteBlog";
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
 /**
@@ -1625,6 +1782,13 @@ export interface LowStockAlertType {
   variantName?: Maybe<Scalars["String"]["output"]>;
 }
 
+export interface ManageComment {
+  __typename?: "ManageComment";
+  comment?: Maybe<CommentType>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 /**
  * Mark order as paid (for COD and WhatsApp orders)
  *
@@ -1928,6 +2092,8 @@ export interface Mutation {
    * Use after: Import completed and user acknowledged results
    */
   clearImportProgress?: Maybe<ClearImportProgress>;
+  createArticle?: Maybe<CreateArticle>;
+  createBlog?: Maybe<CreateBlog>;
   /**
    * Create a cash on delivery order
    *
@@ -1991,6 +2157,8 @@ export interface Mutation {
    * Creates order and sends WhatsApp DM to admin
    */
   createWhatsappOrder?: Maybe<CreateWhatsAppOrder>;
+  deleteArticle?: Maybe<DeleteArticle>;
+  deleteBlog?: Maybe<DeleteBlog>;
   /**
    * Delete category with atomic transaction
    *
@@ -2091,6 +2259,7 @@ export interface Mutation {
    * Flow: Creates invite -> Sends email (async) -> User accepts -> Membership created
    */
   inviteStaff?: Maybe<InviteStaff>;
+  manageComment?: Maybe<ManageComment>;
   /**
    * Mark order as paid (for COD and WhatsApp orders)
    *
@@ -2211,6 +2380,8 @@ export interface Mutation {
    * Reliability: Validates order can be unarchived before update
    */
   unarchiveOrder?: Maybe<UnarchiveOrder>;
+  updateArticle?: Maybe<UpdateArticle>;
+  updateBlog?: Maybe<UpdateBlog>;
   /**
    * Update category with atomic transaction (Shopify-style)
    *
@@ -2542,6 +2713,26 @@ export interface MutationClearImportProgressArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationCreateArticleArgs {
+  input: ArticleInput;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationCreateBlogArgs {
+  input: BlogInput;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationCreateCashOnDeliveryOrderArgs {
   orderData: OrderCreateInput;
 }
@@ -2653,6 +2844,26 @@ export interface MutationCreateSalesChannelArgs {
  */
 export interface MutationCreateWhatsappOrderArgs {
   orderData: OrderCreateInput;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationDeleteArticleArgs {
+  id: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationDeleteBlogArgs {
+  id: Scalars["ID"]["input"];
 }
 
 /**
@@ -2787,6 +2998,17 @@ export interface MutationGetImportProgressArgs {
  */
 export interface MutationInviteStaffArgs {
   input: InviteStaffInput;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationManageCommentArgs {
+  id: Scalars["ID"]["input"];
+  status: Scalars["String"]["input"];
 }
 
 /**
@@ -3060,6 +3282,28 @@ export interface MutationUnarchiveOrderArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationUpdateArticleArgs {
+  id: Scalars["ID"]["input"];
+  input: ArticleInput;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationUpdateBlogArgs {
+  id: Scalars["ID"]["input"];
+  input: BlogInput;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationUpdateCategoryArgs {
   description?: InputMaybe<Scalars["String"]["input"]>;
   featuredMediaId?: InputMaybe<Scalars["String"]["input"]>;
@@ -3323,6 +3567,7 @@ export interface NavigationItemInput {
  */
 export interface NavigationItemType extends Node {
   __typename?: "NavigationItemType";
+  blog?: Maybe<BlogType>;
   /** Nested submenu items */
   children?: Maybe<Array<Maybe<NavigationItemType>>>;
   collection?: Maybe<CategoryType>;
@@ -4043,12 +4288,16 @@ export interface Query {
   activeDiscounts?: Maybe<Array<Maybe<DiscountType>>>;
   /** Get active packages (for product dropdown) */
   activePackages?: Maybe<Array<Maybe<PackageType>>>;
+  article?: Maybe<ArticleType>;
+  articles?: Maybe<ArticleConnection>;
   /** List all available permissions in the system */
   availablePermissions?: Maybe<Array<Maybe<PermissionType>>>;
   /** List payment providers available to add */
   availableProviders?: Maybe<Array<Maybe<AvailableProviderType>>>;
   /** List of hardcoded system routes (Home, Search, etc.) */
   availableSystemRoutes?: Maybe<Array<Maybe<SystemRouteType>>>;
+  blog?: Maybe<BlogType>;
+  blogs?: Maybe<BlogConnection>;
   /** Get bulk operation by ID */
   bulkOperation?: Maybe<BulkOperationType>;
   /** Get paginated list of bulk operations */
@@ -4069,6 +4318,7 @@ export interface Query {
   channelProduct?: Maybe<ChannelProductType>;
   /** List channel products with pagination and filtering */
   channelProducts?: Maybe<ChannelProductTypeConnection>;
+  comments?: Maybe<CommentConnection>;
   /** Get single customer by ID */
   customer?: Maybe<CustomerType>;
   /** Get customer by phone number */
@@ -4172,6 +4422,60 @@ export interface Query {
  */
 export interface QueryActiveDiscountsArgs {
   limit?: InputMaybe<Scalars["Int"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryArticleArgs {
+  blogHandle?: InputMaybe<Scalars["String"]["input"]>;
+  handle?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["ID"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryArticlesArgs {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  blogHandle?: InputMaybe<Scalars["String"]["input"]>;
+  blogId?: InputMaybe<Scalars["ID"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  status?: InputMaybe<Scalars["String"]["input"]>;
+  tag?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryBlogArgs {
+  handle?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["ID"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryBlogsArgs {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
 }
 
 /**
@@ -4301,6 +4605,21 @@ export interface QueryChannelProductsArgs {
   last?: InputMaybe<Scalars["Int"]["input"]>;
   offset?: InputMaybe<Scalars["Int"]["input"]>;
   productId?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryCommentsArgs {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  articleId?: InputMaybe<Scalars["ID"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  status?: InputMaybe<Scalars["String"]["input"]>;
 }
 
 /**
@@ -5304,6 +5623,20 @@ export interface UnarchiveOrder {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+export interface UpdateArticle {
+  __typename?: "UpdateArticle";
+  article?: Maybe<ArticleType>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+export interface UpdateBlog {
+  __typename?: "UpdateBlog";
+  blog?: Maybe<BlogType>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 /**
  * Update category with atomic transaction (Shopify-style)
  *
@@ -5815,6 +6148,16 @@ export interface WorkspaceMemberTypeEdge {
 }
 
 /** An enumeration. */
+export enum WorkspaceStoreBlogCommentPolicyChoices {
+  /** Auto-publish */
+  Auto = "AUTO",
+  /** Moderated */
+  Moderate = "MODERATE",
+  /** Disabled */
+  No = "NO",
+}
+
+/** An enumeration. */
 export enum WorkspaceStoreBulkOperationOperationTypeChoices {
   /** Bulk Delete Products */
   BulkDelete = "BULK_DELETE",
@@ -5836,6 +6179,14 @@ export enum WorkspaceStoreBulkOperationStatusChoices {
   Processing = "PROCESSING",
   /** Success */
   Success = "SUCCESS",
+}
+
+/** An enumeration. */
+export enum WorkspaceStoreCommentStatusChoices {
+  /** Approved */
+  Approved = "APPROVED",
+  /** Pending */
+  Pending = "PENDING",
 }
 
 /** An enumeration. */

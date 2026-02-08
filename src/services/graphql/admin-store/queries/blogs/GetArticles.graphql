@@ -1,0 +1,33 @@
+query GetArticles(
+  $blogId: ID
+  $blogHandle: String
+  $tag: String
+  $status: String
+) {
+  articles(
+    blogId: $blogId
+    blogHandle: $blogHandle
+    tag: $tag
+    status: $status
+  ) {
+    edges {
+      node {
+        id
+        title
+        handle
+        isPublished
+        statusDisplay
+        author
+        blog {
+          id
+          title
+          handle
+        }
+        publishedAt
+        createdAt
+        url
+      }
+    }
+    totalCount
+  }
+}

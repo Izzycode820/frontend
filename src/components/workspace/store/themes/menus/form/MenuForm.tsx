@@ -134,10 +134,10 @@ export default function MenuForm({ menuId }: MenuFormProps) {
             }
          }
 
-         // Handle Items
+         // Handle Items - Execute all mutations in parallel for faster saves
          if (navId) {
-             for (const item of items) {
-                 const itemInput: any = { // Use any to bypass strict type check if generating types lag behind
+             const itemPromises = items.map((item, index) => {
+                 const itemInput: any = {
                      title: item.title,
                      type: item.type,
                      value: item.value,
@@ -146,26 +146,29 @@ export default function MenuForm({ menuId }: MenuFormProps) {
                  
                  // Add Robust Linking IDs
                  if (item.pageId) itemInput.pageId = item.pageId;
-                 if (item.collectionId) itemInput.collectionId = item.collectionId; // Ensure mapping matches backend (collection vs category_id?)
+                 if (item.collectionId) itemInput.collectionId = item.collectionId;
                  
-                 if (item.id && !item.id.startsWith('temp')) { // Check if real ID
-                     // Update
-                     await updateMenuItem({ 
+                 if (item.id && !item.id.startsWith('temp')) {
+                     // Update existing item
+                     return updateMenuItem({ 
                         variables: { 
                              id: item.id, 
                              input: itemInput
                         } 
                      });
                  } else {
-                     // Create
-                     await createMenuItem({ 
+                     // Create new item
+                     return createMenuItem({ 
                         variables: { 
                              navigationId: navId, 
                              input: itemInput 
                         } 
                      });
                  }
-             }
+             });
+             
+             // Execute all mutations in parallel
+             await Promise.all(itemPromises);
          }
 
          toast.success(isEditing ? 'Menu updated' : 'Menu created');

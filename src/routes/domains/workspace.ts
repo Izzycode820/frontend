@@ -72,6 +72,29 @@ export const STORE_ROUTES = {
     NEW: (workspaceId: string) => `/workspace/${workspaceId}/store/discounts/new`,
   },
 
+  // Studio (Content creation: Pages, Blogs, Media)
+  STUDIO: {
+    PAGES: {
+      LIST: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/pages`,
+      NEW: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/pages/new`,
+      EDIT: (workspaceId: string, pageId: string) => `/workspace/${workspaceId}/store/studio/pages/${pageId}`,
+    },
+    BLOGS: {
+      // Article/Post listing (main view)
+      LIST: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/blogs`,
+      NEW: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/blogs/new`,
+      EDIT: (workspaceId: string, articleId: string) => `/workspace/${workspaceId}/store/studio/blogs/${articleId}`,
+      
+      // Blog container management (create "News", "Updates", etc.)
+      MANAGE: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/blogs/manage`,
+      
+      // Comments management
+      COMMENTS: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/blogs/comments`,
+      COMMENTS_ARTICLE: (workspaceId: string, articleId: string) => 
+        `/workspace/${workspaceId}/store/studio/blogs/${articleId}/comments`,
+    },
+  },
+
   // Sales Channels (Shopify-exact: Online Store, Shop, Point of Sale)
   CHANNELS: {
     ONLINE_STORE: (workspaceId: string) => `/workspace/${workspaceId}/store/themes`,
