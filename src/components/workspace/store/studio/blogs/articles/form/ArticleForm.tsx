@@ -10,10 +10,17 @@ import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/shadcn-ui/radio-group';
-import { ArrowLeft, Loader2, Upload } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn-ui/popover';
+import { Calendar } from '@/components/shadcn-ui/calendar';
+import { ArrowLeft, Loader2, CalendarIcon, X } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 import { RichTextEditor } from '@/components/workspace/store/shared/RichTextEditor';
-import { ArticleSEOSection } from './ArticleSEOSection';
+import { FilesAndMediaModal } from '@/components/workspace/store/shared/files-and-media';
+import type { MediaItem, MediaSelection } from '@/components/workspace/store/shared/files-and-media';
+import { ArticleSEOSection } from './seo/ArticleSEOSection';
 import { CreateArticleDocument } from '@/services/graphql/admin-store/mutations/blogs/__generated__/CreateArticle.generated';
 import { UpdateArticleDocument } from '@/services/graphql/admin-store/mutations/blogs/__generated__/UpdateArticle.generated';
 import { GetArticleDocument } from '@/services/graphql/admin-store/queries/blogs/__generated__/GetArticle.generated';
@@ -37,17 +44,25 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
   const [author, setAuthor] = useState('');
   const [blogId, setBlogId] = useState('');
   const [tags, setTags] = useState('');
+  const [visibilityMode, setVisibilityMode] = useState<'visible' | 'hidden' | 'scheduled'>('visible');
   const [isPublished, setIsPublished] = useState(false);
+  const [publishedAt, setPublishedAt] = useState<Date | undefined>(undefined);
   const [image, setImage] = useState('');
+  const [mediaItem, setMediaItem] = useState<MediaItem | undefined>(undefined);
+  const [showMediaModal, setShowMediaModal] = useState(false);
   const [templateSuffix, setTemplateSuffix] = useState('');
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
 
   const [createArticle, { loading: isCreating }] = useMutation(CreateArticleDocument, {
     refetchQueries: [{ query: GetArticlesDocument, variables: {} }],
+    awaitRefetchQueries: true, // Wait for cache update before navigation
   });
 
-  const [updateArticle, { loading: isUpdating }] = useMutation(UpdateArticleDocument);
+  const [updateArticle, { loading: isUpdating }] = useMutation(UpdateArticleDocument, {
+    refetchQueries: [{ query: GetArticlesDocument, variables: {} }],
+    awaitRefetchQueries: true, // Wait for cache update before navigation
+  });
 
   const { data: articleData, loading: isLoadingData } = useQuery(GetArticleDocument, {
     variables: { id: articleId || '' },
@@ -70,6 +85,20 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
       setBlogId(article.blog?.id || '');
       setTags(article.tags ? JSON.stringify(article.tags) : '');
       setIsPublished(article.isPublished || false);
+      
+      // Set visibility mode based on publishedAt
+      if (article.publishedAt) {
+        const pubDate = new Date(article.publishedAt);
+        if (pubDate > new Date()) {
+          setVisibilityMode('scheduled');
+          setPublishedAt(pubDate);
+        } else {
+          setVisibilityMode(article.isPublished ? 'visible' : 'hidden');
+        }
+      } else {
+        setVisibilityMode(article.isPublished ? 'visible' : 'hidden');
+      }
+      
       setImage(article.image || '');
       setTemplateSuffix(article.templateSuffix || '');
       setMetaTitle(article.metaTitle || '');
@@ -99,16 +128,36 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
       return;
     }
 
+    // Handle visibility and publishing logic
+    let finalIsPublished = false;
+    let finalPublishedAt: string | null = null;
+
+    if (visibilityMode === 'visible') {
+      finalIsPublished = true;
+      finalPublishedAt = new Date().toISOString();
+    } else if (visibilityMode === 'scheduled') {
+      if (!publishedAt) {
+        toast.error('Please select a publish date');
+        return;
+      }
+      finalIsPublished = false; // Will be published at scheduled time
+      finalPublishedAt = publishedAt.toISOString();
+    } else {
+      // hidden
+      finalIsPublished = false;
+      finalPublishedAt = null;
+    }
+
     const input: any = {
       title,
-      handle,
       bodyHtml,
       summaryHtml,
       author,
       blogId,
       tags,
-      isPublished,
-      image,
+      isPublished: finalIsPublished,
+      publishedAt: finalPublishedAt,
+      image: mediaItem?.url || image,
       templateSuffix,
       metaTitle,
       metaDescription,
@@ -126,6 +175,19 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
     } catch (err: any) {
       toast.error('Failed to save article: ' + err.message);
     }
+  };
+
+  const handleMediaSelect = (selection: MediaSelection) => {
+    const selectedItem = selection.newUploads[0] || selection.existingUploads[0];
+    if (selectedItem) {
+      setMediaItem(selectedItem);
+    }
+    setShowMediaModal(false);
+  };
+
+  const handleImageRemove = () => {
+    setMediaItem(undefined);
+    setImage('');
   };
 
   if (isLoadingData) {
@@ -192,6 +254,8 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
           </Card>
 
           <ArticleSEOSection
+            articleTitle={title}
+            articleContent={bodyHtml || summaryHtml}
             metaTitle={metaTitle}
             metaDescription={metaDescription}
             handle={handle}
@@ -207,8 +271,8 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
             <CardHeader>
               <CardTitle>Visibility</CardTitle>
             </CardHeader>
-            <CardContent>
-              <RadioGroup value={isPublished ? 'visible' : 'hidden'} onValueChange={(val) => setIsPublished(val === 'visible')}>
+            <CardContent className="space-y-4">
+              <RadioGroup value={visibilityMode} onValueChange={(val: any) => setVisibilityMode(val)}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="visible" id="visible" />
                   <Label htmlFor="visible" className="font-normal cursor-pointer">
@@ -221,7 +285,41 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
                     Hidden
                   </Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="scheduled" id="scheduled" />
+                  <Label htmlFor="scheduled" className="font-normal cursor-pointer">
+                    Scheduled
+                  </Label>
+                </div>
               </RadioGroup>
+
+              {visibilityMode === 'scheduled' && (
+                <div className="pt-2">
+                  <Label className="text-sm mb-2">Publish date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !publishedAt && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {publishedAt ? format(publishedAt, 'PPP p') : 'Pick a date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={publishedAt}
+                        onSelect={setPublishedAt}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -230,11 +328,34 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
               <CardTitle>Featured image</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <Button variant="outline" size="sm">Add image</Button>
-                <p className="text-xs text-muted-foreground mt-2">or drop an image to upload</p>
-              </div>
+              {mediaItem || image ? (
+                <div className="relative group">
+                  <img
+                    src={mediaItem?.thumbnailUrl || mediaItem?.url || image}
+                    alt="Article image"
+                    className="w-full aspect-square rounded-md object-cover border"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleImageRemove}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-md p-12 text-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowMediaModal(true)}
+                    className="mb-2"
+                  >
+                    Add image
+                  </Button>
+                  <p className="text-xs text-muted-foreground">or drop an image to upload</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -254,18 +375,18 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
 
               <div className="grid gap-2">
                 <Label>Blog</Label>
-                <select
-                  className="h-10 w-full px-3 rounded-md border border-input bg-background text-sm"
-                  value={blogId}
-                  onChange={(e) => setBlogId(e.target.value)}
-                >
-                  <option value="">Select a blog</option>
-                  {blogs.map((blog: any) => (
-                    <option key={blog.id} value={blog.id}>
-                      {blog.title}
-                    </option>
-                  ))}
-                </select>
+                <Select value={blogId} onValueChange={setBlogId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a blog" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {blogs.map((blog: any) => (
+                      <SelectItem key={blog.id} value={blog.id}>
+                        {blog.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid gap-2">
@@ -287,17 +408,33 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
               <CardTitle>Theme template</CardTitle>
             </CardHeader>
             <CardContent>
-              <select
-                className="h-10 w-full px-3 rounded-md border border-input bg-background text-sm"
-                value={templateSuffix}
-                onChange={(e) => setTemplateSuffix(e.target.value)}
-              >
-                <option value="">Default blog post</option>
-              </select>
+              <Select value={templateSuffix} onValueChange={setTemplateSuffix}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Default template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default</SelectItem>
+                  {/* <SelectItem value="alternate">Alternate</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="editorial">Editorial</SelectItem> */}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-2">
+                Assign a template from your current theme to define how the article is displayed
+              </p>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Media Modal */}
+      <FilesAndMediaModal
+        open={showMediaModal}
+        onClose={() => setShowMediaModal(false)}
+        onSelect={handleMediaSelect}
+        allowedTypes={['image']}
+        maxSelection={1}
+      />
     </div>
   );
 }

@@ -87,6 +87,7 @@ export const STORE_ROUTES = {
       
       // Blog container management (create "News", "Updates", etc.)
       MANAGE: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/blogs/manage`,
+      MANAGE_FORM: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/blogs/manage/form`,
       
       // Comments management
       COMMENTS: (workspaceId: string) => `/workspace/${workspaceId}/store/studio/blogs/comments`,

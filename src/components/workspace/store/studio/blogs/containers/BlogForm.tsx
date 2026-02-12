@@ -26,13 +26,17 @@ export default function BlogForm() {
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
 
   const [title, setTitle] = useState('');
-  const [commentPolicy, setCommentPolicy] = useState<string>('MODERATED');
+  const [commentPolicy, setCommentPolicy] = useState<string>('moderate'); // Backend expects: 'no', 'moderate', 'auto'
 
   const [createBlog, { loading: isCreating }] = useMutation(CreateBlogDocument, {
     refetchQueries: [{ query: GetBlogsDocument }],
+    awaitRefetchQueries: true, // Wait for cache update before navigation
   });
 
-  const [updateBlog, { loading: isUpdating }] = useMutation(UpdateBlogDocument);
+  const [updateBlog, { loading: isUpdating }] = useMutation(UpdateBlogDocument, {
+    refetchQueries: [{ query: GetBlogsDocument }],
+    awaitRefetchQueries: true, // Wait for cache update before navigation
+  });
 
   const { data: blogData, loading: isLoadingData } = useQuery(GetBlogDocument, {
     variables: { id: blogId || '' },
@@ -43,7 +47,7 @@ export default function BlogForm() {
   useEffect(() => {
     if (blogData?.blog) {
       setTitle(blogData.blog.title || '');
-      setCommentPolicy(blogData.blog.commentPolicy || 'MODERATED');
+      setCommentPolicy(blogData.blog.commentPolicy || 'moderate');
     }
   }, [blogData]);
 
@@ -60,13 +64,22 @@ export default function BlogForm() {
 
     try {
       if (isEditing) {
-        await updateBlog({ variables: { id: blogId, input } });
-        toast.success('Blog updated');
+        const result = await updateBlog({ variables: { id: blogId, input } });
+        if (result.data?.updateBlog?.success) {
+          toast.success('Blog updated');
+          router.back();
+        } else {
+          toast.error(result.data?.updateBlog?.message || 'Failed to update blog');
+        }
       } else {
-        await createBlog({ variables: { input } });
-        toast.success('Blog created');
+        const result = await createBlog({ variables: { input } });
+        if (result.data?.createBlog?.success) {
+          toast.success('Blog created');
+          router.back();
+        } else {
+          toast.error(result.data?.createBlog?.message || 'Failed to create blog');
+        }
       }
-      router.back();
     } catch (err: any) {
       toast.error('Failed to save blog: ' + err.message);
     }
@@ -109,7 +122,7 @@ export default function BlogForm() {
             <Label>Comment policy</Label>
             <RadioGroup value={commentPolicy} onValueChange={(value: any) => setCommentPolicy(value)}>
               <div className="flex items-start space-x-2">
-                <RadioGroupItem value="ENABLED" id="enabled" className="mt-0.5" />
+                <RadioGroupItem value="auto" id="enabled" className="mt-0.5" />
                 <div className="grid gap-1.5 leading-none">
                   <label htmlFor="enabled" className="text-sm font-medium cursor-pointer">
                     Allow comments
@@ -120,7 +133,7 @@ export default function BlogForm() {
                 </div>
               </div>
               <div className="flex items-start space-x-2">
-                <RadioGroupItem value="MODERATED" id="moderated" className="mt-0.5" />
+                <RadioGroupItem value="moderate" id="moderated" className="mt-0.5" />
                 <div className="grid gap-1.5 leading-none">
                   <label htmlFor="moderated" className="text-sm font-medium cursor-pointer">
                     Moderate comments
@@ -131,7 +144,7 @@ export default function BlogForm() {
                 </div>
               </div>
               <div className="flex items-start space-x-2">
-                <RadioGroupItem value="DISABLED" id="disabled" className="mt-0.5" />
+                <RadioGroupItem value="no" id="disabled" className="mt-0.5" />
                 <div className="grid gap-1.5 leading-none">
                   <label htmlFor="disabled" className="text-sm font-medium cursor-pointer">
                     Disable comments

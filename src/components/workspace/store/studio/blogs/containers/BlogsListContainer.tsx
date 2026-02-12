@@ -27,7 +27,7 @@ export default function BlogsListContainer() {
   });
 
   const handleAddBlog = () => {
-    router.push(STORE_ROUTES.STUDIO.BLOGS.MANAGE(currentWorkspace?.id || ''));
+    router.push(STORE_ROUTES.STUDIO.BLOGS.MANAGE_FORM(currentWorkspace?.id || ''));
   };
 
   const handleEditBlog = (blogId: string) => {
@@ -68,9 +68,17 @@ export default function BlogsListContainer() {
             Organize your blog posts into different blogs (e.g., News, Updates)
           </p>
         </div>
-        <Button onClick={handleAddBlog}>
-          <Plus className="mr-2 h-4 w-4" /> Add blog
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => router.push(STORE_ROUTES.STUDIO.BLOGS.LIST(currentWorkspace?.id || ''))}
+          >
+            View all posts
+          </Button>
+          <Button onClick={handleAddBlog}>
+            <Plus className="mr-2 h-4 w-4" /> Add blog
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 max-w-sm">
