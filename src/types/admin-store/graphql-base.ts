@@ -4450,6 +4450,7 @@ export interface QueryArticlesArgs {
   first?: InputMaybe<Scalars["Int"]["input"]>;
   last?: InputMaybe<Scalars["Int"]["input"]>;
   limit?: InputMaybe<Scalars["Int"]["input"]>;
+  search?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<Scalars["String"]["input"]>;
   tag?: InputMaybe<Scalars["String"]["input"]>;
 }

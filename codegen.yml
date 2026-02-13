@@ -30,8 +30,8 @@ schema:
 documents:
   # Incremental development - change domain as needed
   # - "src/services/graphql/admin-store/queries/discounts/*.graphql"
-  - "src/services/graphql/admin-store/mutations/blogs/*.graphql"
-  - "src/services/graphql/admin-store/queries/blogs/*.graphql"
+  # - "src/services/graphql/admin-store/mutations/blogs/*.graphql"
+  - "src/services/graphql/admin-store/queries/blogs/GetArticles.graphql"
   # - "src/services/graphql/admin-store/mutations/pages/*.graphql"
   # - "src/services/graphql/admin-store/queries/navigation/*.graphql"
   # - "src/services/graphql/admin-store/queries/pages/*.graphql"

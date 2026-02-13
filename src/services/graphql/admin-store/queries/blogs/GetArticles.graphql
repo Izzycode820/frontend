@@ -3,12 +3,16 @@ query GetArticles(
   $blogHandle: String
   $tag: String
   $status: String
+  $search: String
+  $limit: Int
 ) {
   articles(
     blogId: $blogId
     blogHandle: $blogHandle
     tag: $tag
     status: $status
+    search: $search
+    limit: $limit
   ) {
     edges {
       node {
