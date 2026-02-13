@@ -50,21 +50,21 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
   const [search, setSearch] = useState('');
 
   // Queries (fetched on demand / when view is active ideally, but hook rules apply) 
-  const { data: categoriesData } = useQuery(CategoriesDocument, {
+  const { data: categoriesData, loading: categoriesLoading } = useQuery(CategoriesDocument, {
      variables: { first: 50 }, // Use pagination or search if needed
      skip: view !== 'COLLECTIONS' && !open 
   });
 
-  const { data: pagesData } = useQuery(GetPagesDocument, {
+  const { data: pagesData, loading: pagesLoading } = useQuery(GetPagesDocument, {
      variables: { workspaceId }, 
      skip: view !== 'PAGES' && !open || !workspaceId
   });
 
-  const { data: blogsData } = useQuery(GetBlogsDocument, {
+  const { data: blogsData, loading: blogsLoading } = useQuery(GetBlogsDocument, {
      skip: view !== 'BLOGS' && !open // Fetches only when needed
   });
 
-  const { data: articlesData } = useQuery(GetArticlesDocument, {
+  const { data: articlesData, loading: articlesLoading } = useQuery(GetArticlesDocument, {
      variables: { 
          limit: 20, // Reasonable initial load
          search: view === 'ARTICLES' ? search : undefined // Pass search term only when in Article view
@@ -117,11 +117,6 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
   const handleSelectCollection = (collection: any) => {
       onChange({
           title: collection.name,
-          // Use ID for value if robust, or Slug if preferred for display
-          // User said: "we benefit from images and slug at once... use only the fields we need"
-          // We send ID to backend for FK, but Value might need to be slug for frontend routing?
-          // Actually, if we send ID, backend can resolve slug.
-          // Let's store slug in value for immediate UI feedback, but ID is the key.
           value: collection.slug, 
           type: 'COLLECTION',
           id: collection.id
@@ -213,7 +208,10 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
                   <span className="text-sm font-medium">Back to Link types</span>
               </div>
               <CommandGroup heading="Collections">
-                  {collections.length === 0 && <CommandEmpty>No collections found.</CommandEmpty>}
+                  {categoriesLoading && (
+                      <CommandItem disabled>Loading collections...</CommandItem>
+                  )}
+                  {!categoriesLoading && collections.length === 0 && <CommandEmpty>No collections found.</CommandEmpty>}
                   {collections.map((c: any) => (
                       <CommandItem key={c.id} onSelect={() => handleSelectCollection(c)}>
                           {c.name}
@@ -238,7 +236,10 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
                   <span className="text-sm font-medium">Back to Link types</span>
               </div>
               <CommandGroup heading="Pages">
-                  {pages.length === 0 && <CommandEmpty>No pages found.</CommandEmpty>}
+                  {pagesLoading && (
+                      <CommandItem disabled>Loading pages...</CommandItem>
+                  )}
+                  {!pagesLoading && pages.length === 0 && <CommandEmpty>No pages found.</CommandEmpty>}
                   {pages.map((p: any) => (
                       <CommandItem key={p.id} onSelect={() => handleSelectPage(p)}>
                           {p.title}
@@ -260,7 +261,10 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
                   <span className="text-sm font-medium">Back to Link types</span>
               </div>
               <CommandGroup heading="Blogs">
-                  {blogs.length === 0 && <CommandEmpty>No blogs found.</CommandEmpty>}
+                  {blogsLoading && (
+                      <CommandItem disabled>Loading blogs...</CommandItem>
+                  )}
+                  {!blogsLoading && blogs.length === 0 && <CommandEmpty>No blogs found.</CommandEmpty>}
                   {blogs.map((b: any) => (
                       <CommandItem key={b.id} onSelect={() => handleSelectBlog(b)}>
                           {b.title}
@@ -282,7 +286,10 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
                   <span className="text-sm font-medium">Back to Link types</span>
               </div>
               <CommandGroup heading="Blog Posts">
-                  {articles.length === 0 && <CommandEmpty>No articles found.</CommandEmpty>}
+                  {articlesLoading && (
+                      <CommandItem disabled>Loading articles...</CommandItem>
+                  )}
+                  {!articlesLoading && articles.length === 0 && <CommandEmpty>No articles found.</CommandEmpty>}
                   {articles.map((a: any) => (
                       <CommandItem key={a.id} onSelect={() => handleSelectArticle(a)}>
                           <span className="flex-1 truncate">{a.title}</span>
