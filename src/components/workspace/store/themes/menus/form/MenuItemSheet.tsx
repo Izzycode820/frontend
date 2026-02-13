@@ -20,6 +20,8 @@ export interface MenuItemData {
   type: LinkType;
   value: string;
   pageId?: string;       // For backend FK
+  blogId?: string;       // For backend FK
+  articleId?: string;    // For backend FK
   collectionId?: string; // For backend FK
   url?: string;          // Derived or explicit
 }
@@ -71,6 +73,12 @@ export function MenuItemSheet({ open, onOpenChange, initialItem, onSave, workspa
       if (result.type === 'COLLECTION' && result.id) {
           newItem.collectionId = result.id;
       }
+      if (result.type === 'BLOG' && result.id) {
+          newItem.blogId = result.id;
+      }
+      if (result.type === 'ARTICLE' && result.id) {
+          newItem.articleId = result.id;
+      }
 
       setCurrentItem(newItem);
 
@@ -89,6 +97,8 @@ export function MenuItemSheet({ open, onOpenChange, initialItem, onSave, workspa
           type: currentItem.type || 'HTTP',
           value: currentItem.value || '',
           pageId: currentItem.pageId,
+          blogId: currentItem.blogId,
+          articleId: currentItem.articleId,
           collectionId: currentItem.collectionId
       });
       onOpenChange(false);
