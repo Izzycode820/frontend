@@ -192,7 +192,6 @@ export function VariantsTable({
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Variant</TableHead>
                 <TableHead className="w-[120px]">Price (FCFA)</TableHead>
-                <TableHead className="w-[100px]">On Hand</TableHead>
                 <TableHead className="w-[100px]">Available</TableHead>
               </TableRow>
             </TableHeader>
@@ -311,7 +310,7 @@ export function VariantsTable({
                         )}
                       </TableCell>
 
-                      {/* On Hand (Editable for leaf) */}
+                      {/* Available (Editable for leaf) */}
                       <TableCell>
                         {isLeaf ? (
                           <Input
@@ -322,26 +321,6 @@ export function VariantsTable({
                               handleVariantUpdate({
                                 ...variant,
                                 inventoryQuantity: parseInt(e.target.value) || 0
-                              })
-                            }
-                            className="w-full"
-                          />
-                        ) : (
-                          <span className="text-muted-foreground text-sm">-</span>
-                        )}
-                      </TableCell>
-
-                      {/* Available (Editable for leaf) */}
-                      <TableCell>
-                        {isLeaf ? (
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            value={variant.available || ""}
-                            onChange={(e) =>
-                              handleVariantUpdate({
-                                ...variant,
-                                available: parseInt(e.target.value) || 0
                               })
                             }
                             className="w-full"

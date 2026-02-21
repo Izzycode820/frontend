@@ -51,7 +51,6 @@ import type { MediaItem } from '@/components/workspace/store/shared/files-and-me
 export interface VariantFormState extends Omit<VariantInput, 'inventory' | 'images' | 'featuredMediaId'> {
   // Local UI-only fields
   inventoryQuantity?: number;
-  available?: number;
   mediaItem?: MediaItem;  // UI-only: manages variant image
   featuredMediaId?: string;  // Backend: upload ID for variant image
   sku?: string;  // SKU for inventory tracking

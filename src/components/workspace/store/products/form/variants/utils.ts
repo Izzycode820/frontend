@@ -435,7 +435,6 @@ export function mergeVariantsWithNewStructure(
       costPrice: existingVariant.costPrice,
       compareAtPrice: existingVariant.compareAtPrice,
       inventoryQuantity: existingVariant.inventoryQuantity,
-      available: existingVariant.available,
       sku: existingVariant.sku,
       barcode: existingVariant.barcode,
       mediaItem: existingVariant.mediaItem,

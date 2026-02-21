@@ -113,16 +113,6 @@ export function VariantEditModal({
                   placeholder="123456789"
                 />
               </div>
-
-              <div>
-                <Label htmlFor="inventoryQuantity">Quantity</Label>
-                <Input
-                  id="inventoryQuantity"
-                  type="number"
-                  value={formData.inventoryQuantity || 0}
-                  onChange={(e) => setFormData({ ...formData, inventoryQuantity: parseInt(e.target.value) || 0 })}
-                />
-              </div>
             </div>
           </div>
 
