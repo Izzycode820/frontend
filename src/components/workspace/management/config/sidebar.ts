@@ -5,10 +5,6 @@
 
 import {
   IconHome,
-  IconUsers,
-  IconSettings,
-  IconReport,
-  IconPlus,
 } from "@tabler/icons-react"
 import type {
   NavMainItem,
@@ -30,31 +26,10 @@ export function getManagementSidebarConfig(user: UserConfig): WorkspaceSidebarCo
       url: "/workspace",
       icon: IconHome,
     },
-    {
-      title: "Create New",
-      url: "/workspace/create",
-      icon: IconPlus,
-    },
-    {
-      title: "Teams",
-      url: "/teams",
-      icon: IconUsers,
-    },
-    {
-      title: "Reports",
-      url: "/reports",
-      icon: IconReport,
-    },
   ]
 
   // Secondary navigation (bottom)
-  const navSecondary: NavSecondaryItem[] = [
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: IconSettings,
-    },
-  ]
+  const navSecondary: NavSecondaryItem[] = []
 
   // Workspace configuration
   const workspaceConfig: WorkspaceConfig = {

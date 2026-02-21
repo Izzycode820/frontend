@@ -203,49 +203,53 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
       `}
       onClick={isClickable ? onClick : undefined}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${typeConfig.bgColor}`}>
-              <IconComponent className={`h-5 w-5 ${typeConfig.color}`} />
+      {/* ============== MOBILE: Compact list row ============== */}
+      <div className="md:hidden">
+        <CardContent className="flex items-center gap-3 p-3">
+          {/* Type icon */}
+          <div className={`p-2 rounded-lg shrink-0 ${typeConfig.bgColor}`}>
+            <IconComponent className={`h-4 w-4 ${typeConfig.color}`} />
+          </div>
+
+          {/* Name + badges */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm truncate">{workspace.name}</h3>
+              <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${isDeleted ? 'bg-red-500' : 'bg-green-500'}`} />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg font-semibold truncate">
-                  {workspace.name}
-                </CardTitle>
-                {/* Status Indicator Dot */}
-                <div className={`h-2 w-2 rounded-full ${isDeleted ? 'bg-red-500' : 'bg-green-500'}`} />
-              </div>
-              <CardDescription className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-xs">
-                  {typeConfig.label}
-                </Badge>
-                {/* Role badge - staff-aware */}
-                <Badge
-                  variant={isOwner ? 'default' : 'secondary'}
-                  className="text-xs"
-                >
-                  {isOwner ? 'Owner' : 'Staff'}
-                </Badge>
-                {/* Status badge with custom class for suspended_by_plan */}
-                <Badge
-                  variant={status.variant}
-                  className={`text-xs ${'className' in status ? status.className : ''}`}
-                >
-                  {status.label}
-                </Badge>
-              </CardDescription>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                {typeConfig.label}
+              </Badge>
+              <Badge
+                variant={isOwner ? 'default' : 'secondary'}
+                className="text-[10px] px-1.5 py-0"
+              >
+                {isOwner ? 'Owner' : 'Staff'}
+              </Badge>
             </div>
           </div>
 
-          {/* Three Dot Menu */}
+          {/* Deletion countdown (mobile) */}
+          {isDeleted && timeRemaining && (
+            <div className="flex items-center gap-1 text-destructive shrink-0">
+              <IconClock className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-medium">{timeRemaining.days}d</span>
+            </div>
+          )}
+
+          {/* Restricted indicator (mobile) */}
+          {isRestricted && !isDeleted && !isSuspendedByPlan && (
+            <IconLock className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+          )}
+
+          {/* Dropdown menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-8 w-8 shrink-0"
                 disabled={isActionLoading}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -261,7 +265,6 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
                   </DropdownMenuItem>
                 )
               ) : (
-                /* SECURITY: Only owners can delete workspaces */
                 isOwner && (
                   <DropdownMenuItem
                     onClick={handleDelete}
@@ -275,85 +278,159 @@ export function WorkspaceCard({ workspace, onClick, className }: WorkspaceCardPr
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-      </CardHeader>
+        </CardContent>
+      </div>
 
-      <CardContent className="pt-0">
-        {/* Restricted Mode Warning Banner */}
-        {isRestricted && !isDeleted && !isSuspendedByPlan && (
-          <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-amber-600">
-              <IconLock className="h-4 w-4" />
-              <span className="font-medium">Write access restricted</span>
+      {/* ============== DESKTOP: Full card layout ============== */}
+      <div className="hidden md:block">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${typeConfig.bgColor}`}>
+                <IconComponent className={`h-5 w-5 ${typeConfig.color}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold truncate">
+                    {workspace.name}
+                  </CardTitle>
+                  <div className={`h-2 w-2 rounded-full ${isDeleted ? 'bg-red-500' : 'bg-green-500'}`} />
+                </div>
+                <CardDescription className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className="text-xs">
+                    {typeConfig.label}
+                  </Badge>
+                  <Badge
+                    variant={isOwner ? 'default' : 'secondary'}
+                    className="text-xs"
+                  >
+                    {isOwner ? 'Owner' : 'Staff'}
+                  </Badge>
+                  <Badge
+                    variant={status.variant}
+                    className={`text-xs ${'className' in status ? status.className : ''}`}
+                  >
+                    {status.label}
+                  </Badge>
+                </CardDescription>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {isOwner
-                ? 'Renew subscription to restore full access'
-                : 'Contact workspace owner to resolve'}
-            </p>
+
+            {/* Three Dot Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={isActionLoading}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <IconDots className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                {isDeleted ? (
+                  canRestore && (
+                    <DropdownMenuItem onClick={handleRestore} disabled={isActionLoading}>
+                      <IconRefresh className="mr-2 h-4 w-4" />
+                      <span>Restore</span>
+                    </DropdownMenuItem>
+                  )
+                ) : (
+                  isOwner && (
+                    <DropdownMenuItem
+                      onClick={handleDelete}
+                      disabled={isActionLoading}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <IconTrash className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  )
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )}
+        </CardHeader>
 
-        {/* Plan Limit Exceeded Warning Banner */}
-        {isSuspendedByPlan && (
-          <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-amber-600">
-              <IconLock className="h-4 w-4" />
-              <span className="font-medium">Workspace inaccessible</span>
+        <CardContent className="pt-0">
+          {/* Restricted Mode Warning Banner */}
+          {isRestricted && !isDeleted && !isSuspendedByPlan && (
+            <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-amber-600">
+                <IconLock className="h-4 w-4" />
+                <span className="font-medium">Write access restricted</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isOwner
+                  ? 'Renew subscription to restore full access'
+                  : 'Contact workspace owner to resolve'}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {isOwner
-                ? 'Upgrade plan or delete excess workspaces to access'
-                : 'Contact workspace owner for access'}
-            </p>
-          </div>
-        )}
-
-        {/* Deletion Warning Banner */}
-        {isDeleted && workspace.deletionInfo && timeRemaining && (
-          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-destructive">
-              <IconClock className="h-4 w-4" />
-              <span className="font-medium">
-                {timeRemaining.days}d {timeRemaining.hours}h {timeRemaining.minutes}m left to restore
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Permanently deletes on {formatDate(workspace.deletionInfo.scheduledFor)}
-            </p>
-          </div>
-        )}
-
-        {/* Workspace Stats */}
-        {!isDeleted && !isSuspendedByPlan && (
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="flex items-center gap-2 text-sm">
-              <IconUsers className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{workspace.member_count || 0}</span>
-              <span className="text-muted-foreground">members</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <IconUserCheck className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium capitalize">{workspace.role}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Description placeholder - WorkspaceListItem doesn't include description */}
-        {!isDeleted && !isSuspendedByPlan && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-            {workspace.type.charAt(0).toUpperCase() + workspace.type.slice(1)} workspace
-          </p>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Created {formatDate(workspace.createdAt)}</span>
-          {workspace.updatedAt !== workspace.createdAt && (
-            <span>Updated {formatDate(workspace.updatedAt)}</span>
           )}
-        </div>
-      </CardContent>
+
+          {/* Plan Limit Exceeded Warning Banner */}
+          {isSuspendedByPlan && (
+            <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-amber-600">
+                <IconLock className="h-4 w-4" />
+                <span className="font-medium">Workspace inaccessible</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isOwner
+                  ? 'Upgrade plan or delete excess workspaces to access'
+                  : 'Contact workspace owner for access'}
+              </p>
+            </div>
+          )}
+
+          {/* Deletion Warning Banner */}
+          {isDeleted && workspace.deletionInfo && timeRemaining && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-destructive">
+                <IconClock className="h-4 w-4" />
+                <span className="font-medium">
+                  {timeRemaining.days}d {timeRemaining.hours}h {timeRemaining.minutes}m left to restore
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Permanently deletes on {formatDate(workspace.deletionInfo.scheduledFor)}
+              </p>
+            </div>
+          )}
+
+          {/* Workspace Stats */}
+          {!isDeleted && !isSuspendedByPlan && (
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="flex items-center gap-2 text-sm">
+                <IconUsers className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">{workspace.member_count || 0}</span>
+                <span className="text-muted-foreground">members</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <IconUserCheck className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium capitalize">{workspace.role}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Description placeholder */}
+          {!isDeleted && !isSuspendedByPlan && (
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+              {workspace.type.charAt(0).toUpperCase() + workspace.type.slice(1)} workspace
+            </p>
+          )}
+
+          {/* Footer */}
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Created {formatDate(workspace.createdAt)}</span>
+            {workspace.updatedAt !== workspace.createdAt && (
+              <span>Updated {formatDate(workspace.updatedAt)}</span>
+            )}
+          </div>
+        </CardContent>
+      </div>
     </Card>
   );
 }

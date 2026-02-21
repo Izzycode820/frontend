@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Variant Editor Container (Smart Component)
@@ -8,29 +8,36 @@
  * - Right panel: Selected variant editor with inventory
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useQuery, useMutation } from '@apollo/client/react';
-import { GetProductDocument } from '@/services/graphql/admin-store/queries/products/__generated__/GetProduct.generated';
-import { UpdateVariantDocument } from '@/services/graphql/admin-store/mutations/variants/__generated__/UpdateVariant.generated';
-import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
-import { toast } from 'sonner';
-import { VariantsList } from './VariantsList';
-import { VariantEditorForm } from './VariantEditorForm';
-import { Card } from '@/components/shadcn-ui/card';
-import { Loader2 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { GetProductDocument } from "@/services/graphql/admin-store/queries/products/__generated__/GetProduct.generated";
+import { UpdateVariantDocument } from "@/services/graphql/admin-store/mutations/variants/__generated__/UpdateVariant.generated";
+import {
+  useWorkspaceStore,
+  workspaceSelectors,
+} from "@/stores/authentication/workspaceStore";
+import { toast } from "sonner";
+import { VariantsList } from "./VariantsList";
+import { VariantEditorForm } from "./VariantEditorForm";
+import { Card } from "@/components/shadcn-ui/card";
+import { Loader2 } from "lucide-react";
 
 export default function VariantEditorContainer() {
   const router = useRouter();
   const params = useParams();
-  const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const currentWorkspace = useWorkspaceStore(
+    workspaceSelectors.currentWorkspace,
+  );
 
   const productId = params.id as string;
   const variantIdParam = params.variant_id as string;
 
   // State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(variantIdParam || null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    variantIdParam || null,
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch product with all variants
@@ -41,7 +48,11 @@ export default function VariantEditorContainer() {
 
   // Auto-select first variant if none selected
   useEffect(() => {
-    if (!selectedVariantId && data?.product?.variants?.length && data.product.variants.length > 0) {
+    if (
+      !selectedVariantId &&
+      data?.product?.variants?.length &&
+      data.product.variants.length > 0
+    ) {
       const firstVariantId = data.product.variants[0]?.id;
       if (firstVariantId) {
         setSelectedVariantId(firstVariantId);
@@ -61,7 +72,7 @@ export default function VariantEditorContainer() {
     if (!searchTerm.trim()) return variants;
 
     const term = searchTerm.toLowerCase();
-    return variants.filter(variant => {
+    return variants.filter((variant) => {
       const searchableText = [
         variant?.option1,
         variant?.option2,
@@ -69,7 +80,7 @@ export default function VariantEditorContainer() {
         variant?.sku,
       ]
         .filter(Boolean)
-        .join(' ')
+        .join(" ")
         .toLowerCase();
 
       return searchableText.includes(term);
@@ -78,7 +89,7 @@ export default function VariantEditorContainer() {
 
   // Get selected variant
   const selectedVariant = useMemo(() => {
-    return variants.find(v => v?.id === selectedVariantId) || null;
+    return variants.find((v) => v?.id === selectedVariantId) || null;
   }, [variants, selectedVariantId]);
 
   // Extract unique option names from product
@@ -93,8 +104,8 @@ export default function VariantEditorContainer() {
     // Update URL without navigation
     window.history.replaceState(
       null,
-      '',
-      `/workspace/${currentWorkspace?.id}/store/products/${productId}/variants/${variantId}`
+      "",
+      `/workspace/${currentWorkspace?.id}/store/products/${productId}/variants/${variantId}`,
     );
   };
 
@@ -112,14 +123,16 @@ export default function VariantEditorContainer() {
       });
 
       if (updateData_?.updateVariant?.success) {
-        toast.success('Variant updated successfully');
+        toast.success("Variant updated successfully");
         refetch(); // Refresh data
       } else {
-        toast.error(updateData_?.updateVariant?.error || 'Failed to update variant');
+        toast.error(
+          updateData_?.updateVariant?.error || "Failed to update variant",
+        );
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update variant');
-      console.error('Update variant error:', err);
+      toast.error(err.message || "Failed to update variant");
+      console.error("Update variant error:", err);
     } finally {
       setIsSaving(false);
     }
@@ -127,7 +140,7 @@ export default function VariantEditorContainer() {
 
   // Handle back navigation
   const handleBack = () => {
-    router.push(`/workspace/${currentWorkspace?.id}/store/inventory`);
+    router.push(`/workspace/${currentWorkspace?.id}/store/products/inventory`);
   };
 
   // Loading state
@@ -148,7 +161,9 @@ export default function VariantEditorContainer() {
       <Card className="p-6">
         <div className="text-center text-destructive">
           <p>Failed to load product</p>
-          {error && <p className="text-sm text-muted-foreground">{error.message}</p>}
+          {error && (
+            <p className="text-sm text-muted-foreground">{error.message}</p>
+          )}
         </div>
       </Card>
     );
@@ -160,7 +175,7 @@ export default function VariantEditorContainer() {
         {/* Left Panel: Variants List */}
         <VariantsList
           product={{
-            id: product.id || '',
+            id: product.id || "",
             name: product.name,
             status: product.status,
             featuredMedia: product.featuredMedia,

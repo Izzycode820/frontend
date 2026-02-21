@@ -65,7 +65,8 @@ export function CreateWorkspaceCard() {
           </div>
         )}
 
-        <CardContent className="flex flex-col items-center justify-center p-8 h-full min-h-[200px]">
+        {/* Desktop: Vertical card layout */}
+        <CardContent className="hidden md:flex flex-col items-center justify-center p-8 h-full min-h-[200px]">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center group-hover:bg-primary/30 transition-colors">
               <IconPlus className="h-6 w-6 text-primary" />
@@ -76,6 +77,19 @@ export function CreateWorkspaceCard() {
                 Start a new store, blog, services, or portfolio
               </p>
             </div>
+          </div>
+        </CardContent>
+
+        {/* Mobile: Compact horizontal list row */}
+        <CardContent className="flex md:hidden items-center gap-4 p-4">
+          <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary/30 transition-colors">
+            <IconPlus className="h-5 w-5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-sm">Create Workspace</h3>
+            <p className="text-xs text-muted-foreground truncate">
+              Start a new store, blog, services, or portfolio
+            </p>
           </div>
         </CardContent>
       </Card>
