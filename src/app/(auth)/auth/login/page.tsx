@@ -7,10 +7,8 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 import { LoginForm } from '@/components/authentication/forms/LoginForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card'
-import { Separator } from '@/components/shadcn-ui/separator'
 
 export default function LoginPage() {
   return (
@@ -35,20 +33,6 @@ export default function LoginPage() {
                 console.error('Login error:', error)
               }}
             />
-
-            <Separator className="my-6" />
-
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Link
-                  href="/auth/signup"
-                  className="font-medium text-primary hover:underline"
-                >
-                  Create account
-                </Link>
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

@@ -52,15 +52,15 @@ export default function VerifyPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md space-y-4">
+        <div className="min-h-screen flex items-center justify-center px-4 py-6 sm:p-4">
+            <div className="w-full max-w-md space-y-3 sm:space-y-4">
                 {/* Header Card */}
                 <Card className="border-0 shadow-lg">
-                    <CardHeader className="text-center pb-2">
-                        <CardTitle className="text-2xl font-semibold">
+                    <CardHeader className="text-center pb-2 px-4 sm:px-6">
+                        <CardTitle className="text-xl sm:text-2xl font-semibold">
                             Verify Your Account
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">
                             Complete verification to secure your account
                         </CardDescription>
                     </CardHeader>
@@ -98,7 +98,7 @@ export default function VerifyPage() {
                 <Button
                     onClick={handleContinue}
                     disabled={!canContinue}
-                    className="w-full h-12"
+                    className="w-full h-11 sm:h-12 text-sm sm:text-base"
                     size="lg"
                 >
                     Continue to Dashboard
@@ -109,7 +109,7 @@ export default function VerifyPage() {
                     <Button
                         variant="ghost"
                         onClick={handleContinue}
-                        className="w-full h-10 text-muted-foreground hover:text-foreground"
+                        className="w-full h-9 sm:h-10 text-sm text-muted-foreground hover:text-foreground"
                     >
                         Skip for now (Beta)
                     </Button>

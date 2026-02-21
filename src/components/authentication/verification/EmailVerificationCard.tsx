@@ -158,13 +158,13 @@ export function EmailVerificationCard({
 
     return (
         <Card className={className}>
-            <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Email Verification</CardTitle>
-                <CardDescription>
+            <CardHeader className="pb-4 px-4 sm:px-6">
+                <CardTitle className="text-base sm:text-lg">Email Verification</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                     Verify your email address to secure your account
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-4 sm:px-6">
                 {/* Error Display */}
                 {error && (
                     <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
@@ -183,10 +183,10 @@ export function EmailVerificationCard({
                 ) : (
                     <>
                         {/* Email Display + Request Button */}
-                        <div className="flex items-center justify-between gap-4">
-                            <div>
-                                <Label className="text-sm text-muted-foreground">Email</Label>
-                                <p className="font-medium">{maskedEmail}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                            <div className="min-w-0">
+                                <Label className="text-xs sm:text-sm text-muted-foreground">Email</Label>
+                                <p className="font-medium text-sm sm:text-base truncate">{maskedEmail}</p>
                             </div>
 
                             {step === 'initial' && (
@@ -195,6 +195,7 @@ export function EmailVerificationCard({
                                     disabled={isLoading}
                                     variant="outline"
                                     size="sm"
+                                    className="w-full sm:w-auto shrink-0"
                                 >
                                     {isLoading ? (
                                         <>
@@ -213,7 +214,7 @@ export function EmailVerificationCard({
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-2">
                                     <Label className="text-sm">Enter verification code</Label>
-                                    <div className="flex gap-2 justify-center">
+                                    <div className="flex gap-1.5 sm:gap-2 justify-center">
                                         {otpValues.map((value, index) => (
                                             <Input
                                                 key={index}
@@ -226,7 +227,7 @@ export function EmailVerificationCard({
                                                 onKeyDown={(e) => handleKeyDown(index, e)}
                                                 onPaste={handlePaste}
                                                 disabled={isLoading}
-                                                className="w-10 h-12 text-center text-lg font-semibold"
+                                                className="flex-1 max-w-12 h-11 sm:h-12 text-center text-base sm:text-lg font-semibold p-0"
                                             />
                                         ))}
                                     </div>
