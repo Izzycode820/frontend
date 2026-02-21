@@ -1,9 +1,7 @@
 /**
- * Verify Page - Account Verification
- * Handles phone and email verification after signup
- * Clean component-based implementation
- * 
- * MVP: Email-only verification (SMS coming soon)
+ * Verify Page - Email Account Verification
+ * Handles email OTP verification after signup
+ * Phone/SMS verification hidden until SMS provider is ready
  */
 
 'use client'
@@ -14,10 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/shadcn-ui/button'
 import { EmailVerificationCard } from '@/components/authentication/verification'
 import { useAuth } from '@/hooks/authentication/useAuth'
-import { Clock } from 'lucide-react'
+// import { Clock } from 'lucide-react'  // Uncomment when SMS verification is enabled
 
-// Feature flag: Set to true when SMS is ready
-const SMS_ENABLED = false
 
 export default function VerifyPage() {
     const router = useRouter()
@@ -77,11 +73,11 @@ export default function VerifyPage() {
                     className="shadow-lg"
                 />
 
-                {/* Phone Verification - Coming Soon */}
-                {SMS_ENABLED ? (
-                    // TODO: Re-enable when SMS is ready
-                    null
-                ) : user.phone_number ? (
+                {/* ---------------------------------------------------------------
+                 * Phone Verification — COMMENTED OUT (SMS provider not ready yet)
+                 * Uncomment this block + Clock import when SMS is enabled
+                 * --------------------------------------------------------------- */}
+                {/* {user.phone_number && (
                     <Card className="shadow-lg opacity-60">
                         <CardHeader className="pb-4">
                             <div className="flex items-center justify-between">
@@ -96,7 +92,7 @@ export default function VerifyPage() {
                             </CardDescription>
                         </CardHeader>
                     </Card>
-                ) : null}
+                )} */}
 
                 {/* Continue Button - enabled when email verified */}
                 <Button
