@@ -77,7 +77,6 @@ export function ProductVariantsSection({
         const hasDataRecursive = (v: VariantFormState): boolean => {
           const hasOwnData = (
             (v.inventoryQuantity !== undefined && v.inventoryQuantity > 0) ||
-            (v.available !== undefined && v.available > 0) ||
             v.mediaItem !== undefined ||
             v.featuredMediaId !== undefined ||
             (v.sku && v.sku !== '') ||
@@ -154,7 +153,6 @@ export function ProductVariantsSection({
                     costPrice: match.costPrice,
                     compareAtPrice: match.compareAtPrice,
                     inventoryQuantity: match.inventoryQuantity,
-                    available: match.available,
                     sku: match.sku,
                     barcode: match.barcode,
                     mediaItem: match.mediaItem,
