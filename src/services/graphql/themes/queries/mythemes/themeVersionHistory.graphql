@@ -1,0 +1,10 @@
+query ThemeVersionHistory($customizationId: ID!) {
+  themeVersionHistory(customizationId: $customizationId) {
+    id
+    versionNumber
+    isSystemUpdate
+    createdAt
+    createdByActor
+    status
+  }
+}

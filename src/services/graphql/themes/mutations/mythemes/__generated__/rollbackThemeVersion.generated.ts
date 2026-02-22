@@ -1,0 +1,13 @@
+import * as Types from '../../../../../../types/themes/graphql-base';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type RollbackThemeVersionMutationVariables = Types.Exact<{
+  id: Types.Scalars['ID']['input'];
+  versionId: Types.Scalars['ID']['input'];
+}>;
+
+
+export type RollbackThemeVersionMutation = { __typename?: 'Mutation', rollbackThemeVersion: { __typename?: 'RollbackThemeVersion', success: boolean | null, message: string | null, error: string | null, customization: { __typename?: 'ThemeCustomizationType', id: string, themeName: string, activeVersion: { __typename?: 'ThemeVersionType', id: string, versionNumber: string } } | null } | null };
+
+
+export const RollbackThemeVersionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RollbackThemeVersion"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"versionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"rollbackThemeVersion"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"versionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"versionId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"error"}},{"kind":"Field","name":{"kind":"Name","value":"customization"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"themeName"}},{"kind":"Field","name":{"kind":"Name","value":"activeVersion"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"versionNumber"}}]}}]}}]}}]}}]} as unknown as DocumentNode<RollbackThemeVersionMutation, RollbackThemeVersionMutationVariables>;

@@ -5,7 +5,7 @@ query ThemeDetails($slug: String!) {
     slug
     description
     author
-    version
+    currentVersion
     templateType
     workspaceTypes
     priceTier

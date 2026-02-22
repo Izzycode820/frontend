@@ -1,0 +1,15 @@
+mutation RollbackThemeVersion($id: ID!, $versionId: ID!) {
+  rollbackThemeVersion(id: $id, versionId: $versionId) {
+    success
+    message
+    error
+    customization {
+      id
+      themeName
+      activeVersion {
+        id
+        versionNumber
+      }
+    }
+  }
+}

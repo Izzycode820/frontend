@@ -12,12 +12,17 @@ query MyThemes($workspaceId: ID!) {
     publishedAt
     isPasswordProtected
     storefrontPassword
+    activeVersion {
+      id
+      versionNumber
+      isSystemUpdate
+    }
     template {
       id
       name
       slug
       previewImage
-      version
+      currentVersion
     }
   }
 }

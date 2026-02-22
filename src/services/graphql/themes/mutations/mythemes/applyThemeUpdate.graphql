@@ -1,0 +1,7 @@
+mutation ApplyThemeUpdate($id: ID!) {
+  applyThemeUpdate(id: $id) {
+    success
+    message
+    error
+  }
+}
