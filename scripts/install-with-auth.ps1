@@ -26,4 +26,4 @@ npm config set @huzilerz:registry https://npm.pkg.github.com
 npm config set "//npm.pkg.github.com/:_authToken" "$env:NPM_TOKEN"
 
 Write-Host "Running npm install..."
-npm install
+npm install @huzilerz/theme-sneakers@latest @huzilerz/theme-khendu-apple@latest

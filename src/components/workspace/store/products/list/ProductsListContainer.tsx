@@ -454,6 +454,17 @@ export default function ProductsListContainer() {
           categories={categoryOptions} // Pass dynamic categories
           onAddProduct={handleAddProduct}
         />
+
+        {/* Duplicate Product Modal (must render in mobile branch too) */}
+        {productToDuplicate && (
+          <DuplicateProductModal
+            open={duplicateModalOpen}
+            onOpenChange={setDuplicateModalOpen}
+            productName={productToDuplicate.name}
+            onConfirm={handleConfirmDuplicate}
+            isLoading={isDuplicating}
+          />
+        )}
       </div>
     );
   }
