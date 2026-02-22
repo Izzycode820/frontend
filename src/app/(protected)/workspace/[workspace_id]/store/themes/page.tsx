@@ -245,7 +245,9 @@ function ThemesContent() {
                 id={activeTheme.id}
                 themeName={activeTheme.themeName}
                 previewImage={activeTheme.template.previewImage}
-                version={activeTheme.template.version}
+                currentVersion={activeTheme.template.currentVersion}
+                activeVersionNumber={activeTheme.activeVersion.versionNumber}
+                activeVersionId={activeTheme.activeVersion.id}
                 createdAt={activeTheme.createdAt}
                 isPasswordProtected={activeTheme.isPasswordProtected}
                 storefrontPassword={activeTheme.storefrontPassword}
@@ -274,7 +276,9 @@ function ThemesContent() {
                     id={theme.id}
                     themeName={theme.themeName}
                     previewImage={theme.template.previewImage}
-                    version={theme.template.version}
+                    currentVersion={theme.template.currentVersion}
+                    activeVersionNumber={theme.activeVersion.versionNumber}
+                    activeVersionId={theme.activeVersion.id}
                     createdAt={theme.createdAt}
                     isPublished={theme.isPublished}
                     canDelete={theme.canDelete}

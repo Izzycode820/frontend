@@ -19,7 +19,9 @@ interface ActiveThemeCardProps {
   id: string;
   themeName: string;
   previewImage: string;
-  version: string;
+  currentVersion: string;
+  activeVersionNumber: string;
+  activeVersionId: string;
   createdAt: string;
   isPasswordProtected?: boolean | null;
   storefrontPassword?: string | null;
@@ -32,7 +34,9 @@ export function ActiveThemeCard({
   id,
   themeName,
   previewImage,
-  version,
+  currentVersion,
+  activeVersionNumber,
+  activeVersionId,
   createdAt,
   isPasswordProtected,
   storefrontPassword,
@@ -99,9 +103,12 @@ export function ActiveThemeCard({
               <p className="text-sm text-muted-foreground">
                 Added: {formatDate(createdAt)}
               </p>
-              <p className="text-sm text-muted-foreground">
-                Version {version}
-              </p>
+                Version {activeVersionNumber}
+                {currentVersion !== activeVersionNumber && (
+                  <Badge variant="outline" className="ml-2 text-[10px] py-0 h-4 bg-blue-50 text-blue-700 border-blue-200">
+                    Update available: {currentVersion}
+                  </Badge>
+                )}
 
               {/* Password Protection Warning Banner */}
               {isPasswordProtected && (

@@ -18,7 +18,9 @@ interface ThemeLibraryCardProps {
   id: string;
   themeName: string;
   previewImage: string;
-  version: string;
+  currentVersion: string;
+  activeVersionNumber: string;
+  activeVersionId: string;
   createdAt: string;
   isPublished: boolean | null;
   canDelete: boolean | null;
@@ -35,7 +37,9 @@ export function ThemeLibraryCard({
   id,
   themeName,
   previewImage,
-  version,
+  currentVersion,
+  activeVersionNumber,
+  activeVersionId,
   createdAt,
   isPublished,
   canDelete,
@@ -91,9 +95,12 @@ export function ThemeLibraryCard({
                 Added: {formatDate(createdAt)}
               </p>
               <div className="flex items-center gap-1">
-                <p className="text-sm text-muted-foreground">
-                  Version {version}
-                </p>
+                  Version {activeVersionNumber}
+                  {currentVersion !== activeVersionNumber && (
+                    <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap">
+                      New: {currentVersion}
+                    </span>
+                  )}
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
             </div>
