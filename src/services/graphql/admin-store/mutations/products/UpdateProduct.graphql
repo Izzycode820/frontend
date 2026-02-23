@@ -16,7 +16,10 @@ mutation UpdateProduct($productId: String!, $updateData: ProductUpdateInput!) {
       productType
       status
       publishedAt
-      category { id name }
+      category {
+        id
+        name
+      }
       tags
       trackInventory
       inventoryQuantity
@@ -77,10 +80,11 @@ mutation UpdateProduct($productId: String!, $updateData: ProductUpdateInput!) {
         inventory {
           id
           quantity
-          onhand
-          available
           condition
-          location { id name }
+          location {
+            id
+            name
+          }
         }
       }
       totalStock

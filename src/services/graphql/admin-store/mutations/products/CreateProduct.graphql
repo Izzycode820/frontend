@@ -16,7 +16,10 @@ mutation CreateProduct($productData: ProductCreateInput!) {
       productType
       status
       publishedAt
-      category { id name }
+      category {
+        id
+        name
+      }
       tags
       trackInventory
       inventoryQuantity
@@ -77,10 +80,11 @@ mutation CreateProduct($productData: ProductCreateInput!) {
         inventory {
           id
           quantity
-          onhand
-          available
           condition
-          location { id name }
+          location {
+            id
+            name
+          }
         }
       }
       totalStock
