@@ -15,9 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
-
-import { WorkspaceCoreCustomerRegionChoices } from '@/types/admin-store/graphql-base';
-
 interface CustomersFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
@@ -28,22 +25,23 @@ interface CustomersFiltersProps {
 }
 
 const CUSTOMER_TYPES = [
-  { value: 'INDIVIDUAL', label: 'Individual' },
-  { value: 'BUSINESS', label: 'Business' },
-  { value: 'RESELLER', label: 'Reseller' },
+  { value: 'student', label: 'Student' },
+  { value: 'business', label: 'Small Business' },
+  { value: 'individual', label: 'Individual' },
+  { value: 'corporate', label: 'Corporate' },
 ];
 
 const CAMEROON_REGIONS = [
-  { value: WorkspaceCoreCustomerRegionChoices.Centre, label: 'Centre' },
-  { value: WorkspaceCoreCustomerRegionChoices.Littoral, label: 'Littoral' },
-  { value: WorkspaceCoreCustomerRegionChoices.West, label: 'West' },
-  { value: WorkspaceCoreCustomerRegionChoices.Northwest, label: 'Northwest' },
-  { value: WorkspaceCoreCustomerRegionChoices.Southwest, label: 'Southwest' },
-  { value: WorkspaceCoreCustomerRegionChoices.Adamawa, label: 'Adamawa' },
-  { value: WorkspaceCoreCustomerRegionChoices.East, label: 'East' },
-  { value: WorkspaceCoreCustomerRegionChoices.FarNorth, label: 'Far North' },
-  { value: WorkspaceCoreCustomerRegionChoices.North, label: 'North' },
-  { value: WorkspaceCoreCustomerRegionChoices.South, label: 'South' },
+  { value: 'centre', label: 'Centre' },
+  { value: 'littoral', label: 'Littoral' },
+  { value: 'west', label: 'West' },
+  { value: 'northwest', label: 'Northwest' },
+  { value: 'southwest', label: 'Southwest' },
+  { value: 'adamawa', label: 'Adamawa' },
+  { value: 'east', label: 'East' },
+  { value: 'far_north', label: 'Far North' },
+  { value: 'north', label: 'North' },
+  { value: 'south', label: 'South' },
 ];
 
 export function CustomersFilters({

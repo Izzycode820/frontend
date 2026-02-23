@@ -51,16 +51,16 @@ export const ORDER_SOURCES = [
 ];
 
 export const CAMEROON_REGIONS = [
-  { value: 'CENTRE', label: 'Centre' },
-  { value: 'LITTORAL', label: 'Littoral' },
-  { value: 'WEST', label: 'West' },
-  { value: 'NORTHWEST', label: 'Northwest' },
-  { value: 'SOUTHWEST', label: 'Southwest' },
-  { value: 'ADAMAWA', label: 'Adamawa' },
-  { value: 'EAST', label: 'East' },
-  { value: 'FAR_NORTH', label: 'Far North' },
-  { value: 'NORTH', label: 'North' },
-  { value: 'SOUTH', label: 'South' },
+  { value: 'centre', label: 'Centre' },
+  { value: 'littoral', label: 'Littoral' },
+  { value: 'west', label: 'West' },
+  { value: 'northwest', label: 'Northwest' },
+  { value: 'southwest', label: 'Southwest' },
+  { value: 'adamawa', label: 'Adamawa' },
+  { value: 'east', label: 'East' },
+  { value: 'far_north', label: 'Far North' },
+  { value: 'north', label: 'North' },
+  { value: 'south', label: 'South' },
 ];
 
 export function OrdersFilters({

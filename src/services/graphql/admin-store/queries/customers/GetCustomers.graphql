@@ -4,7 +4,7 @@ query GetCustomers(
   $name_Icontains: String
   $phone_Icontains: String
   $customerType: WorkspaceCoreCustomerCustomerTypeChoices
-  $region: WorkspaceCoreCustomerRegionChoices
+  $region: String
   $isActive: Boolean
 ) {
   customers(

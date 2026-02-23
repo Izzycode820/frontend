@@ -4,7 +4,7 @@ query GetOrders(
   $after: String
   $status: WorkspaceStoreOrderStatusChoices
   $orderSource: WorkspaceStoreOrderOrderSourceChoices
-  $shippingRegion: WorkspaceStoreOrderShippingRegionChoices
+  $shippingRegion: String
   $paymentStatus: WorkspaceStoreOrderPaymentStatusChoices
   $paymentMethod: WorkspaceStoreOrderPaymentMethodChoices
   $isArchived: Boolean
