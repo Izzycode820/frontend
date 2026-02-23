@@ -36,11 +36,42 @@ function ThemesContent() {
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
   const [renameThemeId, setRenameThemeId] = React.useState<string | null>(null);
   const [renameThemeName, setRenameThemeName] = React.useState('');
+  const [updatingThemeId, setUpdatingThemeId] = React.useState<string | null>(null);
 
-  const { data, loading, error, refetch } = useQuery(MyThemesDocument, {
+  const { data, loading, error, refetch, startPolling, stopPolling } = useQuery(MyThemesDocument, {
     variables: { workspaceId },
     skip: !workspaceId,
   });
+
+  // Polling Orchestrator for Theme Updates
+  React.useEffect(() => {
+    if (updatingThemeId && data?.myThemes) {
+      const themes = data.myThemes.filter((t): t is NonNullable<typeof t> => t !== null);
+      const updatingTheme = themes.find(t => t.id === updatingThemeId);
+      
+      if (updatingTheme) {
+        if (updatingTheme.activeVersion.versionNumber === updatingTheme.template.currentVersion) {
+          stopPolling();
+          setUpdatingThemeId(null);
+          toast.success(`${updatingTheme.themeName} has been successfully updated to v${updatingTheme.template.currentVersion}`);
+        }
+      } else {
+         stopPolling();
+         setUpdatingThemeId(null);
+      }
+    }
+  }, [data, updatingThemeId, stopPolling]);
+
+  React.useEffect(() => {
+    return () => {
+      stopPolling();
+    };
+  }, [stopPolling]);
+
+  const handleUpdateStart = (id: string) => {
+    setUpdatingThemeId(id);
+    startPolling(3000); // Poll every 3 seconds
+  };
 
   const [publishTheme] = useMutation(PublishThemeDocument, {
     client: themeClient,
@@ -251,6 +282,9 @@ function ThemesContent() {
                 createdAt={activeTheme.createdAt}
                 isPasswordProtected={activeTheme.isPasswordProtected}
                 storefrontPassword={activeTheme.storefrontPassword}
+                isUpdating={updatingThemeId === activeTheme.id}
+                onUpdateSuccess={() => handleUpdateStart(activeTheme.id)}
+                onRollbackSuccess={() => refetch()}
                 onEditTheme={() => handleEditTheme(activeTheme.id)}
                 onDuplicate={() => handleDuplicate(activeTheme.id, activeTheme.themeName)}
                 onRename={() => openRenameDialog(activeTheme.id, activeTheme.themeName)}
@@ -284,6 +318,9 @@ function ThemesContent() {
                     canDelete={theme.canDelete}
                     isPublishing={publishingThemeId === theme.id}
                     isDuplicating={duplicatingThemeId === theme.id}
+                    isUpdating={updatingThemeId === theme.id}
+                    onUpdateSuccess={() => handleUpdateStart(theme.id)}
+                    onRollbackSuccess={() => refetch()}
                     onEditTheme={() => handleEditTheme(theme.id)}
                     onPublish={() => handlePublish(theme.id)}
                     onDelete={() => handleDelete(theme.id)}

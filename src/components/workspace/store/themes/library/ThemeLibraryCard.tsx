@@ -28,6 +28,7 @@ interface ThemeLibraryCardProps {
   canDelete: boolean | null;
   isPublishing?: boolean;
   isDuplicating?: boolean;
+  isUpdating?: boolean;
   onEditTheme: () => void;
   onPublish?: () => void;
   onDelete?: () => void;
@@ -49,6 +50,7 @@ export function ThemeLibraryCard({
   canDelete,
   isPublishing = false,
   isDuplicating = false,
+  isUpdating = false,
   onEditTheme,
   onPublish,
   onDelete,
@@ -147,15 +149,23 @@ export function ThemeLibraryCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {hasUpdate && (
                   <DropdownMenuItem 
                     onClick={() => setIsUpdateModalOpen(true)}
+                    disabled={isUpdating}
                     className="text-blue-600 font-medium"
                   >
-                    <DownloadCloud className="mr-2 h-4 w-4" />
-                    Update to v{currentVersion}
+                    {isUpdating ? (
+                      <>
+                        <div className="mr-2 w-4 h-4 rounded-full border-2 border-current border-b-transparent animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <DownloadCloud className="mr-2 h-4 w-4" />
+                        Update to v{currentVersion}
+                      </>
+                    )}
                   </DropdownMenuItem>
-                )}
                 
                 <DropdownMenuItem onClick={() => setIsHistoryModalOpen(true)}>
                   <History className="mr-2 h-4 w-4" />

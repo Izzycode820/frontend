@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Play } from "lucide-react";
+import Link from 'next/link';
 import { Header } from "../common";
 import { AmoebaBackground } from "./AmoebaBackground";
 
@@ -68,9 +69,12 @@ export default function Hero() {
             className="flex flex-col sm:flex-row gap-6 pt-8 items-center justify-center"
           >
             {/* Primary Button - Circular/Pill style */}
-            <button className="h-16 px-10 bg-white text-black font-medium text-xl rounded-full hover:bg-huzilerz-lime hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            <Link 
+              href="/auth/signup"
+              className="h-16 px-10 bg-white text-black font-medium text-xl rounded-full hover:bg-huzilerz-lime hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center"
+            >
               Start Your Empire
-            </button>
+            </Link>
 
             {/* Secondary Button */}
             <button className="h-16 px-10 flex items-center gap-3 border border-white/30 bg-white/5 text-white font-medium text-xl rounded-full hover:bg-white/10 hover:scale-105 transition-all backdrop-blur-md">

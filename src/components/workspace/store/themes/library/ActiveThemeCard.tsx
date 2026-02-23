@@ -27,6 +27,7 @@ interface ActiveThemeCardProps {
   createdAt: string;
   isPasswordProtected?: boolean | null;
   storefrontPassword?: string | null;
+  isUpdating?: boolean;
   onEditTheme: () => void;
   onDuplicate?: () => void;
   onRename?: () => void;
@@ -44,6 +45,7 @@ export function ActiveThemeCard({
   createdAt,
   isPasswordProtected,
   storefrontPassword,
+  isUpdating,
   onEditTheme,
   onDuplicate,
   onRename,
@@ -178,10 +180,20 @@ export function ActiveThemeCard({
               <Button 
                 variant="default" 
                 onClick={() => setIsUpdateModalOpen(true)}
+                disabled={isUpdating}
                 className="bg-blue-600 hover:bg-blue-700 text-white gap-2 transition-colors flex-1 sm:flex-none hidden sm:flex"
               >
-                <DownloadCloud className="w-4 h-4" />
-                Update to v{currentVersion}
+                {isUpdating ? (
+                  <>
+                    <div className="w-4 h-4 rounded-full border-2 border-current border-b-transparent animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <DownloadCloud className="w-4 h-4" />
+                    Update to v{currentVersion}
+                  </>
+                )}
               </Button>
             )}
 
