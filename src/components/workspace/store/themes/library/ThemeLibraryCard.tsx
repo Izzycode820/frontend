@@ -11,14 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
-import { MoreHorizontal, Package, Edit2, Eye, Copy, Trash2, ChevronDown } from 'lucide-react';
+import { MoreHorizontal, Package, Edit2, Eye, Copy, Trash2, ChevronDown, DownloadCloud, History } from 'lucide-react';
 import { toast } from 'sonner';
+import { ThemeVersionHistoryModal } from '../modals/ThemeVersionHistoryModal';
+import { ApplyThemeUpdateModal } from '../modals/ApplyThemeUpdateModal';
 
 interface ThemeLibraryCardProps {
   id: string;
   themeName: string;
   previewImage: string;
-  currentVersion: string;
+  currentVersion: string | null;
   activeVersionNumber: string;
   activeVersionId: string;
   createdAt: string;
@@ -31,6 +33,8 @@ interface ThemeLibraryCardProps {
   onDelete?: () => void;
   onDuplicate?: () => void;
   onRename?: () => void;
+  onUpdateSuccess?: () => void;
+  onRollbackSuccess?: () => void;
 }
 
 export function ThemeLibraryCard({
@@ -50,7 +54,14 @@ export function ThemeLibraryCard({
   onDelete,
   onDuplicate,
   onRename,
+  onUpdateSuccess,
+  onRollbackSuccess,
 }: ThemeLibraryCardProps) {
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = React.useState(false);
+
+  const hasUpdate = Boolean(activeVersionNumber && currentVersion && activeVersionNumber !== currentVersion);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -136,6 +147,23 @@ export function ThemeLibraryCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {hasUpdate && (
+                  <DropdownMenuItem 
+                    onClick={() => setIsUpdateModalOpen(true)}
+                    className="text-blue-600 font-medium"
+                  >
+                    <DownloadCloud className="mr-2 h-4 w-4" />
+                    Update to v{currentVersion}
+                  </DropdownMenuItem>
+                )}
+                
+                <DropdownMenuItem onClick={() => setIsHistoryModalOpen(true)}>
+                  <History className="mr-2 h-4 w-4" />
+                  Version History
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+
                 {onRename && (
                   <DropdownMenuItem onClick={onRename}>
                     <Edit2 className="mr-2 h-4 w-4" />
@@ -166,6 +194,25 @@ export function ThemeLibraryCard({
           </div>
         </div>
       </CardContent>
+
+      <ApplyThemeUpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        customizationId={id}
+        themeName={themeName}
+        currentVersion={activeVersionNumber}
+        newVersion={currentVersion || ''}
+        onUpdateSuccess={onUpdateSuccess}
+      />
+
+      <ThemeVersionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        customizationId={id}
+        themeName={themeName}
+        activeVersionId={activeVersionId}
+        onRollbackSuccess={onRollbackSuccess}
+      />
     </Card>
   );
 }

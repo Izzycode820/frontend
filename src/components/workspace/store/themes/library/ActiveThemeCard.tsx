@@ -12,14 +12,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
-import { MoreHorizontal, Package, Edit2, Copy } from 'lucide-react';
+import { MoreHorizontal, Package, Edit2, Copy, DownloadCloud, History } from 'lucide-react';
 import { toast } from 'sonner';
+import { ThemeVersionHistoryModal } from '../modals/ThemeVersionHistoryModal';
+import { ApplyThemeUpdateModal } from '../modals/ApplyThemeUpdateModal';
 
 interface ActiveThemeCardProps {
   id: string;
   themeName: string;
   previewImage: string;
-  currentVersion: string;
+  currentVersion: string | null;
   activeVersionNumber: string;
   activeVersionId: string;
   createdAt: string;
@@ -28,6 +30,8 @@ interface ActiveThemeCardProps {
   onEditTheme: () => void;
   onDuplicate?: () => void;
   onRename?: () => void;
+  onUpdateSuccess?: () => void;
+  onRollbackSuccess?: () => void;
 }
 
 export function ActiveThemeCard({
@@ -43,9 +47,16 @@ export function ActiveThemeCard({
   onEditTheme,
   onDuplicate,
   onRename,
+  onUpdateSuccess,
+  onRollbackSuccess,
 }: ActiveThemeCardProps) {
   const params = useParams();
   const workspaceId = params?.workspace_id as string;
+  
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = React.useState(false);
+
+  const hasUpdate = Boolean(activeVersionNumber && currentVersion && activeVersionNumber !== currentVersion);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -104,7 +115,7 @@ export function ActiveThemeCard({
                 Added: {formatDate(createdAt)}
               </p>
                 Version {activeVersionNumber}
-                {currentVersion !== activeVersionNumber && (
+                {hasUpdate && (
                   <Badge variant="outline" className="ml-2 text-[10px] py-0 h-4 bg-blue-50 text-blue-700 border-blue-200">
                     Update available: {currentVersion}
                   </Badge>
@@ -162,12 +173,52 @@ export function ActiveThemeCard({
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {hasUpdate && (
+              <Button 
+                variant="default" 
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white gap-2 transition-colors flex-1 sm:flex-none hidden sm:flex"
+              >
+                <DownloadCloud className="w-4 h-4" />
+                Update to v{currentVersion}
+              </Button>
+            )}
+
             <Button onClick={onEditTheme} variant="default" className="flex-1 sm:flex-none">
               Edit theme
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => setIsHistoryModalOpen(true)}
+              className="gap-2 hidden sm:flex text-muted-foreground hover:text-foreground"
+            >
+              <History className="w-4 h-4" />
+              History
             </Button>
           </div>
         </div>
       </CardContent>
+
+      <ApplyThemeUpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        customizationId={id}
+        themeName={themeName}
+        currentVersion={activeVersionNumber}
+        newVersion={currentVersion || ''}
+        onUpdateSuccess={onUpdateSuccess}
+      />
+
+      <ThemeVersionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        customizationId={id}
+        themeName={themeName}
+        activeVersionId={activeVersionId}
+        onRollbackSuccess={onRollbackSuccess}
+      />
     </Card>
   );
 }
