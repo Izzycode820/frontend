@@ -8,6 +8,7 @@ import { Spacing } from '../custom-fields/Spacing';
 import { TextField } from '../custom-fields/TextField';
 import { Toggle } from '../custom-fields/Toggle';
 import { VideoPicker } from '../custom-fields/VideoPicker';
+import { LinkSelector } from '../custom-fields/LinkSelector';
 
 export const puckOverrides = {
   // Replace entire left sidebar with our custom implementation
@@ -27,5 +28,6 @@ export const puckOverrides = {
     textField: TextField,
     toggle: Toggle,
     videoPicker: VideoPicker,
+    linkSelector: LinkSelector,
   },
 };
