@@ -14,6 +14,7 @@ query GetProductsPicker(
       node {
         id
         name
+        slug
         mediaGallery {
           id
           url

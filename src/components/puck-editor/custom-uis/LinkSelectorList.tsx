@@ -52,17 +52,33 @@ function LinkSelectorListInner({
 }: LinkSelectorListProps) {
   const [view, setView] = useState<SelectorView>('ROOT');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
   const params = useParams();
   const workspaceId = (params?.workspace_id as string) || '';
 
+  // Debouncing logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   // Queries
   const { data: categoriesData, loading: categoriesLoading } = useQuery(CategoriesDocument, {
-    variables: { first: 100 },
+    variables: { 
+      first: 100,
+      search: debouncedSearch 
+    },
     skip: !isOpen || view !== 'COLLECTIONS'
   });
 
   const { data: productsData, loading: productsLoading } = useQuery(GetProductsPickerDocument, {
-    variables: { first: 50 },
+    variables: { 
+      first: 50,
+      search: debouncedSearch
+    },
     skip: !isOpen || view !== 'PRODUCTS'
   });
 
@@ -76,7 +92,10 @@ function LinkSelectorListInner({
   });
 
   const { data: articlesData, loading: articlesLoading } = useQuery(GetArticlesDocument, {
-    variables: { limit: 50 },
+    variables: { 
+      limit: 50,
+      search: debouncedSearch
+    },
     skip: !isOpen || view !== 'ARTICLES'
   });
 
@@ -188,12 +207,28 @@ function LinkSelectorListInner({
     </div>
   );
 
-  const renderHeader = (title: string) => (
-    <div className="flex items-center gap-2 p-2 border-b mb-2">
-      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setView('ROOT')}>
-        <ArrowLeft className="h-4 w-4" />
-      </Button>
-      <span className="text-sm font-semibold">{title}</span>
+  const renderHeader = (title: string, showSearch: boolean = true) => (
+    <div className="border-b space-y-2 pb-2 mb-2">
+      <div className="flex items-center gap-2 p-2">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setView('ROOT')}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm font-semibold">{title}</span>
+      </div>
+      {showSearch && (
+        <div className="px-2 pb-1">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search..." 
+              className="pl-9 h-9"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -246,7 +281,7 @@ function LinkSelectorListInner({
     const pages = pagesData?.pages || [];
     return (
       <div className="p-2 space-y-1">
-        {renderHeader('Select Page')}
+        {renderHeader('Select Page', false)}
         {pagesLoading && <div className="p-4 space-y-2"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>}
         {pages.map((p: any) => (
           <Button 
@@ -266,7 +301,7 @@ function LinkSelectorListInner({
     const blogs = blogsData?.blogs?.edges?.map(e => e?.node) || [];
     return (
       <div className="p-2 space-y-1">
-        {renderHeader('Select Blog')}
+        {renderHeader('Select Blog', false)}
         {blogsLoading && <div className="p-4 space-y-2"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>}
         {blogs.map((b: any) => (
           <Button 

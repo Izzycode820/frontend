@@ -25,6 +25,8 @@ import {
 } from '@/components/shadcn-ui/dialog';
 import { Button } from '@/components/shadcn-ui/button';
 import { toast } from 'sonner';
+import subscriptionService from '@/services/subscription/subscription';
+import { SubscriptionTier } from '@/types/subscription/subscription';
 
 interface PricingPageProps {
   className?: string;
@@ -183,30 +185,23 @@ export function PricingPage({ className }: PricingPageProps) {
   // Handle downgrade confirmation
   const handleConfirmDowngrade = async () => {
     try {
-      // Call schedule-downgrade REST endpoint
-      const response = await fetch('/api/subscriptions/schedule-downgrade/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          new_plan_tier: selectedTier?.toLowerCase() === 'beginner' ? 'beginning' : selectedTier?.toLowerCase()
-        }),
-        credentials: 'include'
+      const tier = (selectedTier?.toLowerCase() === 'beginner' ? 'beginning' : selectedTier?.toLowerCase()) as SubscriptionTier;
+      
+      const result = await subscriptionService.scheduleDowngrade({
+        new_plan_tier: tier
       });
 
-      if (response.ok) {
-        toast.success(`Downgrade scheduled for ${downgradeDialog.scheduleDate}`);
+      if (result.success) {
+        toast.success(result.message || `Downgrade scheduled for ${downgradeDialog.scheduleDate}`);
         setDowngradeDialog({ open: false, planName: '', currentPlan: '', scheduleDate: '' });
         // Refresh the page to update UI
         router.refresh();
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Failed to schedule downgrade');
+        toast.error(result.error || 'Failed to schedule downgrade');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Downgrade failed:', error);
-      toast.error('Failed to schedule downgrade');
+      toast.error(error?.message || 'Failed to schedule downgrade');
     }
   };
 

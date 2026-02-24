@@ -27,8 +27,8 @@ schema:
   #       X-Workspace-Id: "${WORKSPACE_ID}"
   - admin-store.json
 
-documents:
-  - "src/services/graphql/admin-store/**/*.graphql"
+  # - "src/services/graphql/admin-store/**/*.graphql"
+  - "src/services/graphql/admin-store/queries/products/*.graphql"
   # "src/services/graphql/admin-store/queries/products/*.graphql"
   # - "src/services/graphql/admin-store/mutations/blogs/*.graphql"
   # - "src/services/graphql/admin-store/queries/navigation/*.graphql"
