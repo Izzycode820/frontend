@@ -28,8 +28,8 @@ schema:
   - admin-store.json
 
 documents:
-  - "src/services/graphql/admin-store/mutations/products/*.graphql"
-  - "src/services/graphql/admin-store/queries/products/*.graphql"
+  - "src/services/graphql/admin-store/**/*.graphql"
+  # "src/services/graphql/admin-store/queries/products/*.graphql"
   # - "src/services/graphql/admin-store/mutations/blogs/*.graphql"
   # - "src/services/graphql/admin-store/queries/navigation/*.graphql"
   # - "src/services/graphql/admin-store/mutations/navigation/*.graphql"
