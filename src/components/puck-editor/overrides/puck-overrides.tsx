@@ -1,5 +1,6 @@
 import { SidebarRoot } from '../sidebar/SidebarRoot';
 import { CategorySelector } from '../custom-fields/CategorySelector';
+import { DiscountSelector } from '../custom-fields/DiscountSelector';
 import { ColorPicker } from '../custom-fields/ColorPicker';
 import { ImagePicker } from '../custom-fields/ImagePicker';
 import { Slider } from '../custom-fields/Slider';
@@ -18,6 +19,7 @@ export const puckOverrides = {
   // Custom field types - allows themes to use new field types without importing from frontend
   fieldTypes: {
     categorySelector: CategorySelector,
+    discountSelector: DiscountSelector,
     colorPicker: ColorPicker,
     imagePicker: ImagePicker,
     slider: Slider,
