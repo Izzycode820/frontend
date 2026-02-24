@@ -28,18 +28,12 @@ schema:
   - admin-store.json
 
 documents:
-  # - "src/services/graphql/admin-store/mutations/navigation/MenuItemCreate.graphql"
-  # - "src/services/graphql/admin-store/mutations/navigation/MenuItemUpdate.graphql"
-  - "src/services/graphql/admin-store/queries/orders/*.graphql"
-  - "src/services/graphql/admin-store/queries/customers/*.graphql"
-  - "src/services/graphql/admin-store/mutations/orders/*.graphql"
-  - "src/services/graphql/admin-store/mutations/customers/*.graphql"
-
-  #- "src/services/graphql/admin-store/queries/blogs/GetArticles.graphql"
-  # - "src/services/graphql/admin-store/mutations/pages/*.graphql"
-  # - "src/services/graphql/admin-store/queries/navigation/*.graphql"
-  # - "src/services/graphql/admin-store/queries/pages/*.graphql"
-  # - "src/services/graphql/admin-store/queries/customers/GetCustomers.graphql"
+  - "src/services/graphql/admin-store/queries/blogs/*.graphql"
+  - "src/services/graphql/admin-store/mutations/blogs/*.graphql"
+  - "src/services/graphql/admin-store/queries/navigation/*.graphql"
+  - "src/services/graphql/admin-store/mutations/navigation/*.graphql"
+  - "src/services/graphql/admin-store/mutations/pages/*.graphql"
+  - "src/services/graphql/admin-store/queries/pages/*.graphql"
 
 generates:
   # Base types for the store domain

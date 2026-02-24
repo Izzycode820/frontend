@@ -1,4 +1,4 @@
-import * as Types from '../../../../../../types/admin-store/graphql-base';
+import * as Types from '../../../../../../types/workspace/store/graphql-base';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type CreateArticleMutationVariables = Types.Exact<{
