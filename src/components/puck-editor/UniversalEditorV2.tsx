@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Puck, type Data, type Config } from '@measured/puck';
 import '@measured/puck/puck.css';
 import { MemoryRouter } from 'react-router-dom';
-import { useTheme } from '@/utils/ThemeContext';
 import { loadThemeConfig } from '@/registry/theme-registry';
 import { puckOverrides } from './overrides/puck-overrides';
 import { Button } from '@/components/shadcn-ui/button';
@@ -84,15 +83,13 @@ export default function UniversalEditorV2({
     onChange?.(newData);
   };
 
-  const { theme } = useTheme();
-
   if (isLoading) {
     return (
-      <div className={`h-screen flex items-center justify-center bg-background ${className}`}>
+      <div className={`h-screen flex items-center justify-center bg-gray-50 ${className}`}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h3 className="text-lg font-medium text-foreground mb-2">Loading Editor</h3>
-          <p className="text-muted-foreground">Loading theme configuration...</p>
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Loading Editor</h3>
+          <p className="text-gray-500">Loading theme configuration...</p>
         </div>
       </div>
     );
@@ -100,18 +97,18 @@ export default function UniversalEditorV2({
 
   if (error) {
     return (
-      <div className={`h-screen flex items-center justify-center bg-destructive/5 ${className}`}>
+      <div className={`h-screen flex items-center justify-center bg-red-50 ${className}`}>
         <div className="text-center max-w-md">
-          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="h-8 w-8 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-foreground mb-2">Editor Error</h3>
-          <p className="text-destructive text-sm mb-6">{error}</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Editor Error</h3>
+          <p className="text-red-600 text-sm mb-6">{error}</p>
           <button
             onClick={loadMasterConfig}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Retry
           </button>
@@ -122,15 +119,15 @@ export default function UniversalEditorV2({
 
   if (!config) {
     return (
-      <div className={`h-screen flex items-center justify-center bg-background ${className}`}>
-        <p className="text-muted-foreground">Theme configuration not available</p>
+      <div className={`h-screen flex items-center justify-center bg-gray-50 ${className}`}>
+        <p className="text-gray-600">Theme configuration not available</p>
       </div>
     );
   }
 
   return (
     <MediaLibraryProvider>
-      <div className={`puck-editor ${theme === 'dark' ? 'dark' : ''} ${className}`} style={{ height: '100vh' }}>
+      <div className={`puck-editor force-light ${className}`} style={{ height: '100vh' }}>
         <Puck
           config={config}
           data={data}

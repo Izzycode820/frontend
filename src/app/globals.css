@@ -135,13 +135,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-
-  /* Puck Editor Variables (Light) */
-  --puck-bg: #f8fafc;
-  --puck-text: #0f172a;
-  --puck-border: #e2e8f0;
-  --puck-input-bg: #ffffff;
-  --puck-sidebar-bg: #ffffff;
 }
 
 .dark {
@@ -176,43 +169,66 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-
-  /* Puck Editor Variables (Dark) */
-  --puck-bg: oklch(0.145 0 0);
-  --puck-text: oklch(0.985 0 0);
-  --puck-border: oklch(1 0 0 / 10%);
-  --puck-input-bg: oklch(0.205 0 0);
-  --puck-sidebar-bg: oklch(0.205 0 0);
-
-  /* Ensure browser UI elements respond to dark mode */
-  color-scheme: dark;
 }
 
-/* Ensure Puck UI components use theme variables */
-.puck-editor {
-  --puck-bg: var(--background);
-  --puck-text: var(--foreground);
-  --puck-border: var(--border);
+.force-light {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Force Puck-specific variables to light mode values */
+  --puck-bg: #ffffff;
+  --puck-text: #000000;
+  --puck-border: #e2e8f0;
+
+  /* Override standard properties that Puck might use */
+  color-scheme: light;
 }
 
-.puck-editor [class*="PuckHeader"] {
-  background-color: var(--background);
-  color: var(--foreground);
-  border-bottom: 1px solid var(--border);
+/* Ensure text inputs and buttons inside Puck editor are visible */
+.force-light input,
+.force-light textarea,
+.force-light button {
+  color: #000000;
 }
 
-.puck-editor [class*="PuckSidebar"] {
-  background-color: var(--sidebar);
-  color: var(--sidebar-foreground);
+/* Fix specific Puck Icons not adapting */
+.force-light svg {
+  color: inherit;
 }
 
-/* Fix for Puck inputs in dark mode */
-.dark .puck-editor input,
-.dark .puck-editor textarea,
-.dark .puck-editor select {
-  background-color: var(--input);
-  color: var(--foreground);
-  border-color: var(--border);
+/* Specific fix for dim text in Zoom/Header controls if they use muted colors */
+.force-light [class*="PuckHeader"] {
+  background-color: #ffffff;
+  color: #000000;
 }
 
 @layer base {

@@ -42,7 +42,8 @@ export function PricingPage({ className }: PricingPageProps) {
     planName: string;
     currentPlan: string;
     scheduleDate: string;
-  }>({ open: false, planName: '', currentPlan: '', scheduleDate: '' });
+    tier: string;
+  }>({ open: false, planName: '', currentPlan: '', scheduleDate: '', tier: '' });
 
   // Query all plans
   const { data: plansData, loading: plansLoading, error: plansError } = useQuery(GetPlansDocument);
@@ -162,7 +163,8 @@ export function PricingPage({ className }: PricingPageProps) {
             open: true,
             planName: intent.planName || tier,
             currentPlan: intent.currentPlanName || 'Current Plan',
-            scheduleDate: intent.scheduleDate?.split('T')[0] || 'end of billing cycle'
+            scheduleDate: intent.scheduleDate?.split('T')[0] || 'end of billing cycle',
+            tier: backendTier
           });
           break;
 
@@ -185,7 +187,7 @@ export function PricingPage({ className }: PricingPageProps) {
   // Handle downgrade confirmation
   const handleConfirmDowngrade = async () => {
     try {
-      const tier = (selectedTier?.toLowerCase() === 'beginner' ? 'beginning' : selectedTier?.toLowerCase()) as SubscriptionTier;
+      const tier = downgradeDialog.tier as SubscriptionTier;
       
       const result = await subscriptionService.scheduleDowngrade({
         new_plan_tier: tier
@@ -193,7 +195,7 @@ export function PricingPage({ className }: PricingPageProps) {
 
       if (result.success) {
         toast.success(result.message || `Downgrade scheduled for ${downgradeDialog.scheduleDate}`);
-        setDowngradeDialog({ open: false, planName: '', currentPlan: '', scheduleDate: '' });
+        setDowngradeDialog({ open: false, planName: '', currentPlan: '', scheduleDate: '', tier: '' });
         // Refresh the page to update UI
         router.refresh();
       } else {
@@ -337,7 +339,10 @@ export function PricingPage({ className }: PricingPageProps) {
       </div>
 
       {/* Downgrade Confirmation Dialog */}
-      <Dialog open={downgradeDialog.open} onOpenChange={(open) => !open && setDowngradeDialog({ ...downgradeDialog, open: false })}>
+      <Dialog 
+        open={downgradeDialog.open} 
+        onOpenChange={(open) => !open && setDowngradeDialog((prev) => ({ ...prev, open: false }))}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
