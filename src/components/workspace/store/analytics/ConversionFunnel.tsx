@@ -26,6 +26,21 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
 
     const validStages = data.stages.filter((s): s is NonNullable<typeof s> => s !== null);
 
+    const getStageLabel = (name: string) => {
+        switch (name) {
+            case 'Total Sessions':
+                return t('funnel.stages.sessions');
+            case 'Added to Cart':
+                return t('funnel.stages.addedToCart');
+            case 'Reached Checkout':
+                return t('funnel.stages.reachedCheckout');
+            case 'Purchased':
+                return t('funnel.stages.purchased');
+            default:
+                return name;
+        }
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -36,7 +51,7 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
                     {validStages.map((stage, index) => (
                         <div key={index} className="space-y-1">
                             <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{stage.name}</span>
+                                <span className="text-muted-foreground">{getStageLabel(stage.name)}</span>
                                 <span className="font-medium">
                                     {stage.count} ({stage.rate.toFixed(1)}%)
                                 </span>

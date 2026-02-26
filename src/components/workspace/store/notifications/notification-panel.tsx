@@ -44,6 +44,7 @@ import { useNotificationSocket } from './use-notification-socket';
 import { GetWorkspaceNotificationsDocument } from '@/services/graphql/notifications/queries/__generated__/getWorkspaceNotifications.generated';
 import { MarkNotificationAsReadDocument } from '@/services/graphql/notifications/mutations/__generated__/markAsRead.generated';
 import { MarkAllNotificationsAsReadDocument } from '@/services/graphql/notifications/mutations/__generated__/markAllAsRead.generated';
+import { useTranslations } from 'next-intl';
 
 // Helper hook for media query
 function useMediaQuery(query: string) {
@@ -93,6 +94,8 @@ function NotificationList({
     notifications,
     handleMarkAsRead,
 }: NotificationListProps) {
+    const t = useTranslations('Notifications');
+
     if (loading) {
         return (
             <div className="space-y-4">
@@ -110,9 +113,9 @@ function NotificationList({
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
                 <IconBell className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No notifications yet</p>
+                <p className="text-muted-foreground">{t('empty.title')}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                    You'll see order updates and alerts here
+                    {t('empty.description')}
                 </p>
             </div>
         );
@@ -208,6 +211,7 @@ function NotificationPanelInner({
     onOpenChange,
     workspaceId,
 }: NotificationPanelProps) {
+    const t = useTranslations('Notifications');
     const isDesktop = useMediaQuery('(min-width: 768px)');
     const {
         unreadCount,
@@ -257,7 +261,7 @@ function NotificationPanelInner({
             <div className="flex items-center gap-2">
                 <IconBell className="h-5 w-5" />
                 <span className="text-lg font-semibold leading-none tracking-tight">
-                    Notifications
+                    {t('title')}
                 </span>
                 {unreadCount > 0 && (
                     <Badge variant="destructive" className="rounded-full px-2">
@@ -273,7 +277,7 @@ function NotificationPanelInner({
                     className="text-xs"
                 >
                     <IconChecks className="h-4 w-4 mr-1" />
-                    Mark all read
+                    {t('actions.markAllRead')}
                 </Button>
             )}
         </div>
@@ -301,7 +305,7 @@ function NotificationPanelInner({
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle asChild>{HeaderContent}</SheetTitle>
                         <SheetDescription>
-                            Stay updated with your store activity
+                            {t('description')}
                         </SheetDescription>
                     </SheetHeader>
                     {NotificationContent}
@@ -317,7 +321,7 @@ function NotificationPanelInner({
                 <DrawerHeader className="flex-shrink-0 text-left">
                     <DrawerTitle asChild>{HeaderContent}</DrawerTitle>
                     <DrawerDescription>
-                        Stay updated with your store activity
+                        {t('description')}
                     </DrawerDescription>
                 </DrawerHeader>
                 <Separator className="my-2" />

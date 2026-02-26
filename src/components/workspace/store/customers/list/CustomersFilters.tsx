@@ -26,23 +26,23 @@ interface CustomersFiltersProps {
 }
 
 const CUSTOMER_TYPES = [
-  { value: 'student', label: 'Student' },
-  { value: 'business', label: 'Small Business' },
-  { value: 'individual', label: 'Individual' },
-  { value: 'corporate', label: 'Corporate' },
+  { value: 'STUDENT', label: 'Student' },
+  { value: 'BUSINESS', label: 'Small Business' },
+  { value: 'INDIVIDUAL', label: 'Individual' },
+  { value: 'CORPORATE', label: 'Corporate' },
 ];
 
 const CAMEROON_REGIONS = [
-  { value: 'centre', label: 'Centre' },
-  { value: 'littoral', label: 'Littoral' },
-  { value: 'west', label: 'West' },
-  { value: 'northwest', label: 'Northwest' },
-  { value: 'southwest', label: 'Southwest' },
-  { value: 'adamawa', label: 'Adamawa' },
-  { value: 'east', label: 'East' },
-  { value: 'far_north', label: 'Far North' },
-  { value: 'north', label: 'North' },
-  { value: 'south', label: 'South' },
+  { value: 'CENTRE', label: 'Centre' },
+  { value: 'LITTORAL', label: 'Littoral' },
+  { value: 'WEST', label: 'West' },
+  { value: 'NORTH_WEST', label: 'Northwest' },
+  { value: 'SOUTH_WEST', label: 'Southwest' },
+  { value: 'ADAMAWA', label: 'Adamawa' },
+  { value: 'EAST', label: 'East' },
+  { value: 'FAR_NORTH', label: 'Far North' },
+  { value: 'NORTH', label: 'North' },
+  { value: 'SOUTH', label: 'South' },
 ];
 
 export function CustomersFilters({
@@ -117,7 +117,7 @@ export function CustomersFilters({
                 <SelectItem value="all">{t('list.filters.allTypes')}</SelectItem>
                 {CUSTOMER_TYPES.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
-                    {t(`list.filters.types.${type.value}`)}
+                    {t(`list.filters.types.${type.value.toLowerCase()}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -138,7 +138,7 @@ export function CustomersFilters({
                 <SelectItem value="all">{t('list.filters.allRegions')}</SelectItem>
                 {CAMEROON_REGIONS.map((reg) => (
                   <SelectItem key={reg.value} value={reg.value}>
-                    {t(`list.filters.regions.${reg.value}`)}
+                    {t(`list.filters.regions.${reg.value.toLowerCase()}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

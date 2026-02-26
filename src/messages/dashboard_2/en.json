@@ -662,10 +662,22 @@
     "save": "Save"
   },
   "Analytics": {
+    "title": "Analytics",
+    "last30Days": "Last 30 days",
+    "loading": "Loading analytics...",
+    "failed": "Failed to load analytics",
+    "unknownError": "Unknown error occurred",
+    "notAvailable": "Analytics Not Available",
     "funnel": {
       "title": "Conversion Funnel",
       "conversionRate": "Conversion Rate",
-      "abandonmentRate": "Abandonment Rate"
+      "abandonmentRate": "Abandonment Rate",
+      "stages": {
+        "sessions": "Total Sessions",
+        "addedToCart": "Added to Cart",
+        "reachedCheckout": "Reached Checkout",
+        "purchased": "Purchased"
+      }
     },
     "metrics": {
       "title": "Customer Metrics",
@@ -720,6 +732,7 @@
         "allTypes": "All types",
         "region": "Region",
         "allRegions": "All regions",
+        "viewResults": "View results",
         "types": {
           "student": "Student",
           "business": "Small Business",
@@ -730,7 +743,9 @@
           "centre": "Centre",
           "littoral": "Littoral",
           "west": "West",
+          "north_west": "Northwest",
           "northwest": "Northwest",
+          "south_west": "Southwest",
           "southwest": "Southwest",
           "adamawa": "Adamawa",
           "east": "East",
@@ -756,69 +771,95 @@
       }
     },
     "form": {
-      "createTitle": "Create customer",
-      "editTitle": "Edit customer",
-      "personalDetails": "Personal Details",
-      "name": "Name",
-      "namePlaceholder": "Jane Doe",
-      "email": "Email",
-      "emailPlaceholder": "jane.doe@example.com",
+      "basicInfo": "Basic Information",
       "phone": "Phone number",
-      "phonePlaceholder": "6XXXXXXXX",
+      "phonePlaceholder": "+237 670 123 456",
+      "phoneRequired": "Phone number is required",
+      "phoneFormat": "Phone must be in format +237XXXXXXXXX",
+      "name": "Full name",
+      "namePlaceholder": "John Doe",
+      "nameRequired": "Name is required",
+      "nameMinLength": "Name must be at least 2 characters",
+      "email": "Email",
+      "emailPlaceholder": "john.doe@example.com",
+      "emailFormat": "Invalid email format",
       "type": "Customer type",
-      "address": "Address",
-      "addressPlaceholder": "123 Street Name",
+      "selectType": "Select type",
+      "location": "Location",
       "city": "City",
       "cityPlaceholder": "Douala",
       "region": "Region",
+      "selectRegion": "Select region",
+      "address": "Address",
+      "addressPlaceholder": "Enter full address",
+      "additionalInfo": "Additional Information",
       "tags": "Tags",
-      "tagsPlaceholder": "VIP, Wholesale",
-      "notes": "Notes",
-      "notesPlaceholder": "Add a note about this customer...",
-      "marketing": "Marketing preferences",
-      "acceptsSms": "Accepts SMS marketing",
-      "acceptsWhatsapp": "Accepts WhatsApp marketing",
-      "save": "Save customer",
+      "tagsPlaceholder": "VIP, Wholesale, Returning (comma-separated)",
+      "tagsHint": "Separate multiple tags with commas",
       "saving": "Saving...",
-      "toasts": {
-        "createSuccess": "Customer created successfully",
-        "updateSuccess": "Customer updated successfully"
-      }
+      "save": "Save customer",
+      "notificationPreferences": "Notification Preferences",
+      "smsNotifications": "SMS notifications",
+      "whatsappNotifications": "WhatsApp notifications"
     },
     "details": {
-      "back": "Back to customers",
+      "loading": "Loading customer...",
+      "failed": "Failed to load customer",
+      "notFound": "Customer not found",
       "moreActions": "More actions",
       "stats": {
-        "totalSpent": "Total spent",
-        "totalOrders": "Total orders",
+        "amountSpent": "Amount spent",
+        "orders": "Orders",
         "customerSince": "Customer since",
-        "rfmGroup": "RFM Group"
+        "rfmGroup": "RFM group"
       },
       "sidebar": {
         "customer": "Customer",
-        "contact": "Contact information",
+        "contactInfo": "Contact information",
+        "notificationsLanguage": "Will receive notifications in English",
         "defaultAddress": "Default address",
-        "noAddress": "No address provided",
-        "taxInfo": "Tax details",
-        "exempt": "Exempt",
-        "notExempt": "Not exempt",
+        "country": "Cameroon",
+        "marketing": "Marketing",
+        "emailSubscribed": "Email subscribed",
+        "emailNotSubscribed": "Email not subscribed",
+        "smsSubscribed": "SMS subscribed",
+        "smsNotSubscribed": "SMS not subscribed",
+        "taxDetails": "Tax details",
+        "collectTax": "Collect tax",
         "storeCredit": "Store credit",
+        "noStoreCredit": "No store credit",
         "tags": "Tags",
-        "notes": "Notes"
+        "noTags": "No tags",
+        "notes": "Notes",
+        "noNotes": "No notes"
       },
       "timeline": {
         "title": "Timeline",
-        "addNote": "Add a note",
-        "postNote": "Post note",
-        "notePlaceholder": "Leave a note...",
-        "noActivity": "No activity yet"
+        "leaveNote": "Leave a note...",
+        "post": "Post",
+        "notesVisibility": "Only you and other staff can see notes",
+        "noHistory": "No history yet.",
+        "system": "System",
+        "notesComingSoon": "Notes functionality coming soon!",
+        "eventOccurred": "Event occurred"
       },
       "lastOrder": {
         "title": "Last order placed",
         "noOrders": "This customer hasn't placed any orders yet",
         "createOrder": "Create order",
-        "orderLabel": "Last order: {date}"
+        "lastOrder": "Last order: {date}"
       }
     }
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "empty": {
+      "title": "No notifications yet",
+      "description": "You'll see order updates and alerts here"
+    },
+    "actions": {
+      "markAllRead": "Mark all read"
+    },
+    "description": "Stay updated with your store activity"
   }
 }

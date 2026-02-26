@@ -8,6 +8,7 @@ import { Textarea } from '@/components/shadcn-ui/textarea';
 import { FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export interface TimelineEvent {
   id: string;
@@ -28,6 +29,7 @@ interface CustomerTimelineProps {
 }
 
 export function CustomerTimeline({ events = [], onCommentAdded }: CustomerTimelineProps) {
+  const t = useTranslations('Customers');
   const [comment, setComment] = useState('');
 
   // Sort events: Newest first
@@ -38,14 +40,14 @@ export function CustomerTimeline({ events = [], onCommentAdded }: CustomerTimeli
   const handlePostComment = () => {
     // Placeholder until mutation is ready
     if (!comment.trim()) return;
-    toast.info('Notes functionality coming soon!');
+    toast.info(t('details.timeline.notesComingSoon'));
     setComment('');
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Timeline</CardTitle>
+        <CardTitle className="text-base font-semibold">{t('details.timeline.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -58,7 +60,7 @@ export function CustomerTimeline({ events = [], onCommentAdded }: CustomerTimeli
               <Textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Leave a note..."
+                placeholder={t('details.timeline.leaveNote')}
                 className="min-h-[80px] resize-none"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -74,11 +76,11 @@ export function CustomerTimeline({ events = [], onCommentAdded }: CustomerTimeli
                   </Button>
                 </div>
                 <Button size="sm" variant="ghost" onClick={handlePostComment} disabled={!comment.trim()}>
-                  Post
+                  {t('details.timeline.post')}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Only you and other staff can see notes
+                {t('details.timeline.notesVisibility')}
               </p>
             </div>
           </div>
@@ -88,7 +90,7 @@ export function CustomerTimeline({ events = [], onCommentAdded }: CustomerTimeli
           {/* Timeline Feed */}
           <div className="relative pl-4 border-l-2 border-muted space-y-8">
             {sortedEvents.length === 0 && (
-              <p className="text-sm text-muted-foreground pl-4">No history yet.</p>
+              <p className="text-sm text-muted-foreground pl-4">{t('details.timeline.noHistory')}</p>
             )}
 
             {sortedEvents.map((event) => {
@@ -112,7 +114,7 @@ export function CustomerTimeline({ events = [], onCommentAdded }: CustomerTimeli
                           {event.author ? (
                             <span className="font-medium mr-1">{event.author.name}</span>
                           ) : (
-                            <span className="font-medium mr-1 text-muted-foreground">System</span>
+                            <span className="font-medium mr-1 text-muted-foreground">{t('details.timeline.system')}</span>
                           )}
                           {event.message}
                         </span>

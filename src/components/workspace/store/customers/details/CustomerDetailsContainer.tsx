@@ -10,12 +10,14 @@ import { CustomerStatsBar } from './CustomerStatsBar';
 import { LastOrderCard } from './LastOrderCard';
 import { CustomerTimeline } from './CustomerTimeline';
 import { CustomerSidebar } from './CustomerSidebar';
+import { useTranslations } from 'next-intl';
 
 interface CustomerDetailsContainerProps {
   customerId: string;
 }
 
 export default function CustomerDetailsContainer({ customerId }: CustomerDetailsContainerProps) {
+  const t = useTranslations('Customers');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
 
@@ -33,7 +35,7 @@ export default function CustomerDetailsContainer({ customerId }: CustomerDetails
       <div className="flex items-center justify-center h-full">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading customer...</p>
+          <p className="text-muted-foreground">{t('details.loading')}</p>
         </div>
       </div>
     );
@@ -44,9 +46,9 @@ export default function CustomerDetailsContainer({ customerId }: CustomerDetails
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center text-destructive">
-          <p>Failed to load customer</p>
+          <p>{t('details.failed')}</p>
           <p className="text-sm text-muted-foreground">
-            {error?.message || 'Customer not found'}
+            {error?.message || t('details.notFound')}
           </p>
         </div>
       </div>

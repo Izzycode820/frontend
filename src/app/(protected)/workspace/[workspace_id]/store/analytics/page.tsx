@@ -3,6 +3,7 @@
 import React from 'react';
 import { useQuery } from '@apollo/client/react';
 import { GetStoreAnalyticsDocument } from '@/services/graphql/admin-store/queries/analytics/__generated__/getStoreAnalytics.generated';
+import { useTranslations } from 'next-intl';
 import { SectionCards } from '@/components/workspace/store/dashboard/section-cards';
 import { ChartAreaInteractive } from '@/components/workspace/store/dashboard/chart-area-interactive';
 import { TierBadge } from '@/components/workspace/store/analytics/TierBadge';
@@ -13,6 +14,7 @@ import { CustomerMetrics } from '@/components/workspace/store/analytics/Customer
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 
 export default function AnalyticsPage() {
+    const t = useTranslations('Analytics');
     const { data, loading, error } = useQuery(GetStoreAnalyticsDocument, {
         variables: { days: 30 },
         fetchPolicy: 'network-only', // Always fetch fresh data on navigation
@@ -28,7 +30,7 @@ export default function AnalyticsPage() {
                     <CardContent className="pt-6">
                         <div className="text-center py-12">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-                            <p className="text-muted-foreground">Loading analytics...</p>
+                            <p className="text-muted-foreground">{t('loading')}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -43,9 +45,9 @@ export default function AnalyticsPage() {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-center text-destructive">
-                            <p>Failed to load analytics</p>
+                            <p>{t('failed')}</p>
                             <p className="text-sm text-muted-foreground">
-                                {error?.message || 'Unknown error occurred'}
+                                {error?.message || t('unknownError')}
                             </p>
                         </div>
                     </CardContent>
@@ -61,9 +63,9 @@ export default function AnalyticsPage() {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-center py-12">
-                            <p className="text-lg font-semibold mb-2">Analytics Not Available</p>
+                            <p className="text-lg font-semibold mb-2">{t('notAvailable')}</p>
                             <p className="text-muted-foreground">
-                                {analytics.error || 'Analytics is not available for your current plan.'}
+                                {analytics.error || t('notAvailable')}
                             </p>
                         </div>
                     </CardContent>
@@ -80,8 +82,8 @@ export default function AnalyticsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Analytics</h1>
-                    <p className="text-sm text-muted-foreground">Last 30 days</p>
+                    <h1 className="text-2xl font-bold">{t('title')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('last30Days')}</p>
                 </div>
                 <TierBadge currentTier={currentTier} />
             </div>
@@ -105,14 +107,14 @@ export default function AnalyticsPage() {
                     {hasPro && analytics.funnel ? (
                         <ConversionFunnel data={analytics.funnel} />
                     ) : (
-                        <LockedSection title="Conversion Funnel" requiredPlan="Pro" />
+                        <LockedSection title={t('funnel.title')} requiredPlan="Pro" />
                     )}
                 </div>
                 <div>
                     {hasPro && analytics.customers ? (
                         <CustomerMetrics data={analytics.customers} />
                     ) : (
-                        <LockedSection title="Customer Metrics" requiredPlan="Pro" />
+                        <LockedSection title={t('metrics.title')} requiredPlan="Pro" />
                     )}
                 </div>
             </div>

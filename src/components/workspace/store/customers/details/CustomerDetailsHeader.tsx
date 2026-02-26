@@ -1,11 +1,14 @@
 import { Button } from '@/components/shadcn-ui/button';
 import { User, MoreHorizontal } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface CustomerDetailsHeaderProps {
   customerName: string;
 }
 
 export function CustomerDetailsHeader({ customerName }: CustomerDetailsHeaderProps) {
+  const t = useTranslations('Customers');
+
   return (
     <div className="px-4 lg:px-6">
       <div className="flex items-center justify-between">
@@ -17,7 +20,7 @@ export function CustomerDetailsHeader({ customerName }: CustomerDetailsHeaderPro
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
-            More actions
+            {t('details.moreActions')}
             <MoreHorizontal className="ml-2 h-4 w-4" />
           </Button>
         </div>

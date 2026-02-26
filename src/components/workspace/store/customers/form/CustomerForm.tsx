@@ -14,15 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shadcn-ui/select';
-import { Separator } from '@/components/shadcn-ui/separator';
 import { Save } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const CAMEROON_REGIONS = [
   { value: 'centre', label: 'Centre' },
   { value: 'littoral', label: 'Littoral' },
   { value: 'west', label: 'West' },
-  { value: 'northwest', label: 'Northwest' },
-  { value: 'southwest', label: 'Southwest' },
+  { value: 'north_west', label: 'Northwest' },
+  { value: 'south_west', label: 'Southwest' },
   { value: 'adamawa', label: 'Adamawa' },
   { value: 'east', label: 'East' },
   { value: 'far_north', label: 'Far North' },
@@ -33,6 +33,8 @@ const CAMEROON_REGIONS = [
 const CUSTOMER_TYPES = [
   { value: 'individual', label: 'Individual' },
   { value: 'business', label: 'Business' },
+  { value: 'student', label: 'Student' },
+  { value: 'corporate', label: 'Corporate' },
 ] as const;
 
 const CAMEROON_PHONE_REGEX = /^\+237[0-9]{9}$/;
@@ -61,6 +63,7 @@ export function CustomerForm({
   onSubmit,
   isLoading = false,
 }: CustomerFormProps) {
+  const t = useTranslations('Customers');
   const {
     register,
     handleSubmit,
@@ -98,24 +101,24 @@ export function CustomerForm({
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle>{t('form.basicInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 {/* Phone Number */}
                 <div className="space-y-2">
                   <Label htmlFor="phone">
-                    Phone number <span className="text-red-500">*</span>
+                    {t('form.phone')} <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="phone"
                     {...register('phone', {
-                      required: 'Phone number is required',
+                      required: t('form.phoneRequired'),
                       validate: (value) =>
                         CAMEROON_PHONE_REGEX.test(value) ||
-                        'Phone must be in format +237XXXXXXXXX',
+                        t('form.phoneFormat'),
                     })}
-                    placeholder="+237 670 123 456"
+                    placeholder={t('form.phonePlaceholder')}
                     className={errors.phone ? 'border-red-500' : ''}
                   />
                   {errors.phone && (
@@ -126,18 +129,18 @@ export function CustomerForm({
                 {/* Full Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name">
-                    Full name <span className="text-red-500">*</span>
+                    {t('form.name')} <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="name"
                     {...register('name', {
-                      required: 'Name is required',
+                      required: t('form.nameRequired'),
                       minLength: {
                         value: 2,
-                        message: 'Name must be at least 2 characters',
+                        message: t('form.nameMinLength'),
                       },
                     })}
-                    placeholder="John Doe"
+                    placeholder={t('form.namePlaceholder')}
                     className={errors.name ? 'border-red-500' : ''}
                   />
                   {errors.name && (
@@ -149,17 +152,17 @@ export function CustomerForm({
               <div className="grid grid-cols-2 gap-4">
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('form.email')}</Label>
                   <Input
                     id="email"
                     type="email"
                     {...register('email', {
                       pattern: {
                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: 'Invalid email format',
+                        message: t('form.emailFormat'),
                       },
                     })}
-                    placeholder="john.doe@example.com"
+                    placeholder={t('form.emailPlaceholder')}
                     className={errors.email ? 'border-red-500' : ''}
                   />
                   {errors.email && (
@@ -169,18 +172,18 @@ export function CustomerForm({
 
                 {/* Customer Type */}
                 <div className="space-y-2">
-                  <Label htmlFor="customerType">Customer type</Label>
+                  <Label htmlFor="customerType">{t('form.type')}</Label>
                   <Select
                     value={customerType || 'individual'}
                     onValueChange={(value) => setValue('customerType', value)}
                   >
                     <SelectTrigger id="customerType">
-                      <SelectValue placeholder="Select type" />
+                      <SelectValue placeholder={t('form.selectType')} />
                     </SelectTrigger>
                     <SelectContent>
                       {CUSTOMER_TYPES.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
-                          {type.label}
+                          {t(`list.filters.types.${type.value.toLowerCase()}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -193,30 +196,30 @@ export function CustomerForm({
           {/* Location Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Location</CardTitle>
+              <CardTitle>{t('form.location')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 {/* City */}
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
-                  <Input id="city" {...register('city')} placeholder="Douala" />
+                  <Label htmlFor="city">{t('form.city')}</Label>
+                  <Input id="city" {...register('city')} placeholder={t('form.cityPlaceholder')} />
                 </div>
 
                 {/* Region */}
                 <div className="space-y-2">
-                  <Label htmlFor="region">Region</Label>
+                  <Label htmlFor="region">{t('form.region')}</Label>
                   <Select
                     value={region || ''}
                     onValueChange={(value) => setValue('region', value)}
                   >
                     <SelectTrigger id="region">
-                      <SelectValue placeholder="Select region" />
+                      <SelectValue placeholder={t('form.selectRegion')} />
                     </SelectTrigger>
                     <SelectContent>
                       {CAMEROON_REGIONS.map((reg) => (
                         <SelectItem key={reg.value} value={reg.value}>
-                          {reg.label}
+                          {t(`list.filters.regions.${reg.value.toLowerCase()}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -226,11 +229,11 @@ export function CustomerForm({
 
               {/* Address */}
               <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="address">{t('form.address')}</Label>
                 <Textarea
                   id="address"
                   {...register('address')}
-                  placeholder="Enter full address"
+                  placeholder={t('form.addressPlaceholder')}
                   rows={3}
                 />
               </div>
@@ -240,19 +243,19 @@ export function CustomerForm({
           {/* Additional Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Additional Information</CardTitle>
+              <CardTitle>{t('form.additionalInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Tags */}
               <div className="space-y-2">
-                <Label htmlFor="tags">Tags</Label>
+                <Label htmlFor="tags">{t('form.tags')}</Label>
                 <Input
                   id="tags"
                   {...register('tags')}
-                  placeholder="VIP, Wholesale, Returning (comma-separated)"
+                  placeholder={t('form.tagsPlaceholder')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Separate multiple tags with commas
+                  {t('form.tagsHint')}
                 </p>
               </div>
             </CardContent>
@@ -269,14 +272,14 @@ export function CustomerForm({
               disabled={isLoading}
             >
               <Save className="mr-2 h-4 w-4" />
-              {isLoading ? 'Saving...' : 'Save customer'}
+              {isLoading ? t('form.saving') : t('form.save')}
             </Button>
           </Card>
 
           {/* Notification Preferences */}
           <Card>
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
+              <CardTitle>{t('form.notificationPreferences')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {/* SMS Notifications */}
@@ -292,7 +295,7 @@ export function CustomerForm({
                   htmlFor="smsNotifications"
                   className="text-sm font-normal cursor-pointer"
                 >
-                  SMS notifications
+                  {t('form.smsNotifications')}
                 </Label>
               </div>
 
@@ -309,7 +312,7 @@ export function CustomerForm({
                   htmlFor="whatsappNotifications"
                   className="text-sm font-normal cursor-pointer"
                 >
-                  WhatsApp notifications
+                  {t('form.whatsappNotifications')}
                 </Label>
               </div>
             </CardContent>

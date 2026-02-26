@@ -662,10 +662,22 @@
     "save": "Enregistrer"
   },
   "Analytics": {
+    "title": "Analytiques",
+    "last30Days": "30 derniers jours",
+    "loading": "Chargement des analytiques...",
+    "failed": "Échec du chargement des analytiques",
+    "unknownError": "Une erreur inconnue est survenue",
+    "notAvailable": "Analytiques non disponibles",
     "funnel": {
       "title": "Entonnoir de conversion",
       "conversionRate": "Taux de conversion",
-      "abandonmentRate": "Taux d'abandon"
+      "abandonmentRate": "Taux d'abandon",
+      "stages": {
+        "sessions": "Sessions totales",
+        "addedToCart": "Ajouté au panier",
+        "reachedCheckout": "Paiement initié",
+        "purchased": "Acheté"
+      }
     },
     "metrics": {
       "title": "Indicateurs clients",
@@ -720,6 +732,7 @@
         "allTypes": "Tous les types",
         "region": "Région",
         "allRegions": "Toutes les régions",
+        "viewResults": "Voir les résultats",
         "types": {
           "student": "Étudiant",
           "business": "Petite entreprise",
@@ -730,7 +743,9 @@
           "centre": "Centre",
           "littoral": "Littoral",
           "west": "Ouest",
+          "north_west": "Nord-Ouest",
           "northwest": "Nord-Ouest",
+          "south_west": "Sud-Ouest",
           "southwest": "Sud-Ouest",
           "adamawa": "Adamaoua",
           "east": "Est",
@@ -756,69 +771,95 @@
       }
     },
     "form": {
-      "createTitle": "Créer un client",
-      "editTitle": "Modifier le client",
-      "personalDetails": "Informations personnelles",
-      "name": "Nom",
-      "namePlaceholder": "Jean Dupont",
-      "email": "E-mail",
-      "emailPlaceholder": "jean.dupont@exemple.com",
+      "basicInfo": "Informations de base",
       "phone": "Numéro de téléphone",
-      "phonePlaceholder": "6XXXXXXXX",
+      "phonePlaceholder": "+237 670 123 456",
+      "phoneRequired": "Le numéro de téléphone est requis",
+      "phoneFormat": "Le téléphone doit être au format +237XXXXXXXXX",
+      "name": "Nom complet",
+      "namePlaceholder": "John Doe",
+      "nameRequired": "Le nom est requis",
+      "nameMinLength": "Le nom doit comporter au moins 2 caractères",
+      "email": "E-mail",
+      "emailPlaceholder": "john.doe@exemple.com",
+      "emailFormat": "Format d'e-mail invalide",
       "type": "Type de client",
-      "address": "Adresse",
-      "addressPlaceholder": "Nom de la rue, quartier",
+      "selectType": "Sélectionner le type",
+      "location": "Emplacement",
       "city": "Ville",
       "cityPlaceholder": "Douala",
       "region": "Région",
+      "selectRegion": "Sélectionner la région",
+      "address": "Adresse",
+      "addressPlaceholder": "Entrez l'adresse complète",
+      "additionalInfo": "Informations complémentaires",
       "tags": "Tags",
-      "tagsPlaceholder": "VIP, Grossiste",
-      "notes": "Notes",
-      "notesPlaceholder": "Ajouter une note sur ce client...",
-      "marketing": "Préférences marketing",
-      "acceptsSms": "Accepte le marketing par SMS",
-      "acceptsWhatsapp": "Accepte le marketing par WhatsApp",
-      "save": "Enregistrer le client",
+      "tagsPlaceholder": "VIP, Grossiste, Récurrent (séparés par des virgules)",
+      "tagsHint": "Séparez plusieurs tags par des virgules",
       "saving": "Enregistrement...",
-      "toasts": {
-        "createSuccess": "Client créé avec succès",
-        "updateSuccess": "Client mis à jour avec succès"
-      }
+      "save": "Enregistrer le client",
+      "notificationPreferences": "Préférences de notification",
+      "smsNotifications": "Notifications par SMS",
+      "whatsappNotifications": "Notifications WhatsApp"
     },
     "details": {
-      "back": "Retour aux clients",
+      "loading": "Chargement du client...",
+      "failed": "Échec du chargement du client",
+      "notFound": "Client non trouvé",
       "moreActions": "Plus d'actions",
       "stats": {
-        "totalSpent": "Montant total",
-        "totalOrders": "Nombre de commandes",
-        "customerSince": "Client depuis le",
+        "amountSpent": "Montant dépensé",
+        "orders": "Commandes",
+        "customerSince": "Client depuis",
         "rfmGroup": "Groupe RFM"
       },
       "sidebar": {
         "customer": "Client",
-        "contact": "Coordonnées",
+        "contactInfo": "Coordonnées",
+        "notificationsLanguage": "Recevra les notifications en anglais",
         "defaultAddress": "Adresse par défaut",
-        "noAddress": "Aucune adresse fournie",
-        "taxInfo": "Détails fiscaux",
-        "exempt": "Exonéré",
-        "notExempt": "Pas exonéré",
-        "storeCredit": "Crédit boutique",
+        "country": "Cameroun",
+        "marketing": "Marketing",
+        "emailSubscribed": "E-mail abonné",
+        "emailNotSubscribed": "E-mail non abonné",
+        "smsSubscribed": "SMS abonné",
+        "smsNotSubscribed": "SMS non abonné",
+        "taxDetails": "Détails fiscaux",
+        "collectTax": "Collecter la taxe",
+        "storeCredit": "Crédit magasin",
+        "noStoreCredit": "Pas de crédit magasin",
         "tags": "Tags",
-        "notes": "Notes"
+        "noTags": "Pas de tags",
+        "notes": "Notes",
+        "noNotes": "Pas de notes"
       },
       "timeline": {
         "title": "Chronologie",
-        "addNote": "Ajouter une note",
-        "postNote": "Publier la note",
-        "notePlaceholder": "Laisser une note...",
-        "noActivity": "Aucune activité pour le moment"
+        "leaveNote": "Laisser une note...",
+        "post": "Publier",
+        "notesVisibility": "Seuls vous et les autres membres du personnel pouvez voir les notes",
+        "noHistory": "Pas encore d'historique.",
+        "system": "Système",
+        "notesComingSoon": "La fonctionnalité de notes arrive bientôt !",
+        "eventOccurred": "L'événement s'est produit"
       },
       "lastOrder": {
         "title": "Dernière commande passée",
         "noOrders": "Ce client n'a pas encore passé de commande",
         "createOrder": "Créer une commande",
-        "orderLabel": "Dernière commande : {date}"
+        "lastOrder": "Dernière commande : {date}"
       }
     }
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "empty": {
+      "title": "Aucune notification pour le moment",
+      "description": "Vous verrez les mises à jour de commandes et les alertes ici"
+    },
+    "actions": {
+      "markAllRead": "Tout marquer comme lu"
+    },
+    "description": "Restez informé de l'activité de votre boutique"
   }
 }

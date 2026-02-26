@@ -11,16 +11,12 @@ import { useState } from 'react';
 import { IconBell } from '@tabler/icons-react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/shadcn-ui/sheet"
 import { cn } from '@/lib/utils';
 import { useNotificationSocket } from './use-notification-socket';
 import { NotificationPanel } from './notification-panel';
-import { ApolloProvider } from "@apollo/client/react"
-import { notificationClient } from "@/services/graphql/clients"
+import { ApolloProvider } from "@apollo/client/react";
+import { notificationClient } from "@/services/graphql/clients";
+import { useTranslations } from 'next-intl';
 
 interface NotificationBellProps {
   workspaceId: string;
@@ -33,6 +29,7 @@ function NotificationBellInner({
   className,
   collapsed = false,
 }: NotificationBellProps) {
+  const t = useTranslations('Notifications');
   const [panelOpen, setPanelOpen] = useState(false);
   const { unreadCount } = useNotificationSocket();
 
@@ -64,7 +61,7 @@ function NotificationBellInner({
 
         {!collapsed && (
           <>
-            <span className="flex-1 text-left">Notifications</span>
+            <span className="flex-1 text-left">{t('title')}</span>
             {unreadCount > 0 && (
               <Badge
                 variant="secondary"

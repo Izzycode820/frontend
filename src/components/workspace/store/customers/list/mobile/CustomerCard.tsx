@@ -97,7 +97,7 @@ export function CustomerCard({
                         {customer.name}
                     </span>
                     <Badge variant="secondary" className="text-xs capitalize px-1.5 py-0">
-                        {customer.customerType}
+                        {t(`list.filters.types.${customer.customerType.toLowerCase()}`)}
                     </Badge>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">

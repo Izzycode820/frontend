@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Plus, Filter } from 'lucide-react';
+import { Search, Plus, Filter, X } from 'lucide-react';
 import { Input } from '@/components/shadcn-ui/input';
 import { Button } from '@/components/shadcn-ui/button';
 import { CustomerCard } from './CustomerCard';
@@ -15,13 +15,6 @@ import {
     SheetFooter,
 } from '@/components/shadcn-ui/sheet';
 import { useTranslations } from 'next-intl';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/shadcn-ui/select';
 import { Label } from '@/components/shadcn-ui/label';
 import type { GetCustomersQuery } from '@/services/graphql/admin-store/queries/customers/__generated__/GetCustomers.generated';
 
@@ -140,50 +133,60 @@ export function MobileCustomersList({
                     <SheetContent side="bottom" className="h-[85vh] rounded-t-[20px] p-0">
                         <div className="flex flex-col h-full">
                             <SheetHeader className="p-6 pb-2 text-left">
-                                <SheetTitle className="text-xl">Filters</SheetTitle>
+                                <SheetTitle className="text-xl">{t('list.filters.title')}</SheetTitle>
                             </SheetHeader>
 
                             <div className="flex-1 overflow-y-auto p-6 pt-2 space-y-6">
                                 {/* Customer Type Filter */}
-                                <div className="space-y-2">
-                                    <Label>{t('list.filters.type')}</Label>
-                                    <Select
-                                        value={customerType || 'all'}
-                                        onValueChange={(val) => onCustomerTypeChange(val === 'all' ? null : val)}
-                                    >
-                                        <SelectTrigger className="h-12">
-                                            <SelectValue placeholder={t('list.filters.allTypes')} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">{t('list.filters.allTypes')}</SelectItem>
-                                            {CUSTOMER_TYPES.map((opt) => (
-                                                <SelectItem key={opt.value} value={opt.value}>
-                                                    {t(`list.filters.types.${opt.value.toLowerCase()}`)}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-semibold">{t('list.filters.type')}</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            variant={!customerType ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => onCustomerTypeChange(null)}
+                                            className="rounded-full"
+                                        >
+                                            {t('list.filters.allTypes')}
+                                        </Button>
+                                        {CUSTOMER_TYPES.map((opt) => (
+                                            <Button
+                                                key={opt.value}
+                                                variant={customerType === opt.value ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => onCustomerTypeChange(opt.value)}
+                                                className="rounded-full"
+                                            >
+                                                {t(`list.filters.types.${opt.value.toLowerCase()}`)}
+                                            </Button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Region Filter */}
-                                <div className="space-y-2">
-                                    <Label>{t('list.filters.region')}</Label>
-                                    <Select
-                                        value={region || 'all'}
-                                        onValueChange={(val) => onRegionChange(val === 'all' ? null : val)}
-                                    >
-                                        <SelectTrigger className="h-12">
-                                            <SelectValue placeholder={t('list.filters.allRegions')} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">{t('list.filters.allRegions')}</SelectItem>
-                                            {CAMEROON_REGIONS.map((opt) => (
-                                                <SelectItem key={opt.value} value={opt.value}>
-                                                    {t(`list.filters.regions.${opt.value.toLowerCase()}`)}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-semibold">{t('list.filters.region')}</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            variant={!region ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => onRegionChange(null)}
+                                            className="rounded-full"
+                                        >
+                                            {t('list.filters.allRegions')}
+                                        </Button>
+                                        {CAMEROON_REGIONS.map((opt) => (
+                                            <Button
+                                                key={opt.value}
+                                                variant={region === opt.value ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => onRegionChange(opt.value)}
+                                                className="rounded-full"
+                                            >
+                                                {t(`list.filters.regions.${opt.value.toLowerCase()}`)}
+                                            </Button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
@@ -214,6 +217,27 @@ export function MobileCustomersList({
                     <Plus className="h-5 w-5" />
                 </Button>
             </div>
+
+            {/* Active Filters Summary */}
+            {activeFilterCount > 0 && (
+                <div className="flex gap-2 flex-wrap px-1">
+                    {customerType && (
+                        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                            {t('list.filters.type')}: {t(`list.filters.types.${customerType.toLowerCase()}`)}
+                            <X className="h-3 w-3 cursor-pointer" onClick={() => onCustomerTypeChange(null)} />
+                        </div>
+                    )}
+                    {region && (
+                        <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                            {t('list.filters.region')}: {t(`list.filters.regions.${region.toLowerCase()}`)}
+                            <X className="h-3 w-3 cursor-pointer" onClick={() => onRegionChange(null)} />
+                        </div>
+                    )}
+                    <div className="text-muted-foreground text-xs py-1 px-2 cursor-pointer" onClick={handleClearFilters}>
+                        {t('list.filters.clearAll')}
+                    </div>
+                </div>
+            )}
 
             {/* Filter Chips */}
             <CustomersFilterChips

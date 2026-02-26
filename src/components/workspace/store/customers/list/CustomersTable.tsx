@@ -97,7 +97,7 @@ export function CustomersTable({
                       {customer.city && <span>{customer.city}</span>}
                       {customer.city && customer.region && <span>, </span>}
                       {customer.region && (
-                        <span className="capitalize">{customer.region.replace('_', ' ')}</span>
+                        <span className="capitalize">{t(`list.filters.regions.${customer.region.toLowerCase()}`)}</span>
                       )}
                     </div>
                   ) : (
@@ -119,7 +119,7 @@ export function CustomersTable({
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary" className="capitalize">
-                    {customer.customerType}
+                    {t(`list.filters.types.${customer.customerType.toLowerCase()}`)}
                   </Badge>
                 </TableCell>
               </TableRow>
