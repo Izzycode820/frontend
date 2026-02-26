@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GetOrderDocument } from '@/services/graphql/admin-store/queries/orders/__generated__/getOrder.generated';
 import { CancelOrderDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/CancelOrder.generated';
@@ -22,6 +23,8 @@ interface OrderDetailsContainerProps {
 }
 
 export default function OrderDetailsContainer({ orderId }: OrderDetailsContainerProps) {
+  const t = useTranslations('Orders.details.toasts');
+  const commonT = useTranslations('Orders.details');
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
 
   const { data, loading, error, refetch } = useQuery(GetOrderDocument, {
@@ -72,12 +75,12 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
     try {
       const result = await cancelOrder({ variables: { orderId } });
       if (result.data?.cancelOrder?.success) {
-        toast.success('Order cancelled successfully');
+        toast.success(t('orderCancelled'));
       } else {
-        toast.error(result.data?.cancelOrder?.error || 'Failed to cancel order');
+        toast.error(result.data?.cancelOrder?.error || t('unexpectedError'));
       }
     } catch (e) {
-      toast.error('An error occurred');
+      toast.error(t('unexpectedError'));
     }
   };
 
@@ -85,12 +88,12 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
     try {
       const result = await archiveOrder({ variables: { orderId } });
       if (result.data?.archiveOrder?.success) {
-        toast.success('Order archived successfully');
+        toast.success(t('orderArchived'));
       } else {
-        toast.error(result.data?.archiveOrder?.error || 'Failed to archive order');
+        toast.error(result.data?.archiveOrder?.error || t('unexpectedError'));
       }
     } catch (e) {
-      toast.error('An error occurred');
+      toast.error(t('unexpectedError'));
     }
   };
 
@@ -98,12 +101,12 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
     try {
       const result = await unarchiveOrder({ variables: { orderId } });
       if (result.data?.unarchiveOrder?.success) {
-        toast.success('Order unarchived successfully');
+        toast.success(t('orderUnarchived'));
       } else {
-        toast.error(result.data?.unarchiveOrder?.error || 'Failed to unarchive order');
+        toast.error(result.data?.unarchiveOrder?.error || t('unexpectedError'));
       }
     } catch (e) {
-      toast.error('An error occurred');
+      toast.error(t('unexpectedError'));
     }
   };
 
@@ -117,12 +120,12 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
       });
 
       if (result.data?.updateOrderStatus?.success) {
-        toast.success('Order marked as fulfilled');
+        toast.success(t('markFulfilledSuccess'));
       } else {
-        toast.error(result.data?.updateOrderStatus?.error || 'Failed to mark order as fulfilled');
+        toast.error(result.data?.updateOrderStatus?.error || t('unexpectedError'));
       }
     } catch (e) {
-      toast.error('An error occurred');
+      toast.error(t('unexpectedError'));
       console.error('Fulfill order error:', e);
     }
   };
@@ -131,12 +134,12 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
     try {
       const result = await markOrderAsPaid({ variables: { orderId } });
       if (result.data?.markOrderAsPaid?.success) {
-        toast.success('Order marked as paid');
+        toast.success(t('markPaidSuccess'));
       } else {
-        toast.error(result.data?.markOrderAsPaid?.error || 'Failed to mark order as paid');
+        toast.error(result.data?.markOrderAsPaid?.error || t('unexpectedError'));
       }
     } catch (e) {
-      toast.error('An error occurred');
+      toast.error(t('unexpectedError'));
       console.error('Mark as paid error:', e);
     }
   };
@@ -153,9 +156,9 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              <p>Failed to load order</p>
+              <p>{t('unexpectedError')}</p>
               <p className="text-sm text-muted-foreground">
-                {error?.message || 'Order not found'}
+                {error?.message || t('unexpectedError')}
               </p>
             </div>
           </CardContent>

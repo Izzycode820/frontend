@@ -6,17 +6,26 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { GetWorkspaceRolesDocument } from '@/services/graphql/admin-store/queries/staffs/__generated__/GetWorkspaceRoles.generated';
 import { InviteStaffDocument } from '@/services/graphql/admin-store/mutations/staffs/__generated__/InviteStaff.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/shadcn-ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn-ui/popover';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Search, X, Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import {
+  ArrowLeft, Plus, Search, X, Check, Users, Loader2
+} from 'lucide-react';
 
-export default function AddStaffForm() {
+interface AddStaffFormProps {
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+export function AddStaffForm({ onSuccess, onCancel }: AddStaffFormProps) {
   const router = useRouter();
+  const t = useTranslations('Staff');
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
 
   const [email, setEmail] = useState('');
@@ -62,16 +71,14 @@ export default function AddStaffForm() {
     setSelectedRoleIds(selectedRoleIds.filter(id => id !== roleId));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleInvite = async () => {
     if (!email) {
-      toast.error('Please enter an email address');
+      toast.error(t('enterEmail'));
       return;
     }
 
-    if (selectedRoleIds.length === 0) {
-      toast.error('Please select at least one role');
+    if (selectedRoles.length === 0) {
+      toast.error(t('selectRole'));
       return;
     }
 
@@ -86,13 +93,13 @@ export default function AddStaffForm() {
       });
 
       if (data?.inviteStaff?.success) {
-        toast.success(data.inviteStaff.message || 'Staff invitation sent successfully');
-        router.push(`/workspace/${currentWorkspace?.id}/store/settings/staff`);
+        toast.success(t('inviteSuccess'));
+        onSuccess?.();
       } else {
-        toast.error(data?.inviteStaff?.error || 'Failed to send invitation');
+        toast.error(data?.inviteStaff?.error || t('inviteFailed'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to send invitation');
+      toast.error(err.message || t('inviteFailed'));
     }
   };
 
@@ -102,25 +109,28 @@ export default function AddStaffForm() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-8 pb-10 max-w-[1000px] mx-auto min-w-0 px-4 md:px-6">
       {/* Header with back button */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Add users</h1>
+        <h1 className="text-2xl font-bold">{t('addUsers')}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
         {/* Emails Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Emails</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {t('addUsers')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Input
               type="email"
-              placeholder="Enter email address"
+              placeholder={t('enterEmailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full"
@@ -131,8 +141,8 @@ export default function AddStaffForm() {
         {/* Roles Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Roles</CardTitle>
-            <CardDescription>Assign roles to grant user actions.</CardDescription>
+            <CardTitle className="text-base">{t('roles')}</CardTitle>
+            <CardDescription>{t('rolesDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {/* Selected Roles (supports multiple like Shopify) */}
@@ -158,7 +168,7 @@ export default function AddStaffForm() {
               <PopoverTrigger asChild>
                 <Button type="button" variant="outline" className="w-full justify-start">
                   <Plus className="h-4 w-4 mr-2" />
-                  Assign
+                  {t('assign')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0" align="start">
@@ -166,7 +176,7 @@ export default function AddStaffForm() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search"
+                      placeholder={t('search')}
                       value={roleSearchQuery}
                       onChange={(e) => setRoleSearchQuery(e.target.value)}
                       className="pl-9"
@@ -174,14 +184,14 @@ export default function AddStaffForm() {
                   </div>
                 </div>
 
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-60 overflow-y-auto">
                   {rolesLoading ? (
                     <div className="p-8 text-center text-sm text-muted-foreground">
-                      Loading roles...
+                      {t('loadingRoles')}
                     </div>
                   ) : filteredRoles.length === 0 ? (
                     <div className="p-8 text-center text-sm text-muted-foreground">
-                      No roles found
+                      {t('noRolesFound')}
                     </div>
                   ) : (
                     <div className="py-2">
@@ -206,31 +216,36 @@ export default function AddStaffForm() {
                       })}
 
                       {/* Create new role button (disabled for now) */}
-                      <button
+                      <Button
                         type="button"
-                        disabled
-                        className="w-full px-4 py-3 text-left flex items-center gap-2 text-muted-foreground opacity-50 cursor-not-allowed"
+                        variant="ghost"
+                        className="w-full justify-start text-primary h-auto py-3 px-4 border-t rounded-none"
                       >
-                        <Plus className="h-4 w-4" />
-                        Create new role
-                      </button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        {t('createNewRole')}
+                      </Button>
                     </div>
                   )}
                 </div>
               </PopoverContent>
             </Popover>
           </CardContent>
+          <CardFooter className="justify-between border-t pt-6">
+            <Button variant="ghost" onClick={onCancel}>
+              {t('cancel')}
+            </Button>
+            <Button onClick={handleInvite} disabled={inviting}>
+              {inviting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t('sending')}
+                </>
+              ) : (
+                t('sendInvite')
+              )}
+            </Button>
+          </CardFooter>
         </Card>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={inviting}>
-            {inviting ? 'Sending...' : 'Send invite'}
-          </Button>
-        </div>
       </form>
     </div>
   );

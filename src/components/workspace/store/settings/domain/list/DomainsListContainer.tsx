@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { DomainsDocument } from '@/services/graphql/domains/queries/custom-domains/__generated__/domains.generated';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
@@ -13,6 +14,7 @@ import { ChangeSubdomainModal } from '../change-subdomain/ChangeSubdomainModal';
 
 export function DomainsListContainer() {
   const params = useParams();
+  const t = useTranslations('Domains');
   const router = useRouter();
   const workspaceId = params.workspace_id as string;
   const [showSubdomainModal, setShowSubdomainModal] = useState(false);
@@ -37,11 +39,11 @@ export function DomainsListContainer() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'connected':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Connected</Badge>;
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{t('connected')}</Badge>;
       case 'pending':
-        return <Badge variant="secondary">Pending</Badge>;
+        return <Badge variant="secondary">{t('pending')}</Badge>;
       case 'invalid_dns':
-        return <Badge variant="destructive">Invalid DNS</Badge>;
+        return <Badge variant="destructive">{t('invalidDns')}</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -62,31 +64,42 @@ export function DomainsListContainer() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Failed to load domains: {error.message}</AlertDescription>
+        <AlertDescription>{t('verificationFailed')}: {error.message}</AlertDescription>
       </Alert>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with back button for mobile */}
-      <div className="flex items-center gap-3 md:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push(`/workspace/${workspaceId}/store/settings`)}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-xl font-bold">Domains</h1>
+    <div className="space-y-8 pb-10 max-w-[1000px] mx-auto min-w-0 px-4 md:px-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push(`/workspace/${workspaceId}/store/settings`)}
+            className="md:hidden"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        </div>
+        <p className="text-muted-foreground">
+          Manage your custom domains and online store address.
+        </p>
       </div>
 
       {/* Info Banner */}
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Connect or buy a custom domain below and get a $20 USD subscription discount on your next bill.{' '}
-          <a href="#" className="underline">Terms apply</a>
+          {t.rich('infoBanner', {
+            link: (chunks) => (
+              <a href="#" className="underline">
+                {chunks}
+              </a>
+            ),
+          })}
         </AlertDescription>
       </Alert>
 
@@ -94,10 +107,9 @@ export function DomainsListContainer() {
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex-1">
-            <CardTitle className="text-lg">Change to a new .huzilerz.com domain</CardTitle>
+            <CardTitle className="text-lg">{t('changeSubdomainTitle')}</CardTitle>
             <p className="text-sm text-muted-foreground mt-2">
-              Update your current Huzilerz subdomain for free to better match your brand.
-              You can also buy or connect a custom domain.
+              {t('changeSubdomainDesc')}
             </p>
           </div>
           <div className="hidden sm:block">
@@ -106,7 +118,7 @@ export function DomainsListContainer() {
         </CardHeader>
         <CardContent>
           <Button onClick={() => setShowSubdomainModal(true)}>
-            Change .huzilerz.com domain
+            {t('changeSubdomainBtn')}
           </Button>
         </CardContent>
       </Card>
@@ -116,11 +128,11 @@ export function DomainsListContainer() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Domain</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Online Store</p>
+              <CardTitle>{t('title')}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">{t('onlineStore')}</p>
             </div>
             <div className="text-right">
-              <CardTitle>Status</CardTitle>
+              <CardTitle>{t('status')}</CardTitle>
             </div>
           </div>
         </CardHeader>
@@ -132,7 +144,7 @@ export function DomainsListContainer() {
                 <Globe className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="font-medium">{defaultDomain.domain}</p>
-                  <Badge variant="outline" className="mt-1">Primary</Badge>
+                  <Badge variant="outline" className="mt-1">{t('primary')}</Badge>
                 </div>
               </div>
               <div>
@@ -174,7 +186,7 @@ export function DomainsListContainer() {
           {/* Empty State */}
           {customDomains.length === 0 && !defaultDomain && (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No domains configured</p>
+              <p className="text-muted-foreground">{t('noDomains')}</p>
             </div>
           )}
         </CardContent>
@@ -184,11 +196,11 @@ export function DomainsListContainer() {
       <div className="flex flex-col sm:flex-row gap-3">
         <Button onClick={handleConnectDomain} variant="outline" className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
-          Connect existing domain
+          {t('connectExisting')}
         </Button>
         <Button onClick={handleBuyDomain} variant="outline" className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
-          Buy new domain
+          {t('buyNew')}
         </Button>
       </div>
 

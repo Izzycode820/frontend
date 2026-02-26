@@ -11,6 +11,7 @@ import {
     IconUsers,
     IconMenu2,
 } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 
 // Hard-coded nav items for consistent animation
 // These are the 4 main shortcuts + menu button
@@ -26,6 +27,7 @@ interface MobileBottomNavProps {
 }
 
 export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
+    const t = useTranslations('Dashboard.navigation');
     const router = useRouter();
     const pathname = usePathname();
     const params = useParams();
@@ -124,7 +126,7 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                                         transition={{ duration: 0.2 }}
                                         className="relative z-10 text-sm font-semibold whitespace-nowrap overflow-hidden"
                                     >
-                                        {item.label}
+                                        {t(item.key)}
                                     </motion.span>
                                 )}
                             </AnimatePresence>
@@ -176,7 +178,7 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                                 transition={{ duration: 0.2 }}
                                 className="relative z-10 text-sm font-semibold whitespace-nowrap overflow-hidden"
                             >
-                                Menu
+                                {t('menu')}
                             </motion.span>
                         )}
                     </AnimatePresence>

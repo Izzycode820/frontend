@@ -9,6 +9,8 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card"
 
+import { useTranslations } from "next-intl"
+
 type DashboardCard = {
   title: string
   value: string
@@ -21,13 +23,14 @@ type SectionCardsProps = {
 }
 
 export function SectionCards({ cards }: SectionCardsProps) {
+  const t = useTranslations('Dashboard')
   // Filter out null cards and ensure we have data
   const validCards = cards.filter((card): card is DashboardCard => card !== null)
 
   if (validCards.length === 0) {
     return (
       <div className="px-4 lg:px-6">
-        <p className="text-muted-foreground text-center py-8">No analytics data available</p>
+        <p className="text-muted-foreground text-center py-8">{t('noData')}</p>
       </div>
     )
   }
@@ -46,7 +49,7 @@ export function SectionCards({ cards }: SectionCardsProps) {
           <div key={index} className="min-w-[85%] sm:min-w-[45%] snap-center lg:min-w-0">
             <Card className="@container/card h-full">
               <CardHeader>
-                <CardDescription>{card.title}</CardDescription>
+                <CardDescription>{t(`cards.${card.title}`)}</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
                   {card.value}
                 </CardTitle>

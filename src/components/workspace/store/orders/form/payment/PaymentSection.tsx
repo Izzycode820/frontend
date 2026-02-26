@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Label } from '@/components/shadcn-ui/label';
 import {
@@ -11,33 +12,33 @@ import { Separator } from '@/components/shadcn-ui/separator';
 import { usePaymentCalculations } from './usePaymentCalculations';
 import { formatCurrency } from '@/utils/currency';
 import type { PaymentSectionProps } from './types';
-
-const PAYMENT_METHODS = [
-  { value: 'cash_on_delivery', label: 'Cash on Delivery' },
-  { value: 'mobile_money', label: 'Mobile Money' },
-  { value: 'bank_transfer', label: 'Bank Transfer' },
-  { value: 'card', label: 'Credit/Debit Card' },
-] as const;
-
 export function PaymentSection({
   items,
   paymentMethod,
   onPaymentMethodChange,
 }: PaymentSectionProps) {
+  const t = useTranslations('Orders.form');
   const { subtotal, taxAmount, total } = usePaymentCalculations(items);
+
+  const PAYMENT_METHODS = [
+    { value: 'cash_on_delivery', label: useTranslations('Orders.table.methods')('cash_on_delivery') },
+    { value: 'mobile_money', label: useTranslations('Orders.table.methods')('mobile_money') },
+    { value: 'bank_transfer', label: useTranslations('Orders.table.methods')('bank_transfer') },
+    { value: 'card', label: useTranslations('Orders.table.methods')('card') },
+  ] as const;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Payment</CardTitle>
+        <CardTitle className="text-base font-semibold">{t('sections.payment')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Payment Method Dropdown */}
         <div className="space-y-2">
-          <Label htmlFor="payment-method">Payment method</Label>
+          <Label htmlFor="payment-method">{t('payment.method.label')}</Label>
           <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
             <SelectTrigger id="payment-method">
-              <SelectValue placeholder="Select payment method" />
+              <SelectValue placeholder={t('payment.method.placeholder')} />
             </SelectTrigger>
             <SelectContent>
               {PAYMENT_METHODS.map((method) => (
@@ -56,10 +57,10 @@ export function PaymentSection({
           {/* Subtotal */}
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              Subtotal
+              {t('payment.summary.subtotal')}
               {items.length > 0 && (
                 <span className="ml-2">
-                  {items.length} {items.length === 1 ? 'item' : 'items'}
+                  {t('payment.summary.itemCount', { count: items.length })}
                 </span>
               )}
             </span>
@@ -68,7 +69,7 @@ export function PaymentSection({
 
           {/* Tax (shown but 0 for now) */}
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Tax</span>
+            <span className="text-muted-foreground">{t('payment.summary.tax')}</span>
             <span className="text-muted-foreground">FCFA {formatCurrency(taxAmount)}</span>
           </div>
 
@@ -76,7 +77,7 @@ export function PaymentSection({
 
           {/* Total */}
           <div className="flex items-center justify-between">
-            <span className="font-semibold">Total</span>
+            <span className="font-semibold">{t('payment.summary.total')}</span>
             <span className="font-bold text-lg">FCFA {formatCurrency(total)}</span>
           </div>
         </div>

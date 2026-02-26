@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useRouter, useParams } from 'next/navigation';
 import { ConnectCustomDomainDocument } from '@/services/graphql/domains/mutations/custom-domains/__generated__/connectCustomDomain.generated';
+import { useTranslations } from 'next-intl';
 import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import {
   Dialog,
@@ -25,6 +26,8 @@ interface ConnectDomainFormProps {
 export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps) {
   const router = useRouter();
   const params = useParams();
+  const t = useTranslations('Domains');
+  const tGen = useTranslations('General');
   const workspaceId = params.workspace_id as string;
   const [domain, setDomain] = useState('');
   const isMobile = useIsMobile();
@@ -35,7 +38,7 @@ export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps
     e.preventDefault();
 
     if (!domain) {
-      toast.error('Please enter a domain');
+      toast.error(t('enterDomain'));
       return;
     }
 
@@ -48,15 +51,15 @@ export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps
       });
 
       if (data?.connectCustomDomain?.success && data.connectCustomDomain.domain) {
-        toast.success('Domain connected successfully');
+        toast.success(t('connectSuccess'));
         router.push(
           `/workspace/${workspaceId}/store/settings/domains/verification/${data.connectCustomDomain.domain.id}`
         );
       } else {
-        toast.error(data?.connectCustomDomain?.error || 'Failed to connect domain');
+        toast.error(data?.connectCustomDomain?.error || t('connectFailed'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to connect domain');
+      toast.error(err.message || t('connectFailed'));
       console.error('Connect domain error:', err);
     }
   };
@@ -66,7 +69,7 @@ export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold">Connect existing domain</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">{t('connectExisting')}</DialogTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -79,12 +82,12 @@ export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps
 
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="domain" className="text-sm font-medium">Domain</Label>
+            <Label htmlFor="domain" className="text-sm font-medium">{t('title')}</Label>
             <Input
               id="domain"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
-              placeholder="steve.com"
+              placeholder={t('searchPlaceholder')}
               className="h-10"
               autoFocus={!isMobile}
             />
@@ -98,14 +101,14 @@ export function ConnectDomainForm({ open, onOpenChange }: ConnectDomainFormProps
               disabled={loading}
               className="px-4"
             >
-              Cancel
+              {tGen('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={!domain || loading}
               className="px-6 bg-black hover:bg-black/90 text-white"
             >
-              {loading ? 'Connecting...' : 'Next'}
+              {loading ? t('connecting') : tGen('next')}
             </Button>
           </div>
         </form>

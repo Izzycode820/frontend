@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Edit, Save, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
@@ -42,6 +43,8 @@ export function OrderSidebar({
   billingAddress,
   shippingRegion,
 }: OrderSidebarProps) {
+  const t = useTranslations('Orders.details.sidebar');
+  const commonT = useTranslations('Orders.details.toasts');
   // Use live customer data if available, otherwise use snapshot
   const displayName = customer?.name || customerName;
   const displayPhone = customer?.phone || customerPhone;
@@ -74,13 +77,13 @@ export function OrderSidebar({
       });
 
       if (result.data?.updateOrderNotes?.success) {
-        toast.success('Notes updated successfully');
+        toast.success(commonT('notesSuccess'));
         setIsEditingNotes(false);
       } else {
-        toast.error(result.data?.updateOrderNotes?.error || 'Failed to update notes');
+        toast.error(result.data?.updateOrderNotes?.error || commonT('notesError'));
       }
     } catch (error) {
-      toast.error('An error occurred while updating notes');
+      toast.error(commonT('unexpectedError'));
     }
   };
 
@@ -106,7 +109,7 @@ export function OrderSidebar({
       {/* Notes */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base font-semibold">Notes</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('notes')}</CardTitle>
           {isEditingNotes ? (
             <div className="flex gap-2">
               <Button
@@ -147,14 +150,14 @@ export function OrderSidebar({
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes about this order..."
+              placeholder={t('addNotesPlaceholder')}
               className="min-h-[100px] resize-none"
             />
           ) : (
             notes ? (
               <p className="text-sm whitespace-pre-wrap">{notes}</p>
             ) : (
-              <p className="text-sm text-muted-foreground">No notes from customer</p>
+              <p className="text-sm text-muted-foreground">{t('noNotes')}</p>
             )
           )}
         </CardContent>
@@ -163,7 +166,7 @@ export function OrderSidebar({
       {/* Customer */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Customer</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('customer')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {displayName ? (
@@ -172,7 +175,7 @@ export function OrderSidebar({
                 <p className="text-sm font-medium">{displayName}</p>
                 {customer && (
                   <p className="text-xs text-muted-foreground">
-                    {customer.totalOrders} order{customer.totalOrders !== 1 ? 's' : ''}
+                    {t('orderCount', { count: customer.totalOrders })}
                   </p>
                 )}
               </div>
@@ -182,7 +185,7 @@ export function OrderSidebar({
               {/* Contact Information */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium">Contact information</p>
+                  <p className="text-sm font-medium">{t('contactInfo')}</p>
                   <Button variant="ghost" size="icon" className="h-6 w-6">
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -190,17 +193,17 @@ export function OrderSidebar({
                 {displayEmail ? (
                   <p className="text-sm text-blue-600">{displayEmail}</p>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No email provided</p>
+                  <p className="text-sm text-muted-foreground">{t('noEmail')}</p>
                 )}
                 {displayPhone ? (
                   <p className="text-sm">{displayPhone}</p>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No phone number</p>
+                  <p className="text-sm text-muted-foreground">{t('noPhone')}</p>
                 )}
               </div>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">No customer information</p>
+            <p className="text-sm text-muted-foreground">{t('noNotes')}</p>
           )}
         </CardContent>
       </Card>
@@ -209,7 +212,7 @@ export function OrderSidebar({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold">Shipping address</CardTitle>
+            <CardTitle className="text-base font-semibold">{t('shippingAddress')}</CardTitle>
             <Button variant="ghost" size="icon" className="h-6 w-6">
               <Edit className="h-3 w-3" />
             </Button>
@@ -232,7 +235,7 @@ export function OrderSidebar({
               {shipping.phoneNumber && <p>{shipping.phoneNumber}</p>}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No shipping address provided</p>
+            <p className="text-sm text-muted-foreground">{t('noShippingAddress')}</p>
           )}
         </CardContent>
       </Card>
@@ -241,7 +244,7 @@ export function OrderSidebar({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold">Billing address</CardTitle>
+            <CardTitle className="text-base font-semibold">{t('billingAddress')}</CardTitle>
             <Button variant="ghost" size="icon" className="h-6 w-6">
               <Edit className="h-3 w-3" />
             </Button>
@@ -265,7 +268,7 @@ export function OrderSidebar({
 
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No billing address provided</p>
+            <p className="text-sm text-muted-foreground">{t('noBillingAddress')}</p>
           )}
         </CardContent>
       </Card>
@@ -273,11 +276,11 @@ export function OrderSidebar({
       {/* Conversion Summary */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Conversion summary</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('conversionSummary')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            There aren't any conversion details available for this order
+            {t('noConversionDetails')}
           </p>
         </CardContent>
       </Card>

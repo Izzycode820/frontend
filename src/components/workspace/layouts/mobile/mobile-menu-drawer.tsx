@@ -16,6 +16,7 @@ import { ApolloProvider } from '@apollo/client/react';
 import { notificationClient } from '@/services/graphql/clients';
 import { useAuth } from '@/hooks/authentication/useAuth';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface MobileMenuDrawerProps {
     config: WorkspaceSidebarConfig;
@@ -24,6 +25,7 @@ interface MobileMenuDrawerProps {
 }
 
 function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProps) {
+    const t = useTranslations('Dashboard.navigation');
     const pathname = usePathname();
     const router = useRouter();
     const { logout } = useAuth();
@@ -74,7 +76,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
 
                         {/* Header with Close Button */}
                         <div className="flex justify-between items-center mb-6">
-                            <DrawerTitle className="text-lg font-semibold">Menu</DrawerTitle>
+                            <DrawerTitle className="text-lg font-semibold">{t('menu')}</DrawerTitle>
                             <DrawerClose asChild>
                                 <Button variant="ghost" size="icon" className="rounded-full hover:bg-zinc-800 text-white">
                                     <IconX className="w-5 h-5" />
@@ -105,7 +107,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                                     className="flex items-center gap-3 flex-1"
                                                 >
                                                     {Icon && <Icon className="w-5 h-5 text-zinc-400" />}
-                                                    <span className="text-base font-medium">{item.title}</span>
+                                                    <span className="text-base font-medium">{t(item.title)}</span>
                                                 </Link>
                                                 <CollapsibleTrigger asChild>
                                                     <button className="p-1">
@@ -121,7 +123,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                                         onClick={() => onClose(false)}
                                                         className="block py-2 text-sm text-zinc-400 hover:text-white"
                                                     >
-                                                        {sub.title}
+                                                        {t(sub.title)}
                                                     </Link>
                                                 ))}
                                             </CollapsibleContent>
@@ -140,7 +142,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                         )}
                                     >
                                         {Icon && <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-zinc-400")} />}
-                                        <span className="text-base font-medium">{item.title}</span>
+                                        <span className="text-base font-medium">{t(item.title)}</span>
                                     </Link>
                                 );
                             })}
@@ -152,7 +154,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                     {config.navSections.map((section) => (
                                         <div key={section.label} className="mb-2">
                                             <span className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider px-2 mb-2">
-                                                {section.label}
+                                                {t(section.label)}
                                             </span>
 
                                             {section.items.map((sectionItem) => {
@@ -170,7 +172,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                                             <div className="flex items-center justify-between py-3 px-2 rounded-lg active:bg-zinc-900">
                                                                 <div className="flex items-center gap-3 flex-1">
                                                                     {SectionIcon && <SectionIcon className="w-5 h-5 text-zinc-400" />}
-                                                                    <span className="text-base font-medium text-zinc-300">{sectionItem.name}</span>
+                                                                    <span className="text-base font-medium text-zinc-300">{t(sectionItem.name)}</span>
                                                                 </div>
                                                                 <CollapsibleTrigger asChild>
                                                                     <button className="p-1">
@@ -186,7 +188,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                                                         onClick={() => onClose(false)}
                                                                         className="block py-2 text-sm text-zinc-400 hover:text-white"
                                                                     >
-                                                                        {sub.title}
+                                                                        {t(sub.title)}
                                                                     </Link>
                                                                 ))}
                                                             </CollapsibleContent>
@@ -202,7 +204,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                                         className="flex items-center gap-3 py-3 px-2 rounded-lg active:bg-zinc-900 text-zinc-300"
                                                     >
                                                         {SectionIcon && <SectionIcon className="w-5 h-5 text-zinc-400" />}
-                                                        <span className="text-base font-medium">{sectionItem.name}</span>
+                                                        <span className="text-base font-medium">{t(sectionItem.name)}</span>
                                                     </Link>
                                                 );
                                             })}
@@ -237,7 +239,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <span className="text-base font-medium">{item.title}</span>
+                                            <span className="text-base font-medium">{t(item.title)}</span>
                                             {unreadCount > 0 && (
                                                 <Badge variant="secondary" className="ml-auto rounded-full px-2 text-xs">
                                                     {unreadCount}
@@ -255,7 +257,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                         className="flex items-center gap-3 py-3 px-2 rounded-lg active:bg-zinc-900 text-zinc-300"
                                     >
                                         {Icon && <Icon className="w-5 h-5 text-zinc-400" />}
-                                        <span className="text-base font-medium">{item.title}</span>
+                                        <span className="text-base font-medium">{t(item.title)}</span>
                                     </Link>
                                 );
                             })}
@@ -269,7 +271,7 @@ function MobileMenuDrawerInner({ config, isOpen, onClose }: MobileMenuDrawerProp
                                 className="flex items-center gap-3 py-3 px-2 rounded-lg active:bg-red-900/30 text-red-400 w-full text-left hover:bg-red-900/20 transition-colors"
                             >
                                 <IconLogout className="w-5 h-5" />
-                                <span className="text-base font-medium">Sign Out</span>
+                                <span className="text-base font-medium">{t('signOut')}</span>
                             </button>
                         </div>
                     </div>

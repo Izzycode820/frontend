@@ -10,6 +10,7 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { GetStoreProfileDocument } from '@/services/graphql/admin-store/queries/settings/__generated__/GetStoreProfile.generated';
 import { UpdateStoreProfileDocument } from '@/services/graphql/admin-store/mutations/settings/__generated__/UpdateStoreProfile.generated';
 import {
@@ -27,6 +28,7 @@ import { useRouter, useParams } from 'next/navigation';
 export function GeneralSettingsPage() {
     const router = useRouter();
     const params = useParams();
+    const t = useTranslations('General');
 
     // Form state
     const [storeName, setStoreName] = useState('');
@@ -81,15 +83,15 @@ export function GeneralSettingsPage() {
     const handleSave = async () => {
         // Validate phone numbers (9 digits without prefix)
         if (whatsappNumber && !validateCameroonPhone(whatsappNumber)) {
-            toast.error('Invalid WhatsApp Number', {
-                description: 'Please enter exactly 9 digits (e.g., 612345678)',
+            toast.error(t('invalidWhatsApp'), {
+                description: t('phoneFormatHint'),
             });
             return;
         }
 
         if (phoneNumber && !validateCameroonPhone(phoneNumber)) {
-            toast.error('Invalid Phone Number', {
-                description: 'Please enter exactly 9 digits (e.g., 612345678)',
+            toast.error(t('invalidPhone'), {
+                description: t('phoneFormatHint'),
             });
             return;
         }
@@ -109,19 +111,19 @@ export function GeneralSettingsPage() {
             });
 
             if (result.data?.updateStoreProfile?.success) {
-                toast.success('Settings saved', {
-                    description: 'Your store settings have been updated successfully.',
+                toast.success(t('settingsSaved'), {
+                    description: t('settingsSavedDesc'),
                 });
                 setIsDirty(false);
             } else {
-                toast.error('Error', {
-                    description: result.data?.updateStoreProfile?.error || 'Failed to save settings',
+                toast.error(t('error'), {
+                    description: result.data?.updateStoreProfile?.error || t('failedToSaveGeneric'),
                 });
             }
         } catch (err) {
             console.error('Failed to save settings:', err);
-            toast.error('Error', {
-                description: 'Failed to save settings. Please try again.',
+            toast.error(t('error'), {
+                description: t('failedToSave'),
             });
         }
     };
@@ -140,7 +142,7 @@ export function GeneralSettingsPage() {
         return (
             <div className="w-full max-w-[1000px] mx-auto px-6">
                 <Alert variant="destructive">
-                    <div className="font-semibold">Error loading settings</div>
+                    <div className="font-semibold">{t('errorLoading')}</div>
                     <div className="text-sm">{error.message}</div>
                 </Alert>
             </div>
@@ -148,27 +150,27 @@ export function GeneralSettingsPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 max-w-[1000px] mx-auto min-w-0 px-4 md:px-6 pb-10">
             {/* Store Identity Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+            <div className="w-full">
                 <div className="flex items-center gap-2 mb-4 md:hidden">
                     <Button variant="ghost" size="icon" onClick={() => router.push(`/workspace/${params.workspace_id}/store/settings`)}>
                         <IconArrowLeft className="w-5 h-5" />
                     </Button>
-                    <h1 className="text-xl font-bold">General Settings</h1>
+                    <h1 className="text-xl font-bold">{t('title')}</h1>
                 </div>
 
                 <Card className="p-4 md:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <IconBuilding className="w-5 h-5 text-muted-foreground" />
-                        <h2 className="text-base font-semibold">Store identity</h2>
+                        <h2 className="text-base font-semibold">{t('storeIdentity')}</h2>
                     </div>
 
                     <div className="space-y-5">
                         {/* Store Name */}
                         <div className="space-y-2">
                             <Label htmlFor="storeName" className="text-sm font-medium">
-                                Store name
+                                {t('storeName')}
                             </Label>
                             <Input
                                 id="storeName"
@@ -176,17 +178,17 @@ export function GeneralSettingsPage() {
                                 value={storeName}
                                 onChange={handleChange(setStoreName)}
                                 maxLength={255}
-                                placeholder="Enter your store name"
+                                placeholder={t('storeNamePlaceholder')}
                             />
                             <p className="text-xs text-muted-foreground">
-                                {storeName.length} of 255 characters used
+                                {t('charUsed', { count: storeName.length, total: 255 })}
                             </p>
                         </div>
 
                         {/* Store Description */}
                         <div className="space-y-2">
                             <Label htmlFor="storeDescription" className="text-sm font-medium">
-                                Store description
+                                {t('storeDescription')}
                             </Label>
                             <Textarea
                                 id="storeDescription"
@@ -194,11 +196,11 @@ export function GeneralSettingsPage() {
                                 onChange={handleChange(setStoreDescription)}
                                 maxLength={500}
                                 rows={4}
-                                placeholder="Describe your store in a few sentences"
+                                placeholder={t('storeDescriptionPlaceholder')}
                                 className="resize-none"
                             />
                             <p className="text-xs text-muted-foreground">
-                                {storeDescription.length} of 500 characters used
+                                {t('charUsed', { count: storeDescription.length, total: 500 })}
                             </p>
                         </div>
                     </div>
@@ -206,18 +208,18 @@ export function GeneralSettingsPage() {
             </div>
 
             {/* Contact Information Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+            <div className="w-full">
                 <Card className="p-4 md:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <IconMail className="w-5 h-5 text-muted-foreground" />
-                        <h2 className="text-base font-semibold">Contact information</h2>
+                        <h2 className="text-base font-semibold">{t('contactInfo')}</h2>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {/* Store Email */}
                         <div className="space-y-2">
                             <Label htmlFor="storeEmail" className="text-sm font-medium">
-                                Store email
+                                {t('storeEmail')}
                             </Label>
                             <Input
                                 id="storeEmail"
@@ -227,14 +229,14 @@ export function GeneralSettingsPage() {
                                 placeholder="store@example.com"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Primary contact email for your store
+                                {t('storeEmailHint')}
                             </p>
                         </div>
 
                         {/* Support Email */}
                         <div className="space-y-2">
                             <Label htmlFor="supportEmail" className="text-sm font-medium">
-                                Support email
+                                {t('supportEmail')}
                             </Label>
                             <Input
                                 id="supportEmail"
@@ -244,14 +246,14 @@ export function GeneralSettingsPage() {
                                 placeholder="support@example.com"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Customer support email (optional)
+                                {t('supportEmailHint')}
                             </p>
                         </div>
 
                         {/* Phone Number */}
                         <div className="space-y-2">
                             <Label htmlFor="phoneNumber" className="text-sm font-medium">
-                                Phone number
+                                {t('phoneNumber')}
                             </Label>
                             <div className="flex">
                                 <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
@@ -268,7 +270,7 @@ export function GeneralSettingsPage() {
                                 />
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Enter 9 digits (e.g., 612345678)
+                                {t('phoneHint')}
                             </p>
                         </div>
                     </div>
@@ -276,24 +278,24 @@ export function GeneralSettingsPage() {
             </div>
 
             {/* WhatsApp Settings Card */}
-            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6">
+            <div className="w-full">
                 <Card className="p-4 md:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <IconBrandWhatsapp className="w-5 h-5 text-green-600" />
-                        <h2 className="text-base font-semibold">WhatsApp checkout</h2>
+                        <h2 className="text-base font-semibold">{t('whatsappCheckout')}</h2>
                         <IconInfoCircle className="w-4 h-4 text-muted-foreground" />
                     </div>
 
                     <Alert className="bg-green-500/10 border-green-500/20 mb-5">
                         <IconBrandWhatsapp className="h-4 w-4 text-green-600" />
                         <AlertDescription className="ml-2 text-sm text-green-900 dark:text-green-300">
-                            WhatsApp orders will be sent to this number. Customers can place orders directly via WhatsApp for a seamless checkout experience.
+                            {t('whatsappAlert')}
                         </AlertDescription>
                     </Alert>
 
                     <div className="space-y-2">
                         <Label htmlFor="whatsappNumber" className="text-sm font-medium">
-                            WhatsApp number
+                            {t('whatsappNumber')}
                         </Label>
                         <div className="flex max-w-md">
                             <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
@@ -310,14 +312,14 @@ export function GeneralSettingsPage() {
                             />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            Enter 9 digits (required for WhatsApp orders)
+                            {t('whatsappHint')}
                         </p>
                     </div>
                 </Card>
             </div>
 
             {/* Save Button */}
-            <div className="w-full max-w-[1000px] mx-auto px-4 md:px-6 pb-6">
+            <div className="w-full pb-6">
                 <div className="flex justify-end">
                     <Button
                         onClick={handleSave}
@@ -327,12 +329,12 @@ export function GeneralSettingsPage() {
                         {saving ? (
                             <>
                                 <IconLoader2 className="w-4 h-4 animate-spin" />
-                                Saving...
+                                {t('saving')}
                             </>
                         ) : (
                             <>
                                 <IconDeviceFloppy className="w-4 h-4" />
-                                Save changes
+                                {t('save')}
                             </>
                         )}
                     </Button>

@@ -19,6 +19,7 @@ import { Label } from '@/components/shadcn-ui/label'
 import { Textarea } from '@/components/shadcn-ui/textarea'
 import { Button } from '@/components/shadcn-ui/button'
 import { Edit2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { SEO_LIMITS } from './types'
 import {
   generateSlug,
@@ -55,6 +56,7 @@ export function CategorySEOSection({
   onMetaDescriptionChange,
   onSlugChange,
 }: CategorySEOSectionProps) {
+  const t = useTranslations('Categories.form.seo')
   const [isEditing, setIsEditing] = useState(false)
 
   // Auto-generate slug from category name when name changes (only if slug is empty)
@@ -87,7 +89,7 @@ export function CategorySEOSection({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold">Search engine listing</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('sectionTitle')}</CardTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -100,7 +102,7 @@ export function CategorySEOSection({
       <CardContent className="space-y-4">
         {/* Preview Card */}
         <div className="border rounded-lg p-4 bg-muted/30 space-y-2">
-          <p className="text-sm text-muted-foreground">My Store</p>
+          <p className="text-sm text-muted-foreground">{t('previewStoreName')}</p>
           <p className="text-xs text-muted-foreground">
             {getUrlBreadcrumbs(displaySlug)}
           </p>
@@ -117,41 +119,41 @@ export function CategorySEOSection({
           <div className="space-y-4 pt-4 border-t">
             {/* Page Title */}
             <div className="space-y-2">
-              <Label htmlFor="meta-title">Page title</Label>
+              <Label htmlFor="meta-title">{t('pageTitleLabel')}</Label>
               <Input
                 id="meta-title"
-                placeholder={categoryName || "Enter category name first"}
+                placeholder={categoryName || t('pageTitlePlaceholder')}
                 value={metaTitle}
                 onChange={(e) => onMetaTitleChange(e.target.value)}
                 maxLength={SEO_LIMITS.TITLE}
               />
               <p className={`text-xs ${titleCount.isExceeding ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {titleCount.message}
+                {t('charCount', { count: metaTitle.length || categoryName.length, limit: SEO_LIMITS.TITLE, exceeding: String(titleCount.isExceeding) })}
               </p>
             </div>
 
             {/* Meta Description */}
             <div className="space-y-2">
-              <Label htmlFor="meta-description">Meta description</Label>
+              <Label htmlFor="meta-description">{t('metaDescriptionLabel')}</Label>
               <Textarea
                 id="meta-description"
-                placeholder={stripHtmlTags(categoryDescription) || "Enter category description first"}
+                placeholder={stripHtmlTags(categoryDescription) || t('metaDescriptionPlaceholder')}
                 value={metaDescription}
                 onChange={(e) => onMetaDescriptionChange(e.target.value)}
                 maxLength={SEO_LIMITS.DESCRIPTION}
                 rows={3}
               />
               <p className={`text-xs ${descCount.isExceeding ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {descCount.message}
+                {t('charCount', { count: metaDescription.length || stripHtmlTags(categoryDescription).length, limit: SEO_LIMITS.DESCRIPTION, exceeding: String(descCount.isExceeding) })}
               </p>
             </div>
 
             {/* URL Handle */}
             <div className="space-y-2">
-              <Label htmlFor="url-handle">URL handle</Label>
+              <Label htmlFor="url-handle">{t('urlHandleLabel')}</Label>
               <Input
                 id="url-handle"
-                placeholder="category-slug"
+                placeholder={t('urlHandlePlaceholder')}
                 value={slug}
                 onChange={(e) => handleSlugChange(e.target.value)}
               />
@@ -165,7 +167,7 @@ export function CategorySEOSection({
         {/* Info text when not editing */}
         {!isEditing && (
           <p className="text-xs text-muted-foreground">
-            Add a title and description to see how this collection might appear in a search engine listing.
+            {t('infoText')}
           </p>
         )}
       </CardContent>

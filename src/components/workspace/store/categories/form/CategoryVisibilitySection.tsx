@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui
 import { Input } from '@/components/shadcn-ui/input'
 import { Label } from '@/components/shadcn-ui/label'
 import { Switch } from '@/components/shadcn-ui/switch'
+import { useTranslations } from 'next-intl'
 
 interface CategoryVisibilitySectionProps {
   isVisible: boolean
@@ -22,18 +23,19 @@ export function CategoryVisibilitySection({
   onIsFeaturedChange,
   onSortOrderChange,
 }: CategoryVisibilitySectionProps) {
+  const t = useTranslations('Categories.form.sidebar');
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Visibility & Display</CardTitle>
+        <CardTitle>{t('publishing')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Visibility Toggle */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="category-visible">Visible to customers</Label>
+            <Label htmlFor="category-visible">{t('visibleLabel')}</Label>
             <p className="text-sm text-muted-foreground">
-              Show this category on your store
+              {t('visibleDesc')}
             </p>
           </div>
           <Switch
@@ -46,9 +48,9 @@ export function CategoryVisibilitySection({
         {/* Featured Toggle */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="category-featured">Featured category</Label>
+            <Label htmlFor="category-featured">{t('featuredLabel')}</Label>
             <p className="text-sm text-muted-foreground">
-              Highlight this category on your homepage
+              {t('featuredDesc')}
             </p>
           </div>
           <Switch
@@ -60,7 +62,7 @@ export function CategoryVisibilitySection({
 
         {/* Sort Order */}
         <div className="space-y-2">
-          <Label htmlFor="category-sort-order">Sort Order</Label>
+          <Label htmlFor="category-sort-order">{t('sortOrderLabel')}</Label>
           <Input
             id="category-sort-order"
             type="number"
@@ -71,7 +73,7 @@ export function CategoryVisibilitySection({
             max="999"
           />
           <p className="text-sm text-muted-foreground">
-            Lower numbers appear first in category lists
+            {t('sortOrderDesc')}
           </p>
         </div>
       </CardContent>

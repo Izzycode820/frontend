@@ -19,6 +19,7 @@ import { Search, Filter, X } from 'lucide-react'
 import {
   PRODUCT_STATUS_OPTIONS
 } from './constants'
+import { useTranslations } from 'next-intl'
 
 interface ProductsFiltersProps {
   searchValue?: string
@@ -39,6 +40,7 @@ export function ProductsFilters({
   onCategoryFilterChange,
   categories = [],
 }: ProductsFiltersProps) {
+  const t = useTranslations('Products');
   // Use props directly, no internal state for values
 
 
@@ -70,7 +72,7 @@ export function ProductsFilters({
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search products by name or SKU..."
+            placeholder={t('filters.searchPlaceholder')}
             value={searchValue}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10"
@@ -81,7 +83,7 @@ export function ProductsFilters({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
-              Filters
+              {t('filters.filters')}
               {hasActiveFilters && (
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               )}
@@ -89,16 +91,16 @@ export function ProductsFilters({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-80 p-4 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
+              <label className="text-sm font-medium">{t('filters.status')}</label>
               <Select value={statusFilter} onValueChange={handleStatusChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All statuses" />
+                  <SelectValue placeholder={t('filters.allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="all">{t('filters.allStatuses')}</SelectItem>
                   {PRODUCT_STATUS_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                      {t(`filters.${option.label.toLowerCase() as any}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -107,13 +109,13 @@ export function ProductsFilters({
 
             {categories.length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Category</label>
+                <label className="text-sm font-medium">{t('filters.category')}</label>
                 <Select value={categoryFilter} onValueChange={handleCategoryChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="All categories" />
+                    <SelectValue placeholder={t('filters.allCategories')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All categories</SelectItem>
+                    <SelectItem value="all">{t('filters.allCategories')}</SelectItem>
                     {categories.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -133,7 +135,7 @@ export function ProductsFilters({
                 className="w-full flex items-center gap-2"
               >
                 <X className="h-4 w-4" />
-                Clear filters
+                {t('filters.clearFilters')}
               </Button>
             )}
           </DropdownMenuContent>
@@ -142,20 +144,20 @@ export function ProductsFilters({
 
       {hasActiveFilters && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Active filters:</span>
+          <span>{t('filters.activeFilters')}</span>
           {searchValue && (
             <span className="bg-muted px-2 py-1 rounded text-xs">
-              Search: "{searchValue}"
+              {t('filters.search')} "{searchValue}"
             </span>
           )}
           {statusFilter && (
             <span className="bg-muted px-2 py-1 rounded text-xs">
-              Status: {statusFilter}
+              {t('filters.status')}: {t(`filters.${statusFilter.toLowerCase() as any}`)}
             </span>
           )}
           {categoryFilter && (
             <span className="bg-muted px-2 py-1 rounded text-xs">
-              Category: {categories.find(c => c.value === categoryFilter)?.label || categoryFilter}
+              {t('filters.category')}: {categories.find(c => c.value === categoryFilter)?.label || categoryFilter}
             </span>
           )}
           <Button
@@ -164,7 +166,7 @@ export function ProductsFilters({
             onClick={clearFilters}
             className="h-6 px-2 text-xs"
           >
-            Clear all
+            {t('filters.clearAll')}
           </Button>
         </div>
       )}

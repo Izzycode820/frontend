@@ -11,6 +11,7 @@ import { CategoryDocument } from '@/services/graphql/admin-store/queries/categor
 import { UpdateCategoryDocument } from '@/services/graphql/admin-store/mutations/categories/__generated__/updateCategory.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 const stripHtmlTags = (html: string): string => {
   return html
@@ -20,6 +21,7 @@ const stripHtmlTags = (html: string): string => {
 };
 
 export default function EditCategoryPage() {
+  const t = useTranslations('Categories.form');
   const params = useParams();
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
@@ -35,14 +37,14 @@ export default function EditCategoryPage() {
   const [updateCategory, { loading: updateLoading }] = useMutation(UpdateCategoryDocument, {
     onCompleted: (data) => {
       if (data.updateCategory?.success && data.updateCategory?.category) {
-        toast.success(`${data.updateCategory.category.name} has been updated successfully.`);
+        toast.success(t('toasts.updateSuccess', { name: data.updateCategory.category.name }));
         router.push(`/workspace/${currentWorkspace?.id}/store/categories`);
       } else {
-        toast.error(data.updateCategory?.error || "Failed to update category");
+        toast.error(data.updateCategory?.error || t('toasts.updateError'));
       }
     },
     onError: (error) => {
-      toast.error(error.message || "An unexpected error occurred");
+      toast.error(error.message || t('toasts.unexpectedError'));
     },
   });
 
@@ -79,7 +81,7 @@ export default function EditCategoryPage() {
   };
 
   const handlePreview = () => {
-    toast.info("Category preview coming soon!");
+    toast.info(t('toasts.previewSoon'));
   };
 
   const handleRemoveExistingImage = () => {
@@ -97,7 +99,7 @@ export default function EditCategoryPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Loading category...</p>
+        <p className="text-muted-foreground">{t('edit.loadingCategory')}</p>
       </div>
     );
   }
@@ -114,10 +116,10 @@ export default function EditCategoryPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <h1 className="text-2xl font-bold">Category Not Found</h1>
+              <h1 className="text-2xl font-bold">{t('edit.notFound')}</h1>
             </div>
             <p className="text-destructive">
-              {fetchError?.message || "The category you're looking for doesn't exist."}
+              {fetchError?.message || t('edit.notFoundDetail')}
             </p>
           </div>
         </div>
@@ -165,10 +167,10 @@ export default function EditCategoryPage() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold">Edit Category</h1>
+            <h1 className="text-2xl font-bold">{t('edit.title')}</h1>
           </div>
           <p className="text-muted-foreground">
-            Update {category.name}
+            {t('edit.subtitle', { name: category.name })}
           </p>
         </div>
 

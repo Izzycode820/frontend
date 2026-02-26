@@ -10,6 +10,7 @@ import { useMutation } from '@apollo/client/react';
 import { CreateCategoryDocument } from '@/services/graphql/admin-store/mutations/categories/__generated__/createCategory.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 const stripHtmlTags = (html: string): string => {
   return html
@@ -19,21 +20,22 @@ const stripHtmlTags = (html: string): string => {
 };
 
 export default function AddCategoryPage() {
+  const t = useTranslations('Categories.form');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
 
   const [createCategory, { loading }] = useMutation(CreateCategoryDocument, {
     onCompleted: (data) => {
       if (data.createCategory?.success && data.createCategory?.category) {
-        toast.success(`${data.createCategory.category.name} has been created successfully.`);
+        toast.success(t('toasts.createSuccess', { name: data.createCategory.category.name }));
         // Navigate to categories list
         router.push(`/workspace/${currentWorkspace?.id}/store/products/categories`);
       } else {
-        toast.error(data.createCategory?.error || "Failed to create category");
+        toast.error(data.createCategory?.error || t('toasts.createError'));
       }
     },
     onError: (error) => {
-      toast.error(error.message || "An unexpected error occurred");
+      toast.error(error.message || t('toasts.unexpectedError'));
     },
   });
 
@@ -68,13 +70,13 @@ export default function AddCategoryPage() {
   };
 
   const handlePreview = () => {
-    toast.info("Category preview coming soon!");
+    toast.info(t('toasts.previewSoon'));
   };
 
   if (!currentWorkspace) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">Loading workspace...</p>
+        <p className="text-muted-foreground">{t('add.loadingWorkspace')}</p>
       </div>
     );
   }
@@ -90,10 +92,10 @@ export default function AddCategoryPage() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold">Add Category</h1>
+            <h1 className="text-2xl font-bold">{t('add.title')}</h1>
           </div>
           <p className="text-muted-foreground">
-            Create a new category for your store
+            {t('add.subtitle')}
           </p>
         </div>
 

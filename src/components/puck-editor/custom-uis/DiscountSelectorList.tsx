@@ -35,7 +35,7 @@ function DiscountSelectorListInner({
   const { data, loading, error, refetch } = useQuery(GetDiscountsListDocument, {
     variables: {
       first: 100,
-      status: 'active' as any, // Only show active discounts
+      status: 'ACTIVE' as any, // Only show active discounts
     },
     skip: !isOpen,
     fetchPolicy: 'network-only',

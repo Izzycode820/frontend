@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader } from '@/components/shadcn-ui/card';
 import { Input } from '@/components/shadcn-ui/input';
 import { Button } from '@/components/shadcn-ui/button';
@@ -46,6 +47,9 @@ export function VariantsList({
   onBack,
   optionNames,
 }: VariantsListProps) {
+  const t = useTranslations('Products.variants.list');
+  const te = useTranslations('Products.variants.editor');
+
   return (
     <Card className="h-fit sticky top-4">
       <CardHeader className="space-y-4">
@@ -57,7 +61,7 @@ export function VariantsList({
           className="w-fit -ml-2"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Inventory
+          {te('backToInventory')}
         </Button>
 
         {/* Product Header */}
@@ -85,10 +89,10 @@ export function VariantsList({
                 variant={product.status === 'published' ? 'default' : 'secondary'}
                 className="text-xs"
               >
-                {product.status === 'published' ? 'Active' : product.status}
+                {product.status === 'published' ? t('active') : product.status}
               </Badge>
               <span className="text-sm text-muted-foreground">
-                {variants.length} variant{variants.length !== 1 ? 's' : ''}
+                {t('variantCount', { count: variants.length })}
               </span>
             </div>
           </div>
@@ -98,7 +102,7 @@ export function VariantsList({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search variants"
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"
@@ -109,14 +113,14 @@ export function VariantsList({
       <CardContent className="pt-0">
         {/* Variant Count */}
         <p className="text-sm text-muted-foreground mb-3">
-          {variants.length} variant{variants.length !== 1 ? 's' : ''}
+          {t('variantCount', { count: variants.length })}
         </p>
 
         {/* Variants List */}
         <div className="space-y-1">
           {variants.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground">
-              No variants found
+              {t('noVariants')}
             </div>
           ) : (
             variants.map((variant) => {

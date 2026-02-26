@@ -18,6 +18,7 @@ import {
   AlignRight,
 } from 'lucide-react';
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface RichTextEditorProps {
   value: string;
@@ -27,6 +28,7 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-h-[200px]' }: RichTextEditorProps) {
+  const t = useTranslations('Shared.editor');
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -78,6 +80,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive('bold') ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().toggleBold().run()}
+            aria-label={t('bold')}
+            title={t('bold')}
           >
             <Bold className="h-4 w-4" />
           </Button>
@@ -88,6 +92,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive('italic') ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().toggleItalic().run()}
+            aria-label={t('italic')}
+            title={t('italic')}
           >
             <Italic className="h-4 w-4" />
           </Button>
@@ -98,6 +104,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive('underline') ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().toggleUnderline().run()}
+            aria-label={t('underline')}
+            title={t('underline')}
           >
             <UnderlineIcon className="h-4 w-4" />
           </Button>
@@ -110,6 +118,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive('bulletList') ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
+            aria-label={t('bulletList')}
+            title={t('bulletList')}
           >
             <List className="h-4 w-4" />
           </Button>
@@ -120,6 +130,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive('orderedList') ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            aria-label={t('orderedList')}
+            title={t('orderedList')}
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
@@ -132,6 +144,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive({ textAlign: 'left' }) ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            aria-label={t('alignLeft')}
+            title={t('alignLeft')}
           >
             <AlignLeft className="h-4 w-4" />
           </Button>
@@ -141,6 +155,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive({ textAlign: 'center' }) ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            aria-label={t('alignCenter')}
+            title={t('alignCenter')}
           >
             <AlignCenter className="h-4 w-4" />
           </Button>
@@ -150,6 +166,8 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 'min-
             size="sm"
             className={`h-8 w-8 p-0 hover:bg-accent ${editor.isActive({ textAlign: 'right' }) ? 'bg-accent/50 text-accent-foreground' : ''}`}
             onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            aria-label={t('alignRight')}
+            title={t('alignRight')}
           >
             <AlignRight className="h-4 w-4" />
           </Button>

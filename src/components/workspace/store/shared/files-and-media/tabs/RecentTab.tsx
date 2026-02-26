@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRecentMedia } from '../hooks/useRecentMedia'
 import { MediaGrid } from '../MediaGrid'
+import { useTranslations } from 'next-intl'
 import type { MediaType, MediaItem } from '../types'
 
 interface RecentTabProps {
@@ -20,6 +21,7 @@ export function RecentTab({
   maxSelection,
   refetchRef,
 }: RecentTabProps) {
+  const t = useTranslations('Shared.media')
   const { recentMedia, loading, error, refetch } = useRecentMedia({
     limit: 50,
   })
@@ -47,12 +49,12 @@ export function RecentTab({
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-destructive">Failed to load recent media</p>
+        <p className="text-destructive">{t('failedToLoadRecent')}</p>
         <button
           onClick={() => refetch()}
           className="mt-2 text-sm text-primary hover:underline"
         >
-          Try again
+          {t('tryAgain')}
         </button>
       </div>
     )
@@ -63,8 +65,8 @@ export function RecentTab({
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {selectedIds.size > 0
-            ? `${selectedIds.size} selected`
-            : `${filteredMedia.length} recent files`}
+            ? t('selectedCount', { count: selectedIds.size })
+            : t('recentFiles', { count: filteredMedia.length })}
         </p>
         {selectedIds.size > 0 && (
           <button
@@ -73,7 +75,7 @@ export function RecentTab({
             }}
             className="text-sm text-primary hover:underline"
           >
-            Clear selection
+            {t('clearSelection')}
           </button>
         )}
       </div>

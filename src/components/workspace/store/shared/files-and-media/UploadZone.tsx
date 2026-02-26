@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { Upload } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { UploadProgress, MediaType } from './types'
 
 interface UploadZoneProps {
@@ -28,6 +29,7 @@ export function UploadZone({
   onFilesSelected,
   uploads = [],
 }: UploadZoneProps) {
+  const t = useTranslations('Shared.media');
   const [isDragging, setIsDragging] = useState(false)
 
   // Get accept attribute for file input
@@ -112,19 +114,19 @@ export function UploadZone({
       >
         <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
         <p className="text-sm text-muted-foreground mb-2">
-          Drag and drop or{' '}
+          {t('dragDrop')}{' '}
           <button
             type="button"
             onClick={() => document.getElementById('file-upload')?.click()}
             className="text-primary hover:underline font-medium"
           >
-            browse files
+            {t('browse')}
           </button>
         </p>
         <p className="text-xs text-muted-foreground">
-          {allowedTypes.includes('image') && 'Images, '}
-          {allowedTypes.includes('video') && 'Videos, '}
-          {allowedTypes.includes('3d_model') && '3D Models '}
+          {allowedTypes.includes('image') && `${t('images')}, `}
+          {allowedTypes.includes('video') && `${t('videos')}, `}
+          {allowedTypes.includes('3d_model') && `${t('models3D')} `}
           (max {maxSizeMB}MB)
         </p>
 

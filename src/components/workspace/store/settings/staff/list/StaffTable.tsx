@@ -12,6 +12,7 @@ import {
 import { Card } from '@/components/shadcn-ui/card';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import { Badge } from '@/components/shadcn-ui/badge';
+import { useTranslations } from 'next-intl';
 import { RefreshCcw, Ban } from 'lucide-react';
 
 interface StaffMember {
@@ -36,6 +37,7 @@ export function StaffTable({
   onSelectStaff,
   onViewMember,
 }: StaffTableProps) {
+  const t = useTranslations('Staff');
   const isAllSelected = members.length > 0 && selectedStaff.length === members.length;
 
   const handleSelectAll = () => {
@@ -59,19 +61,19 @@ export function StaffTable({
       case 'active':
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Active
+            {t('active')}
           </Badge>
         );
       case 'pending':
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            Pending
+            {t('pending')}
           </Badge>
         );
       case 'suspended':
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            Suspended
+            {t('suspended')}
           </Badge>
         );
       default:
@@ -110,9 +112,9 @@ export function StaffTable({
                   aria-label="Select all"
                 />
               </TableHead>
-              <TableHead className="whitespace-nowrap">User</TableHead>
-              <TableHead className="whitespace-nowrap">Status</TableHead>
-              <TableHead className="whitespace-nowrap">Role</TableHead>
+              <TableHead className="whitespace-nowrap">{t('user')}</TableHead>
+              <TableHead className="whitespace-nowrap">{t('status')}</TableHead>
+              <TableHead className="whitespace-nowrap">{t('role')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

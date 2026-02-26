@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import {
@@ -35,6 +36,7 @@ interface OrdersTableProps {
   workspaceId: string;
   onArchiveOrder?: (orderId: string) => void;
   onUnarchiveOrder?: (orderId: string) => void;
+  totalCount: number;
 }
 
 export function OrdersTable({
@@ -45,18 +47,21 @@ export function OrdersTable({
   workspaceId,
   onArchiveOrder,
   onUnarchiveOrder,
+  totalCount,
 }: OrdersTableProps) {
+  const t = useTranslations('Orders.table');
+  const tActions = useTranslations('Orders.actions');
   const allSelected = orders.length > 0 && selectedOrders.length === orders.length;
   const someSelected = selectedOrders.length > 0 && selectedOrders.length < orders.length;
 
   const getChannelBadge = (orderSource: string) => {
     switch (orderSource?.toLowerCase()) {
       case 'whatsapp':
-        return <span className="text-xs text-green-600 font-medium">WhatsApp</span>;
+        return <span className="text-xs text-green-600 font-medium">{t('channels.whatsapp')}</span>;
       case 'admin':
-        return <span className="text-xs text-gray-600 font-medium">Admin</span>;
+        return <span className="text-xs text-gray-600 font-medium">{t('channels.admin')}</span>;
       case 'web':
-        return <span className="text-xs text-blue-600 font-medium">Online Store</span>;
+        return <span className="text-xs text-blue-600 font-medium">{t('channels.web')}</span>;
       default:
         return <span className="text-xs text-gray-600 font-medium">{orderSource}</span>;
     }
@@ -71,19 +76,19 @@ export function OrdersTable({
               <Checkbox
                 checked={allSelected}
                 onCheckedChange={onSelectAll}
-                aria-label="Select all orders"
+                aria-label={tActions('selectedCount', { count: totalCount })} // Wait totalCount not in scope, using orders.length? Actually the prop is OrdersTableProps, orders might be just current page.
                 className={someSelected ? 'data-[state=checked]:bg-primary' : ''}
               />
             </TableHead>
-            <TableHead>Order</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Channel</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead>Payment status</TableHead>
-            <TableHead>Fulfillment status</TableHead>
-            <TableHead className="text-right">Items</TableHead>
-            <TableHead>Delivery method</TableHead>
+            <TableHead>{t('order')}</TableHead>
+            <TableHead>{t('date')}</TableHead>
+            <TableHead>{t('customer')}</TableHead>
+            <TableHead>{t('channel')}</TableHead>
+            <TableHead className="text-right">{t('total')}</TableHead>
+            <TableHead>{t('paymentStatus')}</TableHead>
+            <TableHead>{t('fulfillmentStatus')}</TableHead>
+            <TableHead className="text-right">{t('items')}</TableHead>
+            <TableHead>{t('deliveryMethod')}</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
@@ -91,7 +96,7 @@ export function OrdersTable({
           {orders.length === 0 ? (
             <TableRow>
               <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
-                No orders found
+                {t('noOrders')}
               </TableCell>
             </TableRow>
           ) : (
@@ -113,7 +118,7 @@ export function OrdersTable({
                   </Link>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+                  {order.createdAt ? formatDistanceToNow(new Date(order.createdAt), { addSuffix: true }) : '-'}
                 </TableCell>
                 <TableCell>
                   {order.customerName ? (
@@ -122,7 +127,7 @@ export function OrdersTable({
                       <span className="text-xs text-muted-foreground">{order.customerPhone}</span>
                     </div>
                   ) : (
-                    <span className="text-sm text-muted-foreground">No customer</span>
+                    <span className="text-sm text-muted-foreground">{t('noCustomer')}</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -138,11 +143,11 @@ export function OrdersTable({
                   <OrderStatusBadge status={order.status} type="fulfillment" />
                 </TableCell>
                 <TableCell className="text-right text-sm">
-                  {order.itemCount} {order.itemCount === 1 ? 'item' : 'items'}
+                  {t('itemCount', { count: order.itemCount ?? 0 })}
                 </TableCell>
                 <TableCell className="text-sm">
                   {order.isCashOnDelivery ? (
-                    <span className="text-xs">Cash on Delivery</span>
+                    <span className="text-xs">{t('methods.cash_on_delivery')}</span>
                   ) : (
                     <span className="text-xs capitalize">{order.paymentMethod?.replace('_', ' ')}</span>
                   )}
@@ -152,20 +157,20 @@ export function OrdersTable({
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">{tActions('openMenu')}</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {order.canBeArchived && onArchiveOrder && (
                         <DropdownMenuItem onClick={() => onArchiveOrder(order.id)}>
                           <Archive className="mr-2 h-4 w-4" />
-                          Archive
+                          {tActions('archive')}
                         </DropdownMenuItem>
                       )}
                       {order.canBeUnarchived && onUnarchiveOrder && (
                         <DropdownMenuItem onClick={() => onUnarchiveOrder(order.id)}>
                           <ArchiveRestore className="mr-2 h-4 w-4" />
-                          Unarchive
+                          {tActions('unarchive')}
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>

@@ -11,6 +11,7 @@ import {
 } from '@/components/shadcn-ui/select'
 import { Search, ArrowUpDown, SortAsc } from 'lucide-react'
 import { Button } from '@/components/shadcn-ui/button'
+import { useTranslations } from 'next-intl'
 import {
   Popover,
   PopoverContent,
@@ -50,6 +51,8 @@ export function SearchAndFilters({
   onSortOrderChange,
   compact = false,
 }: SearchAndFiltersProps) {
+  const t = useTranslations('Shared.media');
+
   // Compact mode: horizontal layout for mobile
   if (compact) {
     return (
@@ -59,7 +62,7 @@ export function SearchAndFilters({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Filter by title"
+            placeholder={t('filterByTitle')}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9 h-9"
@@ -80,9 +83,9 @@ export function SearchAndFilters({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="size">Size</SelectItem>
+                  <SelectItem value="date">{t('date')}</SelectItem>
+                  <SelectItem value="name">{t('name')}</SelectItem>
+                  <SelectItem value="size">{t('size')}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={sortOrder} onValueChange={onSortOrderChange}>
@@ -91,10 +94,10 @@ export function SearchAndFilters({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="desc">
-                    {sortBy === 'date' ? 'Newest' : 'Largest'}
+                    {sortBy === 'date' ? t('newest') : t('largest')}
                   </SelectItem>
                   <SelectItem value="asc">
-                    {sortBy === 'date' ? 'Oldest' : 'Smallest'}
+                    {sortBy === 'date' ? t('oldest') : t('smallest')}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -110,13 +113,13 @@ export function SearchAndFilters({
     <div className="space-y-4">
       {/* Search */}
       <div className="space-y-2">
-        <Label htmlFor="media-search">Search files</Label>
+        <Label htmlFor="media-search">{t('searchFiles')}</Label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="media-search"
             type="text"
-            placeholder="Search by filename..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"
@@ -126,32 +129,32 @@ export function SearchAndFilters({
 
       {/* Sort By */}
       <div className="space-y-2">
-        <Label>Sort by</Label>
+        <Label>{t('sortBy')}</Label>
         <Select value={sortBy} onValueChange={onSortByChange}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date">Date uploaded</SelectItem>
-            <SelectItem value="name">File name</SelectItem>
-            <SelectItem value="size">File size</SelectItem>
+            <SelectItem value="date">{t('dateUploaded')}</SelectItem>
+            <SelectItem value="name">{t('fileName')}</SelectItem>
+            <SelectItem value="size">{t('fileSize')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Sort Order */}
       <div className="space-y-2">
-        <Label>Order</Label>
+        <Label>{t('order')}</Label>
         <Select value={sortOrder} onValueChange={onSortOrderChange}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="desc">
-              {sortBy === 'date' ? 'Newest first' : 'Largest first'}
+              {sortBy === 'date' ? t('newestFirst') : t('largestFirst')}
             </SelectItem>
             <SelectItem value="asc">
-              {sortBy === 'date' ? 'Oldest first' : 'Smallest first'}
+              {sortBy === 'date' ? t('oldestFirst') : t('smallestFirst')}
             </SelectItem>
           </SelectContent>
         </Select>

@@ -21,10 +21,13 @@ import { StaffToolbar } from './StaffToolbar';
 import { Button } from '@/components/shadcn-ui/button';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Users, ArrowLeft } from 'lucide-react';
 
 export default function StaffListContainer() {
   const router = useRouter();
+  const t = useTranslations('Staff');
+  const tGen = useTranslations('General');
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
 
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
@@ -63,7 +66,7 @@ export default function StaffListContainer() {
         firstName: node.user.firstName,
         lastName: node.user.lastName,
         status: node.status,
-        role: node.role?.name || 'Unknown',
+        role: node.role?.name || t('unknown'),
         roles: node.role ? [node.role.name] : [],
         joinedAt: node.joinedAt,
       };
@@ -77,8 +80,8 @@ export default function StaffListContainer() {
       return {
         id: invite.id,
         email: invite.email,
-        role: invite.role?.name || 'Unknown',
-        invitedBy: invite.invitedBy?.email || 'Unknown',
+        role: invite.role?.name || t('unknown'),
+        invitedBy: invite.invitedBy?.email || t('unknown'),
         createdAt: invite.createdAt,
         expiresAt: invite.expiresAt,
       };
@@ -95,7 +98,7 @@ export default function StaffListContainer() {
   };
 
   const handleExport = () => {
-    toast.info('Export functionality coming soon!');
+    toast.info(t('exportComingSoon'));
   };
 
   const handleBulkSuspend = async () => {
@@ -110,7 +113,7 @@ export default function StaffListContainer() {
           variables: {
             input: {
               memberId,
-              reason: 'Suspended by administrator',
+              reason: t('suspend'),
             },
           },
         });
@@ -123,15 +126,15 @@ export default function StaffListContainer() {
       }
 
       if (successCount > 0) {
-        toast.success(`Suspended ${successCount} staff member${successCount > 1 ? 's' : ''}`);
+        toast.success(t('suspendedSuccess', { count: successCount }));
         refetch();
         setSelectedStaff([]);
       }
       if (errorCount > 0) {
-        toast.error(`Failed to suspend ${errorCount} staff member${errorCount > 1 ? 's' : ''}`);
+        toast.error(t('suspendedFailed', { count: errorCount }));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to suspend staff members');
+      toast.error(err.message || t('suspendGenericFailed'));
     }
   };
 
@@ -155,22 +158,22 @@ export default function StaffListContainer() {
       }
 
       if (successCount > 0) {
-        toast.success(`Reactivated ${successCount} staff member${successCount > 1 ? 's' : ''}`);
+        toast.success(t('reactivatedSuccess', { count: successCount }));
         refetch();
         setSelectedStaff([]);
       }
       if (errorCount > 0) {
-        toast.error(`Failed to reactivate ${errorCount} staff member${errorCount > 1 ? 's' : ''}`);
+        toast.error(t('reactivatedFailed', { count: errorCount }));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to reactivate staff members');
+      toast.error(err.message || t('reactivateGenericFailed'));
     }
   };
 
   const handleBulkRemove = async () => {
     if (selectedStaff.length === 0) return;
 
-    if (!confirm(`Are you sure you want to remove ${selectedStaff.length} staff member${selectedStaff.length > 1 ? 's' : ''}?`)) {
+    if (!confirm(t('removeConfirm', { count: selectedStaff.length }))) {
       return;
     }
 
@@ -191,15 +194,15 @@ export default function StaffListContainer() {
       }
 
       if (successCount > 0) {
-        toast.success(`Removed ${successCount} staff member${successCount > 1 ? 's' : ''}`);
+        toast.success(t('removedSuccess', { count: successCount }));
         refetch();
         setSelectedStaff([]);
       }
       if (errorCount > 0) {
-        toast.error(`Failed to remove ${errorCount} staff member${errorCount > 1 ? 's' : ''}`);
+        toast.error(t('removedFailed', { count: errorCount }));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to remove staff members');
+      toast.error(err.message || t('removeGenericFailed'));
     }
   };
 
@@ -211,13 +214,13 @@ export default function StaffListContainer() {
       });
 
       if (resendData?.resendInvite?.success) {
-        toast.success('Invitation resent');
+        toast.success(t('inviteResent'));
         refetchPending();
       } else {
-        toast.error(resendData?.resendInvite?.error || 'Failed to resend invitation');
+        toast.error(resendData?.resendInvite?.error || t('inviteResendFailed'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to resend invitation');
+      toast.error(err.message || t('inviteResendFailed'));
     }
   };
 
@@ -229,7 +232,7 @@ export default function StaffListContainer() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading staff members...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           </CardContent>
         </Card>
@@ -244,7 +247,7 @@ export default function StaffListContainer() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive py-12">
-              <p>Failed to load staff members</p>
+              <p>{t('errorLoading')}</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </CardContent>
@@ -260,11 +263,11 @@ export default function StaffListContainer() {
         <Card>
           <CardContent className="py-12 text-center">
             <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-2">No staff members yet</p>
+            <p className="text-lg font-medium mb-2">{t('noStaff')}</p>
             <p className="text-sm text-muted-foreground mb-4">
-              Start by inviting team members to your workspace
+              {t('noStaffDesc')}
             </p>
-            <Button onClick={handleAddStaff}>Add users</Button>
+            <Button onClick={handleAddStaff}>{t('addUsers')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -285,14 +288,14 @@ export default function StaffListContainer() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <Users className="h-5 w-5" />
-          <h1 className="text-2xl font-bold">Users</h1>
+          <h1 className="text-2xl font-bold">{t('users')}</h1>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <Button variant="outline" onClick={handleExport} className="flex-1 sm:flex-none">
-            Export
+            {t('export')}
           </Button>
           <Button onClick={handleAddStaff} className="flex-1 sm:flex-none">
-            Add users
+            {t('addUsers')}
           </Button>
         </div>
       </div>

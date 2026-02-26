@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface FilterChip {
@@ -27,6 +28,15 @@ export function InventoryFilterChips({
     activeChip,
     onChipChange,
 }: InventoryFilterChipsProps) {
+    const t = useTranslations('Inventory');
+    const translatedChips = chips.map(chip => {
+        if (chip.value === 'all') return { ...chip, label: t('list.all', { defaultValue: 'All' }) }
+        if (['in_stock', 'low_stock', 'out_of_stock'].includes(chip.value)) {
+            return { ...chip, label: t(`status.${chip.value}`) }
+        }
+        return chip
+    })
+
     return (
         <div
             className="flex gap-2 overflow-x-auto scrollbar-none pb-2 -mx-4 px-4"
@@ -35,7 +45,7 @@ export function InventoryFilterChips({
                 msOverflowStyle: 'none',
             }}
         >
-            {chips.map((chip) => (
+            {translatedChips.map((chip) => (
                 <button
                     key={chip.value}
                     onClick={() => onChipChange(chip.value)}

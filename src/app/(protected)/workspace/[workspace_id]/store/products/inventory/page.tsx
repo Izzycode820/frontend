@@ -40,9 +40,11 @@ import { GetLocationsDocument } from '@/services/graphql/admin-store/queries/inv
 import { UpdateInventoryDocument } from '@/services/graphql/admin-store/mutations/inventory/__generated__/UpdateInventory.generated'
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { Search, Package } from 'lucide-react'
 
 export default function InventoryPage() {
+  const t = useTranslations('Inventory')
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace)
   const isMobile = useIsMobile()
 
@@ -142,13 +144,15 @@ export default function InventoryPage() {
       })
 
       if (updateData?.updateInventory?.success) {
-        toast.success(`${field === 'onhand' ? 'On Hand' : 'Available'} updated successfully`)
+        toast.success(t('toasts.updateSuccess', {
+          field: field === 'onhand' ? t('table.onHand') : t('table.available')
+        }))
         refetch() // Refresh to get computed fields
       } else {
-        toast.error(updateData?.updateInventory?.error || 'Failed to update inventory')
+        toast.error(updateData?.updateInventory?.error || t('toasts.updateError'))
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update inventory')
+      toast.error(err.message || t('toasts.updateError'))
       console.error('Update inventory error:', err)
     }
   }
@@ -195,7 +199,7 @@ export default function InventoryPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              <p>Failed to load inventory</p>
+              <p>{t('page.errorLoading')}</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </CardContent>
@@ -263,9 +267,9 @@ export default function InventoryPage() {
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Inventory</h1>
+        <h1 className="text-2xl font-bold">{t('page.title')}</h1>
         <p className="text-sm text-muted-foreground">
-          Manage inventory across all locations ({totalCount} total records)
+          {t('page.subtitle', { count: totalCount })}
         </p>
       </div>
 
@@ -277,7 +281,7 @@ export default function InventoryPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by product, SKU, or variant..."
+                placeholder={t('filters.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -287,10 +291,10 @@ export default function InventoryPage() {
             {/* Location Filter */}
             <Select value={locationFilter || 'all'} onValueChange={(v) => setLocationFilter(v === 'all' ? undefined : v)}>
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="All Locations" />
+                <SelectValue placeholder={t('filters.allLocations')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="all">{t('filters.allLocations')}</SelectItem>
                 {locations.map((location) => (
                   <SelectItem key={location.id} value={location.id}>
                     {location.name}
@@ -305,20 +309,20 @@ export default function InventoryPage() {
               onValueChange={(v) => setStockStatusFilter(v === 'all' ? undefined : v)}
             >
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder={t('filters.allStatus')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="in_stock">In Stock</SelectItem>
-                <SelectItem value="low_stock">Low Stock</SelectItem>
-                <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                <SelectItem value="all">{t('filters.allStatus')}</SelectItem>
+                <SelectItem value="in_stock">{t('status.in_stock')}</SelectItem>
+                <SelectItem value="low_stock">{t('status.low_stock')}</SelectItem>
+                <SelectItem value="out_of_stock">{t('status.out_of_stock')}</SelectItem>
               </SelectContent>
             </Select>
 
             {/* Clear Filters */}
             {hasFilters && (
               <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-                Clear
+                {t('filters.clear')}
               </Button>
             )}
           </div>
@@ -331,7 +335,7 @@ export default function InventoryPage() {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-12">
               <Package className="h-12 w-12 text-muted-foreground mb-4" />
-              <div className="animate-pulse text-muted-foreground">Loading inventory...</div>
+              <div className="animate-pulse text-muted-foreground">{t('page.loading')}</div>
             </div>
           </CardContent>
         </Card>
@@ -340,9 +344,9 @@ export default function InventoryPage() {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-12">
               <Package className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No inventory records found</p>
+              <p className="text-muted-foreground">{t('list.noInventory')}</p>
               <p className="text-sm text-muted-foreground">
-                {hasFilters ? 'Try adjusting your filters' : 'Add products to create inventory records'}
+                {hasFilters ? t('page.adjustFilters') : t('page.noInventoryDetail')}
               </p>
             </div>
           </CardContent>
@@ -355,7 +359,11 @@ export default function InventoryPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-2">
               <div className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} records
+                {t('page.pagination', {
+                  start: ((currentPage - 1) * pageSize) + 1,
+                  end: Math.min(currentPage * pageSize, totalCount),
+                  total: totalCount
+                })}
               </div>
               <Pagination>
                 <PaginationContent>

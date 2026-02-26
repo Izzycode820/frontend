@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { ProductRowActions } from '../ProductRowActions';
+import { useTranslations } from 'next-intl';
 
 interface Product {
     id: string;
@@ -48,6 +49,7 @@ export function ProductCard({
     onDelete,
     onCategoryUpdate,
 }: ProductCardProps) {
+    const t = useTranslations('Products');
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
     const [isPressed, setIsPressed] = React.useState(false);
 
@@ -86,13 +88,13 @@ export function ProductCard({
         if (status === 'published') {
             return (
                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
-                    Active
+                    {t('active')}
                 </Badge>
             );
         }
         return (
             <Badge variant="outline" className="bg-zinc-50 text-zinc-600 border-zinc-200 text-xs">
-                Archived
+                {t('filters.archived')}
             </Badge>
         );
     };
@@ -157,7 +159,7 @@ export function ProductCard({
                         "text-xs",
                         product.inventory > 0 ? "text-zinc-500" : "text-red-500"
                     )}>
-                        {product.inventory > 0 ? `${product.inventory} in stock` : 'Out of stock'}
+                        {product.inventory > 0 ? t('inStock', { count: product.inventory }) : t('outOfStock')}
                     </div>
                 </div>
                 {/* Row Actions - Hidden in selection mode */}

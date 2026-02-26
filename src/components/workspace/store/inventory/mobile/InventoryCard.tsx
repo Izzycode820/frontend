@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/shadcn-ui/badge';
+import { useTranslations } from 'next-intl';
 import type { GetInventoryQuery } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetInventory.generated';
 
 type InventoryNode = NonNullable<
@@ -27,6 +28,7 @@ export function InventoryCard({
     onSelect,
     onLongPress,
 }: InventoryCardProps) {
+    const t = useTranslations('Inventory');
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
     const [isPressed, setIsPressed] = React.useState(false);
 
@@ -131,7 +133,7 @@ export function InventoryCard({
                         </Badge>
                     )}
                     {!item.variant?.option1 && !item.variant?.option2 && !item.variant?.option3 && (
-                        <span className="text-xs text-zinc-500">Default</span>
+                        <span className="text-xs text-zinc-500">{t('table.default')}</span>
                     )}
                 </div>
 

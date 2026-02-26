@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
@@ -25,6 +26,8 @@ export function UnfulfillmentCard({
   items,
   onMarkAsFulfilled,
 }: UnfulfillmentCardProps) {
+  const t = useTranslations('Orders.details.unfulfillment');
+  const commonT = useTranslations('Products');
   // Check for any "fulfilled" status variant (case-insensitive)
   const fulfilledStatuses = ['fulfilled', 'shipped', 'delivered'];
   const isFulfilled = fulfilledStatuses.includes(status?.toLowerCase() || '');
@@ -38,14 +41,14 @@ export function UnfulfillmentCard({
               <Package className="h-4 w-4 text-yellow-700 dark:text-yellow-400" />
             </div>
             <CardTitle className="text-base">
-              {isFulfilled ? 'Fulfilled' : 'Unfulfilled'}
+              {isFulfilled ? t('fulfilled') : t('unfulfilled')}
             </CardTitle>
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="p-4 space-y-1">
-          <p className="text-sm font-medium">Shipping</p>
+          <p className="text-sm font-medium">{t('shipping')}</p>
         </div>
 
         <Separator />
@@ -75,7 +78,7 @@ export function UnfulfillmentCard({
                     />
                   ) : (
                     <div className="w-full h-full rounded-md bg-muted flex items-center justify-center border">
-                      <span className="text-[10px] text-muted-foreground">No image</span>
+                      <span className="text-[10px] text-muted-foreground">{commonT('noImage')}</span>
                     </div>
                   )}
                 </div>
@@ -106,7 +109,7 @@ export function UnfulfillmentCard({
         {!isFulfilled && (
           <div className="p-4 border-t">
             <Button onClick={onMarkAsFulfilled} size="sm">
-              Mark as fulfilled
+              {t('markAsFulfilled')}
             </Button>
           </div>
         )}

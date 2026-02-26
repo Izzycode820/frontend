@@ -60,7 +60,6 @@ export function generateMetaDescription(
 export function getCharacterCount(text: string, limit: number): {
   count: number;
   isExceeding: boolean;
-  message: string;
 } {
   const count = text.length;
   const isExceeding = count > limit;
@@ -68,7 +67,6 @@ export function getCharacterCount(text: string, limit: number): {
   return {
     count,
     isExceeding,
-    message: `${count} of ${limit} characters used`
   };
 }
 

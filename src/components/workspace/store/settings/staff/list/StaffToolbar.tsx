@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Card } from '@/components/shadcn-ui/card';
+import { useTranslations } from 'next-intl';
 import { Ban, RotateCcw, Trash2 } from 'lucide-react';
 
 interface StaffToolbarProps {
@@ -18,13 +19,14 @@ export function StaffToolbar({
   onReactivate,
   onRemove,
 }: StaffToolbarProps) {
+  const t = useTranslations('Staff');
   if (selectedCount === 0) return null;
 
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">
-          {selectedCount} {selectedCount === 1 ? 'staff member' : 'staff members'} selected
+          {t('selected', { count: selectedCount })}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -33,7 +35,7 @@ export function StaffToolbar({
             onClick={onSuspend}
           >
             <Ban className="h-4 w-4 mr-2" />
-            Suspend
+            {t('suspend')}
           </Button>
           <Button
             variant="outline"
@@ -41,7 +43,7 @@ export function StaffToolbar({
             onClick={onReactivate}
           >
             <RotateCcw className="h-4 w-4 mr-2" />
-            Reactivate
+            {t('reactivate')}
           </Button>
           <Button
             variant="destructive"
@@ -49,7 +51,7 @@ export function StaffToolbar({
             onClick={onRemove}
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Remove
+            {t('remove')}
           </Button>
         </div>
       </div>

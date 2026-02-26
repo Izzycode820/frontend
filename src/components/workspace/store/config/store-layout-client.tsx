@@ -21,6 +21,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { WorkspaceLayout } from "@/components/workspace/layouts/workspace-layout"
 import { WorkspaceSidebar } from "@/components/workspace/layouts/workspace-sidebar"
 import { WorkspaceHeader } from "@/components/workspace/layouts/workspace-header"
@@ -99,6 +100,7 @@ interface StoreLayoutClientProps {
 }
 
 export function StoreLayoutClient({ children }: StoreLayoutClientProps) {
+  const t = useTranslations('Dashboard.navigation')
   const router = useRouter()
   const params = useParams()
   const workspaceId = params?.workspace_id as string
@@ -239,7 +241,7 @@ export function StoreLayoutClient({ children }: StoreLayoutClientProps) {
     <>
       <WorkspaceLayout
         sidebar={<WorkspaceSidebar config={sidebarConfig} />}
-        header={<WorkspaceHeader title={`${currentWorkspace.name} - Store`} />}
+        header={<WorkspaceHeader title={`${currentWorkspace.name} - ${t('store')}`} />}
         mobileHeader={<MobileHeader user={{ name: user.username, email: user.email, avatar: user.avatar }} workspaceId={currentWorkspace.id} />}
         mobileNav={<MobileBottomNav onMenuClick={() => setIsMobileMenuOpen(true)} />}
       >

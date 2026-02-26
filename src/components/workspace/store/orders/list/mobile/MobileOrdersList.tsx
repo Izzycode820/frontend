@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Search, Plus, Filter } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/shadcn-ui/input';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -11,23 +13,10 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/shadcn-ui/sheet';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/shadcn-ui/select';
 import { OrderCard } from './OrderCard';
 import { MobileOrderCardSkeleton } from './MobileOrderCardSkeleton';
 import { OrdersFilterChips } from './OrdersFilterChips';
 import { MobileOrdersActionBar } from './MobileOrdersActionBar';
-import {
-    PAYMENT_STATUSES,
-    PAYMENT_METHODS,
-    ORDER_SOURCES,
-    CAMEROON_REGIONS
-} from '../OrdersFilters';
 import type { GetOrdersQuery } from '@/services/graphql/admin-store/queries/orders/__generated__/getOrders.generated';
 import Link from 'next/link';
 
@@ -50,7 +39,6 @@ interface MobileOrdersListProps {
     searchTerm: string;
     onSearchChange: (value: string) => void;
     // Filter chips
-    chips: FilterChip[];
     activeChip: string;
     onChipChange: (value: string) => void;
     // Selection
@@ -62,10 +50,7 @@ interface MobileOrdersListProps {
     onBulkArchive: () => void;
     onBulkMarkAsPaid: () => void;
     onBulkCancel: () => void;
-    onBulkMarkAsDelivered?: () => void;
-    onBulkMarkOnHold?: () => void;
-    onBulkMarkProcessing?: () => void;
-    onBulkMarkAsNotDelivered?: () => void;
+    onBulkStatusUpdate: (status: string, label?: string) => void;
     // Loading
     isLoading?: boolean;
     // Filters
@@ -84,7 +69,6 @@ export function MobileOrdersList({
     workspaceId,
     searchTerm,
     onSearchChange,
-    chips,
     activeChip,
     onChipChange,
     selectedOrders,
@@ -94,10 +78,7 @@ export function MobileOrdersList({
     onBulkArchive,
     onBulkMarkAsPaid,
     onBulkCancel,
-    onBulkMarkAsDelivered,
-    onBulkMarkOnHold,
-    onBulkMarkProcessing,
-    onBulkMarkAsNotDelivered,
+    onBulkStatusUpdate,
     isLoading,
     paymentStatus,
     onPaymentStatusChange,
@@ -108,6 +89,44 @@ export function MobileOrdersList({
     shippingRegion,
     onShippingRegionChange,
 }: MobileOrdersListProps) {
+    const t = useTranslations('Orders.mobile');
+    const tList = useTranslations('Orders.list');
+    const tFilters = useTranslations('Orders.filters');
+    const tBadges = useTranslations('Orders.badges');
+    const tTable = useTranslations('Orders.table');
+
+    const PAYMENT_STATUSES = [
+        { value: 'PAID', label: tBadges('paid') },
+        { value: 'PENDING', label: tBadges('pending') },
+        { value: 'FAILED', label: tBadges('failed') },
+        { value: 'REFUNDED', label: tBadges('refunded') },
+    ];
+
+    const PAYMENT_METHODS = [
+        { value: 'CASH_ON_DELIVERY', label: tTable('methods.cash_on_delivery') },
+        { value: 'MOBILE_MONEY', label: tFilters('mobileMoney') },
+        { value: 'BANK_TRANSFER', label: tFilters('bankTransfer') },
+        { value: 'CARD', label: tFilters('card') },
+    ];
+
+    const ORDER_SOURCES = [
+        { value: 'WHATSAPP', label: tTable('channels.whatsapp') },
+        { value: 'MANUAL', label: tTable('channels.manual') },
+        { value: 'WEB', label: tTable('channels.web') },
+    ];
+
+    const CAMEROON_REGIONS = [
+        { value: 'CENTRE', label: tFilters('regions.centre') },
+        { value: 'LITTORAL', label: tFilters('regions.littoral') },
+        { value: 'WEST', label: tFilters('regions.west') },
+        { value: 'NORTHWEST', label: tFilters('regions.northwest') },
+        { value: 'SOUTHWEST', label: tFilters('regions.southwest') },
+        { value: 'ADAMAWA', label: tFilters('regions.adamawa') },
+        { value: 'EAST', label: tFilters('regions.east') },
+        { value: 'FAR_NORTH', label: tFilters('regions.far_north') },
+        { value: 'NORTH', label: tFilters('regions.north') },
+        { value: 'SOUTH', label: tFilters('regions.south') },
+    ];
     const isSelectionMode = selectedOrders.length > 0;
     const hasActiveFilters = paymentStatus || paymentMethod || orderSource || shippingRegion;
 
@@ -120,15 +139,15 @@ export function MobileOrdersList({
 
     return (
         <div className="flex flex-col gap-4 pb-32">
-            {/* Search Bar */}
-            <div className="flex gap-2 items-center">
+            {/* Search Bar & Filter */}
+            <div className="flex gap-3">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                     <Input
-                        placeholder="Search orders..."
+                        placeholder={t('searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="pl-10 h-10 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                        className="pl-10 h-12 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-none focus-visible:ring-0"
                     />
                 </div>
 
@@ -138,111 +157,142 @@ export function MobileOrdersList({
                         <Button
                             variant="outline"
                             size="icon"
-                            className={hasActiveFilters ? "text-primary border-primary" : ""}
+                            className={cn(
+                                "h-12 w-12 rounded-xl shrink-0 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 relative",
+                                hasActiveFilters && "text-primary border-primary"
+                            )}
                         >
-                            <Filter className="h-4 w-4" />
+                            <SlidersHorizontal className="h-5 w-5" />
+                            {hasActiveFilters && (
+                                <div className="absolute top-3 right-3 h-2 w-2 rounded-full bg-primary" />
+                            )}
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="bottom" className="h-[80vh] rounded-t-xl">
-                        <SheetHeader className="mb-4">
-                            <div className="flex items-center justify-between">
-                                <SheetTitle>Filters</SheetTitle>
-                                {hasActiveFilters && (
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={clearFilters}
-                                        className="text-xs h-auto py-1"
-                                    >
-                                        Clear all
-                                    </Button>
-                                )}
-                            </div>
-                        </SheetHeader>
+                    <SheetContent side="bottom" className="h-[80vh] rounded-t-[20px] p-0">
+                        <div className="flex flex-col h-full">
+                            <SheetHeader className="p-6 pb-2 text-left">
+                                <SheetTitle className="text-xl">{t('filters')}</SheetTitle>
+                            </SheetHeader>
 
-                        <div className="space-y-6 overflow-y-auto pb-8 h-full">
-                            {/* Payment Status */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Payment Status</label>
-                                <Select
-                                    value={paymentStatus || 'all'}
-                                    onValueChange={(value) => onPaymentStatusChange(value === 'all' ? null : value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All statuses</SelectItem>
+                            <div className="flex-1 overflow-y-auto p-6 pt-2 space-y-6">
+                                {/* Payment Status */}
+                                <div className="space-y-3">
+                                    <label className="text-sm font-semibold">{tFilters('paymentStatus')}</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            variant={!paymentStatus ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => onPaymentStatusChange(null)}
+                                            className="rounded-full"
+                                        >
+                                            {tFilters('allStatuses')}
+                                        </Button>
                                         {PAYMENT_STATUSES.map((status) => (
-                                            <SelectItem key={status.value} value={status.value}>
+                                            <Button
+                                                key={status.value}
+                                                variant={paymentStatus === status.value ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => onPaymentStatusChange(status.value)}
+                                                className="rounded-full"
+                                            >
                                                 {status.label}
-                                            </SelectItem>
+                                            </Button>
                                         ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                    </div>
+                                </div>
 
-                            {/* Payment Method */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Payment Method</label>
-                                <Select
-                                    value={paymentMethod || 'all'}
-                                    onValueChange={(value) => onPaymentMethodChange(value === 'all' ? null : value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All methods" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All methods</SelectItem>
+                                {/* Payment Method */}
+                                <div className="space-y-3">
+                                    <label className="text-sm font-semibold">{tFilters('paymentMethod')}</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            variant={!paymentMethod ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => onPaymentMethodChange(null)}
+                                            className="rounded-full"
+                                        >
+                                            {tFilters('allMethods')}
+                                        </Button>
                                         {PAYMENT_METHODS.map((method) => (
-                                            <SelectItem key={method.value} value={method.value}>
+                                            <Button
+                                                key={method.value}
+                                                variant={paymentMethod === method.value ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => onPaymentMethodChange(method.value)}
+                                                className="rounded-full"
+                                            >
                                                 {method.label}
-                                            </SelectItem>
+                                            </Button>
                                         ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                    </div>
+                                </div>
 
-                            {/* Order Source */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Order Source</label>
-                                <Select
-                                    value={orderSource || 'all'}
-                                    onValueChange={(value) => onOrderSourceChange(value === 'all' ? null : value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All sources" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All sources</SelectItem>
+                                {/* Order Source */}
+                                <div className="space-y-3">
+                                    <label className="text-sm font-semibold">{tFilters('orderSource')}</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            variant={!orderSource ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => onOrderSourceChange(null)}
+                                            className="rounded-full"
+                                        >
+                                            {tFilters('allSources')}
+                                        </Button>
                                         {ORDER_SOURCES.map((source) => (
-                                            <SelectItem key={source.value} value={source.value}>
+                                            <Button
+                                                key={source.value}
+                                                variant={orderSource === source.value ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => onOrderSourceChange(source.value)}
+                                                className="rounded-full"
+                                            >
                                                 {source.label}
-                                            </SelectItem>
+                                            </Button>
                                         ))}
-                                    </SelectContent>
-                                </Select>
+                                    </div>
+                                </div>
+
+                                {/* Shipping Region */}
+                                <div className="space-y-3">
+                                    <label className="text-sm font-semibold">{tFilters('shippingRegion')}</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            variant={!shippingRegion ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => onShippingRegionChange(null)}
+                                            className="rounded-full"
+                                        >
+                                            {tFilters('allRegions')}
+                                        </Button>
+                                        {CAMEROON_REGIONS.map((region) => (
+                                            <Button
+                                                key={region.value}
+                                                variant={shippingRegion === region.value ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => onShippingRegionChange(region.value)}
+                                                className="rounded-full"
+                                            >
+                                                {region.label}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Shipping Region */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Shipping Region</label>
-                                <Select
-                                    value={shippingRegion || 'all'}
-                                    onValueChange={(value) => onShippingRegionChange(value === 'all' ? null : value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All regions" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All regions</SelectItem>
-                                        {CAMEROON_REGIONS.map((region) => (
-                                            <SelectItem key={region.value} value={region.value}>
-                                                {region.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="p-6 border-t mt-auto">
+                                <div className="flex w-full gap-3">
+                                    <SheetTrigger asChild>
+                                        <Button variant="outline" className="flex-1 h-12" onClick={clearFilters}>
+                                            {tFilters('clearAll')}
+                                        </Button>
+                                    </SheetTrigger>
+                                    <SheetTrigger asChild>
+                                        <Button className="flex-1 h-12">
+                                            {t('viewResults')}
+                                        </Button>
+                                    </SheetTrigger>
+                                </div>
                             </div>
                         </div>
                     </SheetContent>
@@ -258,9 +308,8 @@ export function MobileOrdersList({
 
             {/* Filter Chips */}
             <OrdersFilterChips
-                chips={chips}
-                activeChip={activeChip}
-                onChipChange={onChipChange}
+                activeTab={activeChip}
+                onTabChange={onChipChange}
             />
 
             {/* Orders List */}
@@ -271,10 +320,13 @@ export function MobileOrdersList({
                     ))}
                 </div>
             ) : orders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-zinc-500 dark:text-zinc-400">No orders found</p>
-                    <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
-                        Try adjusting your filters
+                <div className="text-center py-20 px-6">
+                    <div className="bg-muted rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
+                        <Search className="h-8 w-8 text-muted-foreground opacity-20" />
+                    </div>
+                    <h3 className="text-lg font-semibold">{tList('noOrders')}</h3>
+                    <p className="text-muted-foreground text-sm mt-1">
+                        {tList('adjustFilters')}
                     </p>
                 </div>
             ) : (
@@ -304,14 +356,11 @@ export function MobileOrdersList({
             {/* Mobile Action Bar (fixed position) */}
             <MobileOrdersActionBar
                 selectedCount={selectedOrders.length}
-                onCancel={onClearSelection}
-                onArchive={onBulkArchive}
-                onMarkAsPaid={onBulkMarkAsPaid}
+                onClearSelection={onClearSelection}
+                onBulkArchive={onBulkArchive}
+                onBulkMarkAsPaid={onBulkMarkAsPaid}
                 onBulkCancel={onBulkCancel}
-                onMarkAsDelivered={onBulkMarkAsDelivered}
-                onMarkOnHold={onBulkMarkOnHold}
-                onMarkProcessing={onBulkMarkProcessing}
-                onMarkAsNotDelivered={onBulkMarkAsNotDelivered}
+                onBulkStatusUpdate={onBulkStatusUpdate}
             />
         </div>
     );

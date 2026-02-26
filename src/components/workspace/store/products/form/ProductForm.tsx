@@ -17,6 +17,7 @@ import { Save, Eye } from 'lucide-react'
 import type { ProductCreateInput } from '@/types/workspace/store/graphql-base'
 import { useUnsavedChanges } from '@/hooks/workspace/store/useUnsavedChanges'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 // Extended form data with UI-only fields (weight unit)
 export interface ProductFormData extends Omit<ProductCreateInput, 'price' | 'compareAtPrice' | 'costPrice' | 'weight' | 'tags' | 'images' | 'existingImageIds' | 'options' | 'variants' | 'seo' | 'featuredMediaId' | 'mediaGalleryIds'> {
@@ -86,6 +87,7 @@ export function ProductForm({
   enableUnsavedChanges = true,
   onUnsavedChangesMount,
 }: ProductFormProps) {
+  const t = useTranslations('Products.form');
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
@@ -296,14 +298,14 @@ export function ProductForm({
                 disabled={isLoading}
               >
                 <Save className="mr-2 h-4 w-4" />
-                Save draft
+                {t('saveDraft')}
               </Button>
               <Button
                 onClick={handleSubmit}
                 className="flex-1"
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : (isEditing ? 'Update product' : 'Publish product')}
+                {isLoading ? t('saving') : (isEditing ? t('update') : t('publish'))}
               </Button>
             </div>
 
@@ -314,7 +316,7 @@ export function ProductForm({
               disabled={isLoading}
             >
               <Eye className="mr-2 h-4 w-4" />
-              Preview
+              {t('preview')}
             </Button>
           </Card>
         </div>

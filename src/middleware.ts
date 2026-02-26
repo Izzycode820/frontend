@@ -127,6 +127,11 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // 1. LOCALE DETECTION
+  const locale = request.cookies.get('NEXT_LOCALE')?.value || 
+                 request.headers.get('accept-language')?.split(',')[0].split('-')[0] || 
+                 'en';
+
   // Handle authentication for system domain
   if (SYSTEM_DOMAINS.includes(hostname)) {
     const authResponse = handleAuth(request);
@@ -136,6 +141,14 @@ export function middleware(request: NextRequest) {
 
   // Default behavior
   const response = NextResponse.next();
+
+  // 2. SET LOCALE COOKIE IF MISSING
+  if (!request.cookies.has('NEXT_LOCALE')) {
+    response.cookies.set('NEXT_LOCALE', locale, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+    });
+  }
 
   // Apply Security Headers (CSP, X-Frame-Options, etc.)
   applySecurityHeaders(response);

@@ -95,22 +95,28 @@ export const metadata: Metadata = {
 };
 
 import JsonLd from '@/components/seo/JsonLd';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
       >
         <JsonLd />
-        <Providers>
-          {children}
-          <Toaster position="top-right" richColors closeButton />
-        </Providers>
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <Providers>
+            {children}
+            <Toaster position="top-right" richColors closeButton />
+          </Providers>
+        </NextIntlClientProvider>
         <Analytics />
       </body>
     </html>

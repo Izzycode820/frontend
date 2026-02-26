@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/shadcn-ui/button'
 import { Card } from '@/components/shadcn-ui/card'
 import { ProductsSection } from './products'
@@ -36,6 +37,7 @@ export function OrderForm({
   isEditing = false,
   isLoading = false,
 }: OrderFormProps) {
+  const t = useTranslations('Orders.form')
   const [formData, setFormData] = useState<OrderFormData>({
     customer_id: '',
     items: [],
@@ -75,7 +77,7 @@ export function OrderForm({
           <PaymentSection
             items={formData.items}
             paymentMethod={formData.payment_method}
-            onPaymentMethodChange={(payment_method) => updateFormData({ payment_method })}
+            onPaymentMethodChange={(payment_method: string) => updateFormData({ payment_method })}
           />
         </div>
 
@@ -83,7 +85,7 @@ export function OrderForm({
         <div className="w-full lg:w-96 lg:flex-shrink-0 space-y-6">
           {/* Notes Card - Placeholder */}
           <Card className="p-4">
-            <p className="text-sm text-muted-foreground">Notes section coming soon</p>
+            <p className="text-sm text-muted-foreground">{t('placeholders.notesSoon')}</p>
           </Card>
 
           {/* Customer Section */}
@@ -94,32 +96,36 @@ export function OrderForm({
 
           {/* Markets Card - Placeholder */}
           <Card className="p-4">
-            <p className="text-sm text-muted-foreground">Markets section coming soon</p>
+            <p className="text-sm text-muted-foreground">{t('placeholders.marketsSoon')}</p>
           </Card>
 
           {/* Tags Card - Placeholder */}
           <Card className="p-4">
-            <p className="text-sm text-muted-foreground">Tags section coming soon</p>
+            <p className="text-sm text-muted-foreground">{t('placeholders.tagsSoon')}</p>
           </Card>
 
           {/* Action Buttons */}
           <Card className="p-4 space-y-3 sticky top-6">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 onClick={handleSaveDraft}
                 variant="outline"
-                className="flex-1"
+                className="flex-1 h-auto py-2 min-w-[140px]"
                 disabled={isLoading}
               >
-                <Save className="mr-2 h-4 w-4" />
-                Save draft
+                <Save className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate sm:whitespace-normal text-xs sm:text-sm">
+                  {t('actions.saveDraft')}
+                </span>
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="flex-1"
+                className="flex-1 h-auto py-2 min-w-[140px]"
                 disabled={isLoading || formData.items.length === 0}
               >
-                {isLoading ? 'Creating...' : (isEditing ? 'Update order' : 'Create order')}
+                <span className="text-xs sm:text-sm">
+                  {isLoading ? t('actions.creating') : (isEditing ? t('actions.updateOrder') : t('actions.createOrder'))}
+                </span>
               </Button>
             </div>
           </Card>

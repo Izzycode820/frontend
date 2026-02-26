@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu'
 import { Eye, EyeOff, Edit, MoreHorizontal, Trash2, Package } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface Category {
   id: string
@@ -48,6 +49,7 @@ export function CategoriesGrid({
   onToggleVisibility,
   onDelete,
 }: CategoriesGridProps) {
+  const t = useTranslations('Categories.table');
   const handleEdit = (categoryId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     onEdit?.(categoryId)
@@ -94,12 +96,12 @@ export function CategoriesGrid({
               {!category.isVisible && (
                 <Badge variant="secondary" className="bg-destructive/90 text-destructive-foreground">
                   <EyeOff className="h-3 w-3 mr-1" />
-                  Hidden
+                  {t('statusHidden')}
                 </Badge>
               )}
               {category.isFeatured && (
                 <Badge variant="secondary" className="bg-yellow-500/90 text-yellow-900">
-                  Featured
+                  {t('statusFeatured')}
                 </Badge>
               )}
             </div>
@@ -128,18 +130,18 @@ export function CategoriesGrid({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={(e) => handleEdit(category.id, e)}>
                     <Edit className="mr-2 h-4 w-4" />
-                    Edit
+                    {t('edit')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={(e) => handleToggleVisibility(category.id, e)}>
                     {category.isVisible ? (
                       <>
                         <EyeOff className="mr-2 h-4 w-4" />
-                        Hide
+                        {t('hide')}
                       </>
                     ) : (
                       <>
                         <Eye className="mr-2 h-4 w-4" />
-                        Show
+                        {t('show')}
                       </>
                     )}
                   </DropdownMenuItem>
@@ -149,7 +151,7 @@ export function CategoriesGrid({
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    {t('delete')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -171,10 +173,10 @@ export function CategoriesGrid({
 
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
-                  {category.productCount} product{category.productCount !== 1 ? 's' : ''}
+                  {t('products', { count: category.productCount || 0 })}
                 </span>
                 <span>
-                  Order: {category.sortOrder}
+                  {t('sortOrder', { order: category.sortOrder })}
                 </span>
               </div>
             </div>

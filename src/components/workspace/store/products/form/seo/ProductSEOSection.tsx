@@ -16,6 +16,7 @@ import { Label } from '@/components/shadcn-ui/label';
 import { Textarea } from '@/components/shadcn-ui/textarea';
 import { Button } from '@/components/shadcn-ui/button';
 import { Edit2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { SEO_LIMITS } from './types';
 import {
   generateSlug,
@@ -53,6 +54,7 @@ export function ProductSEOSection({
   onMetaDescriptionChange,
   onSlugChange,
 }: ProductSEOSectionProps) {
+  const t = useTranslations('Products.form.seo');
   const [isEditing, setIsEditing] = useState(false);
 
   // Track if handle has been manually edited
@@ -89,11 +91,12 @@ export function ProductSEOSection({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Search engine listing</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsEditing(!isEditing)}
+            title={t('title')}
           >
             <Edit2 className="h-4 w-4" />
           </Button>
@@ -124,41 +127,41 @@ export function ProductSEOSection({
           <div className="space-y-4 pt-4 border-t">
             {/* Page Title */}
             <div className="space-y-2">
-              <Label htmlFor="meta-title">Page title</Label>
+              <Label htmlFor="meta-title">{t('pageTitle')}</Label>
               <Input
                 id="meta-title"
-                placeholder={productName || "Enter product name first"}
+                placeholder={productName || t('pageTitlePlaceholder')}
                 value={metaTitle}
                 onChange={(e) => onMetaTitleChange(e.target.value)}
                 maxLength={SEO_LIMITS.TITLE}
               />
               <p className={`text-xs ${titleCount.isExceeding ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {titleCount.message}
+                {t('charactersUsed', { count: titleCount.count, limit: SEO_LIMITS.TITLE })}
               </p>
             </div>
 
             {/* Meta Description */}
             <div className="space-y-2">
-              <Label htmlFor="meta-description">Meta description</Label>
+              <Label htmlFor="meta-description">{t('metaDescription')}</Label>
               <Textarea
                 id="meta-description"
-                placeholder={productDescription || "Enter product description first"}
+                placeholder={productDescription || t('metaDescriptionPlaceholder')}
                 value={metaDescription}
                 onChange={(e) => onMetaDescriptionChange(e.target.value)}
                 maxLength={SEO_LIMITS.DESCRIPTION}
                 rows={3}
               />
               <p className={`text-xs ${descCount.isExceeding ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {descCount.message}
+                {t('charactersUsed', { count: descCount.count, limit: SEO_LIMITS.DESCRIPTION })}
               </p>
             </div>
 
             {/* URL Handle */}
             <div className="space-y-2">
-              <Label htmlFor="url-handle">URL handle</Label>
+              <Label htmlFor="url-handle">{t('urlHandle')}</Label>
               <Input
                 id="url-handle"
-                placeholder="product-slug"
+                placeholder={t('urlHandlePlaceholder')}
                 value={slug}
                 onChange={(e) => handleSlugChange(e.target.value)}
               />
@@ -172,7 +175,7 @@ export function ProductSEOSection({
         {/* Info text when not editing */}
         {!isEditing && (
           <p className="text-xs text-muted-foreground">
-            Add a title and description to see how this product might appear in a search engine listing.
+            {t('infoText')}
           </p>
         )}
       </CardContent>

@@ -13,6 +13,7 @@ import { Badge } from '@/components/shadcn-ui/badge'
 import { Checkbox } from '@/components/shadcn-ui/checkbox'
 import { Button } from '@/components/shadcn-ui/button'
 import { ProductRowActions } from './ProductRowActions'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface Product {
   id: string
@@ -48,6 +49,8 @@ export function ProductsTable({
   onDelete,
   onCategoryUpdate
 }: ProductsTableProps) {
+  const t = useTranslations('Products');
+  const locale = useLocale();
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
 
   const handleSelectAll = (checked: boolean) => {
@@ -71,15 +74,15 @@ export function ProductsTable({
     }
     return (
       <Badge variant="outline" className={variants[status as keyof typeof variants]}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {t(`filters.${status as any}`)}
       </Badge>
     )
   }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-CM', {
+    return new Intl.NumberFormat(locale === 'fr' ? 'fr-CM' : 'en-US', {
       style: 'currency',
-      currency: 'XAF',
+      currency: locale === 'fr' ? 'XAF' : 'USD',
     }).format(price)
   }
 
@@ -95,13 +98,13 @@ export function ProductsTable({
                 aria-label="Select all"
               />
             </TableHead>
-            <TableHead>Product</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Inventory</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Vendor</TableHead>
+            <TableHead>{t('table.product')}</TableHead>
+            <TableHead>{t('table.status')}</TableHead>
+            <TableHead>{t('table.inventory')}</TableHead>
+            <TableHead>{t('table.price')}</TableHead>
+            <TableHead>{t('table.category')}</TableHead>
+            <TableHead>{t('table.type')}</TableHead>
+            <TableHead>{t('table.vendor')}</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
@@ -125,7 +128,7 @@ export function ProductsTable({
                     />
                   ) : (
                     <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center border">
-                      <span className="text-xs text-muted-foreground">No image</span>
+                      <span className="text-xs text-muted-foreground">{t('noImage')}</span>
                     </div>
                   )}
                   <div>
@@ -136,7 +139,7 @@ export function ProductsTable({
               <TableCell>{getStatusBadge(product.status)}</TableCell>
               <TableCell>
                 <div className="text-sm">
-                  {product.inventory} in stock
+                  {t('inStock', { count: product.inventory })}
                 </div>
               </TableCell>
               <TableCell className="font-medium">

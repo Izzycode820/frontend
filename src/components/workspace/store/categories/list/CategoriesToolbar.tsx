@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu'
 import { Download, Archive, Trash2, MoreHorizontal } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface CategoriesToolbarProps {
   selectedCount: number
@@ -21,6 +22,7 @@ export function CategoriesToolbar({
   onBulkAction,
   onAddCategory,
 }: CategoriesToolbarProps) {
+  const t = useTranslations('Categories.toolbar');
   const handleBulkAction = (action: 'archive' | 'delete' | 'export') => {
     onBulkAction?.(action)
   }
@@ -31,13 +33,13 @@ export function CategoriesToolbar({
         {selectedCount > 0 ? (
           <>
             <div className="text-sm text-muted-foreground">
-              {selectedCount} categor{selectedCount > 1 ? 'ies' : 'y'} selected
+              {t('selectedCount', { count: selectedCount })}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   <MoreHorizontal className="mr-2 h-4 w-4" />
-                  Bulk actions
+                  {t('bulkActions')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -45,13 +47,13 @@ export function CategoriesToolbar({
                   onClick={() => handleBulkAction('archive')}
                 >
                   <Archive className="mr-2 h-4 w-4" />
-                  Archive
+                  {t('archive')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleBulkAction('export')}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Export
+                  {t('export')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -59,20 +61,20 @@ export function CategoriesToolbar({
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {t('delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </>
         ) : (
           <div className="text-sm text-muted-foreground">
-            Select categories to perform bulk actions
+            {t('selectToPerform')}
           </div>
         )}
       </div>
 
       <Button onClick={onAddCategory}>
-        Add category
+        {t('addCategory')}
       </Button>
     </div>
   )

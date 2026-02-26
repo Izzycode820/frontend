@@ -8,15 +8,16 @@
  * - Presentational components handle UI (SectionCards, ChartAreaInteractive)
  * - Clean separation of concerns
  */
-
 import React from 'react';
 import { useQuery } from '@apollo/client/react';
 import { GetStoreAnalyticsDocument } from '@/services/graphql/admin-store/queries/analytics/__generated__/getStoreAnalytics.generated';
 import { SectionCards } from './section-cards';
 import { ChartAreaInteractive } from './chart-area-interactive';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
+import { useTranslations } from 'next-intl';
 
 export function DashboardContainer() {
+    const t = useTranslations('Dashboard');
     // Fetch analytics data (workspace auto-scoped via JWT middleware)
     const { data, loading, error } = useQuery(GetStoreAnalyticsDocument, {
         variables: {
@@ -35,7 +36,7 @@ export function DashboardContainer() {
                         <CardContent className="pt-6">
                             <div className="text-center py-12">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                                <p className="text-muted-foreground">Loading analytics...</p>
+                                <p className="text-muted-foreground">{t('loading')}</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -52,9 +53,9 @@ export function DashboardContainer() {
                     <Card>
                         <CardContent className="pt-6">
                             <div className="text-center text-destructive">
-                                <p>Failed to load analytics</p>
+                                <p>{t('errorLoading')}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    {error?.message || 'Unknown error occurred'}
+                                    {error?.message || t('unknownError')}
                                 </p>
                             </div>
                         </CardContent>
@@ -72,13 +73,13 @@ export function DashboardContainer() {
                     <Card>
                         <CardContent className="pt-6">
                             <div className="text-center py-12">
-                                <p className="text-lg font-semibold mb-2">Analytics Not Available</p>
+                                <p className="text-lg font-semibold mb-2">{t('notAvailable')}</p>
                                 <p className="text-muted-foreground mb-4">
-                                    {analytics.error || `Analytics is not available for your current plan.`}
+                                    {analytics.error || t('planRestriction')}
                                 </p>
                                 {analytics.requiredPlan && (
                                     <p className="text-sm text-muted-foreground">
-                                        Upgrade to <span className="font-semibold">{analytics.requiredPlan}</span> to unlock analytics
+                                        {t('upgradeTo', { plan: analytics.requiredPlan })}
                                     </p>
                                 )}
                             </div>

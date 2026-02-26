@@ -7,6 +7,7 @@
 
 import { ThemeSelector } from "@/components/workspace/layouts/theme-selector"
 import { ModeToggle } from "@/components/workspace/layouts/mode-toggle"
+import { LanguageSelector } from "@/components/ui/LanguageSelector"
 
 interface WorkspaceHeaderProps {
   title: string
@@ -29,6 +30,7 @@ export function WorkspaceHeader({ title, actions }: WorkspaceHeaderProps) {
           <span className="mr-2">🐛</span> Report a Problem
         </a>
         {actions}
+        <LanguageSelector />
         <ThemeSelector />
         <ModeToggle />
       </div>

@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/shadcn-ui/card'
 import { Button } from '@/components/shadcn-ui/button'
 import { Package, Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface CategoriesEmptyStateProps {
   onAddCategory?: () => void
@@ -11,6 +12,8 @@ interface CategoriesEmptyStateProps {
 export function CategoriesEmptyState({
   onAddCategory,
 }: CategoriesEmptyStateProps) {
+  const t = useTranslations('Categories.emptyState');
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -19,23 +22,23 @@ export function CategoriesEmptyState({
             <Package className="h-8 w-8 text-muted-foreground" />
           </div>
 
-          <h3 className="text-lg font-semibold mb-2">No categories yet</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('title')}</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Create your first category to organize your products and make them easier to find for your customers.
+            {t('description')}
           </p>
 
           <Button onClick={onAddCategory} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Create your first category
+            {t('createAction')}
           </Button>
 
           <div className="mt-8 text-sm text-muted-foreground max-w-lg mx-auto space-y-2">
-            <p><strong>Why create categories?</strong></p>
+            <p><strong>{t('whyTitle')}</strong></p>
             <ul className="text-left space-y-1">
-              <li>• Organize products for better customer navigation</li>
-              <li>• Create featured collections for your homepage</li>
-              <li>• Improve SEO with structured product organization</li>
-              <li>• Make bulk product management easier</li>
+              <li>• {t('benefit1')}</li>
+              <li>• {t('benefit2')}</li>
+              <li>• {t('benefit3')}</li>
+              <li>• {t('benefit4')}</li>
             </ul>
           </div>
         </div>

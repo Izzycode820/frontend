@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
@@ -13,6 +14,7 @@ function formatCurrency(amount: string | number): string {
 }
 
 export function ProductItem({ item, onQuantityChange, onRemove }: ProductItemProps) {
+  const t = useTranslations('Products');
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value >= 1) {
@@ -32,7 +34,7 @@ export function ProductItem({ item, onQuantityChange, onRemove }: ProductItemPro
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-            No image
+            {t('noImage')}
           </div>
         )}
       </div>

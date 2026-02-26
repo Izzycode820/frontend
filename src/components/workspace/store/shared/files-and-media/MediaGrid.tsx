@@ -4,6 +4,7 @@ import { Checkbox } from '@/components/shadcn-ui/checkbox'
 import { FileVideo, Box, Trash2 } from 'lucide-react'
 import { CircularProgress } from './CircularProgress'
 import type { MediaGridProps } from './types'
+import { useTranslations } from 'next-intl'
 
 export function MediaGrid({
   items,
@@ -15,6 +16,8 @@ export function MediaGrid({
   loading = false,
   viewMode = 'grid',
 }: MediaGridProps) {
+  const t = useTranslations('Shared.media');
+
   // Stale-While-Revalidate: Only show skeletons if we have no items
   if (loading && items.length === 0) {
     return (
@@ -32,8 +35,8 @@ export function MediaGrid({
   if (items.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>No media files yet</p>
-        <p className="text-sm">Upload your first file to get started</p>
+        <p>{t('noFiles')}</p>
+        <p className="text-sm">{t('uploadFirst')}</p>
       </div>
     )
   }
@@ -150,14 +153,14 @@ export function MediaGrid({
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <FileVideo className="h-12 w-12" />
-                      <span className="text-xs">Video</span>
+                      <span className="text-xs">{t('video')}</span>
                     </div>
                   )}
                 </>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Box className="h-12 w-12" />
-                  <span className="text-xs">3D Model</span>
+                  <span className="text-xs">{t('model3D')}</span>
                 </div>
               )}
             </div>
@@ -190,11 +193,11 @@ export function MediaGrid({
                   className="bg-destructive/90 hover:bg-destructive text-destructive-foreground rounded-sm p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(e) => {
                     e.stopPropagation()
-                    if (confirm(`Delete "${item.filename}"?`)) {
+                    if (confirm(t('deleteConfirm', { name: item.filename }))) {
                       onDelete(item.uploadId)
                     }
                   }}
-                  title="Delete"
+                  title={t('delete')}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -217,7 +220,7 @@ export function MediaGrid({
             {item.status === 'processing' && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
                 <div className="text-white text-sm font-medium">
-                  Processing...
+                  {t('processing')}
                 </div>
               </div>
             )}

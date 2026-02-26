@@ -1,15 +1,9 @@
-/**
- * OptionCard Component
- * Displays and edits a single product option (e.g., Color, Size)
- * with its values (e.g., Blue, Small)
- * Supports collapsed/expanded accordion state
- */
-
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Button } from '@/components/shadcn-ui/button';
 import { GripVertical, X, MinusCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ProductOption } from './types';
 import { Badge } from '@/components/shadcn-ui/badge';
 
@@ -26,6 +20,7 @@ export function OptionCard({
   onUpdate,
   onDelete
 }: OptionCardProps) {
+  const t = useTranslations('Products.form.variants');
   const [optionName, setOptionName] = useState(option.optionName || "");
   const [optionValues, setOptionValues] = useState<string[]>(
     option.optionValues.length > 0 ? option.optionValues : [""]
@@ -105,11 +100,11 @@ export function OptionCard({
           {/* Option Name */}
           <div>
             <Label htmlFor={`option-name-${index}`} className="text-sm font-medium">
-              Option name
+              {t('optionName')}
             </Label>
             <Input
               id={`option-name-${index}`}
-              placeholder="e.g., Color, Size, Material"
+              placeholder={t('optionNamePlaceholder')}
               value={optionName}
               onChange={(e) => setOptionName(e.target.value)}
               className="mt-1.5"
@@ -118,13 +113,13 @@ export function OptionCard({
 
           {/* Option Values */}
           <div>
-            <Label className="text-sm font-medium">Option values</Label>
+            <Label className="text-sm font-medium">{t('optionValues')}</Label>
             <div className="space-y-2 mt-1.5">
               {optionValues.map((value, valueIndex) => (
                 <div key={valueIndex} className="flex items-center gap-2">
                   <GripVertical className="h-4 w-4 text-muted-foreground cursor-move flex-shrink-0" />
                   <Input
-                    placeholder={valueIndex === 0 ? "e.g., Blue" : "e.g., Black"}
+                    placeholder={valueIndex === 0 ? t('valuePlaceholder1') : t('valuePlaceholder2')}
                     value={value}
                     onChange={(e) => handleValueChange(valueIndex, e.target.value)}
                     onKeyDown={(e) => {
@@ -140,6 +135,7 @@ export function OptionCard({
                       size="icon"
                       onClick={() => handleRemoveValue(valueIndex)}
                       className="flex-shrink-0"
+                      title={t('delete')}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -154,7 +150,7 @@ export function OptionCard({
                 onClick={handleAddValue}
                 className="w-full text-muted-foreground"
               >
-                Add another value
+                {t('addAnotherValue')}
               </Button>
             </div>
           </div>
@@ -166,14 +162,14 @@ export function OptionCard({
               size="sm"
               onClick={() => onDelete(index)}
             >
-              Delete
+              {t('delete')}
             </Button>
             <Button
               size="sm"
               onClick={handleDone}
               disabled={!optionName.trim() || !optionValues.some(v => v.trim())}
             >
-              Done
+              {t('done')}
             </Button>
           </div>
         </div>

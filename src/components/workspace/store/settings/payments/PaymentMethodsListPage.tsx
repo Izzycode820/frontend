@@ -17,6 +17,7 @@ import {
 } from '@/components/shadcn-ui/dialog';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { GetPaymentMethodsDocument } from '@/services/graphql/admin-store/queries/payments/__generated__/GetPaymentMethods.generated';
 import { TogglePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/TogglePaymentMethod.generated';
 import { RemovePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/RemovePaymentMethod.generated';
@@ -40,6 +41,8 @@ export function PaymentMethodsListPage() {
     const router = useRouter();
     const params = useParams();
     const workspaceId = params.workspace_id as string;
+    const t = useTranslations('Payments');
+    const tGen = useTranslations('General');
 
     // Delete modal state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -66,16 +69,16 @@ export function PaymentMethodsListPage() {
             });
 
             if (result.data?.togglePaymentMethod?.success) {
-                toast.success(enabled ? 'Payment method enabled' : 'Payment method disabled');
+                toast.success(enabled ? t('enabledSuccess') : t('disabledSuccess'));
                 refetch();
             } else {
-                toast.error('Error', {
-                    description: result.data?.togglePaymentMethod?.error || 'Failed to update',
+                toast.error(t('error'), {
+                    description: result.data?.togglePaymentMethod?.error || tGen('failedToSave'),
                 });
             }
         } catch (err) {
             console.error('Toggle failed:', err);
-            toast.error('Error', { description: 'Failed to update payment method' });
+            toast.error(t('error'), { description: tGen('failedToSave') });
         }
     };
 
@@ -91,18 +94,18 @@ export function PaymentMethodsListPage() {
             });
 
             if (result.data?.removePaymentMethod?.success) {
-                toast.success('Payment method removed');
+                toast.success(t('removeSuccess'));
                 setShowDeleteModal(false);
                 setSelectedMethod(null);
                 refetch();
             } else {
-                toast.error('Error', {
-                    description: result.data?.removePaymentMethod?.error || 'Failed to remove',
+                toast.error(t('error'), {
+                    description: result.data?.removePaymentMethod?.error || tGen('failedToSave'),
                 });
             }
         } catch (err) {
             console.error('Delete failed:', err);
-            toast.error('Error', { description: 'Failed to remove payment method' });
+            toast.error(t('error'), { description: tGen('failedToSave') });
         }
     };
 
@@ -124,7 +127,7 @@ export function PaymentMethodsListPage() {
         return (
             <div className="w-full max-w-[1000px] mx-auto px-6">
                 <Alert variant="destructive">
-                    <div className="font-semibold">Error loading payment methods</div>
+                    <div className="font-semibold">{t('errorLoading')}</div>
                     <div className="text-sm">{error.message}</div>
                 </Alert>
             </div>
@@ -148,15 +151,15 @@ export function PaymentMethodsListPage() {
                             </button>
                             <IconCreditCard className="w-6 h-6 text-muted-foreground flex-shrink-0" />
                             <div>
-                                <h2 className="text-base font-semibold">Payment providers</h2>
+                                <h2 className="text-base font-semibold">{t('title')}</h2>
                                 <p className="text-sm text-muted-foreground">
-                                    Manage how customers pay on your store
+                                    {t('manageDescription')}
                                 </p>
                             </div>
                         </div>
                         <Button onClick={goToAddPage} className="gap-2 w-full sm:w-auto">
                             <IconPlus className="w-4 h-4" />
-                            Add payment provider
+                            {t('addProvider')}
                         </Button>
                     </div>
                 </Card>
@@ -168,13 +171,13 @@ export function PaymentMethodsListPage() {
                     <Card className="p-8">
                         <div className="text-center">
                             <IconCreditCard className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                            <h3 className="text-lg font-medium mb-2">No payment methods configured</h3>
+                            <h3 className="text-lg font-medium mb-2">{t('noMethods')}</h3>
                             <p className="text-sm text-muted-foreground mb-4">
-                                Add a payment provider to accept payments on your store.
+                                {t('noMethodsDesc')}
                             </p>
                             <Button onClick={goToAddPage} className="gap-2">
                                 <IconPlus className="w-4 h-4" />
-                                Add payment provider
+                                {t('addProvider')}
                             </Button>
                         </div>
                     </Card>
@@ -195,17 +198,17 @@ export function PaymentMethodsListPage() {
                                                 <h3 className="font-semibold">{method.displayName || method.providerName}</h3>
                                                 {method.verified && (
                                                     <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded">
-                                                        Verified
+                                                        {t('verified')}
                                                     </span>
                                                 )}
                                                 {!method.enabled && (
                                                     <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
-                                                        Disabled
+                                                        {t('disabled')}
                                                     </span>
                                                 )}
                                             </div>
                                             <p className="text-sm text-muted-foreground mt-1">
-                                                MTN MoMo and Orange Money via hosted checkout
+                                                {t('momoHostedDesc')}
                                             </p>
                                             {method.checkoutUrl && (
                                                 <div className="flex items-center gap-2 mt-2">
@@ -224,7 +227,7 @@ export function PaymentMethodsListPage() {
                                             )}
                                             {method.totalTransactions > 0 && (
                                                 <p className="text-xs text-muted-foreground mt-2">
-                                                    {method.totalTransactions} transactions ({method.successRate?.toFixed(1)}% success)
+                                                    {t('transactionsShort', { count: method.totalTransactions, rate: method.successRate?.toFixed(1) || '0' })}
                                                 </p>
                                             )}
                                         </div>
@@ -232,7 +235,7 @@ export function PaymentMethodsListPage() {
                                     <div className="flex items-center gap-4 self-end sm:self-auto">
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm text-muted-foreground hidden sm:inline">
-                                                {method.enabled ? 'Enabled' : 'Disabled'}
+                                                {method.enabled ? t('enabled') : t('disabled')}
                                             </span>
                                             <Switch
                                                 checked={method.enabled}
@@ -264,7 +267,7 @@ export function PaymentMethodsListPage() {
                 <Alert className="bg-blue-500/10 border-blue-500/20">
                     <IconInfoCircle className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="ml-2 text-sm text-blue-900 dark:text-blue-300">
-                        Customers will be redirected to your payment provider's checkout page to complete payments.
+                        {t('redirectInfo')}
                     </AlertDescription>
                 </Alert>
             </div>
@@ -273,24 +276,23 @@ export function PaymentMethodsListPage() {
             <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Remove Payment Provider</DialogTitle>
+                        <DialogTitle>{t('deleteProviderTitle')}</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to remove {selectedMethod?.providerName}?
-                            Customers will no longer be able to pay using this method.
+                            {t('deleteProviderDesc', { provider: selectedMethod?.providerName || '' })}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button variant="destructive" onClick={handleDelete} disabled={removing}>
                             {removing ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Removing...
+                                    {t('removing')}
                                 </>
                             ) : (
-                                'Remove'
+                                t('remove')
                             )}
                         </Button>
                     </DialogFooter>

@@ -14,53 +14,55 @@ import {
   Crown
 } from 'lucide-react';
 
+import { useTranslations } from 'next-intl';
+
 const settingsNavItems = [
   {
-    label: 'General',
+    id: 'general',
     href: '/general',
     icon: Settings,
   },
   {
-    label: 'Plan',
+    id: 'plan',
     href: '/plan',
     icon: Crown,
   },
   {
-    label: 'Billing',
+    id: 'billing',
     href: '/billing',
     icon: Receipt,
   },
   {
-    label: 'Domains',
+    id: 'domains',
     href: '/domains',
     icon: Globe,
   },
   {
-    label: 'Shipping',
+    id: 'shipping',
     href: '/shipping',
     icon: Truck,
   },
   {
-    label: 'Payments',
+    id: 'payments',
     href: '/payments',
     icon: CreditCard,
   },
   {
-    label: 'Notifications',
+    id: 'notifications',
     href: '/notifications',
     icon: Bell,
   },
   {
-    label: 'Team',
+    id: 'staff',
     href: '/staff',
     icon: Users,
   },
-  
 ];
 
 export function SettingsSidebar() {
   const params = useParams();
   const pathname = usePathname();
+  const t = useTranslations('SettingsNav');
   const workspaceId = params.workspace_id as string;
   const baseUrl = `/workspace/${workspaceId}/store/settings`;
 
@@ -85,7 +87,7 @@ export function SettingsSidebar() {
               )}
             >
               <Icon className="h-4 w-4" />
-              {item.label}
+              {t(`items.${item.id}.label` as any)}
             </Link>
           );
         })}

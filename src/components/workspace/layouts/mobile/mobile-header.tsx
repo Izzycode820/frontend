@@ -14,6 +14,7 @@ import { Badge } from '@/components/shadcn-ui/badge';
 import { IconSettings, IconSun, IconMoon, IconBell } from '@tabler/icons-react';
 import type { UserConfig } from '@/types/workspace/dashboard-ui/workspace';
 import { NotificationPanel } from '@/components/workspace/store/notifications';
+import { useTranslations } from 'next-intl';
 import { useNotificationSocket } from '@/components/workspace/store/notifications/use-notification-socket';
 import { ApolloProvider } from '@apollo/client/react';
 import { notificationClient } from '@/services/graphql/clients';
@@ -29,6 +30,7 @@ interface MobileHeaderProps {
 }
 
 function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
+    const t = useTranslations('Dashboard.navigation');
     const { setTheme } = useTheme();
     const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
     const { unreadCount } = useNotificationSocket();
@@ -38,7 +40,7 @@ function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
     const sidebarConfig = getStoreSidebarConfig(workspaceId, user);
 
     const getNavItemLabel = (item: any): string => {
-        return item.title || item.name || '';
+        return item.title ? t(item.title) : (item.name ? t(item.name) : '');
     };
 
     // Helper to find active item and its optional children/siblings
@@ -107,7 +109,7 @@ function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
 
     const activeContext = findActiveContext();
     const showSecondaryNav = activeContext && activeContext.siblings;
-    const pageTitle = activeContext ? getNavItemLabel(activeContext.current) : 'Store';
+    const pageTitle = activeContext ? getNavItemLabel(activeContext.current) : t('store');
 
     return (
         <>
@@ -121,7 +123,7 @@ function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
                                 {user.name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="font-semibold text-sm">My Store</span>
+                        <span className="font-semibold text-sm">{t('myStore')}</span>
                         <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider dark:bg-blue-900/40 dark:text-blue-300">
                             Beta
                         </span>
@@ -148,7 +150,7 @@ function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
                                     {unreadCount > 99 ? '99+' : unreadCount}
                                 </Badge>
                             )}
-                            <span className="sr-only">Notifications</span>
+                            <span className="sr-only">{t('notifications')}</span>
                         </Button>
 
                         {/* Theme Dropdown (Compact) */}
@@ -157,15 +159,15 @@ function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
                                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                                     <IconSun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                                     <IconMoon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                                    <span className="sr-only">Toggle theme</span>
+                                    <span className="sr-only">{t('toggleTheme')}</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-[120px] min-w-0">
                                 <DropdownMenuItem onClick={() => setTheme('light')} className="gap-2 text-xs">
-                                    <IconSun className="h-3.5 w-3.5" /> Light
+                                    <IconSun className="h-3.5 w-3.5" /> {t('light')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setTheme('dark')} className="gap-2 text-xs">
-                                    <IconMoon className="h-3.5 w-3.5" /> Dark
+                                    <IconMoon className="h-3.5 w-3.5" /> {t('dark')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -173,7 +175,7 @@ function MobileHeaderInner({ user, workspaceId }: MobileHeaderProps) {
                         {/* Settings Button */}
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                             <IconSettings className="h-5 w-5 opacity-70" />
-                            <span className="sr-only">Settings</span>
+                            <span className="sr-only">{t('settings')}</span>
                         </Button>
                     </div>
                 </div>

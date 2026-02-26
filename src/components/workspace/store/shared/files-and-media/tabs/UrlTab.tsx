@@ -5,6 +5,7 @@ import { Input } from '@/components/shadcn-ui/input'
 import { Button } from '@/components/shadcn-ui/button'
 import { Label } from '@/components/shadcn-ui/label'
 import { useMutation } from '@apollo/client/react'
+import { useTranslations } from 'next-intl'
 import { Loader2, Check, AlertCircle } from 'lucide-react'
 import type { MediaItem } from '../types'
 import { UploadMediaFromUrlDocument } from '@/services/graphql/admin-store/mutations/media/__generated__/UploadMediaFromUrl.generated'
@@ -29,6 +30,7 @@ interface UrlTabProps {
 }
 
 export function UrlTab({ onUploadComplete }: UrlTabProps) {
+  const t = useTranslations('Shared.media');
   const [url, setUrl] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [error, setError] = useState('')
@@ -39,7 +41,7 @@ export function UrlTab({ onUploadComplete }: UrlTabProps) {
     e.preventDefault()
 
     if (!url.trim()) {
-      setError('Please enter a URL')
+      setError(t('enterUrl'))
       return
     }
 
@@ -81,7 +83,7 @@ export function UrlTab({ onUploadComplete }: UrlTabProps) {
       setTimeout(() => setStatus('idle'), 2000)
     } catch (err) {
       setStatus('error')
-      setError(err instanceof Error ? err.message : 'Failed to upload from URL')
+      setError(err instanceof Error ? err.message : t('loadFailed'))
     }
   }
 
@@ -89,17 +91,17 @@ export function UrlTab({ onUploadComplete }: UrlTabProps) {
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="media-url">Media URL</Label>
+          <Label htmlFor="media-url">{t('mediaUrl')}</Label>
           <Input
             id="media-url"
             type="url"
-            placeholder="https://example.com/image.jpg"
+            placeholder={t('urlPlaceholder')}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             disabled={status === 'loading'}
           />
           <p className="text-xs text-muted-foreground">
-            Enter the URL of an image, video, or 3D model file
+            {t('urlHint')}
           </p>
         </div>
 
@@ -111,15 +113,15 @@ export function UrlTab({ onUploadComplete }: UrlTabProps) {
           {status === 'loading' ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Downloading...
+              {t('downloading')}
             </>
           ) : status === 'success' ? (
             <>
               <Check className="mr-2 h-4 w-4" />
-              Uploaded
+              {t('uploaded')}
             </>
           ) : (
-            'Add from URL'
+            t('addFromUrl')
           )}
         </Button>
 
@@ -132,7 +134,7 @@ export function UrlTab({ onUploadComplete }: UrlTabProps) {
       </form>
 
       <div className="border-t pt-4">
-        <p className="text-sm font-medium mb-2">Supported sources:</p>
+        <p className="text-sm font-medium mb-2">{t('supportedSources')}</p>
         <ul className="text-xs text-muted-foreground space-y-1">
           <li>• Direct image URLs (.jpg, .png, .gif, .webp)</li>
           <li>• Video URLs (.mp4, .webm, .mov)</li>

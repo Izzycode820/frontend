@@ -28,6 +28,7 @@ import {
 } from '@/components/shadcn-ui/table'
 import { ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@/components/shadcn-ui/button'
+import { useTranslations } from 'next-intl'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { GetLocationsDocument } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetLocations.generated'
 import { CreateLocationDocument } from '@/services/graphql/admin-store/mutations/locations/__generated__/CreateLocation.generated'
@@ -77,6 +78,7 @@ export function ProductInventorySection({
   onLocationIdChange,
   onAllowBackordersChange,
 }: ProductInventorySectionProps) {
+  const t = useTranslations('Products.inventory');
   const [showMore, setShowMore] = useState(false)
 
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
@@ -149,10 +151,10 @@ export function ProductInventorySection({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Inventory</CardTitle>
+          <CardTitle className="text-base">{t('title')}</CardTitle>
           <div className="flex items-center gap-2">
             <Label htmlFor="track-inventory" className="text-sm font-normal cursor-pointer">
-              Inventory tracked
+              {t('tracked')}
             </Label>
             <Switch
               id="track-inventory"
@@ -171,11 +173,11 @@ export function ProductInventorySection({
               <Table>
                 <TableHeader>
                   <TableRow className="border-b bg-muted/30">
-                    <TableHead className="h-8 text-xs font-medium px-3">Locations</TableHead>
-                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">Unavailable</TableHead>
-                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">Committed</TableHead>
-                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">Available</TableHead>
-                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">On hand</TableHead>
+                    <TableHead className="h-8 text-xs font-medium px-3">{t('locations')}</TableHead>
+                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">{t('unavailable')}</TableHead>
+                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">{t('committed')}</TableHead>
+                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">{t('available')}</TableHead>
+                    <TableHead className="h-8 text-xs font-medium px-2 text-center w-[100px]">{t('onHand')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -185,7 +187,7 @@ export function ProductInventorySection({
                       <div className="flex items-center gap-2">
                         <Select value={locationId} onValueChange={onLocationIdChange}>
                           <SelectTrigger className="h-8 text-xs flex-1">
-                            <SelectValue placeholder="Select warehouse/location" />
+                            <SelectValue placeholder={t('selectLocation')} />
                           </SelectTrigger>
                           <SelectContent>
                             {locations.map((location) => (
@@ -410,7 +412,7 @@ export function ProductInventorySection({
             {/* View adjustment history link */}
             <div className="px-1">
               <button className="text-xs text-blue-600 hover:underline">
-                View adjustment history
+                {t('history')}
               </button>
             </div>
 
@@ -420,9 +422,9 @@ export function ProductInventorySection({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ChevronRight className={`h-4 w-4 transition-transform ${showMore ? 'rotate-90' : ''}`} />
-                    <span className="text-sm font-medium">SKU</span>
-                    <span className="text-sm font-medium">Barcode</span>
-                    <span className="text-sm">Sell when out of stock</span>
+                    <span className="text-sm font-medium">{t('sku')}</span>
+                    <span className="text-sm font-medium">{t('barcode')}</span>
+                    <span className="text-sm">{t('backorders')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Right-aligned chips/badges */}
@@ -441,7 +443,7 @@ export function ProductInventorySection({
                 <div className="border border-t-0 rounded-b-md px-3 py-3 space-y-3 bg-muted/10">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label htmlFor="sku" className="text-xs">SKU (Stock Keeping Unit)</Label>
+                      <Label htmlFor="sku" className="text-xs">{t('sku')}</Label>
                       <Input
                         id="sku"
                         placeholder="SKU-001"
@@ -452,7 +454,7 @@ export function ProductInventorySection({
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="barcode" className="text-xs">Barcode (ISBN, UPC, GTIN)</Label>
+                      <Label htmlFor="barcode" className="text-xs">{t('barcode')}</Label>
                       <Input
                         id="barcode"
                         placeholder="123456789012"
@@ -464,16 +466,16 @@ export function ProductInventorySection({
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="condition" className="text-xs">Condition</Label>
+                    <Label htmlFor="condition" className="text-xs">{t('condition')}</Label>
                     <Select value={condition} onValueChange={onConditionChange}>
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="Select condition" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="refurbished">Refurbished</SelectItem>
+                        <SelectItem value="new">{t('conditions.new')}</SelectItem>
+                        <SelectItem value="refurbished">{t('conditions.refurbished')}</SelectItem>
                         <SelectItem value="second_hand">Second Hand</SelectItem>
-                        <SelectItem value="used">Used</SelectItem>
+                        <SelectItem value="used">{t('conditions.used')}</SelectItem>
                         <SelectItem value="damaged">Damaged</SelectItem>
                       </SelectContent>
                     </Select>
@@ -486,7 +488,7 @@ export function ProductInventorySection({
                       onCheckedChange={onAllowBackordersChange}
                     />
                     <Label htmlFor="allow-backorders" className="text-xs font-normal cursor-pointer">
-                      Sell when out of stock
+                      {t('backorders')}
                     </Label>
                   </div>
                 </div>
@@ -497,8 +499,8 @@ export function ProductInventorySection({
 
         {!trackInventory && (
           <div className="bg-muted/30 px-3 py-2 rounded-md border">
-            <p className="text-xs text-muted-foreground">
-              Inventory tracking is disabled for this product.
+            <p className="text-xs text-muted-foreground italic">
+              {t('disabled')}
             </p>
           </div>
         )}

@@ -37,6 +37,7 @@ import { RemoveProductsFromCategoryDocument } from '@/services/graphql/admin-sto
 import { CategoriesDocument } from '@/services/graphql/admin-store/queries/categories/__generated__/categories.generated'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface ProductsToolbarProps {
   selectedCount: number
@@ -53,6 +54,7 @@ export function ProductsToolbar({
   onAddProduct,
   onCategoryUpdate,
 }: ProductsToolbarProps) {
+  const t = useTranslations('Products');
   const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false)
   const [showRemoveCategoryDialog, setShowRemoveCategoryDialog] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('')
@@ -82,12 +84,12 @@ export function ProductsToolbar({
 
   const confirmBulkAddToCategory = async () => {
     if (!selectedCategory) {
-      toast.error('Please select a category')
+      toast.error(t('messages.selectCategory'))
       return
     }
 
     if (selectedProductIds.length === 0) {
-      toast.error('No products selected')
+      toast.error(t('messages.noProductsSelected'))
       return
     }
 
@@ -100,27 +102,27 @@ export function ProductsToolbar({
       })
 
       if (data?.addProductsToCategory?.success) {
-        toast.success(`${selectedProductIds.length} products added to category`)
+        toast.success(t('messages.addedToCategory', { count: selectedProductIds.length }))
         setShowAddCategoryDialog(false)
         setSelectedCategory('')
         onCategoryUpdate?.()
       } else {
-        toast.error(data?.addProductsToCategory?.error || 'Failed to add products to category')
+        toast.error(data?.addProductsToCategory?.error || t('messages.addCategoryFailed'))
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to add products to category')
+      toast.error(err.message || t('messages.addCategoryFailed'))
       console.error('Bulk add to category error:', err)
     }
   }
 
   const confirmBulkRemoveFromCategory = async () => {
     if (!selectedCategory) {
-      toast.error('Please select a category')
+      toast.error(t('messages.selectCategory'))
       return
     }
 
     if (selectedProductIds.length === 0) {
-      toast.error('No products selected')
+      toast.error(t('messages.noProductsSelected'))
       return
     }
 
@@ -133,15 +135,15 @@ export function ProductsToolbar({
       })
 
       if (data?.removeProductsFromCategory?.success) {
-        toast.success(`${selectedProductIds.length} products removed from category`)
+        toast.success(t('messages.removedFromCategory', { count: selectedProductIds.length }))
         setShowRemoveCategoryDialog(false)
         setSelectedCategory('')
         onCategoryUpdate?.()
       } else {
-        toast.error(data?.removeProductsFromCategory?.error || 'Failed to remove products from category')
+        toast.error(data?.removeProductsFromCategory?.error || t('messages.removeCategoryFailed'))
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to remove products from category')
+      toast.error(err.message || t('messages.removeCategoryFailed'))
       console.error('Bulk remove from category error:', err)
     }
   }
@@ -152,13 +154,13 @@ export function ProductsToolbar({
         {selectedCount > 0 ? (
           <>
             <div className="text-sm text-muted-foreground">
-              {selectedCount} product{selectedCount > 1 ? 's' : ''} selected
+              {t('selectedCount', { count: selectedCount })}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   <MoreHorizontal className="mr-2 h-4 w-4" />
-                  Bulk actions
+                  {t('toolbar.bulkActions')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -166,26 +168,26 @@ export function ProductsToolbar({
                   onClick={() => handleBulkAction('archive')}
                 >
                   <Archive className="mr-2 h-4 w-4" />
-                  Archive
+                  {t('toolbar.archive')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleBulkAction('export')}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Export
+                  {t('toolbar.export')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleBulkAddToCategory}
                 >
                   <FolderPlus className="mr-2 h-4 w-4" />
-                  Add to category
+                  {t('toolbar.addToCategory')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleBulkRemoveFromCategory}
                 >
                   <FolderMinus className="mr-2 h-4 w-4" />
-                  Remove from category
+                  {t('toolbar.removeFromCategory')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -193,27 +195,27 @@ export function ProductsToolbar({
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {t('toolbar.delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </>
         ) : (
           <div className="text-sm text-muted-foreground">
-            Select products to perform bulk actions
+            {t('selectToPerform')}
           </div>
         )}
       </div>
 
       <Button onClick={onAddProduct}>
-        Add product
+        {t('addProduct')}
       </Button>
 
       {/* Bulk Add to Category Dialog */}
       <Dialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add to Category</DialogTitle>
+            <DialogTitle>{t('toolbar.addToCategory')}</DialogTitle>
             <DialogDescription>
               Select a category to add {selectedProductIds.length} selected products to.
             </DialogDescription>
@@ -228,15 +230,15 @@ export function ProductsToolbar({
                 >
                   {selectedCategory
                     ? categories.find((category) => category?.id === selectedCategory)?.name
-                    : "Select category..."}
+                    : t('toolbar.selectCategory')}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="Search categories..." />
+                  <CommandInput placeholder={t('toolbar.searchCategories')} />
                   <CommandList>
-                    <CommandEmpty>No category found.</CommandEmpty>
+                    <CommandEmpty>{t('toolbar.noCategoryFound')}</CommandEmpty>
                     <CommandGroup>
                       {categories.map((category) => (
                         <CommandItem
@@ -264,10 +266,10 @@ export function ProductsToolbar({
               variant="outline"
               onClick={() => setShowAddCategoryDialog(false)}
             >
-              Cancel
+              {t('toolbar.cancel')}
             </Button>
             <Button onClick={confirmBulkAddToCategory}>
-              Add to Category
+              {t('toolbar.addToCategory')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -277,7 +279,7 @@ export function ProductsToolbar({
       <Dialog open={showRemoveCategoryDialog} onOpenChange={setShowRemoveCategoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove from Category</DialogTitle>
+            <DialogTitle>{t('toolbar.removeFromCategory')}</DialogTitle>
             <DialogDescription>
               Select a category to remove {selectedProductIds.length} selected products from.
             </DialogDescription>
@@ -292,15 +294,15 @@ export function ProductsToolbar({
                 >
                   {selectedCategory
                     ? categories.find((category) => category?.id === selectedCategory)?.name
-                    : "Select category..."}
+                    : t('toolbar.selectCategory')}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="Search categories..." />
+                  <CommandInput placeholder={t('toolbar.searchCategories')} />
                   <CommandList>
-                    <CommandEmpty>No category found.</CommandEmpty>
+                    <CommandEmpty>{t('toolbar.noCategoryFound')}</CommandEmpty>
                     <CommandGroup>
                       {categories.map((category) => (
                         <CommandItem
@@ -328,10 +330,10 @@ export function ProductsToolbar({
               variant="outline"
               onClick={() => setShowRemoveCategoryDialog(false)}
             >
-              Cancel
+              {t('toolbar.cancel')}
             </Button>
             <Button onClick={confirmBulkRemoveFromCategory}>
-              Remove from Category
+              {t('toolbar.removeFromCategory')}
             </Button>
           </DialogFooter>
         </DialogContent>

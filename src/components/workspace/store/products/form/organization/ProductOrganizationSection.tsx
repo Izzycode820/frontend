@@ -30,6 +30,7 @@ import {
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Check, ChevronDown, Plus, X, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl'
 import { CreateCategoryModal } from './CreateCategoryModal';
 import type { CategoryOption } from './types';
 
@@ -56,6 +57,7 @@ export function ProductOrganizationSection({
   onCategoryIdChange,
   onTagsChange,
 }: ProductOrganizationSectionProps) {
+  const t = useTranslations('Products.form.organization');
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [tagsOpen, setTagsOpen] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -85,36 +87,36 @@ export function ProductOrganizationSection({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Product organization</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Product Type - Dropdown with 3 options */}
           <div className="space-y-2">
-            <Label htmlFor="product-type">Product Type</Label>
+            <Label htmlFor="product-type">{t('type')}</Label>
             <select
               id="product-type"
               value={productType}
               onChange={(e) => onProductTypeChange(e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <option value="physical">Physical Product</option>
-              <option value="digital">Digital Product</option>
-              <option value="service">Service</option>
+              <option value="physical">{t('physical')}</option>
+              <option value="digital">{t('digital')}</option>
+              <option value="service">{t('service')}</option>
             </select>
             <p className="text-xs text-muted-foreground">
-              {productType === 'digital' && 'Downloadable files, licenses, etc.'}
-              {productType === 'service' && 'Appointments, consultations, subscriptions, etc.'}
-              {productType === 'physical' && 'Tangible goods that require shipping.'}
+              {productType === 'digital' && t('digitalHint')}
+              {productType === 'service' && t('serviceHint')}
+              {productType === 'physical' && t('physicalHint')}
             </p>
           </div>
 
 
           {/* Vendor */}
           <div className="space-y-2">
-            <Label htmlFor="vendor">Vendor</Label>
+            <Label htmlFor="vendor">{t('vendor')}</Label>
             <Input
               id="vendor"
-              placeholder="e.g., Samsung, Apple"
+              placeholder={t('vendorPlaceholder')}
               value={vendor}
               onChange={(e) => onVendorChange(e.target.value)}
             />
@@ -122,7 +124,7 @@ export function ProductOrganizationSection({
 
           {/* Collections (Categories) */}
           <div className="space-y-2">
-            <Label>Collections</Label>
+            <Label>{t('collections')}</Label>
             <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -134,7 +136,7 @@ export function ProductOrganizationSection({
                   <div className="flex items-center gap-2">
                     <Search className="h-4 w-4 text-muted-foreground" />
                     <span className={cn(!selectedCategory && "text-muted-foreground")}>
-                      {selectedCategory ? selectedCategory.name : "Search collections"}
+                      {selectedCategory ? selectedCategory.name : t('searchCollections')}
                     </span>
                   </div>
                   <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -142,9 +144,9 @@ export function ProductOrganizationSection({
               </PopoverTrigger>
               <PopoverContent className="w-full p-0" align="start">
                 <Command>
-                  <CommandInput placeholder="Search collections..." />
+                  <CommandInput placeholder={t('searchCollections')} />
                   <CommandList>
-                    <CommandEmpty>No collection found.</CommandEmpty>
+                    <CommandEmpty>{t('noCollection')}</CommandEmpty>
                     <CommandGroup>
                       {/* Add new collection option */}
                       <CommandItem
@@ -152,7 +154,7 @@ export function ProductOrganizationSection({
                         className="text-primary"
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        Add new collection
+                        {t('addCollection')}
                       </CommandItem>
 
                       {/* Category list */}
@@ -198,7 +200,7 @@ export function ProductOrganizationSection({
 
           {/* Tags */}
           <div className="space-y-2">
-            <Label>Tags</Label>
+            <Label>{t('tags')}</Label>
             <Popover open={tagsOpen} onOpenChange={setTagsOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -207,13 +209,13 @@ export function ProductOrganizationSection({
                   className="w-full justify-start"
                 >
                   <Search className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Search or create tags</span>
+                  <span className="text-muted-foreground">{t('searchTags')}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0" align="start">
                 <Command>
                   <CommandInput
-                    placeholder="Type to add tag..."
+                    placeholder={t('searchTags')}
                     value={tagInput}
                     onValueChange={setTagInput}
                     onKeyDown={(e) => {
@@ -234,7 +236,7 @@ export function ProductOrganizationSection({
                         }}
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        Add "{tagInput}"
+                        {t('addTag', { name: tagInput })}
                       </Button>
                     </CommandEmpty>
                   </CommandList>

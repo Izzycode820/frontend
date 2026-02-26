@@ -30,6 +30,7 @@ import {
     PopoverTrigger,
 } from '@/components/shadcn-ui/popover';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { GetPackagesDocument } from '@/services/graphql/admin-store/queries/shipping/__generated__/GetPackages.generated';
 import { DeletePackageDocument } from '@/services/graphql/admin-store/mutations/shipping/__generated__/DeletePackage.generated';
 import {
@@ -53,6 +54,8 @@ import {
 export function ShippingPackagesListPage() {
     const router = useRouter();
     const params = useParams();
+    const t = useTranslations('Shipping');
+    const tGen = useTranslations('General');
     const workspaceId = params.workspace_id as string;
 
     // Delete modal state
@@ -90,18 +93,18 @@ export function ShippingPackagesListPage() {
             });
 
             if (result.data?.deletePackage?.success) {
-                toast.success('Package deleted');
+                toast.success(t('deleteSuccess'));
                 setShowDeleteModal(false);
                 setSelectedPackage(null);
                 refetch();
             } else {
-                toast.error('Error', {
-                    description: result.data?.deletePackage?.error || 'Failed to delete package',
+                toast.error(tGen('error'), {
+                    description: result.data?.deletePackage?.error || t('deleteFailed'),
                 });
             }
         } catch (err) {
             console.error('Delete failed:', err);
-            toast.error('Error', { description: 'Failed to delete package' });
+            toast.error(tGen('error'), { description: t('deleteFailed') });
         }
     };
 
@@ -141,13 +144,13 @@ export function ShippingPackagesListPage() {
                 <PopoverTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-auto py-1 px-2 gap-1">
                         <IconMapPin className="w-3 h-3" />
-                        {entries.length} regions
+                        {t('regionsCount', { count: entries.length })}
                         <IconChevronDown className="w-3 h-3" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-56 p-2" align="start">
                     <div className="space-y-1">
-                        <p className="text-xs font-medium text-muted-foreground px-2 py-1">Shipping Fees by Region</p>
+                        <p className="text-xs font-medium text-muted-foreground px-2 py-1">{t('regionFeesDropdown')}</p>
                         {entries.map(([region, fee]) => (
                             <div
                                 key={region}
@@ -168,9 +171,9 @@ export function ShippingPackagesListPage() {
     // Format package type
     const formatPackageType = (type: string): string => {
         const types: Record<string, string> = {
-            'BOX': 'Box',
-            'ENVELOPE': 'Envelope',
-            'SOFT_PACKAGE': 'Soft Package',
+            'BOX': t('box'),
+            'ENVELOPE': t('envelope'),
+            'SOFT_PACKAGE': t('softPackage'),
         };
         return types[type] || type;
     };
@@ -178,9 +181,9 @@ export function ShippingPackagesListPage() {
     // Format size
     const formatSize = (size: string): string => {
         const sizes: Record<string, string> = {
-            'SMALL': 'Small',
-            'MEDIUM': 'Medium',
-            'LARGE': 'Large',
+            'SMALL': t('small'),
+            'MEDIUM': t('medium'),
+            'LARGE': t('large'),
         };
         return sizes[size] || size;
     };
@@ -198,7 +201,7 @@ export function ShippingPackagesListPage() {
         return (
             <div className="w-full max-w-[1200px] mx-auto px-6">
                 <Alert variant="destructive">
-                    <div className="font-semibold">Error loading packages</div>
+                    <div className="font-semibold">{tGen('errorLoading')}</div>
                     <div className="text-sm">{error.message}</div>
                 </Alert>
             </div>
@@ -209,41 +212,44 @@ export function ShippingPackagesListPage() {
     const totalCount = data?.packages?.totalCount || 0;
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="w-full max-w-[1200px] mx-auto px-4 md:px-6">
-                <div className="flex items-center gap-2 mb-4 md:hidden">
-                    <Button variant="ghost" size="icon" onClick={() => router.push(`/workspace/${workspaceId}/store/settings`)}>
-                        <IconArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <h1 className="text-xl font-bold">Shipping</h1>
-                </div>
-
-                <Card className="p-4 md:p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <IconPackage className="w-6 h-6 text-muted-foreground" />
-                            <div>
-                                <h2 className="text-base font-semibold">Shipping packages</h2>
-                                <p className="text-sm text-muted-foreground">
-                                    {totalCount} package{totalCount !== 1 ? 's' : ''} configured
-                                </p>
-                            </div>
-                        </div>
-                        <Button onClick={goToAddPage} className="gap-2 w-full sm:w-auto">
-                            <IconPlus className="w-4 h-4" />
-                            Add package
+        <div className="space-y-8 pb-10 max-w-[1000px] mx-auto min-w-0 px-4 md:px-6">
+            {/* Page Header */}
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push(`/workspace/${workspaceId}/store/settings`)}
+                            className="-ml-2"
+                        >
+                            <IconArrowLeft className="h-5 w-5" />
                         </Button>
+                        <IconPackage className="h-6 w-6 text-muted-foreground" />
+                        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
                     </div>
-                </Card>
+                    <Button onClick={goToAddPage} className="gap-2 hidden sm:flex">
+                        <IconPlus className="w-4 h-4" />
+                        {t('addPackage')}
+                    </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    {t('packagesConfigured', { count: totalCount })}
+                </p>
             </div>
+
+            {/* Mobile Add Button */}
+            <Button onClick={goToAddPage} className="gap-2 w-full sm:hidden">
+                <IconPlus className="w-4 h-4" />
+                {t('addPackage')}
+            </Button>
 
             {/* Best Practice Hint */}
             <div className="w-full max-w-[1200px] mx-auto px-4 md:px-6">
                 <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-100 p-4 rounded-md text-sm flex gap-3">
                     <IconPackage className="w-5 h-5 flex-none" />
                     <div>
-                        <strong>Best Practice:</strong> Create broad packages (e.g., "Standard Shipping") and assign many regions/rates to them, rather than creating separate packages for every region. This ensures products can be shipped together easily at checkout.
+                        <strong>{t('bestPracticeTitle')}:</strong> {t('bestPracticeDesc')}
                     </div>
                 </div>
             </div>
@@ -254,13 +260,13 @@ export function ShippingPackagesListPage() {
                     <Card className="p-8">
                         <div className="text-center">
                             <IconPackage className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                            <h3 className="text-lg font-medium mb-2">No shipping packages</h3>
+                            <h3 className="text-lg font-medium mb-2">{t('noPackages')}</h3>
                             <p className="text-sm text-muted-foreground mb-4">
-                                Create shipping packages to define how products are shipped to customers.
+                                {t('noPackagesDesc')}
                             </p>
                             <Button onClick={goToAddPage} className="gap-2">
                                 <IconPlus className="w-4 h-4" />
-                                Add package
+                                {t('addPackage')}
                             </Button>
                         </div>
                     </Card>
@@ -272,15 +278,15 @@ export function ShippingPackagesListPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Type</TableHead>
-                                        <TableHead>Size</TableHead>
-                                        <TableHead>Method</TableHead>
-                                        <TableHead>Region Fees</TableHead>
-                                        <TableHead>Est. Days</TableHead>
-                                        <TableHead>Products</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="w-[100px]">Actions</TableHead>
+                                        <TableHead>{t('name')}</TableHead>
+                                        <TableHead>{t('type')}</TableHead>
+                                        <TableHead>{t('size')}</TableHead>
+                                        <TableHead>{t('method')}</TableHead>
+                                        <TableHead>{t('regionFees')}</TableHead>
+                                        <TableHead>{t('estDays')}</TableHead>
+                                        <TableHead>{t('products')}</TableHead>
+                                        <TableHead>{t('status')}</TableHead>
+                                        <TableHead className="w-[100px]">{t('actions')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -293,7 +299,7 @@ export function ShippingPackagesListPage() {
                                                         <span className="font-medium">{pkg.name}</span>
                                                         {pkg.useAsDefault && (
                                                             <Badge variant="secondary" className="text-xs">
-                                                                Default
+                                                                {t('default')}
                                                             </Badge>
                                                         )}
                                                     </div>
@@ -308,10 +314,10 @@ export function ShippingPackagesListPage() {
                                                     {pkg.isActive ? (
                                                         <Badge variant="default" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                                             <IconCheck className="w-3 h-3 mr-1" />
-                                                            Active
+                                                            {t('active')}
                                                         </Badge>
                                                     ) : (
-                                                        <Badge variant="secondary">Inactive</Badge>
+                                                        <Badge variant="secondary">{t('inactive')}</Badge>
                                                     )}
                                                 </TableCell>
                                                 <TableCell>
@@ -350,24 +356,24 @@ export function ShippingPackagesListPage() {
             <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete Package</DialogTitle>
+                        <DialogTitle>{t('deleteTitle')}</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete "{selectedPackage?.name}"?
-                            Products using this package will need to be reassigned.
+                            {t('deleteConfirm', { name: selectedPackage?.name || '' })}
+                            {t('deleteWarning')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
-                            Cancel
+                            {tGen('cancel')}
                         </Button>
                         <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                             {deleting ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Deleting...
+                                    {t('deleting')}
                                 </>
                             ) : (
-                                'Delete'
+                                t('delete')
                             )}
                         </Button>
                     </DialogFooter>

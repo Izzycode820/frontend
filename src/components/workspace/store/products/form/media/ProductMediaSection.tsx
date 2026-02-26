@@ -1,9 +1,8 @@
-'use client'
-
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card'
 import { FilesAndMediaModal } from '@/components/workspace/store/shared/files-and-media'
 import { ProductMediaGrid } from './ProductMediaGrid'
+import { useTranslations } from 'next-intl'
 import type { ProductMediaSectionProps } from './types'
 import type { MediaSelection } from '@/components/workspace/store/shared/files-and-media'
 
@@ -13,6 +12,7 @@ export function ProductMediaSection({
   existingImages = [],
   onRemoveExisting,
 }: ProductMediaSectionProps) {
+  const t = useTranslations('Products.media')
   const [showModal, setShowModal] = useState(false)
 
   const handleMediaSelect = (selection: MediaSelection) => {
@@ -45,10 +45,10 @@ export function ProductMediaSection({
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center justify-between">
-          <span>Media</span>
+          <span>{t('title')}</span>
           {totalMediaCount > 0 && (
             <span className="text-sm font-normal text-muted-foreground">
-              {totalMediaCount} {totalMediaCount === 1 ? 'file' : 'files'}
+              {t('files', { count: totalMediaCount })}
             </span>
           )}
         </CardTitle>

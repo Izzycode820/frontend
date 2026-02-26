@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, MoreVertical, Printer } from 'lucide-react';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -49,6 +50,7 @@ export function OrderDetailsHeader({
   canMarkAsPaid,
   onMarkAsPaid,
 }: OrderDetailsHeaderProps) {
+  const t = useTranslations('Orders.details.header');
   return (
     <div className="border-b bg-background">
       <div className="px-4 lg:px-6 py-4">
@@ -73,10 +75,10 @@ export function OrderDetailsHeader({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <p className="text-sm text-muted-foreground">
-              Placed on {new Date(createdAt).toLocaleDateString()} at {new Date(createdAt).toLocaleTimeString()}
+              {t('placedOn')} {new Date(createdAt).toLocaleDateString()} {t('at')} {new Date(createdAt).toLocaleTimeString()}
             </p>
             <p className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(createdAt), { addSuffix: true })} from {orderSource}
+              {t('ago', { time: formatDistanceToNow(new Date(createdAt)) })} {t('from')} {orderSource}
             </p>
           </div>
 
@@ -85,16 +87,16 @@ export function OrderDetailsHeader({
             <div className="hidden sm:flex gap-2">
               {canMarkAsPaid && (
                 <Button onClick={onMarkAsPaid} size="sm">
-                  Mark as Paid
+                  {t('markAsPaid')}
                 </Button>
               )}
               {canBeRefunded && (
                 <Button variant="outline" onClick={onRefund} size="sm">
-                  Refund
+                  {t('refund')}
                 </Button>
               )}
               <Button variant="outline" onClick={onEdit} size="sm">
-                Edit
+                {t('edit')}
               </Button>
               <Button variant="outline" size="icon" className="h-9 w-9">
                 <Printer className="h-4 w-4" />
@@ -105,7 +107,7 @@ export function OrderDetailsHeader({
             <div className="sm:hidden flex gap-2">
               {canMarkAsPaid && (
                 <Button onClick={onMarkAsPaid} size="sm" className="flex-1">
-                  Mark Paid
+                  {t('markPaidShort')}
                 </Button>
               )}
             </div>
@@ -113,32 +115,32 @@ export function OrderDetailsHeader({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size={canMarkAsPaid ? "icon" : "default"} className="sm:w-auto">
-                  <span className="sr-only sm:not-sr-only sm:mr-2">More actions</span>
+                  <span className="sr-only sm:not-sr-only sm:mr-2">{t('moreActions')}</span>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {/* Mobile-only menu items */}
                 <div className="sm:hidden">
-                  <DropdownMenuItem onClick={onEdit}>Edit order</DropdownMenuItem>
+                  <DropdownMenuItem onClick={onEdit}>{t('edit')}</DropdownMenuItem>
                   {canBeRefunded && (
-                    <DropdownMenuItem onClick={onRefund}>Refund</DropdownMenuItem>
+                    <DropdownMenuItem onClick={onRefund}>{t('refund')}</DropdownMenuItem>
                   )}
                   <DropdownMenuItem className="gap-2">
-                    <Printer className="h-4 w-4" /> Print order
+                    <Printer className="h-4 w-4" /> {t('print')}
                   </DropdownMenuItem>
                 </div>
 
-                <DropdownMenuItem>Duplicate order</DropdownMenuItem>
+                <DropdownMenuItem>{t('duplicate')}</DropdownMenuItem>
                 {canBeArchived && (
-                  <DropdownMenuItem onClick={onArchive}>Archive order</DropdownMenuItem>
+                  <DropdownMenuItem onClick={onArchive}>{t('archive')}</DropdownMenuItem>
                 )}
                 {canBeUnarchived && (
-                  <DropdownMenuItem onClick={onUnarchive}>Unarchive order</DropdownMenuItem>
+                  <DropdownMenuItem onClick={onUnarchive}>{t('unarchive')}</DropdownMenuItem>
                 )}
                 {canBeCancelled && (
                   <DropdownMenuItem onClick={onCancel} className="text-destructive">
-                    Cancel order
+                    {t('cancel')}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>

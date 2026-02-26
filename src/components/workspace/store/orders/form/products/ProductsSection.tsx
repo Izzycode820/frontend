@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Search, MoreHorizontal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
@@ -8,6 +9,7 @@ import { ProductItem } from './ProductItem';
 import type { ProductsSectionProps, ProductSearchResult } from './types';
 
 export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) {
+  const t = useTranslations('Orders.form');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -73,7 +75,7 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-base font-semibold">Products</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('sections.products')}</CardTitle>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -84,7 +86,7 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products"
+                placeholder={t('placeholders.searchProducts')}
                 value={searchTerm}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -101,9 +103,9 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
               variant="outline"
               onClick={() => setIsModalOpen(true)}
             >
-              Browse
+              {t('actions.browse')}
             </Button>
-            <Button variant="outline">Add custom item</Button>
+            <Button variant="outline">{t('actions.addCustomItem')}</Button>
           </div>
 
           {/* Products List */}
@@ -111,9 +113,9 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
             <div className="space-y-1">
               {/* Table Headers */}
               <div className="flex items-center gap-3 pb-2 text-xs font-medium text-muted-foreground">
-                <div className="flex-1 min-w-0 pl-[60px]">Product</div>
-                <div className="w-20 text-center">Quantity</div>
-                <div className="w-32 text-right">Total</div>
+                <div className="flex-1 min-w-0 pl-[60px]">{t('products.header.product')}</div>
+                <div className="w-20 text-center">{t('products.header.quantity')}</div>
+                <div className="w-32 text-right">{t('products.header.total')}</div>
                 <div className="w-8"></div>
               </div>
 
@@ -129,7 +131,7 @@ export function ProductsSection({ items, onItemsChange }: ProductsSectionProps) 
             </div>
           ) : (
             <div className="text-center py-8 text-sm text-muted-foreground border rounded-lg">
-              No products added
+              {t('placeholders.noProducts')}
             </div>
           )}
         </CardContent>

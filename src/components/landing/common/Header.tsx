@@ -21,6 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { HEADER_NAVIGATION, AUTH_ROUTES } from '@/routes';
 import { useAuth } from '@/hooks/authentication/useAuth';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 interface HeaderProps {
   className?: string;
@@ -140,6 +141,9 @@ export default function Header({ className }: HeaderProps) {
               </Button>
             </>
           )}
+          <div className="flex items-center text-white border-white/20 hover:border-white/40">
+            <LanguageSelector />
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -153,6 +157,10 @@ export default function Header({ className }: HeaderProps) {
             </SheetTrigger>
             <SheetContent side="right" className="bg-huzilerz-black text-white border-l-gray-800 w-80">
               <div className="flex flex-col space-y-6 mt-8">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-800">
+                  <span className="text-sm font-medium text-gray-400">Language</span>
+                  <LanguageSelector />
+                </div>
                 {/* Mobile User Info (if authenticated) */}
                 {isAuthenticated && user && (
                   <div className="flex items-center gap-3 pb-4 border-b border-gray-800">

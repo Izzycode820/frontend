@@ -23,6 +23,7 @@ import {
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import { Input } from '@/components/shadcn-ui/input';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
+import { useTranslations, useFormatter } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,8 @@ import {
 
 export function BillingPage() {
   const router = useRouter();
+  const format = useFormatter();
+  const t = useTranslations('Billing');
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,7 +82,7 @@ export function BillingPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return format.dateTime(date, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -87,23 +90,18 @@ export function BillingPage() {
   };
 
   const formatCurrency = (amount: string | number | null | undefined) => {
-    if (amount === null || amount === undefined) return 'XAF 0.00';
+    if (amount === null || amount === undefined) return format.number(0, { style: 'currency', currency: 'XAF' });
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return `XAF ${numAmount.toFixed(2)}`;
+    return format.number(numAmount, { style: 'currency', currency: 'XAF' });
   };
 
   const getActionText = (action: string) => {
-    const actionMap: Record<string, string> = {
-      CREATED: 'Subscription created',
-      RENEWED: 'Billing cycle ended',
-      UPGRADED: 'Plan upgraded',
-      DOWNGRADED: 'Plan downgraded',
-      CONVERTED: 'Trial converted',
-      SUSPENDED: 'Subscription suspended',
-      REACTIVATED: 'Subscription reactivated',
-      CANCELLED: 'Subscription cancelled',
-    };
-    return actionMap[action] || action;
+    // Falls back to key if not found
+    try {
+      return t(`actions.${action}`);
+    } catch (e) {
+      return action;
+    }
   };
 
   // Determine if renew button should be shown
@@ -145,7 +143,7 @@ export function BillingPage() {
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-2xl font-bold">Billing</h1>
+            <h1 className="text-2xl font-bold">{t('title')}</h1>
           </div>
           <Button
             variant="outline"
@@ -153,7 +151,7 @@ export function BillingPage() {
             className="gap-2 w-full sm:w-auto"
           >
             <FileText className="h-4 w-4" />
-            Billing profile
+            {t('profile')}
           </Button>
         </div>
 
@@ -163,9 +161,9 @@ export function BillingPage() {
             <div className="flex items-start sm:items-center gap-3">
               <AlertCircle className="h-5 w-5 text-white mt-0.5 sm:mt-0 shrink-0" />
               <div>
-                <h3 className="font-semibold text-white">Your plan is past due</h3>
+                <h3 className="font-semibold text-white">{t('pastDueTitle')}</h3>
                 <p className="text-sm text-white/90">
-                  Your subscription is currently restricted. Reactivate now to restore full access to your workspace.
+                  {t('pastDueDesc')}
                 </p>
               </div>
             </div>
@@ -175,7 +173,7 @@ export function BillingPage() {
               disabled={isRenewing}
             >
               {isRenewing && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-              Reactivate subscription
+              {t('reactivate')}
             </Button>
           </div>
         )}
@@ -184,9 +182,9 @@ export function BillingPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">Upcoming bill</CardTitle>
+              <CardTitle className="text-base font-semibold">{t('upcomingBill')}</CardTitle>
               <Button variant="link" className="text-blue-600 p-0 h-auto text-sm">
-                View bill
+                {t('viewBill')}
               </Button>
             </div>
           </CardHeader>
@@ -212,11 +210,11 @@ export function BillingPage() {
                 {/* Next bill info */}
                 <p className="text-sm text-muted-foreground">
                   {billingOverview?.daysUntilBill !== null && billingOverview?.daysUntilBill !== undefined
-                    ? `Next bill in ${billingOverview.daysUntilBill} days, you will pay ${billingOverview?.upcomingBillAmount
-                    // ? ` or when your ${formatCurrency(billingOverview.upcomingBillAmount)} XAF threshold is reached. You have ${formatCurrency(billingOverview.upcomingBillAmount)} remaining.`
-                    // : '.'
-                    }`
-                    : 'No upcoming bill scheduled.'}
+                    ? t('nextBillDesc', {
+                        days: billingOverview.daysUntilBill || 0,
+                        amount: formatCurrency(billingOverview?.upcomingBillAmount)
+                      })
+                    : t('noUpcoming')}
                 </p>
 
                 {/* Payment Method */}
@@ -245,7 +243,7 @@ export function BillingPage() {
                             --
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            No payment method added
+                            {t('noPaymentMethod')}
                           </p>
                         </div>
                       )}
@@ -269,11 +267,11 @@ export function BillingPage() {
                       className="w-full sm:w-auto gap-2"
                     >
                       <RefreshCw className={`h-4 w-4 ${isRenewing ? 'animate-spin' : ''}`} />
-                      {isRenewing ? 'Processing...' : 'Renew subscription'}
+                      {isRenewing ? t('processing') : t('renew')}
                     </Button>
                     {status === 'grace_period' && (
                       <p className="text-sm text-red-600 mt-2">
-                        Your subscription is in grace period. Please renew to avoid service interruption.
+                        {t('gracePeriodAlert')}
                       </p>
                     )}
                     {billingOverview?.daysUntilBill !== null &&
@@ -281,7 +279,7 @@ export function BillingPage() {
                       billingOverview.daysUntilBill <= 5 &&
                       status !== 'grace_period' && (
                         <p className="text-sm text-muted-foreground mt-2">
-                          Renew now to extend your subscription without interruption.
+                          {t('renewPrompt')}
                         </p>
                       )}
                   </div>
@@ -289,13 +287,13 @@ export function BillingPage() {
 
                 {/* Plan settings link */}
                 <p className="text-sm">
-                  To make changes to your plan,{' '}
+                  {t('planChangesPre')}
                   <Button
                     variant="link"
                     className="text-blue-600 p-0 h-auto"
                     onClick={() => router.push('./plan')}
                   >
-                    visit plan settings
+                    {t('planChangesLink')}
                   </Button>
                 </p>
               </>
@@ -307,7 +305,7 @@ export function BillingPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">Past bills</CardTitle>
+              <CardTitle className="text-base font-semibold">{t('pastBillsTitle')}</CardTitle>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -316,7 +314,7 @@ export function BillingPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => router.push('./billing/charges')}>
-                    See charge table
+                    {t('seeChargeTable')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -327,9 +325,9 @@ export function BillingPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
                 <TabsList className="w-full sm:w-auto">
-                  <TabsTrigger value="all" className="flex-1 sm:flex-none">All</TabsTrigger>
-                  <TabsTrigger value="paid" className="flex-1 sm:flex-none">Paid</TabsTrigger>
-                  <TabsTrigger value="unpaid" className="flex-1 sm:flex-none">Unpaid</TabsTrigger>
+                  <TabsTrigger value="all" className="flex-1 sm:flex-none">{t('all')}</TabsTrigger>
+                  <TabsTrigger value="paid" className="flex-1 sm:flex-none">{t('paid')}</TabsTrigger>
+                  <TabsTrigger value="unpaid" className="flex-1 sm:flex-none">{t('unpaid')}</TabsTrigger>
                 </TabsList>
               </Tabs>
 
@@ -339,7 +337,7 @@ export function BillingPage() {
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search bills..."
+                    placeholder={t('searchPlaceholder')}
                     className="pl-9 w-full sm:w-[200px]"
                   />
                 </div>
@@ -374,18 +372,18 @@ export function BillingPage() {
                           <TableHead className="w-10 sm:w-12">
                             <Checkbox />
                           </TableHead>
-                          <TableHead className="whitespace-nowrap">Bill number</TableHead>
-                          <TableHead className="whitespace-nowrap">Date issued</TableHead>
-                          <TableHead className="whitespace-nowrap">Bill reason</TableHead>
-                          <TableHead className="text-right whitespace-nowrap">Bill total</TableHead>
-                          <TableHead className="whitespace-nowrap">Status</TableHead>
+                          <TableHead className="whitespace-nowrap">{t('billNumber')}</TableHead>
+                          <TableHead className="whitespace-nowrap">{t('dateIssued')}</TableHead>
+                          <TableHead className="whitespace-nowrap">{t('billReason')}</TableHead>
+                          <TableHead className="text-right whitespace-nowrap">{t('billTotal')}</TableHead>
+                          <TableHead className="whitespace-nowrap">{t('status')}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {pastBills.length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                              No bills found
+                              {t('noBills')}
                             </TableCell>
                           </TableRow>
                         ) : (
@@ -409,7 +407,7 @@ export function BillingPage() {
                                       : ''
                                   }
                                 >
-                                  {bill?.status === 'PAID' ? 'Paid' : bill?.status === 'UNPAID' ? 'Unpaid' : 'Pending'}
+                                  {bill?.status === 'PAID' ? t('paid') : bill?.status === 'UNPAID' ? t('unpaid') : t('pending')}
                                 </Badge>
                               </TableCell>
                             </TableRow>

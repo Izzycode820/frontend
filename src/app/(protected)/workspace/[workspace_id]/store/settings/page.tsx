@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { MobileSettingsList } from '@/components/workspace/store/settings/ui/MobileSettingsList';
+import { useTranslations } from 'next-intl';
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -49,12 +50,14 @@ export default function SettingsPage() {
         }
     }, [deviceType, workspaceId, router]);
 
+    const t = useTranslations('General');
+
     // Pending: show mobile list optimistically (better UX than spinner)
     // This way mobile users see content immediately
     if (deviceType === 'pending' || deviceType === 'mobile') {
         return (
             <div className="flex flex-col gap-4">
-                <h1 className="text-2xl font-bold">Settings</h1>
+                <h1 className="text-2xl font-bold">{t('settings')}</h1>
                 <MobileSettingsList />
             </div>
         );

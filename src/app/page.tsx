@@ -18,8 +18,12 @@ import { ArrowRight, Lock, Play, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/shadcn-ui/button';
 import { BetaLoginModal } from '@/components/beta/BetaLoginModal';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { LanguageSelector } from '@/components/ui/LanguageSelector';
 
 export default function BetaPage() {
+  const t = useTranslations('Landing');
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-blue-500/30">
 
@@ -31,16 +35,20 @@ export default function BetaPage() {
           <div className="flex items-center gap-4">
             <Link href="/workspace">
               <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-white/5 hidden sm:flex">
-                Already a member?
+                {t('alreadyMember')}
               </Button>
             </Link>
 
             <BetaLoginModal>
               <Button className="bg-white text-black hover:bg-gray-200 font-medium px-6 rounded-full transition-all">
                 <Lock className="w-4 h-4 mr-2" />
-                Member Login
+                {t('memberLogin')}
               </Button>
             </BetaLoginModal>
+
+            <div className="flex items-center text-white border-white/10 hover:border-white/20 ml-2">
+              <LanguageSelector />
+            </div>
           </div>
         </div>
       </header>
@@ -55,22 +63,22 @@ export default function BetaPage() {
         {/* Badge */}
         <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-blue-400 text-xs font-medium tracking-widest uppercase mb-10 backdrop-blur-md">
           <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
-          Private Beta Access
+          {t('privateBeta')}
         </div>
 
         {/* Headline */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl font-light text-white tracking-tight mb-8 leading-[1.1]">
-          The Future of <br className="hidden sm:block" />
+          {t('theFutureOf')} <br className="hidden sm:block" />
           <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-            Commerce in Cameroon is Here
+            {t('futureHeadline')}
           </span>
         </h1>
 
         {/* Subtext */}
         <p className="text-xl sm:text-2xl text-gray-400 max-w-3xl mb-12 font-light leading-relaxed">
-          We are onboarding a select group of founding merchants.
+          {t('onboardingText')}
           <br className="hidden sm:block" />
-          Build your store in minutes, and stare you online business.
+          {t('buildText')}
         </p>
 
         {/* Action Buttons */}
@@ -82,14 +90,14 @@ export default function BetaPage() {
             className="w-full sm:w-auto"
           >
             <Button size="lg" className="w-full sm:w-auto text-lg px-10 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20 transition-all hover:scale-105">
-              Apply for Access
+              {t('applyAccess')}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </a>
 
           <Link href="/workspace" className="w-full sm:w-auto">
             <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg px-10 h-14 rounded-full border-white/20 text-white hover:bg-white/10 bg-transparent backdrop-blur-sm">
-              Already Joined?
+              {t('alreadyJoined')}
               <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
           </Link>
@@ -116,7 +124,7 @@ export default function BetaPage() {
       {/* Footer */}
       <footer className="w-full py-12 border-t border-white/5 text-center">
         <p className="text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Huzilerz Inc. <span className="mx-2">•</span> Founding Member Build v0.9.2
+          {t('copyright', { year: new Date().getFullYear() })}
         </p>
       </footer>
     </div>

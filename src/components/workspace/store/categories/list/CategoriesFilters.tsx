@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu'
 import { Search, Filter, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface CategoriesFiltersProps {
   searchValue?: string
@@ -34,6 +35,7 @@ export function CategoriesFilters({
   featuredFilter,
   onFeaturedFilterChange,
 }: CategoriesFiltersProps) {
+  const t = useTranslations('Categories.filters');
   const [search, setSearch] = useState(searchValue || '')
   const [visibilityFilterLocal, setVisibilityFilterLocal] = useState(visibilityFilter || '')
   const [featuredFilterLocal, setFeaturedFilterLocal] = useState(featuredFilter || '')
@@ -70,7 +72,7 @@ export function CategoriesFilters({
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search categories by name..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10"
@@ -81,7 +83,7 @@ export function CategoriesFilters({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
-              Filters
+              {t('filters')}
               {hasActiveFilters && (
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               )}
@@ -89,35 +91,35 @@ export function CategoriesFilters({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-80 p-4 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Visibility</label>
+              <label className="text-sm font-medium">{t('visibility')}</label>
               <Select
                 value={visibilityFilterLocal || 'all'}
                 onValueChange={(val) => handleVisibilityChange(val === 'all' ? '' : val)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All visibility" />
+                  <SelectValue placeholder={t('allVisibility')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All visibility</SelectItem>
-                  <SelectItem value="visible">Visible</SelectItem>
-                  <SelectItem value="hidden">Hidden</SelectItem>
+                  <SelectItem value="all">{t('allVisibility')}</SelectItem>
+                  <SelectItem value="visible">{t('visible')}</SelectItem>
+                  <SelectItem value="hidden">{t('hidden')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Featured</label>
+              <label className="text-sm font-medium">{t('featured')}</label>
               <Select
                 value={featuredFilterLocal || 'all'}
                 onValueChange={(val) => handleFeaturedChange(val === 'all' ? '' : val)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All categories" />
+                  <SelectValue placeholder={t('allCategories')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
-                  <SelectItem value="featured">Featured only</SelectItem>
-                  <SelectItem value="not-featured">Not featured</SelectItem>
+                  <SelectItem value="all">{t('allCategories')}</SelectItem>
+                  <SelectItem value="featured">{t('featuredOnly')}</SelectItem>
+                  <SelectItem value="not-featured">{t('notFeatured')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -129,7 +131,7 @@ export function CategoriesFilters({
                 className="w-full flex items-center gap-2"
               >
                 <X className="h-4 w-4" />
-                Clear filters
+                {t('clearFilters')}
               </Button>
             )}
           </DropdownMenuContent>
@@ -138,20 +140,20 @@ export function CategoriesFilters({
 
       {hasActiveFilters && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Active filters:</span>
+          <span>{t('activeFilters')}</span>
           {search && (
             <span className="bg-muted px-2 py-1 rounded text-xs">
-              Search: "{search}"
+              {t('search')} "{search}"
             </span>
           )}
           {visibilityFilterLocal && (
             <span className="bg-muted px-2 py-1 rounded text-xs">
-              Visibility: {visibilityFilterLocal}
+              {t('visibilityLabel')} {t(visibilityFilterLocal as any)}
             </span>
           )}
           {featuredFilterLocal && (
             <span className="bg-muted px-2 py-1 rounded text-xs">
-              Featured: {featuredFilterLocal}
+              {t('featuredLabel')} {t(featuredFilterLocal === 'featured' ? 'featuredOnly' : 'notFeatured')}
             </span>
           )}
           <Button
@@ -160,7 +162,7 @@ export function CategoriesFilters({
             onClick={clearFilters}
             className="h-6 px-2 text-xs"
           >
-            Clear all
+            {t('clearAll')}
           </Button>
         </div>
       )}

@@ -6,6 +6,7 @@ import { MediaGrid } from './MediaGrid'
 import { useMediaUpload } from './hooks/useMediaUpload'
 import { useRecentMedia } from './hooks/useRecentMedia'
 import { useMediaDelete } from './hooks/useMediaDelete'
+import { useTranslations } from 'next-intl'
 import type { MediaType, MediaItem } from './types'
 
 interface MediaLibraryProps {
@@ -52,6 +53,7 @@ export function MediaLibrary({
   onUploadsComplete,
   onClearUploads,
 }: MediaLibraryProps) {
+  const t = useTranslations('Shared.media')
   const { uploads, uploadMultiple, clearUploads } = useMediaUpload()
 
   // Expose clearUploads to parent (for modal close)
@@ -144,12 +146,12 @@ export function MediaLibrary({
       <div className="flex-1 overflow-y-auto">
         {error ? (
           <div className="text-center py-12">
-            <p className="text-destructive">Failed to load media</p>
+            <p className="text-destructive">{t('loadFailed')}</p>
             <button
               onClick={() => refetch()}
               className="mt-2 text-sm text-primary hover:underline"
             >
-              Try again
+              {t('tryAgain')}
             </button>
           </div>
         ) : (

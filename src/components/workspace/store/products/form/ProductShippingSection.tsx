@@ -8,6 +8,7 @@ import { Switch } from '@/components/shadcn-ui/switch'
 import { Button } from '@/components/shadcn-ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select'
 import { Plus, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { GetPackagesDocument } from '@/services/graphql/admin-store/queries/shipping/__generated__/GetPackages.generated'
 import { CreatePackageDocument } from '@/services/graphql/admin-store/mutations/shipping/__generated__/CreatePackage.generated'
@@ -34,6 +35,7 @@ export function ProductShippingSection({
   onWeightChange,
   onWeightUnitChange,
 }: ProductShippingSectionProps) {
+  const t = useTranslations('Products.form.shipping');
   const [showCreatePackageModal, setShowCreatePackageModal] = useState(false)
 
   // Query for existing packages
@@ -84,10 +86,10 @@ export function ProductShippingSection({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Shipping</CardTitle>
+          <CardTitle className="text-base">{t('title')}</CardTitle>
           <div className="flex items-center gap-2">
             <Label htmlFor="requires-shipping" className="text-sm font-normal cursor-pointer">
-              Requires shipping
+              {t('requires')}
             </Label>
             <Switch
               id="requires-shipping"
@@ -103,14 +105,14 @@ export function ProductShippingSection({
           <div className="space-y-4">
             {/* Package and Weight Section */}
             <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-100 p-3 rounded-md text-sm mb-4">
-              <strong>Tip:</strong> It is better to assign the same shipping packages to similar products. Create one broad package (e.g., "Standard Shipping") and assign many eligible regions and their rates to it accordingly. This ensures customers can combine items in their cart easily.
+              <strong>{t('tip')}</strong> {t('tipText')}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Package Selection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="package">Shipping Package</Label>
+                  <Label htmlFor="package">{t('package')}</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -129,7 +131,7 @@ export function ProductShippingSection({
                 </div>
                 <Select value={packageId || ''} onValueChange={onPackageIdChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a package" />
+                    <SelectValue placeholder={t('selectPackage')} />
                   </SelectTrigger>
                   <SelectContent>
                     {packagesLoading ? (
@@ -174,13 +176,13 @@ export function ProductShippingSection({
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Select a shipping package
+                  {t('selectPackage')}
                 </p>
               </div>
 
               {/* Weight */}
               <div className="space-y-2">
-                <Label htmlFor="weight">Weight</Label>
+                <Label htmlFor="weight">{t('weight')}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="weight"
@@ -214,8 +216,7 @@ export function ProductShippingSection({
             {/* Shipping Info */}
             <div className="bg-muted p-3 rounded-md">
               <div className="text-sm text-muted-foreground">
-                Shipping rates are calculated based on the package and weight you select.
-                Make sure these values are accurate to get correct shipping costs.
+                {t('ratesCalculated')}
               </div>
             </div>
           </div>
@@ -224,7 +225,7 @@ export function ProductShippingSection({
         {!requiresShipping && (
           <div className="bg-muted p-3 rounded-md">
             <div className="text-sm text-muted-foreground">
-              This product will be marked as a digital product or service that doesn't require shipping.
+              {t('digitalProductHint')}
             </div>
           </div>
         )}

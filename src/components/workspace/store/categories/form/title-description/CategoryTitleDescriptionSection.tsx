@@ -37,6 +37,7 @@ import {
   Link as LinkIcon,
   Code,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { CategoryTitleDescriptionProps } from './types'
 
 export function CategoryTitleDescriptionSection({
@@ -46,6 +47,7 @@ export function CategoryTitleDescriptionSection({
   onDescriptionChange,
   errors,
 }: CategoryTitleDescriptionProps) {
+  const t = useTranslations('Categories.form.titleDescription')
 
   // Initialize Tiptap editor
   const editor = useEditor({
@@ -94,7 +96,7 @@ export function CategoryTitleDescriptionSection({
 
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href
-    const url = window.prompt('URL', previousUrl)
+    const url = window.prompt(t('linkPrompt'), previousUrl)
 
     if (url === null) {
       return
@@ -113,12 +115,12 @@ export function CategoryTitleDescriptionSection({
       <CardContent className="pt-6 space-y-4">
         {/* Title Input */}
         <div className="space-y-2">
-          <Label htmlFor="category-title">Title</Label>
+          <Label htmlFor="category-title">{t('titleLabel')}</Label>
           <Input
             id="category-title"
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
-            placeholder="e.g. Home page"
+            placeholder={t('titlePlaceholder')}
             className={errors?.title ? 'border-red-500' : ''}
           />
           {errors?.title && (
@@ -128,7 +130,7 @@ export function CategoryTitleDescriptionSection({
 
         {/* Description Rich Text Editor */}
         <div className="space-y-2">
-          <Label>Description</Label>
+          <Label>{t('descriptionLabel')}</Label>
 
           {/* Toolbar */}
           <div className="border rounded-t-md bg-muted/30 p-2 flex items-center gap-1 flex-wrap">

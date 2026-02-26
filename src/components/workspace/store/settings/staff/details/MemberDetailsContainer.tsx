@@ -19,7 +19,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Search, MoreVertical, Check, User, ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { ArrowLeft, Plus, Search, MoreVertical, Check, User, ChevronDown, Loader2 } from 'lucide-react';
 
 interface MemberDetailsContainerProps {
   memberId: string;
@@ -27,6 +28,8 @@ interface MemberDetailsContainerProps {
 
 export default function MemberDetailsContainer({ memberId }: MemberDetailsContainerProps) {
   const router = useRouter();
+  const t = useTranslations('Staff');
+  const tGen = useTranslations('General');
   const [roleSearchQuery, setRoleSearchQuery] = useState('');
   const [isRolePopoverOpen, setIsRolePopoverOpen] = useState(false);
 
@@ -76,15 +79,15 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
       });
 
       if (data?.changeStaffRole?.success) {
-        toast.success(data.changeStaffRole.message || 'Role updated successfully');
+        toast.success(data.changeStaffRole.message || t('roleUpdated'));
         refetch();
         setIsRolePopoverOpen(false);
         setRoleSearchQuery('');
       } else {
-        toast.error(data?.changeStaffRole?.error || 'Failed to update role');
+        toast.error(data?.changeStaffRole?.error || t('roleUpdateFailed'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update role');
+      toast.error(err.message || t('roleUpdateFailed'));
     }
   };
 
@@ -93,19 +96,19 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
       case 'active':
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Active
+            {t('active')}
           </Badge>
         );
       case 'pending':
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            Pending
+            {t('pending')}
           </Badge>
         );
       case 'suspended':
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            Suspended
+            {t('suspended')}
           </Badge>
         );
       default:
@@ -119,8 +122,8 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading member details...</p>
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+              <p className="text-muted-foreground">{t('memberDetailsLoading')}</p>
             </div>
           </CardContent>
         </Card>
@@ -134,9 +137,9 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive py-12">
-              <p>Failed to load member details</p>
+              <p>{t('memberDetailsError')}</p>
               <p className="text-sm text-muted-foreground">
-                {memberError?.message || 'Member not found'}
+                {memberError?.message || t('memberNotFound')}
               </p>
             </div>
           </CardContent>
@@ -160,14 +163,14 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              Actions
+              {t('actions')}
               <ChevronDown className="h-4 w-4 ml-2" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Suspend</DropdownMenuItem>
-            <DropdownMenuItem>Reactivate</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Remove</DropdownMenuItem>
+            <DropdownMenuItem>{t('suspend')}</DropdownMenuItem>
+            <DropdownMenuItem>{t('reactivate')}</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">{t('remove')}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -189,8 +192,8 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
       {/* Roles Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Roles</CardTitle>
-          <CardDescription>Assign roles to grant permissions.</CardDescription>
+          <CardTitle className="text-base">{t('roles')}</CardTitle>
+          <CardDescription>{t('assignRolesDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Current Role */}
@@ -206,7 +209,7 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem disabled>Remove role</DropdownMenuItem>
+                  <DropdownMenuItem disabled>{t('removeRole')}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -217,7 +220,7 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
             <PopoverTrigger asChild>
               <Button type="button" variant="outline" className="w-full justify-start">
                 <Plus className="h-4 w-4 mr-2" />
-                Assign
+                {t('assign')}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
@@ -225,7 +228,7 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search"
+                    placeholder={t('search')}
                     value={roleSearchQuery}
                     onChange={(e) => setRoleSearchQuery(e.target.value)}
                     className="pl-9"
@@ -236,11 +239,11 @@ export default function MemberDetailsContainer({ memberId }: MemberDetailsContai
               <div className="max-h-80 overflow-y-auto">
                 {rolesLoading ? (
                   <div className="p-8 text-center text-sm text-muted-foreground">
-                    Loading roles...
+                    {t('loadingRoles')}
                   </div>
                 ) : filteredRoles.length === 0 ? (
                   <div className="p-8 text-center text-sm text-muted-foreground">
-                    No roles found
+                    {t('noRolesFound')}
                   </div>
                 ) : (
                   <div className="py-2">

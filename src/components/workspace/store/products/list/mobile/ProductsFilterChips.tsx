@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface FilterChip {
     value: string;
@@ -26,6 +27,14 @@ export function ProductsFilterChips({
     activeChip,
     onChipChange,
 }: ProductsFilterChipsProps) {
+    const t = useTranslations('Products.filters');
+
+    const chipsToRender = chips === DEFAULT_PRODUCT_CHIPS ? [
+        { value: 'all', label: t('all') },
+        { value: 'PUBLISHED', label: t('published') },
+        { value: 'DRAFT', label: t('draft') },
+    ] : chips;
+
     return (
         <div
             className="flex gap-2 overflow-x-auto scrollbar-none pb-2 -mx-4 px-4"
@@ -34,7 +43,7 @@ export function ProductsFilterChips({
                 msOverflowStyle: 'none',
             }}
         >
-            {chips.map((chip) => (
+            {chipsToRender.map((chip) => (
                 <button
                     key={chip.value}
                     onClick={() => onChipChange(chip.value)}

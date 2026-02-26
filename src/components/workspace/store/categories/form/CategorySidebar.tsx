@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui
 import { Input } from '@/components/shadcn-ui/input'
 import { Label } from '@/components/shadcn-ui/label'
 import { Switch } from '@/components/shadcn-ui/switch'
+import { useTranslations } from 'next-intl'
 
 interface CategorySidebarProps {
   isVisible: boolean
@@ -30,19 +31,20 @@ export function CategorySidebar({
   onIsFeaturedChange,
   onSortOrderChange,
 }: CategorySidebarProps) {
+  const t = useTranslations('Categories.form.sidebar');
   return (
     <>
       {/* Publishing */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Publishing</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('publishing')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="sidebar-visible">Visible</Label>
+              <Label htmlFor="sidebar-visible">{t('visibleLabel')}</Label>
               <p className="text-xs text-muted-foreground">
-                Show on store
+                {t('visibleDesc')}
               </p>
             </div>
             <Switch
@@ -54,9 +56,9 @@ export function CategorySidebar({
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="sidebar-featured">Featured</Label>
+              <Label htmlFor="sidebar-featured">{t('featuredLabel')}</Label>
               <p className="text-xs text-muted-foreground">
-                Show on homepage
+                {t('featuredDesc')}
               </p>
             </div>
             <Switch
@@ -71,11 +73,11 @@ export function CategorySidebar({
       {/* Organization */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Organization</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('organization')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="sidebar-sort-order">Sort Order</Label>
+            <Label htmlFor="sidebar-sort-order">{t('sortOrderLabel')}</Label>
             <Input
               id="sidebar-sort-order"
               type="number"
@@ -86,7 +88,7 @@ export function CategorySidebar({
               max="999"
             />
             <p className="text-xs text-muted-foreground">
-              Lower numbers appear first
+              {t('sortOrderDesc')}
             </p>
           </div>
         </CardContent>

@@ -9,6 +9,7 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
 import { Separator } from '@/components/shadcn-ui/separator';
+import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
   Plus,
@@ -26,6 +27,7 @@ import {
 
 export function BillingProfilePage() {
   const router = useRouter();
+  const t = useTranslations('Billing');
 
   // Query for billing profile
   const { data, loading } = useQuery(GetBillingProfileDocument);
@@ -34,7 +36,7 @@ export function BillingProfilePage() {
 
   const handleAddPaymentMethod = () => {
     // Coming soon placeholder
-    alert('Coming soon! Payment method management will be available soon.');
+    alert(t('comingSoon'));
   };
 
   return (
@@ -49,9 +51,9 @@ export function BillingProfilePage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Billing profile</h1>
+          <h1 className="text-3xl font-bold">{t('profile')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Your payment methods, billing currency and store address
+            {t('profileSubtitle')}
           </p>
         </div>
       </div>
@@ -59,9 +61,9 @@ export function BillingProfilePage() {
       {/* Payment Methods Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment methods</CardTitle>
+          <CardTitle>{t('paymentMethods')}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            For purchases and bills in Huzilerz
+            {t('paymentMethodsDesc')}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -90,7 +92,7 @@ export function BillingProfilePage() {
                             : ''}
                         </p>
                         <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50">
-                          Primary
+                          {t('primary')}
                         </Badge>
                       </div>
                     </div>
@@ -102,10 +104,10 @@ export function BillingProfilePage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={handleAddPaymentMethod}>
-                          Edit
+                          {t('edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleAddPaymentMethod}>
-                          Remove
+                          {t('remove')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -113,7 +115,7 @@ export function BillingProfilePage() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>No payment method added yet</p>
+                  <p>{t('noPaymentMethods')}</p>
                 </div>
               )}
 
@@ -124,7 +126,7 @@ export function BillingProfilePage() {
                 onClick={handleAddPaymentMethod}
               >
                 <Plus className="h-4 w-4" />
-                Add payment method
+                {t('addPaymentMethod')}
               </Button>
             </>
           )}
@@ -135,11 +137,11 @@ export function BillingProfilePage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <CardTitle>Address and currency</CardTitle>
+            <CardTitle>{t('addressAndCurrency')}</CardTitle>
             <Info className="h-4 w-4 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground">
-            The options for your billing currency are determined by your billing address
+            {t('addressAndCurrencyDesc')}
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -149,13 +151,13 @@ export function BillingProfilePage() {
               <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div>
                 <p className="font-medium text-sm text-muted-foreground mb-1">
-                  Store address
+                  {t('storeAddress')}
                 </p>
                 <p className="font-medium">Bonabéri, Cameroon</p>
               </div>
             </div>
             <Button variant="outline" size="sm">
-              Manage
+              {t('manage')}
             </Button>
           </div>
 
@@ -166,7 +168,7 @@ export function BillingProfilePage() {
             <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div>
               <p className="font-medium text-sm text-muted-foreground mb-1">
-                Currency
+                {t('currency')}
               </p>
               <p className="font-medium">XAF (Central African CFA franc)</p>
             </div>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { PurchaseDomainDocument } from '@/services/graphql/domains/mutations/purchases/__generated__/purchaseDomain.generated';
 import { PrepareDomainCheckoutDocument } from '@/services/graphql/domains/mutations/purchases/__generated__/prepareDomainCheckout.generated';
 import { GetPurchaseStatusDocument } from '@/services/graphql/domains/queries/purchases/__generated__/getPurchaseStatus.generated';
@@ -19,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shadcn-ui/select';
-import { Globe, Info, ArrowLeft } from 'lucide-react';
+import { Globe, Info, ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PurchaseConfirmationProps {
@@ -29,6 +30,8 @@ interface PurchaseConfirmationProps {
 
 export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
   const router = useRouter();
+  const t = useTranslations('Domains');
+  const tGen = useTranslations('General');
   const params = useParams();
   const workspaceId = params.workspace_id as string;
 
@@ -79,11 +82,11 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
     if (statusData?.purchaseStatus) {
       const status = statusData.purchaseStatus.paymentStatus;
       if (status === 'COMPLETED') {
-        toast.success('Domain purchase successful!');
+        toast.success(t('purchaseSuccess'));
         router.push(`/workspace/${workspaceId}/store/settings/domains`);
         setPollingId(null);
       } else if (status === 'FAILED') {
-        toast.error(statusData.purchaseStatus.errorMessage || 'Purchase failed');
+        toast.error(statusData.purchaseStatus.errorMessage || t('purchaseFailed'));
         setPollingId(null);
       }
     }
@@ -97,7 +100,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
     e.preventDefault();
 
     if (!prepareData?.prepareDomainCheckout?.success) {
-      toast.error('Unable to verify domain pricing. Please try refreshing.');
+      toast.error(t('verifyPricingError'));
       return;
     }
 
@@ -106,7 +109,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
     const missingFields = requiredFields.filter((field) => !formData[field as keyof typeof formData]);
 
     if (missingFields.length > 0) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('fillRequired'));
       return;
     }
 
@@ -127,15 +130,15 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
 
       if (data?.purchaseDomain?.success && data.purchaseDomain.purchase?.id) {
         setPollingId(data.purchaseDomain.purchase.id);
-        toast.message('Payment initiated', {
-          description: 'Please check your phone to confirm the transaction.',
+        toast.message(t('paymentInitiated'), {
+          description: t('paymentDescription'),
           duration: 10000,
         });
       } else {
-        toast.error(data?.purchaseDomain?.error || 'Failed to initiate purchase');
+        toast.error(data?.purchaseDomain?.error || t('failedToInitiate'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to purchase domain');
+      toast.error(err.message || t('verificationFailed'));
       console.error('Purchase domain error:', err);
     }
   };
@@ -148,7 +151,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground animate-pulse">Loading domain pricing...</p>
+          <p className="text-muted-foreground animate-pulse">{t('loadingPricing')}</p>
         </div>
       </div>
     );
@@ -160,16 +163,16 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
       <div className="flex h-64 items-center justify-center">
         <Card className="w-full max-w-md border-red-200 bg-red-50">
           <CardContent className="pt-6 text-center">
-            <h3 className="text-lg font-medium text-red-900">Unable to load purchase details</h3>
+            <h3 className="text-lg font-medium text-red-900">{t('unableToLoad')}</h3>
             <p className="mt-2 text-sm text-red-700">
-              {prepareData?.prepareDomainCheckout?.error || prepareError?.message || 'Something went wrong.'}
+              {prepareData?.prepareDomainCheckout?.error || prepareError?.message || tGen('error')}
             </p>
             <Button
               variant="outline"
               className="mt-4 border-red-200 bg-white text-red-900 hover:bg-red-50"
               onClick={() => window.location.reload()}
             >
-              Try Again
+              {tGen('tryAgain')}
             </Button>
           </CardContent>
         </Card>
@@ -182,7 +185,7 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
   const priceUsd = pricing?.priceUsd || 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-10 max-w-[1000px] mx-auto min-w-0 px-4 md:px-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button
@@ -194,121 +197,135 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <Globe className="h-6 w-6 text-muted-foreground" />
-        <h1 className="text-xl sm:text-2xl font-bold">Buy new domain</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">{t('buyNew')}</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Form */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">{domain}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Auto-renew */}
-              <div className="flex items-center justify-between">
-                <Label htmlFor="auto-renew" className="text-sm font-normal">
-                  Auto-renew every year
+      <div className="flex flex-col gap-8">
+        {/* Domain Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">{domain}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Auto-renew switch moved inside for better hierarchy */}
+            <div className="flex items-center justify-between py-2">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto-renew" className="text-base">
+                  {t('autoRenew')}
                 </Label>
-                <Switch
-                  id="auto-renew"
-                  checked={autoRenew}
-                  onCheckedChange={setAutoRenew}
-                />
+                <p className="text-sm text-muted-foreground">
+                  Your domain will automatically renew annually.
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <Switch
+                id="auto-renew"
+                checked={autoRenew}
+                onCheckedChange={setAutoRenew}
+              />
+            </div>
 
-          {/* Contact Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Contact information</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                This information will be submitted to Huzilerz's domain registration provider.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <form id="purchase-form" onSubmit={handleSubmit} className="space-y-4">
-                {/* Name Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input
-                      id="firstName"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      required
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      required
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                  </div>
-                </div>
+            <Alert className="mt-4 bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-sm text-blue-900">
+                {t.rich('whoisPrivacyDesc', {
+                  strong: (chunks) => <strong>{chunks}</strong>
+                })}
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
 
-                {/* Email and Store Name */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      required
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="storeName">Store name</Label>
-                    <Input
-                      id="storeName"
-                      value={formData.storeName}
-                      onChange={(e) => handleInputChange('storeName', e.target.value)}
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                  </div>
-                </div>
-
-                {/* Phone and Fax */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone (Mobile Money)</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="e.g. 677123456"
-                      required
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                    <p className="text-[0.8rem] text-muted-foreground">
-                      Enter your MTN or Orange Money number (9 digits)
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="faxNumber">Fax number (Optional)</Label>
-                    <Input
-                      id="faxNumber"
-                      type="tel"
-                      value={formData.faxNumber}
-                      onChange={(e) => handleInputChange('faxNumber', e.target.value)}
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                  </div>
-                </div>
-
-                {/* Country */}
+        {/* Contact Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t('contactInfo')}</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t('contactInfoDesc')}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form id="purchase-form" onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country/region</Label>
+                  <Label htmlFor="firstName">{t('firstName')}</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    required
+                    disabled={purchaseLoading || !!pollingId}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">{t('lastName')}</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    required
+                    disabled={purchaseLoading || !!pollingId}
+                  />
+                </div>
+              </div>
+
+              {/* Email and Store Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t('email')}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    required
+                    disabled={purchaseLoading || !!pollingId}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="storeName">{t('storeName')}</Label>
+                  <Input
+                    id="storeName"
+                    value={formData.storeName}
+                    onChange={(e) => handleInputChange('storeName', e.target.value)}
+                    disabled={purchaseLoading || !!pollingId}
+                  />
+                </div>
+              </div>
+
+              {/* Phone and Fax */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">{t('phoneLabel')}</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="e.g. 677123456"
+                    required
+                    disabled={purchaseLoading || !!pollingId}
+                  />
+                  <p className="text-[0.8rem] text-muted-foreground">
+                    {t('phoneHint')}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="faxNumber">{t('faxNumber')}</Label>
+                  <Input
+                    id="faxNumber"
+                    type="tel"
+                    value={formData.faxNumber}
+                    onChange={(e) => handleInputChange('faxNumber', e.target.value)}
+                    disabled={purchaseLoading || !!pollingId}
+                  />
+                </div>
+              </div>
+
+              {/* Country & City */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="country">{t('country')}</Label>
                   <Select
                     value={formData.country}
                     onValueChange={(value) => handleInputChange('country', value)}
@@ -325,33 +342,8 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Address */}
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    required
-                    disabled={purchaseLoading || !!pollingId}
-                  />
-                </div>
-
-                {/* Apartment */}
-                <div className="space-y-2">
-                  <Label htmlFor="apartment">Apartment, suite, etc</Label>
-                  <Input
-                    id="apartment"
-                    value={formData.apartment}
-                    onChange={(e) => handleInputChange('apartment', e.target.value)}
-                    disabled={purchaseLoading || !!pollingId}
-                  />
-                </div>
-
-                {/* City */}
-                <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">{t('city')}</Label>
                   <Input
                     id="city"
                     value={formData.city}
@@ -360,140 +352,157 @@ export function PurchaseConfirmation({ domain }: PurchaseConfirmationProps) {
                     disabled={purchaseLoading || !!pollingId}
                   />
                 </div>
+              </div>
 
-                {/* State and Postal Code (if needed, add grid) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State/Province</Label>
-                    <Input
-                      id="state"
-                      value={formData.state}
-                      onChange={(e) => handleInputChange('state', e.target.value)}
-                      required
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="postalCode">Postal code</Label>
-                    <Input
-                      id="postalCode"
-                      value={formData.postalCode}
-                      onChange={(e) => handleInputChange('postalCode', e.target.value)}
-                      required
-                      disabled={purchaseLoading || !!pollingId}
-                    />
-                  </div>
+              {/* Address */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="address">{t('address')}</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    required
+                    disabled={purchaseLoading || !!pollingId}
+                  />
                 </div>
-
-                {/* WHOIS Privacy */}
-                <Alert className="bg-blue-50 border-blue-200">
-                  <Info className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-blue-900">
-                    <strong>WHOIS privacy:</strong> This domain includes WHOIS Privacy. Your contact
-                    information won't be displayed in public domain registration records.
-                  </AlertDescription>
-                </Alert>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Payment Method */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Payment method</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Alert>
-                <AlertDescription>
-                  Payment via Mobile Money (MTN/Orange). {priceFcfa.toLocaleString()} XAF will be requested from your phone.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Summary Sidebar */}
-        <div className="lg:col-span-1">
-          <Card className="sticky top-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Today */}
-              <div className="flex justify-between text-sm">
-                <div>
-                  <p className="font-medium">Today</p>
-                  <p className="text-muted-foreground">Domain purchase</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">{priceFcfa.toLocaleString()} XAF</p>
-                  <p className="text-xs text-muted-foreground">(${priceUsd.toFixed(2)} USD)</p>
+                <div className="space-y-2">
+                  <Label htmlFor="apartment">{t('apartment')}</Label>
+                  <Input
+                    id="apartment"
+                    value={formData.apartment}
+                    onChange={(e) => handleInputChange('apartment', e.target.value)}
+                    disabled={purchaseLoading || !!pollingId}
+                  />
                 </div>
               </div>
 
-              {/* Next Renewal */}
-              <div className="flex justify-between text-sm pb-4 border-b">
-                <div>
-                  <p className="font-medium">
-                    {renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
-                  <p className="text-muted-foreground">Annual renewal</p>
+              {/* State and Postal Code */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="state">{t('state')}</Label>
+                  <Input
+                    id="state"
+                    value={formData.state}
+                    onChange={(e) => handleInputChange('state', e.target.value)}
+                    required
+                    disabled={purchaseLoading || !!pollingId}
+                  />
                 </div>
-                <div className="text-right">
-                  <p className="font-medium">{priceFcfa.toLocaleString()} XAF</p>
-                  <p className="text-xs text-muted-foreground">Every year</p>
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode">{t('postalCode')}</Label>
+                  <Input
+                    id="postalCode"
+                    value={formData.postalCode}
+                    onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                    required
+                    disabled={purchaseLoading || !!pollingId}
+                  />
+                </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Purchase Summary - Now a wide card in the stack */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t('summary')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4 border-b">
+              {/* Left Side: Order items */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-sm">
+                  <div className="space-y-0.5">
+                    <p className="font-semibold">{t('today')}</p>
+                    <p className="text-muted-foreground">{t('domainPurchase')}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-base">{priceFcfa.toLocaleString()} XAF</p>
+                    <p className="text-xs text-muted-foreground">(${priceUsd.toFixed(2)} USD)</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-sm">
+                  <div className="space-y-0.5">
+                    <p className="font-semibold">
+                      {renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    <p className="text-muted-foreground">{t('annualRenewal')}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-base text-muted-foreground">{priceFcfa.toLocaleString()} XAF</p>
+                    <p className="text-xs text-muted-foreground">Every year</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Amount Due */}
-              <div className="flex justify-between">
-                <div>
-                  <p className="font-semibold">Amount due</p>
+              {/* Right Side: Total and Payment */}
+              <div className="space-y-6">
+                <div className="p-4 rounded-lg bg-muted/40 border">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-bold text-lg">{t('amountDue')}</p>
+                    <div className="text-right">
+                      <p className="font-extrabold text-2xl">{priceFcfa.toLocaleString()} XAF</p>
+                      <p className="text-xs text-muted-foreground font-medium">(${priceUsd.toFixed(2)} USD)</p>
+                    </div>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    Due {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-lg">{priceFcfa.toLocaleString()} XAF</p>
-                  <p className="text-xs text-muted-foreground">(${priceUsd.toFixed(2)} USD)</p>
-                </div>
-              </div>
 
-              {/* Buy Button */}
+                <Alert className="bg-emerald-50 border-emerald-200">
+                  <div className="text-sm text-emerald-900 font-medium">
+                    {t('momoPaymentDesc', { amount: priceFcfa.toLocaleString() })}
+                  </div>
+                </Alert>
+              </div>
+            </div>
+
+            <Alert className="bg-amber-50 border-amber-200">
+              <Info className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-xs text-amber-900 leading-normal">
+                {t.rich('nonRefundable', {
+                  strong: (chunks) => <strong className="font-bold">{chunks}</strong>
+                })}
+              </AlertDescription>
+            </Alert>
+
+            {/* Final Action */}
+            <div className="flex flex-col gap-3 pt-2">
               <Button
                 type="submit"
                 form="purchase-form"
                 disabled={purchaseLoading || !!pollingId}
-                className="w-full bg-black hover:bg-black/90 text-white relative"
+                size="lg"
+                className="w-full h-14 text-lg font-bold bg-black hover:bg-black/90 text-white transition-all shadow-lg active:scale-[0.98]"
               >
                 {pollingId ? (
                   <>
-                    <span className="animate-spin mr-2">⟳</span>
-                    Confirming Payment...
+                    <Loader2 className="animate-spin mr-3 h-5 w-5" />
+                    {t('confirmingPayment')}
                   </>
                 ) : purchaseLoading ? (
-                  'Processing...'
+                  <>
+                    <Loader2 className="animate-spin mr-3 h-5 w-5" />
+                    {t('processing')}
+                  </>
                 ) : (
-                  'Pay Now'
+                  t('payNow')
                 )}
               </Button>
-
+              
               {pollingId && (
-                <div className="text-center text-xs text-muted-foreground animate-pulse">
-                  Please check your phone to approve the transaction.
+                <div className="flex items-center justify-center gap-2 text-sm text-amber-600 font-medium animate-pulse">
+                  <Info className="h-4 w-4" />
+                  {t('checkPhoneReview')}
                 </div>
               )}
-
-              {/* Warning */}
-              <Alert className="bg-blue-50 border-blue-200">
-                <Info className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-xs text-blue-900">
-                  This is a <strong>non-refundable purchase</strong> and will be charged immediately.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

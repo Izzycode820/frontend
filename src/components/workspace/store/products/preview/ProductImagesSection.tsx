@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export function ProductImagesSection({
   images,
   productName,
 }: ProductImagesSectionProps) {
+  const t = useTranslations("Products.previewPage");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Filter out null images and images without URLs
@@ -31,7 +33,7 @@ export function ProductImagesSection({
     return (
       <div className="flex flex-col gap-4">
         <div className="aspect-square w-full bg-muted flex items-center justify-center text-muted-foreground">
-          No image available
+          {t("noImage")}
         </div>
       </div>
     );

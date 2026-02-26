@@ -37,6 +37,7 @@ import { RemoveProductsFromCategoryDocument } from '@/services/graphql/admin-sto
 import { CategoriesDocument } from '@/services/graphql/admin-store/queries/categories/__generated__/categories.generated'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface Product {
   id: string
@@ -61,6 +62,8 @@ export function ProductRowActions({
   onView,
   onCategoryUpdate,
 }: ProductRowActionsProps) {
+  const t = useTranslations('Products.table')
+  const tm = useTranslations('Products.messages')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false)
   const [showRemoveCategoryDialog, setShowRemoveCategoryDialog] = useState(false)
@@ -108,7 +111,7 @@ export function ProductRowActions({
 
   const confirmAddToCategory = async () => {
     if (!selectedCategory) {
-      toast.error('Please select a category')
+      toast.error(tm('selectCategory'))
       return
     }
 
@@ -121,22 +124,22 @@ export function ProductRowActions({
       })
 
       if (data?.addProductsToCategory?.success) {
-        toast.success(`Product added to category`)
+        toast.success(tm('addedToCategory', { count: 1 }))
         setShowAddCategoryDialog(false)
         setSelectedCategory('')
         onCategoryUpdate?.()
       } else {
-        toast.error(data?.addProductsToCategory?.error || 'Failed to add product to category')
+        toast.error(data?.addProductsToCategory?.error || tm('addCategoryFailed'))
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to add product to category')
+      toast.error(err.message || tm('addCategoryFailed'))
       console.error('Add to category error:', err)
     }
   }
 
   const confirmRemoveFromCategory = async () => {
     if (!selectedCategory) {
-      toast.error('Please select a category')
+      toast.error(tm('selectCategory'))
       return
     }
 
@@ -149,15 +152,15 @@ export function ProductRowActions({
       })
 
       if (data?.removeProductsFromCategory?.success) {
-        toast.success(`Product removed from category`)
+        toast.success(tm('removedFromCategory', { count: 1 }))
         setShowRemoveCategoryDialog(false)
         setSelectedCategory('')
         onCategoryUpdate?.()
       } else {
-        toast.error(data?.removeProductsFromCategory?.error || 'Failed to remove product from category')
+        toast.error(data?.removeProductsFromCategory?.error || tm('removeCategoryFailed'))
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to remove product from category')
+      toast.error(err.message || tm('removeCategoryFailed'))
       console.error('Remove from category error:', err)
     }
   }
@@ -167,31 +170,31 @@ export function ProductRowActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('actions.openMenu')}</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleView}>
             <Eye className="mr-2 h-4 w-4" />
-            View
+            {t('actions.view')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleEdit}>
             <Edit className="mr-2 h-4 w-4" />
-            Edit
+            {t('actions.edit')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleDuplicate}>
             <Copy className="mr-2 h-4 w-4" />
-            Duplicate
+            {t('actions.duplicate')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleAddToCategory}>
             <FolderPlus className="mr-2 h-4 w-4" />
-            Add to category
+            {t('actions.addToCategory')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleRemoveFromCategory}>
             <FolderMinus className="mr-2 h-4 w-4" />
-            Remove from category
+            {t('actions.removeFromCategory')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -199,7 +202,7 @@ export function ProductRowActions({
             className="text-destructive focus:text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete
+            {t('actions.delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -207,9 +210,9 @@ export function ProductRowActions({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Product</DialogTitle>
+            <DialogTitle>{t('dialogs.deleteTitle')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{product.name}"? This action cannot be undone.
+              {t('dialogs.deleteDescription', { name: product.name })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -217,13 +220,13 @@ export function ProductRowActions({
               variant="outline"
               onClick={() => setShowDeleteDialog(false)}
             >
-              Cancel
+              {t('dialogs.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
             >
-              Delete
+              {t('actions.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -233,9 +236,9 @@ export function ProductRowActions({
       <Dialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add to Category</DialogTitle>
+            <DialogTitle>{t('dialogs.addCategoryTitle')}</DialogTitle>
             <DialogDescription>
-              Select a category to add "{product.name}" to.
+              {t('dialogs.addCategoryDescription', { name: product.name })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -248,15 +251,15 @@ export function ProductRowActions({
                 >
                   {selectedCategory
                     ? categories.find((category) => category?.id === selectedCategory)?.name
-                    : "Select category..."}
+                    : t('dialogs.selectCategoryPlaceholder')}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="Search categories..." />
+                  <CommandInput placeholder={t('dialogs.searchCategoriesPlaceholder')} />
                   <CommandList>
-                    <CommandEmpty>No category found.</CommandEmpty>
+                    <CommandEmpty>{t('dialogs.noCategoryFound')}</CommandEmpty>
                     <CommandGroup>
                       {categories.map((category) => (
                         <CommandItem
@@ -284,10 +287,10 @@ export function ProductRowActions({
               variant="outline"
               onClick={() => setShowAddCategoryDialog(false)}
             >
-              Cancel
+              {t('dialogs.cancel')}
             </Button>
             <Button onClick={confirmAddToCategory}>
-              Add to Category
+              {t('dialogs.addToCategory')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -297,9 +300,9 @@ export function ProductRowActions({
       <Dialog open={showRemoveCategoryDialog} onOpenChange={setShowRemoveCategoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove from Category</DialogTitle>
+            <DialogTitle>{t('dialogs.removeCategoryTitle')}</DialogTitle>
             <DialogDescription>
-              Select a category to remove "{product.name}" from.
+              {t('dialogs.removeCategoryDescription', { name: product.name })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -312,13 +315,13 @@ export function ProductRowActions({
                 >
                   {selectedCategory
                     ? categories.find((category) => category?.id === selectedCategory)?.name
-                    : "Select category..."}
+                    : t('dialogs.selectCategoryPlaceholder')}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="Search categories..." />
+                  <CommandInput placeholder={t('dialogs.searchCategoriesPlaceholder')} />
                   <CommandList>
                     <CommandEmpty>No category found.</CommandEmpty>
                     <CommandGroup>
@@ -348,10 +351,10 @@ export function ProductRowActions({
               variant="outline"
               onClick={() => setShowRemoveCategoryDialog(false)}
             >
-              Cancel
+              {t('dialogs.cancel')}
             </Button>
             <Button onClick={confirmRemoveFromCategory}>
-              Remove from Category
+              {t('dialogs.removeFromCategory')}
             </Button>
           </DialogFooter>
         </DialogContent>

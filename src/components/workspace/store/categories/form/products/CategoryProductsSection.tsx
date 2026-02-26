@@ -13,6 +13,7 @@
 
 import { useState } from 'react'
 import { Search, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card'
 import { Input } from '@/components/shadcn-ui/input'
 import { Button } from '@/components/shadcn-ui/button'
@@ -34,6 +35,7 @@ export function CategoryProductsSection({
   onProductsChange,
   errors,
 }: CategoryProductsSectionProps) {
+  const t = useTranslations('Categories.form.products')
   const [searchModalOpen, setSearchModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('best-selling')
@@ -67,7 +69,7 @@ export function CategoryProductsSection({
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Products</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('sectionTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Search, Browse, Sort Controls */}
@@ -76,7 +78,7 @@ export function CategoryProductsSection({
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products"
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -95,7 +97,7 @@ export function CategoryProductsSection({
               variant="outline"
               onClick={() => setSearchModalOpen(true)}
             >
-              Browse
+              {t('browse')}
             </Button>
 
             {/* Sort Dropdown */}
@@ -106,7 +108,7 @@ export function CategoryProductsSection({
               <SelectContent>
                 {SORT_OPTIONS.map(option => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                    {t(`sort.${option.translationKey}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -1,11 +1,7 @@
-/**
- * OptionsForm Component
- * Manages all product options and triggers variant generation
- */
-
 import { useCallback } from 'react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ProductOption } from './types';
 import { OptionCard } from './OptionCard';
 
@@ -20,6 +16,8 @@ export function OptionsForm({
   setOptions,
   maxOptions = 3
 }: OptionsFormProps) {
+  const t = useTranslations('Products.form.variants');
+
   const handleAddOption = () => {
     if (options.length < maxOptions) {
       setOptions([
@@ -59,10 +57,10 @@ export function OptionsForm({
         <Button
           variant="outline"
           onClick={handleAddOption}
-          className="w-full"
+          className="w-full text-sm"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add another option {options.length > 0 && `(${maxOptions - options.length} remaining)`}
+          {t('addAnotherOption')} {options.length > 0 && <span>&nbsp;{t('remainingCount', { count: maxOptions - options.length })}</span>}
         </Button>
       )}
     </div>

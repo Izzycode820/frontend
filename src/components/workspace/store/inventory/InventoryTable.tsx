@@ -12,6 +12,7 @@ import {
   TableRow,
 } from '@/components/shadcn-ui/table'
 import { Badge } from '@/components/shadcn-ui/badge'
+import { useTranslations } from 'next-intl'
 import { EditableCell } from './EditableCell'
 import type { GetInventoryQuery } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetInventory.generated'
 
@@ -31,6 +32,7 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableProps) {
+  const t = useTranslations('Inventory')
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace)
   const [updatingCells, setUpdatingCells] = useState<Set<string>>(new Set())
 
@@ -44,9 +46,9 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
     }
 
     const labels = {
-      in_stock: 'In Stock',
-      low_stock: 'Low Stock',
-      out_of_stock: 'Out of Stock',
+      in_stock: t('status.in_stock'),
+      low_stock: t('status.low_stock'),
+      out_of_stock: t('status.out_of_stock'),
     }
 
     return (
@@ -69,12 +71,12 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
     }
 
     const labels = {
-      new: 'New',
-      refurbished: 'Refurbished',
-      second_hand: 'Second Hand',
-      used_like_new: 'Like New',
-      used_good: 'Good',
-      used_acceptable: 'Acceptable',
+      new: t('condition.new'),
+      refurbished: t('condition.refurbished'),
+      second_hand: t('condition.second_hand'),
+      used_like_new: t('condition.used_like_new'),
+      used_good: t('condition.used_good'),
+      used_acceptable: t('condition.used_acceptable'),
     }
 
     return (
@@ -109,8 +111,8 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
     return (
       <div className="rounded-md border">
         <div className="p-8 text-center text-muted-foreground">
-          <p>No inventory records found</p>
-          <p className="text-sm">Inventory is created automatically when you add products with variants</p>
+          <p>{t('list.noInventory')}</p>
+          <p className="text-sm">{t('list.noInventoryDetail')}</p>
         </div>
       </div>
     )
@@ -121,15 +123,15 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Product</TableHead>
-            <TableHead>Variant</TableHead>
-            <TableHead>SKU</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead className="text-right">Quantity</TableHead>
-            <TableHead className="text-right">On Hand</TableHead>
-            <TableHead className="text-right">Available</TableHead>
-            <TableHead>Condition</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t('table.product')}</TableHead>
+            <TableHead>{t('table.variant')}</TableHead>
+            <TableHead>{t('table.sku')}</TableHead>
+            <TableHead>{t('table.location')}</TableHead>
+            <TableHead className="text-right">{t('table.quantity')}</TableHead>
+            <TableHead className="text-right">{t('table.onHand')}</TableHead>
+            <TableHead className="text-right">{t('table.available')}</TableHead>
+            <TableHead>{t('table.condition')}</TableHead>
+            <TableHead>{t('table.status')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -154,7 +156,7 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
                       />
                     ) : (
                       <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center border">
-                        <span className="text-xs text-muted-foreground">No image</span>
+                        <span className="text-xs text-muted-foreground">{t('table.noImage')}</span>
                       </div>
                     )}
                     <div>
@@ -191,7 +193,7 @@ export function InventoryTable({ inventory, onUpdateInventory }: InventoryTableP
                       </Badge>
                     )}
                     {!item.variant?.option1 && !item.variant?.option2 && !item.variant?.option3 && (
-                      <span className="text-sm text-muted-foreground">Default</span>
+                      <span className="text-sm text-muted-foreground">{t('table.default')}</span>
                     )}
                   </div>
                 </TableCell>

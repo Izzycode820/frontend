@@ -1,8 +1,3 @@
-/**
- * VariantsTable Component
- * Displays hierarchical nested variants with simplified UI
- */
-
 import { useState } from 'react';
 import {
   Table,
@@ -23,6 +18,7 @@ import {
 } from '@/components/shadcn-ui/select';
 import { Button } from '@/components/shadcn-ui/button';
 import { Image as ImageIcon, Search, Filter, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ProductOption, VariantFormState } from './types';
 import { VariantEditModal } from './VariantEditModal';
 import { isLeafVariant, getVariantLevelValue } from './utils';
@@ -40,6 +36,7 @@ export function VariantsTable({
   variants,
   setVariants
 }: VariantsTableProps) {
+  const t = useTranslations('Products.variants');
   const [groupBy, setGroupBy] = useState<string>("none");
   const [selectedVariants, setSelectedVariants] = useState<Set<string>>(new Set());
   const [editingVariant, setEditingVariant] = useState<VariantFormState | null>(null);
@@ -154,13 +151,13 @@ export function VariantsTable({
         {options.length > 1 && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">Group by</span>
+              <span className="text-sm font-medium text-muted-foreground">{t('groupBy')}</span>
               <Select value={groupBy} onValueChange={setGroupBy}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="None" />
+                  <SelectValue placeholder={t('none')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">{t('none')}</SelectItem>
                   {options.map((opt, idx) => (
                     <SelectItem key={idx} value={`option${idx + 1}`}>
                       {opt.optionName}
@@ -189,17 +186,17 @@ export function VariantsTable({
                 <TableHead className="w-12">
                   <Checkbox />
                 </TableHead>
-                <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead>Variant</TableHead>
-                <TableHead className="w-[120px]">Price (FCFA)</TableHead>
-                <TableHead className="w-[100px]">Available</TableHead>
+                <TableHead className="w-[80px]">{t('image')}</TableHead>
+                <TableHead>{t('variant')}</TableHead>
+                <TableHead className="w-[120px]">{t('price', { currency: t('currency') })}</TableHead>
+                <TableHead className="w-[100px]">{t('available')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {flatVariants.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No variants yet. Add option values above to create variants.
+                    {t('noVariants')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -284,7 +281,7 @@ export function VariantsTable({
 
                           {hasChildren && (
                             <span className="text-sm text-muted-foreground ml-1">
-                              {variant.children!.length} variant{variant.children!.length > 1 ? 's' : ''}
+                              {t('variantCount', { count: variant.children!.length })}
                             </span>
                           )}
                         </div>
@@ -340,7 +337,7 @@ export function VariantsTable({
         {/* Summary */}
         {flatVariants.length > 0 && (
           <div className="text-sm text-muted-foreground">
-            Inventory is not tracked at Shop location
+            {t('inventoryLocationInfo')}
           </div>
         )}
       </div>

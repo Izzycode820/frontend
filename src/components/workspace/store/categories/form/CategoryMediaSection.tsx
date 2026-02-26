@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui
 import { Button } from '@/components/shadcn-ui/button'
 import { X } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { FilesAndMediaModal } from '@/components/workspace/store/shared/files-and-media'
 import type { MediaItem, MediaSelection } from '@/components/workspace/store/shared/files-and-media'
 
@@ -34,6 +35,7 @@ export function CategoryMediaSection({
   existingImage,
   onRemoveExisting
 }: CategoryMediaSectionProps) {
+  const t = useTranslations('Categories.form.media')
   const [showMediaModal, setShowMediaModal] = useState(false)
 
   const handleMediaSelect = (selection: MediaSelection) => {
@@ -91,10 +93,10 @@ export function CategoryMediaSection({
               onClick={() => setShowMediaModal(true)}
               className="mb-2"
             >
-              Add image
+              {t('addImage')}
             </Button>
             <p className="text-xs text-muted-foreground">
-              or drop an image to upload
+              {t('dropzone')}
             </p>
           </div>
         )}

@@ -11,6 +11,7 @@ import { Separator } from '@/components/shadcn-ui/separator';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
     IconBell,
     IconVolume,
@@ -29,14 +30,10 @@ interface Props {
     workspaceId: string;
 }
 
-const EVENTS_CONFIG = [
-    { key: 'new_order', label: 'New Order', description: 'When a customer places a new order' },
-    { key: 'order_status_change', label: 'Order Updates', description: 'When order status changes' },
-    { key: 'low_stock_alert', label: 'Low Stock', description: 'When product inventory is running low' },
-    { key: 'new_customer', label: 'New Customer', description: 'When a new customer signs up' },
-];
+const EVENT_KEYS = ['new_order', 'order_status_change', 'low_stock_alert', 'new_customer'] as const;
 
 export function NotificationSettingsPage({ workspaceId }: Props) {
+    const t = useTranslations('Notifications');
     // Queries - skip until workspace ID is available
     // Authentication is handled by the notificationClient's authLink middleware
     const { data, loading, error } = useQuery(GetNotificationSettingsDocument, {
@@ -93,9 +90,9 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                     }
                 }
             });
-            toast.success('Setting updated');
+            toast.success(t('settingUpdated'));
         } catch (err) {
-            toast.error('Failed to update setting');
+            toast.error(t('settingFailed'));
             console.error(err);
         }
     };
@@ -123,10 +120,10 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                     }
                 }
             });
-            toast.success('Preferences saved successfully');
+            toast.success(t('saveSuccess'));
             setIsDirty(false);
         } catch (err) {
-            toast.error('Failed to save preferences');
+            toast.error(t('saveFailed'));
             console.error(err);
         }
     };
@@ -145,7 +142,7 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
         return (
             <div className="max-w-[1000px] mx-auto">
                 <Alert variant="destructive">
-                    <AlertDescription>Error loading settings: {error.message}</AlertDescription>
+                    <AlertDescription>{t('errorLoading')}: {error.message}</AlertDescription>
                 </Alert>
             </div>
         );
@@ -156,9 +153,9 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
     return (
         <div className="space-y-8 pb-10 max-w-[1000px] mx-auto px-4 md:px-6">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-bold tracking-tight">Notification Settings</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
                 <p className="text-muted-foreground">
-                    Manage how you receive alerts and notifications within the dashboard.
+                    {t('description')}
                 </p>
             </div>
 
@@ -167,16 +164,16 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                 <CardHeader>
                     <div className="flex items-center gap-2">
                         <IconBell className="w-5 h-5 text-zinc-500" />
-                        <CardTitle className="text-base">General Preferences</CardTitle>
+                        <CardTitle className="text-base">{t('general')}</CardTitle>
                     </div>
-                    <CardDescription>Global settings for in-app notifications</CardDescription>
+                    <CardDescription>{t('generalDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="text-base">Play Notification Sound</Label>
+                            <Label className="text-base">{t('playNotificationSound')}</Label>
                             <p className="text-sm text-muted-foreground">
-                                Play a sound when a new notification arrives while you are online.
+                                {t('playNotificationSoundDesc')}
                             </p>
                         </div>
                         <Switch
@@ -187,9 +184,9 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                     <Separator />
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="text-base">Browser Notifications</Label>
+                            <Label className="text-base">{t('browserNotifications')}</Label>
                             <p className="text-sm text-muted-foreground">
-                                Show system notifications (banners) when the app is in the background.
+                                {t('browserNotificationsDesc')}
                             </p>
                         </div>
                         <Switch
@@ -198,7 +195,7 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                                 if (val) {
                                     const result = await requestNotificationPermission();
                                     if (result !== 'granted') {
-                                        toast.error('Permission denied. Please enable notifications in your browser settings.');
+                                        toast.error(t('permissionDenied'));
                                         return;
                                     }
                                 }
@@ -214,16 +211,16 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                 <CardHeader>
                     <div className="flex items-center gap-2">
                         <IconMoon className="w-5 h-5 text-indigo-500" />
-                        <CardTitle className="text-base">Quiet Hours</CardTitle>
+                        <CardTitle className="text-base">{t('quietHours')}</CardTitle>
                     </div>
-                    <CardDescription>Mute sounds and banners during specific times</CardDescription>
+                    <CardDescription>{t('quietHoursDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="text-base">Enable Quiet Hours</Label>
+                            <Label className="text-base">{t('enableQuietHours')}</Label>
                             <p className="text-sm text-muted-foreground">
-                                Automatically mute notifications during the specified schedule.
+                                {t('enableQuietHoursDesc')}
                             </p>
                         </div>
                         <Switch
@@ -236,7 +233,7 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                         <div className="grid grid-cols-2 gap-4 mt-4 p-4 border rounded-lg bg-muted/30">
                             <div className="space-y-2">
                                 <Label htmlFor="start-time" className="text-xs font-semibold uppercase text-muted-foreground">
-                                    Start Time
+                                    {t('startTime')}
                                 </Label>
                                 <div className="relative">
                                     <IconClock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -254,7 +251,7 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="end-time" className="text-xs font-semibold uppercase text-muted-foreground">
-                                    End Time
+                                    {t('endTime')}
                                 </Label>
                                 <div className="relative">
                                     <IconClock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -280,36 +277,36 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                 <CardHeader>
                     <div className="flex items-center gap-2">
                         <IconVolume className="w-5 h-5 text-emerald-500" />
-                        <CardTitle className="text-base">Event Rules</CardTitle>
+                        <CardTitle className="text-base">{t('eventRules')}</CardTitle>
                     </div>
-                    <CardDescription>Customize alerts for specific events</CardDescription>
+                    <CardDescription>{t('eventRulesDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
-                        {EVENTS_CONFIG.map((event) => {
-                            const pref = eventPreferences[event.key] || { enabled: true, sound: true };
+                        {EVENT_KEYS.map((key) => {
+                            const pref = eventPreferences[key] || { enabled: true, sound: true };
                             return (
-                                <div key={event.key} className="flex items-center justify-between py-4 first:pt-0 last:pb-0 border-b last:border-0 border-border">
+                                <div key={key} className="flex items-center justify-between py-4 first:pt-0 last:pb-0 border-b last:border-0 border-border">
                                     <div className="space-y-1">
-                                        <p className="font-medium text-sm">{event.label}</p>
-                                        <p className="text-xs text-muted-foreground">{event.description}</p>
+                                        <p className="font-medium text-sm">{t(`events.${key}.label`)}</p>
+                                        <p className="text-xs text-muted-foreground">{t(`events.${key}.description`)}</p>
                                     </div>
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col items-center gap-2">
-                                            <Label className="text-[10px] uppercase text-muted-foreground font-semibold">Sound</Label>
+                                            <Label className="text-[10px] uppercase text-muted-foreground font-semibold">{t('sound')}</Label>
                                             <Switch
                                                 checked={pref.sound}
-                                                onCheckedChange={(val) => handleEventPreferenceChange(event.key, 'sound', val)}
+                                                onCheckedChange={(val) => handleEventPreferenceChange(key, 'sound', val)}
                                                 disabled={!pref.enabled}
                                                 className="scale-90"
                                             />
                                         </div>
                                         <div className="h-8 w-px bg-border mx-2" />
                                         <div className="flex flex-col items-center gap-2">
-                                            <Label className="text-[10px] uppercase text-muted-foreground font-semibold">Enabled</Label>
+                                            <Label className="text-[10px] uppercase text-muted-foreground font-semibold">{t('enabled')}</Label>
                                             <Switch
                                                 checked={pref.enabled}
-                                                onCheckedChange={(val) => handleEventPreferenceChange(event.key, 'enabled', val)}
+                                                onCheckedChange={(val) => handleEventPreferenceChange(key, 'enabled', val)}
                                             />
                                         </div>
                                     </div>
@@ -330,7 +327,7 @@ export function NotificationSettingsPage({ workspaceId }: Props) {
                         disabled={saving}
                     >
                         {saving ? <IconLoader2 className="w-4 h-4 animate-spin" /> : <IconDeviceFloppy className="w-4 h-4" />}
-                        Save Changes
+                        {t('saveChanges')}
                     </Button>
                 </div>
             )}

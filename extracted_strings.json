@@ -1,0 +1,20 @@
+{
+  "Extracted": {
+    "612345678": "612345678",
+    "contact_information": "Contact information",
+    "describe_your_store_in_a_few_sentences": "Describe your store in a few sentences",
+    "enter_your_store_name": "Enter your store name",
+    "general_settings": "General Settings",
+    "invalid_phone_number": "Invalid Phone Number",
+    "invalid_whatsapp_number": "Invalid WhatsApp Number",
+    "phone_number": "Phone number",
+    "primary_contact_email_for_your_store": "Primary contact email for your store",
+    "store_description": "Store description",
+    "store_email": "Store email",
+    "store_identity": "Store identity",
+    "store_name": "Store name",
+    "support_email": "Support email",
+    "whatsapp_checkout": "WhatsApp checkout",
+    "whatsapp_number": "WhatsApp number"
+  }
+}

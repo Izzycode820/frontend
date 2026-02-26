@@ -14,6 +14,7 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { Info, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 interface ChangeSubdomainModalProps {
@@ -35,6 +36,8 @@ export function ChangeSubdomainModal({
   changesLimit,
   onSuccess,
 }: ChangeSubdomainModalProps) {
+  const t = useTranslations('Domains');
+  const tGen = useTranslations('General');
   const [subdomain, setSubdomain] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -85,13 +88,13 @@ export function ChangeSubdomainModal({
       });
 
       if (data?.changeSubdomain?.success) {
-        toast.success(data.changeSubdomain.message || 'Subdomain changed successfully');
+        toast.success(data.changeSubdomain.message || t('changeSuccess'));
         onSuccess();
       } else {
-        toast.error(data?.changeSubdomain?.error || 'Failed to change subdomain');
+        toast.error(data?.changeSubdomain?.error || t('failedToChange'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to change subdomain');
+      toast.error(err.message || t('failedToChange'));
       console.error('Change subdomain error:', err);
     }
   };
@@ -104,7 +107,7 @@ export function ChangeSubdomainModal({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>Change .huzilerz.com domain</DialogTitle>
+            <DialogTitle>{t('changeSubdomainBtn')}</DialogTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -117,8 +120,7 @@ export function ChangeSubdomainModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Your original huzilerz domain will remain visible for technical setup. You can also buy or
-            connect a custom domain.
+            {t('changeSubdomainModalDesc')}
           </p>
 
           <div className="relative">
@@ -134,7 +136,7 @@ export function ChangeSubdomainModal({
           </div>
 
           {validating && (
-            <p className="text-sm text-muted-foreground">Checking availability...</p>
+            <p className="text-sm text-muted-foreground">{t('checkingAvailability')}</p>
           )}
 
           {validationError && (
@@ -143,7 +145,7 @@ export function ChangeSubdomainModal({
 
           {isValid && (
             <p className="text-sm text-green-600">
-              {validationData?.validateSubdomain?.fullDomain} is available!
+              {t('availableSuccess', { domain: validationData?.validateSubdomain?.fullDomain || '' })}
             </p>
           )}
 
@@ -152,8 +154,8 @@ export function ChangeSubdomainModal({
               <Info className="h-4 w-4" />
               <AlertDescription>
                 {changesRemaining === 1
-                  ? "This is your final subdomain change"
-                  : `You'll have ${changesRemaining - 1} change(s) remaining after this update`}
+                  ? t('finalChange')
+                  : t('changesRemaining', { count: changesRemaining - 1 })}
               </AlertDescription>
             </Alert>
           )}
@@ -162,7 +164,7 @@ export function ChangeSubdomainModal({
             <Alert variant="destructive">
               <Info className="h-4 w-4" />
               <AlertDescription>
-                You have reached the maximum number of subdomain changes ({changesLimit}). Contact support if you need to change your subdomain.
+                {t('maxChangesReached', { limit: changesLimit })}
               </AlertDescription>
             </Alert>
           )}
@@ -174,13 +176,13 @@ export function ChangeSubdomainModal({
               onClick={() => onOpenChange(false)}
               disabled={changing}
             >
-              Cancel
+              {tGen('cancel')}
             </Button>
             <Button
               type="submit"
               disabled={!isValid || changing || validating || changesRemaining === 0}
             >
-              {changing ? 'Changing...' : 'Change domain'}
+              {changing ? t('changing') : t('changeDomain')}
             </Button>
           </div>
         </form>

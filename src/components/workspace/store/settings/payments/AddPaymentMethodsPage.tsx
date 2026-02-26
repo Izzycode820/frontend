@@ -17,6 +17,7 @@ import {
     DialogTitle,
 } from '@/components/shadcn-ui/dialog';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { GetPaymentMethodsDocument } from '@/services/graphql/admin-store/queries/payments/__generated__/GetPaymentMethods.generated';
 import { AddPaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/AddPaymentMethod.generated';
 import {
@@ -38,6 +39,8 @@ export function AddPaymentMethodsPage() {
     const router = useRouter();
     const params = useParams();
     const workspaceId = params.workspace_id as string;
+    const t = useTranslations('Payments');
+    const tGen = useTranslations('General');
 
     // Modal state
     const [showUrlModal, setShowUrlModal] = useState(false);
@@ -73,8 +76,8 @@ export function AddPaymentMethodsPage() {
         if (!selectedProvider) return;
 
         if (selectedProvider === 'fapshi' && !validateFapshiUrl(checkoutUrl)) {
-            toast.error('Invalid URL', {
-                description: 'Please enter a valid Fapshi checkout URL (https://...fapshi.com/...)',
+            toast.error(t('invalidUrl'), {
+                description: t('invalidUrlDesc'),
             });
             return;
         }
@@ -90,21 +93,21 @@ export function AddPaymentMethodsPage() {
             });
 
             if (result.data?.addPaymentMethod?.success) {
-                toast.success('Payment provider added', {
-                    description: `${selectedProvider} has been configured successfully.`,
+                toast.success(t('addSuccess'), {
+                    description: t('addSuccessDesc', { provider: selectedProvider || '' }),
                 });
                 setShowUrlModal(false);
                 // Navigate back to listing page
                 router.push(`/workspace/${workspaceId}/store/settings/payments`);
             } else {
-                toast.error('Error', {
-                    description: result.data?.addPaymentMethod?.error || 'Failed to add payment provider',
+                toast.error(t('error'), {
+                    description: result.data?.addPaymentMethod?.error || tGen('failedToSave'),
                 });
             }
         } catch (err) {
             console.error('Add payment method failed:', err);
-            toast.error('Error', {
-                description: 'Failed to add payment provider. Please try again.',
+            toast.error(t('error'), {
+                description: tGen('failedToSave'),
             });
         }
     };
@@ -137,9 +140,9 @@ export function AddPaymentMethodsPage() {
                         <IconArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
-                        <h1 className="text-xl font-semibold">Add payment provider</h1>
+                        <h1 className="text-xl font-semibold">{t('addProvider')}</h1>
                         <p className="text-sm text-muted-foreground">
-                            Choose a payment provider for your store
+                            {t('chooseProvider')}
                         </p>
                     </div>
                 </div>
@@ -173,14 +176,14 @@ export function AddPaymentMethodsPage() {
                                         {isAlreadyAdded ? (
                                             <div className="flex items-center gap-2 text-green-600">
                                                 <IconCheck className="w-5 h-5" />
-                                                <span className="text-sm font-medium">Activated</span>
+                                                <span className="text-sm font-medium">{t('activated')}</span>
                                             </div>
                                         ) : (
                                             <Button
                                                 onClick={() => handleAddClick(provider.provider)}
                                                 className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                                             >
-                                                Activate
+                                                {t('activate')}
                                             </Button>
                                         )}
                                     </div>
@@ -196,12 +199,12 @@ export function AddPaymentMethodsPage() {
                 <div className="w-full max-w-[1000px] mx-auto px-6">
                     <Card className="p-8 text-center">
                         <IconCreditCard className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No providers available</h3>
+                        <h3 className="text-lg font-medium mb-2">{t('noProviders')}</h3>
                         <p className="text-sm text-muted-foreground">
-                            All available payment providers have been configured.
+                            {t('noProvidersDesc')}
                         </p>
                         <Button onClick={goBack} className="mt-4">
-                            Back to payment settings
+                            {t('back')}
                         </Button>
                     </Card>
                 </div>
@@ -211,46 +214,48 @@ export function AddPaymentMethodsPage() {
             <Dialog open={showUrlModal} onOpenChange={setShowUrlModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add Fapshi Payment</DialogTitle>
+                        <DialogTitle>{t('addFapshiTitle')}</DialogTitle>
                         <DialogDescription>
-                            Enter your Fapshi checkout URL to accept mobile money payments.
+                            {t('addFapshiDesc')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="checkoutUrl">Fapshi Checkout URL</Label>
+                            <Label htmlFor="checkoutUrl">{t('fapshiUrl')}</Label>
                             <Input
                                 id="checkoutUrl"
                                 value={checkoutUrl}
                                 onChange={(e) => setCheckoutUrl(e.target.value)}
                                 placeholder="https://checkout.fapshi.com/pay/..."
                             />
-                            <p className="text-xs text-muted-foreground">
-                                Get this URL from your{' '}
-                                <a
-                                    href="https://dashboard.fapshi.com"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="underline"
-                                >
-                                    Fapshi dashboard
-                                </a>{' '}
-                                under Payment Links
+                             <p className="text-xs text-muted-foreground">
+                                {t.rich('fapshiHint', {
+                                    link: (chunks) => (
+                                        <a
+                                            href="https://dashboard.fapshi.com"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline"
+                                        >
+                                            {chunks}
+                                        </a>
+                                    )
+                                })}
                             </p>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowUrlModal(false)}>
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button onClick={handleConfirmAdd} disabled={adding || !checkoutUrl}>
                             {adding ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Adding...
+                                    {t('adding')}
                                 </>
                             ) : (
-                                'Add Fapshi'
+                                t('addFapshi')
                             )}
                         </Button>
                     </DialogFooter>

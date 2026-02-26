@@ -21,27 +21,27 @@ import {
 // Store navigation items
 export const storeNavMain = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "#",
     icon: IconDashboard,
   },
   {
-    title: "Products",
+    title: "products",
     url: "#",
     icon: IconPackage,
   },
   {
-    title: "Orders",
+    title: "orders",
     url: "#",
     icon: IconShoppingCart,
   },
   {
-    title: "Analytics",
+    title: "analytics",
     url: "#",
     icon: IconChartBar,
   },
   {
-    title: "Customers",
+    title: "customers",
     url: "#",
     icon: IconUsers,
   },
@@ -50,17 +50,17 @@ export const storeNavMain = [
 // Store document shortcuts
 export const storeDocuments = [
   {
-    name: "Inventory",
+    name: "inventory",
     url: "#",
     icon: IconPackage,
   },
   {
-    name: "Transactions",
+    name: "transactions",
     url: "#",
     icon: IconCreditCard,
   },
   {
-    name: "Bulk Upload",
+    name: "bulkUpload",
     url: "#",
     icon: IconUpload,
   },
@@ -69,17 +69,17 @@ export const storeDocuments = [
 // Store secondary navigation
 export const storeNavSecondary = [
   {
-    title: "Settings",
+    title: "settings",
     url: "#",
     icon: IconSettings,
   },
   {
-    title: "Get Help",
+    title: "getHelp",
     url: "#",
     icon: IconHelp,
   },
   {
-    title: "Themes",
+    title: "themes",
     url: "#",
     icon: IconSettings,
   },
@@ -87,7 +87,7 @@ export const storeNavSecondary = [
 
 // Store workspace metadata
 export const storeWorkspaceConfig = {
-  name: "Store Workspace",
+  name: "storeWorkspace",
   icon: IconBuildingStore,
   type: "store" as const,
 }

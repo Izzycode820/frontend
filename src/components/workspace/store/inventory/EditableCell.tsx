@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react'
 import { Input } from '@/components/shadcn-ui/input'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface EditableCellProps {
   value: number | null
@@ -23,6 +24,7 @@ export function EditableCell({
   placeholder = '0',
   className
 }: EditableCellProps) {
+  const t = useTranslations('Inventory')
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(String(value ?? ''))
   const [isSaving, setIsSaving] = useState(false)
@@ -148,14 +150,14 @@ export function EditableCell({
   return (
     <button
       onClick={handleClick}
-      disabled={disabled}
+      disabled={disabled || isSaving}
       className={cn(
         'h-8 min-w-[3rem] rounded px-2 text-left text-sm hover:bg-muted',
         'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
         disabled && 'cursor-not-allowed opacity-50',
         className
       )}
-      title="Click to edit"
+      title={t('common.clickToEdit')}
     >
       <span className="font-medium">{value ?? placeholder}</span>
     </button>

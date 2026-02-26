@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '@/components/shadcn-ui/table';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
+import { useTranslations, useFormatter } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,8 @@ import { ChevronLeft, ChevronRight, ChevronDown, ArrowLeft } from 'lucide-react'
 
 export function ChargesPage() {
   const router = useRouter();
+  const t = useTranslations('Billing');
+  const format = useFormatter();
   const [currentPage, setCurrentPage] = useState(0);
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [chargeTypeFilter, setChargeTypeFilter] = useState<string>('all');
@@ -72,7 +75,7 @@ export function ChargesPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return format.dateTime(date, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -80,44 +83,36 @@ export function ChargesPage() {
   };
 
   const formatCurrency = (amount: string | number | null | undefined) => {
-    if (amount === null || amount === undefined) return 'XAF 0.00';
-    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return `XAF ${numAmount.toFixed(2)}`;
+    const numAmount = amount === null || amount === undefined
+      ? 0
+      : typeof amount === 'string' ? parseFloat(amount) : amount;
+
+    return format.number(numAmount, { style: 'currency', currency: 'XAF' });
   };
 
   const getChargeTypeLabel = (chargeType: string) => {
-    const chargeTypeMap: Record<string, string> = {
-      SUBSCRIPTION: 'Subscription charges',
-      SUBSCRIPTION_RENEWAL: 'Subscription renewal',
-      SUBSCRIPTION_UPGRADE: 'Subscription upgrade',
-      DOMAIN: 'Domain purchase',
-      DOMAIN_RENEWAL: 'Domain renewal',
-      THEME: 'Theme purchase',
-      CHECKOUT: 'Checkout',
-      ADDON: 'Add-on',
-      OTHER: 'Other',
-    };
-    return chargeTypeMap[chargeType] || chargeType;
+    // Falls back to key if not found in en/fr.json
+    return t(`chargeTypes.${chargeType}`);
   };
 
   const dateFilterOptions = [
-    { label: 'All time', value: 'all' },
-    { label: 'Last 7 days', value: 'last_7_days' },
-    { label: 'Last 30 days', value: 'last_30_days' },
-    { label: 'Last 90 days', value: 'last_90_days' },
+    { label: t('allTime'), value: 'all' },
+    { label: t('last7Days'), value: 'last_7_days' },
+    { label: t('last30Days'), value: 'last_30_days' },
+    { label: t('last90Days'), value: 'last_90_days' },
   ];
 
   const chargeTypeOptions = [
-    { label: 'All types', value: 'all' },
-    { label: 'Subscription charges', value: 'SUBSCRIPTION' },
-    { label: 'Subscription renewal', value: 'SUBSCRIPTION_RENEWAL' },
-    { label: 'Subscription upgrade', value: 'SUBSCRIPTION_UPGRADE' },
-    { label: 'Domain purchase', value: 'DOMAIN' },
-    { label: 'Domain renewal', value: 'DOMAIN_RENEWAL' },
-    { label: 'Theme purchase', value: 'THEME' },
-    { label: 'Checkout', value: 'CHECKOUT' },
-    { label: 'Add-on', value: 'ADDON' },
-    { label: 'Other', value: 'OTHER' },
+    { label: t('allTypes'), value: 'all' },
+    { label: t('chargeTypes.SUBSCRIPTION'), value: 'SUBSCRIPTION' },
+    { label: t('chargeTypes.SUBSCRIPTION_RENEWAL'), value: 'SUBSCRIPTION_RENEWAL' },
+    { label: t('chargeTypes.SUBSCRIPTION_UPGRADE'), value: 'SUBSCRIPTION_UPGRADE' },
+    { label: t('chargeTypes.DOMAIN'), value: 'DOMAIN' },
+    { label: t('chargeTypes.DOMAIN_RENEWAL'), value: 'DOMAIN_RENEWAL' },
+    { label: t('chargeTypes.THEME'), value: 'THEME' },
+    { label: t('chargeTypes.CHECKOUT'), value: 'CHECKOUT' },
+    { label: t('chargeTypes.ADDON'), value: 'ADDON' },
+    { label: t('chargeTypes.OTHER'), value: 'OTHER' },
   ];
 
   return (
@@ -132,10 +127,10 @@ export function ChargesPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold">Charges</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('charges')}</h1>
         </div>
         <Button variant="default" className="bg-black hover:bg-black/90 text-white w-full sm:w-auto">
-          Export
+          {t('export')}
         </Button>
       </div>
 
@@ -147,7 +142,7 @@ export function ChargesPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2 whitespace-nowrap">
-                  Date
+                  {t('date')}
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -170,12 +165,12 @@ export function ChargesPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2 whitespace-nowrap">
-                  Bill number
+                  {t('billNumber')}
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem>All bills</DropdownMenuItem>
+                <DropdownMenuItem>{t('allBills')}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -183,7 +178,7 @@ export function ChargesPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2 whitespace-nowrap">
-                  Charge type
+                  {t('chargeType')}
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -217,18 +212,18 @@ export function ChargesPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="whitespace-nowrap">Bill number</TableHead>
-                        <TableHead className="whitespace-nowrap">Date</TableHead>
-                        <TableHead className="whitespace-nowrap">Charge type</TableHead>
-                        <TableHead className="whitespace-nowrap">Source</TableHead>
-                        <TableHead className="text-right whitespace-nowrap">Amount</TableHead>
+                        <TableHead className="whitespace-nowrap">{t('billNumber')}</TableHead>
+                        <TableHead className="whitespace-nowrap">{t('date')}</TableHead>
+                        <TableHead className="whitespace-nowrap">{t('chargeType')}</TableHead>
+                        <TableHead className="whitespace-nowrap">{t('source')}</TableHead>
+                        <TableHead className="text-right whitespace-nowrap">{t('amount')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {charges.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                            No charges found
+                            {t('noCharges')}
                           </TableCell>
                         </TableRow>
                       ) : (

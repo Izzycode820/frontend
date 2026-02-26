@@ -30,6 +30,8 @@ import {
   ToggleGroupItem,
 } from "@/components/shadcn-ui/toggle-group"
 
+import { useTranslations, useLocale } from "next-intl"
+
 type ChartDataPoint = {
   date: string
   orders: number
@@ -50,6 +52,8 @@ type ChartAreaInteractiveProps = {
 
 export function ChartAreaInteractive({ chartData }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile()
+  const t = useTranslations('Dashboard.chart')
+  const locale = useLocale()
   const [timeRange, setTimeRange] = React.useState("30d")
 
   React.useEffect(() => {
@@ -63,12 +67,12 @@ export function ChartAreaInteractive({ chartData }: ChartAreaInteractiveProps) {
     return (
       <Card className="@container/card">
         <CardHeader>
-          <CardTitle>Revenue & Orders</CardTitle>
-          <CardDescription>No chart data available</CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('noData')}</CardDescription>
         </CardHeader>
         <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
           <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-            <p>No data to display</p>
+            <p>{t('noDisplay')}</p>
           </div>
         </CardContent>
       </Card>
@@ -90,11 +94,11 @@ export function ChartAreaInteractive({ chartData }: ChartAreaInteractiveProps) {
   // Build chart config from backend data
   const chartConfig: ChartConfig = {
     orders: {
-      label: chartData.config?.orders?.label || "Orders",
+      label: chartData.config?.orders?.label || t('orders'),
       color: chartData.config?.orders?.color || "hsl(var(--chart-1))",
     },
     revenue: {
-      label: chartData.config?.revenue?.label || "Revenue",
+      label: chartData.config?.revenue?.label || t('revenue'),
       color: chartData.config?.revenue?.color || "hsl(var(--chart-2))",
     },
   }
@@ -102,12 +106,14 @@ export function ChartAreaInteractive({ chartData }: ChartAreaInteractiveProps) {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Revenue & Orders</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
-            Showing {filteredData.length} days of data
+            {t('showingDays', { count: filteredData.length })}
           </span>
-          <span className="@[540px]/card:hidden">{filteredData.length} days</span>
+          <span className="@[540px]/card:hidden">
+            {t('daysCount', { count: filteredData.length })}
+          </span>
         </CardDescription>
         <CardAction>
           <ToggleGroup
@@ -117,26 +123,26 @@ export function ChartAreaInteractive({ chartData }: ChartAreaInteractiveProps) {
             variant="outline"
             className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
           >
-            <ToggleGroupItem value="90d">Last 90 days</ToggleGroupItem>
-            <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
-            <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
+            <ToggleGroupItem value="90d">{t('last90Days')}</ToggleGroupItem>
+            <ToggleGroupItem value="30d">{t('last30Days')}</ToggleGroupItem>
+            <ToggleGroupItem value="7d">{t('last7Days')}</ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
               className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate h-8 text-sm @[767px]/card:hidden"
               aria-label="Select a value"
             >
-              <SelectValue placeholder="Last 30 days" />
+              <SelectValue placeholder={t('last30Days')} />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="90d" className="rounded-lg">
-                Last 90 days
+                {t('last90Days')}
               </SelectItem>
               <SelectItem value="30d" className="rounded-lg">
-                Last 30 days
+                {t('last30Days')}
               </SelectItem>
               <SelectItem value="7d" className="rounded-lg">
-                Last 7 days
+                {t('last7Days')}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -183,7 +189,7 @@ export function ChartAreaInteractive({ chartData }: ChartAreaInteractiveProps) {
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
+                return date.toLocaleDateString(locale, {
                   month: "short",
                   day: "numeric",
                 })
@@ -195,7 +201,7 @@ export function ChartAreaInteractive({ chartData }: ChartAreaInteractiveProps) {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
+                    return new Date(value).toLocaleDateString(locale, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",

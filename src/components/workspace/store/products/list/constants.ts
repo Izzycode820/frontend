@@ -1,4 +1,4 @@
 export const PRODUCT_STATUS_OPTIONS = [
-    { value: 'PUBLISHED', label: 'Published' },
-    { value: 'DRAFT', label: 'Draft' },
+    { value: 'PUBLISHED', label: 'published' },
+    { value: 'DRAFT', label: 'draft' },
 ];

@@ -3,6 +3,7 @@
 import { UploadZone } from '../UploadZone'
 import { useMediaUpload } from '../hooks/useMediaUpload'
 import { MediaGrid } from '../MediaGrid'
+import { useTranslations } from 'next-intl'
 import type { MediaType, MediaItem } from '../types'
 import { useEffect, useRef } from 'react'
 
@@ -21,6 +22,7 @@ export function UploadTab({
   selectedIds,
   onToggleSelect,
 }: UploadTabProps) {
+  const t = useTranslations('Shared.media')
   const { uploads, uploadMultiple, clearUploads } = useMediaUpload()
 
   // Track which items have been reported to prevent duplicates
@@ -85,13 +87,13 @@ export function UploadTab({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">
-              Successfully uploaded ({completedUploads.length})
+              {t('successfullyUploaded', { count: completedUploads.length })}
             </p>
             <button
               onClick={handleClear}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
-              Clear
+              {t('clear')}
             </button>
           </div>
 

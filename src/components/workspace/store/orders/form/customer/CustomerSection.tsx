@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { CustomerSearchDropdown } from './CustomerSearchDropdown';
 import { CreateCustomerModal } from './CreateCustomerModal';
@@ -8,6 +9,7 @@ export function CustomerSection({
   customerId,
   onCustomerIdChange,
 }: CustomerSectionProps) {
+  const t = useTranslations('Orders.form');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCustomerCreated = (newCustomerId: string) => {
@@ -18,7 +20,7 @@ export function CustomerSection({
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Customer</CardTitle>
+          <CardTitle className="text-base font-semibold">{t('sections.customer')}</CardTitle>
         </CardHeader>
         <CardContent>
           <CustomerSearchDropdown

@@ -2,6 +2,7 @@
 
 import { X, FileVideo, Box, Plus } from 'lucide-react'
 import type { MediaItem } from './types'
+import { useTranslations } from 'next-intl'
 
 interface ProductMediaGridProps {
   /** Media items to display */
@@ -19,6 +20,8 @@ export function ProductMediaGrid({
   onRemove,
   onAddMore,
 }: ProductMediaGridProps) {
+  const t = useTranslations('Products.media')
+
   // Shopify-style: First image is large, rest are smaller
   const [firstImage, ...restImages] = mediaItems
 
@@ -32,8 +35,8 @@ export function ProductMediaGrid({
       >
         <div className="h-full flex flex-col items-center justify-center gap-2 text-muted-foreground">
           <Plus className="h-8 w-8" />
-          <p className="text-sm font-medium">Add media</p>
-          <p className="text-xs">Images, videos, or 3D models</p>
+          <p className="text-sm font-medium">{t('addMedia')}</p>
+          <p className="text-xs">{t('imagesVideos3D')}</p>
         </div>
       </div>
     )
@@ -54,12 +57,12 @@ export function ProductMediaGrid({
           ) : firstImage.type === 'video' ? (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <FileVideo className="h-16 w-16" />
-              <span className="text-sm">Video</span>
+              <span className="text-sm">{t('video')}</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Box className="h-16 w-16" />
-              <span className="text-sm">3D Model</span>
+              <span className="text-sm">{t('model3D')}</span>
             </div>
           )}
         </div>
@@ -75,7 +78,7 @@ export function ProductMediaGrid({
 
         {/* Main badge */}
         <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium">
-          Main
+          {t('main')}
         </div>
       </div>
 

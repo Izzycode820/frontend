@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { CreatePackageDocument } from '@/services/graphql/admin-store/mutations/shipping/__generated__/CreatePackage.generated';
 import { UpdatePackageDocument } from '@/services/graphql/admin-store/mutations/shipping/__generated__/UpdatePackage.generated';
 import { GetPackagesDocument } from '@/services/graphql/admin-store/queries/shipping/__generated__/GetPackages.generated';
@@ -42,6 +43,8 @@ interface RegionFee {
 export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
     const router = useRouter();
     const params = useParams();
+    const t = useTranslations('Shipping');
+    const tGen = useTranslations('General');
     const workspaceId = params.workspace_id as string;
 
     // Form state
@@ -135,7 +138,7 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
 
         // Validate
         if (!name.trim()) {
-            toast.error('Package name is required');
+            toast.error(t('nameRequired'));
             return;
         }
 
@@ -166,11 +169,11 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                 });
 
                 if (result.data?.createPackage?.success) {
-                    toast.success('Package created');
+                    toast.success(t('createSuccess'));
                     goBack();
                 } else {
-                    toast.error('Error', {
-                        description: result.data?.createPackage?.error || 'Failed to create package',
+                    toast.error(tGen('error'), {
+                        description: result.data?.createPackage?.error || t('saveFailed'),
                     });
                 }
             } else {
@@ -179,17 +182,17 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                 });
 
                 if (result.data?.updatePackage?.success) {
-                    toast.success('Package updated');
+                    toast.success(t('updateSuccess'));
                     goBack();
                 } else {
-                    toast.error('Error', {
-                        description: result.data?.updatePackage?.error || 'Failed to update package',
+                    toast.error(tGen('error'), {
+                        description: result.data?.updatePackage?.error || t('saveFailed'),
                     });
                 }
             }
         } catch (err) {
             console.error('Save failed:', err);
-            toast.error('Error', { description: 'Failed to save package' });
+            toast.error(tGen('error'), { description: t('saveFailed') });
         }
     };
 
@@ -203,39 +206,43 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="w-full max-w-[800px] mx-auto px-6">
-                <div className="flex items-center gap-4 mb-2">
-                    <Button variant="ghost" size="icon" onClick={goBack}>
-                        <IconArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-xl font-semibold">
-                            {mode === 'create' ? 'Add shipping package' : 'Edit shipping package'}
+        <div className="space-y-8 pb-10 max-w-[1000px] mx-auto min-w-0 px-4 md:px-6">
+            {/* Page Header */}
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={goBack}
+                            className="-ml-2"
+                        >
+                            <IconArrowLeft className="h-5 w-5" />
+                        </Button>
+                        <IconPackage className="h-6 w-6 text-muted-foreground" />
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            {mode === 'create' ? t('addPackageTitle') : t('editPackageTitle')}
                         </h1>
-                        <p className="text-sm text-muted-foreground">
-                            {mode === 'create'
-                                ? 'Create a new shipping package for your products'
-                                : 'Update package details'}
-                        </p>
                     </div>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                    {mode === 'create' ? t('addPackageDesc') : t('editPackageDesc')}
+                </p>
             </div>
 
             {/* Form */}
-            <div className="w-full max-w-[800px] mx-auto px-6">
+            <div className="w-full">
                 <form onSubmit={handleSubmit}>
                     <Card className="p-6">
                         <div className="space-y-6">
                             {/* Package Name */}
                             <div className="space-y-2">
-                                <Label htmlFor="name">Package Name</Label>
+                                <Label htmlFor="name">{t('packageName')}</Label>
                                 <Input
                                     id="name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="e.g., Standard Box"
+                                    placeholder={t('packageNamePlaceholder')}
                                     required
                                 />
                             </div>
@@ -243,28 +250,28 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                             {/* Type and Size */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Package Type</Label>
+                                    <Label>{t('type')}</Label>
                                     <Select value={packageType} onValueChange={setPackageType}>
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="box">Box</SelectItem>
-                                            <SelectItem value="envelope">Envelope</SelectItem>
-                                            <SelectItem value="soft_package">Soft Package</SelectItem>
+                                            <SelectItem value="box">{t('box')}</SelectItem>
+                                            <SelectItem value="envelope">{t('envelope')}</SelectItem>
+                                            <SelectItem value="soft_package">{t('softPackage')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Size</Label>
+                                    <Label>{t('size')}</Label>
                                     <Select value={size} onValueChange={setSize}>
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="small">Small</SelectItem>
-                                            <SelectItem value="medium">Medium</SelectItem>
-                                            <SelectItem value="large">Large</SelectItem>
+                                            <SelectItem value="small">{t('small')}</SelectItem>
+                                            <SelectItem value="medium">{t('medium')}</SelectItem>
+                                            <SelectItem value="large">{t('large')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -273,7 +280,7 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                             {/* Weight and Method */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="weight">Weight (kg)</Label>
+                                    <Label htmlFor="weight">{t('weight')}</Label>
                                     <Input
                                         id="weight"
                                         type="number"
@@ -285,12 +292,12 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="method">Shipping Method</Label>
+                                    <Label htmlFor="method">{t('method')}</Label>
                                     <Input
                                         id="method"
                                         value={method}
                                         onChange={(e) => setMethod(e.target.value)}
-                                        placeholder="e.g., Standard, Express"
+                                        placeholder={t('shippingMethodPlaceholder')}
                                         required
                                     />
                                 </div>
@@ -299,7 +306,7 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                             {/* Region Fees */}
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <Label>Region Fees</Label>
+                                    <Label>{t('regionFees')}</Label>
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -308,13 +315,13 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                                         className="gap-1"
                                     >
                                         <IconPlus className="w-3 h-3" />
-                                        Add Region
+                                        {t('addRegion')}
                                     </Button>
                                 </div>
                                 {regionFees.map((rf, index) => (
                                     <div key={index} className="grid grid-cols-2 gap-3 items-end">
                                         <div className="space-y-1">
-                                            <Label className="text-xs">Region {index + 1}</Label>
+                                            <Label className="text-xs">{t('regionLabel', { count: index + 1 })}</Label>
                                             <Input
                                                 value={rf.region}
                                                 onChange={(e) => handleRegionFeeChange(index, 'region', e.target.value)}
@@ -323,7 +330,7 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                                         </div>
                                         <div className="flex gap-2">
                                             <div className="flex-1 space-y-1">
-                                                <Label className="text-xs">Fee (FCFA)</Label>
+                                                <Label className="text-xs">{t('feeLabel')}</Label>
                                                 <Input
                                                     type="number"
                                                     step="0.01"
@@ -348,18 +355,18 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                                     </div>
                                 ))}
                                 <p className="text-xs text-muted-foreground">
-                                    Set different shipping fees for each region
+                                    {t('regionFeesHint')}
                                 </p>
                             </div>
 
                             {/* Estimated Days */}
                             <div className="space-y-2">
-                                <Label htmlFor="estimatedDays">Estimated Delivery Days</Label>
+                                <Label htmlFor="estimatedDays">{t('estDaysLabel')}</Label>
                                 <Input
                                     id="estimatedDays"
                                     value={estimatedDays}
                                     onChange={(e) => setEstimatedDays(e.target.value)}
-                                    placeholder="e.g., 3-5"
+                                    placeholder={t('estDaysPlaceholder')}
                                     required
                                 />
                             </div>
@@ -373,7 +380,7 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                                         onCheckedChange={(checked) => setUseAsDefault(checked === true)}
                                     />
                                     <Label htmlFor="useAsDefault" className="text-sm">
-                                        Use as default package for new products
+                                        {t('useAsDefault')}
                                     </Label>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -383,7 +390,7 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                                         onCheckedChange={(checked) => setIsActive(checked === true)}
                                     />
                                     <Label htmlFor="isActive" className="text-sm">
-                                        Package is active
+                                        {t('isPackageActive')}
                                     </Label>
                                 </div>
                             </div>
@@ -393,18 +400,18 @@ export function PackageFormPage({ mode, packageId }: PackageFormPageProps) {
                     {/* Actions */}
                     <div className="flex justify-end gap-3 mt-6">
                         <Button type="button" variant="outline" onClick={goBack}>
-                            Cancel
+                            {tGen('cancel')}
                         </Button>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Saving...
+                                    {t('saving')}
                                 </>
                             ) : mode === 'create' ? (
-                                'Create Package'
+                                t('createPackage')
                             ) : (
-                                'Save Changes'
+                                t('saveChanges')
                             )}
                         </Button>
                     </div>

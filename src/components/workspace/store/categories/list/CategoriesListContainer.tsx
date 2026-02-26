@@ -32,8 +32,10 @@ import { DeleteCategoryDocument } from '@/services/graphql/admin-store/mutations
 import { ToggleCategoryVisibilityDocument } from '@/services/graphql/admin-store/mutations/categories/__generated__/toggleCategoryVisibility.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export default function CategoriesListContainer() {
+  const t = useTranslations('Categories');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
@@ -144,13 +146,15 @@ export default function CategoriesListContainer() {
 
       if (toggleData?.toggleCategoryVisibility?.success) {
         const newVisibility = toggleData.toggleCategoryVisibility.isVisible;
-        toast.success(`Category ${newVisibility ? 'published' : 'hidden'}`);
+        toast.success(t('toasts.visibilityChanged', {
+          status: newVisibility ? t('toasts.published') : t('toasts.hidden')
+        }));
         refetch(); // Refresh the list
       } else {
-        toast.error(toggleData?.toggleCategoryVisibility?.error || 'Failed to toggle visibility');
+        toast.error(toggleData?.toggleCategoryVisibility?.error || t('toasts.toggleVisibilityError'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to toggle visibility');
+      toast.error(err.message || t('toasts.toggleVisibilityError'));
       console.error('Toggle visibility error:', err);
     }
   };
@@ -164,20 +168,23 @@ export default function CategoriesListContainer() {
       });
 
       if (deleteData?.deleteCategory?.success) {
-        toast.success('Category deleted successfully');
+        toast.success(t('toasts.deleteSuccess'));
         refetch(); // Refresh the list
       } else {
-        toast.error(deleteData?.deleteCategory?.error || 'Failed to delete category');
+        toast.error(deleteData?.deleteCategory?.error || t('toasts.deleteError'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete category');
+      toast.error(err.message || t('toasts.deleteError'));
       console.error('Delete category error:', err);
     }
   };
 
   const handleBulkAction = (action: 'archive' | 'delete' | 'export') => {
     // TODO: Implement bulk actions with GraphQL mutations
-    toast.info(`Bulk ${action} ${selectedCategories.length} categories - Coming soon!`);
+    toast.info(t('toasts.bulkActionComingSoon', {
+      action: t(`toolbar.${action}`),
+      count: selectedCategories.length
+    }));
   };
 
   // Pagination handlers
@@ -211,7 +218,7 @@ export default function CategoriesListContainer() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              <p>Failed to load categories</p>
+              <p>{t('list.errorLoading')}</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </CardContent>
@@ -263,14 +270,14 @@ export default function CategoriesListContainer() {
     );
   }
 
-  // Desktop View
+// Desktop View
   return (
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Categories</h1>
+        <h1 className="text-2xl font-bold">{t('list.title')}</h1>
         <p className="text-sm text-muted-foreground">
-          Organize your products into categories ({totalCount} total)
+          {t('list.subtitle', { count: totalCount })}
         </p>
       </div>
 
@@ -297,7 +304,7 @@ export default function CategoriesListContainer() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading categories...</p>
+              <p className="text-muted-foreground">{t('list.loading')}</p>
             </div>
           </CardContent>
         </Card>
@@ -306,7 +313,7 @@ export default function CategoriesListContainer() {
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-sm text-muted-foreground">
-                {(search || visibilityFilter || featuredFilter) ? 'No categories found' : 'No categories yet'}
+                {(search || visibilityFilter || featuredFilter) ? t('list.noCategories') : t('list.noCategoriesYet')}
               </p>
             </div>
           </CardContent>
@@ -325,7 +332,11 @@ export default function CategoriesListContainer() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} categories
+            {t('list.pagination', { 
+              start: ((currentPage - 1) * pageSize) + 1,
+              end: Math.min(currentPage * pageSize, totalCount),
+              total: totalCount
+            })}
           </div>
           <Pagination>
             <PaginationContent>

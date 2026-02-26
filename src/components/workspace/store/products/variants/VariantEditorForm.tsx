@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
@@ -35,6 +36,9 @@ export function VariantEditorForm({
   onUpdate,
   isSaving,
 }: VariantEditorFormProps) {
+  const t = useTranslations('Products.variants.editor');
+  const ti = useTranslations('Products.inventory');
+
   // Form state
   const [formData, setFormData] = useState({
     option1: variant?.option1 || '',
@@ -170,10 +174,10 @@ export function VariantEditorForm({
           {isSaving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Saving...
+              {t('saving')}
             </>
           ) : (
-            'Save'
+            t('save')
           )}
         </Button>
       </div>
@@ -182,7 +186,7 @@ export function VariantEditorForm({
       {optionNames.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Options</CardTitle>
+            <CardTitle className="text-base">{t('options')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 pb-4">
             {optionNames[0] && (
@@ -230,12 +234,12 @@ export function VariantEditorForm({
       {/* Pricing */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Price</CardTitle>
+          <CardTitle className="text-base">{t('pricing')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 pb-4">
           {/* Main Price */}
           <div className="space-y-1.5">
-            <Label htmlFor="price" className="text-sm">Price</Label>
+            <Label htmlFor="price" className="text-sm">{t('pricing')}</Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
                 FCFA
@@ -257,9 +261,9 @@ export function VariantEditorForm({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ChevronRight className={`h-4 w-4 transition-transform ${showPriceDetails ? 'rotate-90' : ''}`} />
-                  <span className="text-sm">Compare at</span>
-                  <span className="text-sm">Cost per item</span>
-                  {productChargeTax !== undefined && <span className="text-sm">Charge tax</span>}
+                  <span className="text-sm">{t('compareAt')}</span>
+                  <span className="text-sm">{t('cost')}</span>
+                  {productChargeTax !== undefined && <span className="text-sm">{t('chargeTax')}</span>}
                 </div>
                 <div className="flex items-center gap-2">
                   {formData.compareAtPrice && (
@@ -274,7 +278,7 @@ export function VariantEditorForm({
                   )}
                   {productChargeTax !== undefined && (
                     <Badge variant="outline" className="text-xs">
-                      {productChargeTax ? 'Yes' : 'No'}
+                      {productChargeTax ? t('yes') : t('no')}
                     </Badge>
                   )}
                 </div>
@@ -285,7 +289,7 @@ export function VariantEditorForm({
               <div className="border border-t-0 rounded-b-md px-3 py-3 space-y-3 bg-muted/10">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="compareAtPrice" className="text-xs">Compare at price</Label>
+                    <Label htmlFor="compareAtPrice" className="text-xs">{t('compareAtPrice')}</Label>
                     <div className="relative">
                       <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
                         FCFA
@@ -302,7 +306,7 @@ export function VariantEditorForm({
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="costPrice" className="text-xs">Cost per item</Label>
+                    <Label htmlFor="costPrice" className="text-xs">{t('costPerItem')}</Label>
                     <div className="relative">
                       <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
                         FCFA
@@ -321,7 +325,7 @@ export function VariantEditorForm({
 
                 {productChargeTax !== undefined && (
                   <div className="bg-background px-2 py-1.5 rounded text-xs text-muted-foreground">
-                    Charge tax: <span className="font-medium">{productChargeTax ? 'Yes' : 'No'}</span> (Inherited from product)
+                    {t('chargeTax')}: <span className="font-medium">{productChargeTax ? t('yes') : t('no')}</span> {t('inherited')}
                   </div>
                 )}
               </div>
@@ -334,10 +338,10 @@ export function VariantEditorForm({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Inventory</CardTitle>
+            <CardTitle className="text-base">{ti('title')}</CardTitle>
             <div className="flex items-center gap-2">
               <Label htmlFor="trackInventory" className="text-sm font-normal cursor-pointer">
-                Inventory tracked
+                {t('trackInventory')}
               </Label>
               <Switch
                 id="trackInventory"
@@ -353,11 +357,11 @@ export function VariantEditorForm({
               <table className="w-full text-sm">
                 <thead className="bg-muted/30">
                   <tr className="border-b">
-                    <th className="text-left p-2 text-xs font-medium">Locations</th>
-                    <th className="text-center p-2 text-xs font-medium w-[90px]">Unavailable</th>
-                    <th className="text-center p-2 text-xs font-medium w-[90px]">Committed</th>
-                    <th className="text-center p-2 text-xs font-medium w-[90px]">Available</th>
-                    <th className="text-center p-2 text-xs font-medium w-[90px]">On hand</th>
+                    <th className="text-left p-2 text-xs font-medium">{ti('locations')}</th>
+                    <th className="text-center p-2 text-xs font-medium w-[90px]">{ti('unavailable')}</th>
+                    <th className="text-center p-2 text-xs font-medium w-[90px]">{ti('committed')}</th>
+                    <th className="text-center p-2 text-xs font-medium w-[90px]">{ti('available')}</th>
+                    <th className="text-center p-2 text-xs font-medium w-[90px]">{ti('onHand')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -401,7 +405,7 @@ export function VariantEditorForm({
                   ) : (
                     <tr>
                       <td colSpan={5} className="p-6 text-center text-xs text-muted-foreground">
-                        No inventory locations found
+                        {t('noLocations')}
                       </td>
                     </tr>
                   )}
@@ -410,7 +414,7 @@ export function VariantEditorForm({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Inventory tracking is disabled for this variant
+              {t('inventoryDisabled')}
             </p>
           )}
         </CardContent>
@@ -437,7 +441,7 @@ export function VariantEditorForm({
             <CollapsibleContent>
               <div className="border border-t-0 rounded-b-md px-3 py-3 space-y-3 bg-muted/10">
                 <div className="space-y-1.5">
-                  <Label htmlFor="sku" className="text-xs">SKU (Stock Keeping Unit)</Label>
+                  <Label htmlFor="sku" className="text-xs">{t('sku')}</Label>
                   <Input
                     id="sku"
                     value={formData.sku}
@@ -448,7 +452,7 @@ export function VariantEditorForm({
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="barcode" className="text-xs">Barcode (ISBN, UPC, GTIN, etc.)</Label>
+                  <Label htmlFor="barcode" className="text-xs">{t('barcode')}</Label>
                   <Input
                     id="barcode"
                     value={formData.barcode}

@@ -6,6 +6,7 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import { useQuery } from '@apollo/client/react';
 import { useIsMobile } from '@/hooks/shadcn/use-mobile';
+import { useTranslations } from 'next-intl';
 import { CategoriesDocument } from '@/services/graphql/admin-store/queries/categories/__generated__/categories.generated';
 import type { CollectionSearchModalProps } from './types';
 
@@ -17,6 +18,7 @@ export function CollectionSearchModal(props: CollectionSearchModalProps) {
         onAddCollections,
     } = props;
 
+    const t = useTranslations('Shared.collections');
     const isMobile = useIsMobile();
     const [searchTerm, setSearchTerm] = useState('');
     const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedCollectionIds);
@@ -65,17 +67,17 @@ export function CollectionSearchModal(props: CollectionSearchModalProps) {
     const footerContent = (
         <div className="flex w-full items-center justify-between">
             <p className="text-sm text-muted-foreground">
-                {localSelectedIds.length} collection{localSelectedIds.length !== 1 ? 's' : ''} selected
+                {t('selectedCount', { count: localSelectedIds.length })}
             </p>
             <div className="flex gap-2">
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
                 <Button
                     onClick={handleAdd}
                     disabled={localSelectedIds.length === 0}
                 >
-                    Add {localSelectedIds.length > 0 ? localSelectedIds.length : ''} collection{localSelectedIds.length !== 1 ? 's' : ''}
+                    {t('add', { count: localSelectedIds.length })}
                 </Button>
             </div>
         </div>
@@ -85,7 +87,7 @@ export function CollectionSearchModal(props: CollectionSearchModalProps) {
         <ResponsiveModal
             open={open}
             onClose={() => onOpenChange(false)}
-            title="Select collections"
+            title={t('title')}
             dialogClassName="max-w-4xl max-h-[80vh] flex flex-col"
             footer={footerContent}
         >
@@ -94,7 +96,7 @@ export function CollectionSearchModal(props: CollectionSearchModalProps) {
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search collections..."
+                        placeholder={t('searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-9"
@@ -109,11 +111,11 @@ export function CollectionSearchModal(props: CollectionSearchModalProps) {
                         <div className="divide-y">
                             {loading ? (
                                 <div className="text-center p-8 text-muted-foreground">
-                                    Loading collections...
+                                    {t('loading')}
                                 </div>
                             ) : collections.length === 0 ? (
                                 <div className="text-center p-8 text-muted-foreground">
-                                    No collections found
+                                    {t('noCollections')}
                                 </div>
                             ) : (
                                 collections.map((collection) => {
@@ -154,21 +156,21 @@ export function CollectionSearchModal(props: CollectionSearchModalProps) {
                             <thead className="bg-muted/50 sticky top-0">
                                 <tr className="border-b">
                                     <th className="w-12 p-3"></th>
-                                    <th className="text-left p-3 text-sm font-medium">Collection</th>
-                                    <th className="w-24 text-right p-3 text-sm font-medium">Status</th>
+                                    <th className="text-left p-3 text-sm font-medium">{t('collection')}</th>
+                                    <th className="w-24 text-right p-3 text-sm font-medium">{t('status')}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
                                         <td colSpan={3} className="text-center p-8 text-muted-foreground">
-                                            Loading collections...
+                                            {t('loading')}
                                         </td>
                                     </tr>
                                 ) : collections.length === 0 ? (
                                     <tr>
                                         <td colSpan={3} className="text-center p-8 text-muted-foreground">
-                                            No collections found
+                                            {t('noCollections')}
                                         </td>
                                     </tr>
                                 ) : (
@@ -202,7 +204,7 @@ export function CollectionSearchModal(props: CollectionSearchModalProps) {
                                                     {isSelected && (
                                                         <span className="inline-flex items-center text-xs text-muted-foreground">
                                                             <Check className="h-3 w-3 mr-1" />
-                                                            Added
+                                                            {t('added')}
                                                         </span>
                                                     )}
                                                 </td>

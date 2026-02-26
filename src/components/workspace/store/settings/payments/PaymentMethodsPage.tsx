@@ -19,6 +19,7 @@ import {
     DialogTitle,
 } from '@/components/shadcn-ui/dialog';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { GetPaymentMethodsDocument } from '@/services/graphql/admin-store/queries/payments/__generated__/GetPaymentMethods.generated';
 import { AddPaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/AddPaymentMethod.generated';
 import { TogglePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/TogglePaymentMethod.generated';
@@ -39,6 +40,8 @@ import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/w
 export function PaymentMethodsPage() {
     const router = useRouter();
     const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+    const t = useTranslations('Payments');
+    const tGen = useTranslations('General');
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -76,8 +79,8 @@ export function PaymentMethodsPage() {
     // Handle add payment method
     const handleAdd = async () => {
         if (!validateFapshiUrl(checkoutUrl)) {
-            toast.error('Invalid URL', {
-                description: 'Please enter a valid Fapshi checkout URL (https://...fapshi.com/...)',
+            toast.error(t('invalidUrl'), {
+                description: t('invalidUrlDesc'),
             });
             return;
         }
@@ -93,21 +96,21 @@ export function PaymentMethodsPage() {
             });
 
             if (result.data?.addPaymentMethod?.success) {
-                toast.success('Payment method added', {
-                    description: 'Fapshi payment method has been configured.',
+                toast.success(t('addSuccess'), {
+                    description: t('addSuccessDesc', { provider: 'fapshi' }),
                 });
                 setShowAddModal(false);
                 setCheckoutUrl('');
                 refetch();
             } else {
-                toast.error('Error', {
-                    description: result.data?.addPaymentMethod?.error || 'Failed to add payment method',
+                toast.error(t('error'), {
+                    description: result.data?.addPaymentMethod?.error || tGen('failedToSave'),
                 });
             }
         } catch (err) {
             console.error('Add payment method failed:', err);
-            toast.error('Error', {
-                description: 'Failed to add payment method. Please try again.',
+            toast.error(t('error'), {
+                description: tGen('failedToSave'),
             });
         }
     };
@@ -123,16 +126,16 @@ export function PaymentMethodsPage() {
             });
 
             if (result.data?.togglePaymentMethod?.success) {
-                toast.success(enabled ? 'Payment method enabled' : 'Payment method disabled');
+                toast.success(enabled ? t('enabledSuccess') : t('disabledSuccess'));
                 refetch();
             } else {
-                toast.error('Error', {
-                    description: result.data?.togglePaymentMethod?.error || 'Failed to update',
+                toast.error(t('error'), {
+                    description: result.data?.togglePaymentMethod?.error || tGen('failedToSave'),
                 });
             }
         } catch (err) {
             console.error('Toggle failed:', err);
-            toast.error('Error', { description: 'Failed to update payment method' });
+            toast.error(t('error'), { description: tGen('failedToSave') });
         }
     };
 
@@ -141,8 +144,8 @@ export function PaymentMethodsPage() {
         if (!selectedMethod) return;
 
         if (!validateFapshiUrl(checkoutUrl)) {
-            toast.error('Invalid URL', {
-                description: 'Please enter a valid Fapshi checkout URL',
+            toast.error(t('invalidUrl'), {
+                description: t('invalidUrlDesc'),
             });
             return;
         }
@@ -158,19 +161,19 @@ export function PaymentMethodsPage() {
             });
 
             if (result.data?.updatePaymentMethod?.success) {
-                toast.success('Payment method updated');
+                toast.success(t('updateSuccess'));
                 setShowEditModal(false);
                 setSelectedMethod(null);
                 setCheckoutUrl('');
                 refetch();
             } else {
-                toast.error('Error', {
-                    description: result.data?.updatePaymentMethod?.error || 'Failed to update',
+                toast.error(t('error'), {
+                    description: result.data?.updatePaymentMethod?.error || tGen('failedToSave'),
                 });
             }
         } catch (err) {
             console.error('Update failed:', err);
-            toast.error('Error', { description: 'Failed to update payment method' });
+            toast.error(t('error'), { description: tGen('failedToSave') });
         }
     };
 
@@ -186,18 +189,18 @@ export function PaymentMethodsPage() {
             });
 
             if (result.data?.removePaymentMethod?.success) {
-                toast.success('Payment method removed');
+                toast.success(t('removeSuccess'));
                 setShowDeleteModal(false);
                 setSelectedMethod(null);
                 refetch();
             } else {
-                toast.error('Error', {
-                    description: result.data?.removePaymentMethod?.error || 'Failed to remove',
+                toast.error(t('error'), {
+                    description: result.data?.removePaymentMethod?.error || tGen('failedToSave'),
                 });
             }
         } catch (err) {
             console.error('Delete failed:', err);
-            toast.error('Error', { description: 'Failed to remove payment method' });
+            toast.error(t('error'), { description: tGen('failedToSave') });
         }
     };
 
@@ -227,7 +230,7 @@ export function PaymentMethodsPage() {
         return (
             <div className="w-full max-w-[1000px] mx-auto px-6">
                 <Alert variant="destructive">
-                    <div className="font-semibold">Error loading payment methods</div>
+                    <div className="font-semibold">{t('errorLoading')}</div>
                     <div className="text-sm">{error.message}</div>
                 </Alert>
             </div>
@@ -253,16 +256,16 @@ export function PaymentMethodsPage() {
                             </button>
                             <IconCreditCard className="w-6 h-6 text-muted-foreground flex-shrink-0" />
                             <div>
-                                <h2 className="text-base font-semibold">Payment providers</h2>
+                                <h2 className="text-base font-semibold">{t('title')}</h2>
                                 <p className="text-sm text-muted-foreground">
-                                    Accept payments via hosted checkout links
+                                    {t('description')}
                                 </p>
                             </div>
                         </div>
                         {canAddFapshi && (
                             <Button onClick={() => setShowAddModal(true)} className="gap-2 w-full sm:w-auto">
                                 <IconPlus className="w-4 h-4" />
-                                Add Fapshi
+                                {t('addFapshi')}
                             </Button>
                         )}
                     </div>
@@ -275,14 +278,14 @@ export function PaymentMethodsPage() {
                     <Card className="p-8">
                         <div className="text-center">
                             <IconCreditCard className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                            <h3 className="text-lg font-medium mb-2">No payment methods configured</h3>
+                            <h3 className="text-lg font-medium mb-2">{t('noMethods')}</h3>
                             <p className="text-sm text-muted-foreground mb-4">
-                                Add a Fapshi checkout link to accept payments on your store.
+                                {t('noMethodsFapshiDesc')}
                             </p>
                             {canAddFapshi && (
                                 <Button onClick={() => setShowAddModal(true)} className="gap-2">
                                     <IconPlus className="w-4 h-4" />
-                                    Add Fapshi
+                                    {t('addFapshi')}
                                 </Button>
                             )}
                         </div>
@@ -304,12 +307,12 @@ export function PaymentMethodsPage() {
                                                 <h3 className="font-semibold">{method.displayName || method.providerName}</h3>
                                                 {method.verified && (
                                                     <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded">
-                                                        Verified
+                                                        {t('verified')}
                                                     </span>
                                                 )}
                                             </div>
                                             <p className="text-sm text-muted-foreground mt-1">
-                                                MTN MoMo and Orange Money payments
+                                                {t('momoDesc')}
                                             </p>
                                             {method.checkoutUrl && (
                                                 <div className="flex items-center gap-2 mt-2">
@@ -328,7 +331,7 @@ export function PaymentMethodsPage() {
                                             )}
                                             {method.totalTransactions > 0 && (
                                                 <p className="text-xs text-muted-foreground mt-2">
-                                                    {method.totalTransactions} transactions ({method.successRate?.toFixed(1)}% success rate)
+                                                    {t('transactions', { count: method.totalTransactions, rate: method.successRate?.toFixed(1) || '0' })}
                                                 </p>
                                             )}
                                         </div>
@@ -367,16 +370,18 @@ export function PaymentMethodsPage() {
                 <Alert className="bg-blue-500/10 border-blue-500/20">
                     <IconInfoCircle className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="ml-2 text-sm text-blue-900 dark:text-blue-300">
-                        Customers will be redirected to your Fapshi checkout page to complete payments.
-                        Get your checkout URL from your{' '}
-                        <a
-                            href="https://dashboard.fapshi.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline font-medium"
-                        >
-                            Fapshi dashboard
-                        </a>.
+                        {t.rich('redirectFapshiInfo', {
+                            a: (chunks) => (
+                                <a
+                                    href="https://dashboard.fapshi.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline font-medium"
+                                >
+                                    {chunks}
+                                </a>
+                            )
+                        })}
                     </AlertDescription>
                 </Alert>
             </div>
@@ -385,14 +390,14 @@ export function PaymentMethodsPage() {
             <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add Fapshi Payment Method</DialogTitle>
+                        <DialogTitle>{t('addFapshiTitle')}</DialogTitle>
                         <DialogDescription>
-                            Enter your Fapshi checkout URL to accept mobile money payments.
+                            {t('addFapshiDesc')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="checkoutUrl">Fapshi Checkout URL</Label>
+                            <Label htmlFor="checkoutUrl">{t('fapshiUrl')}</Label>
                             <Input
                                 id="checkoutUrl"
                                 value={checkoutUrl}
@@ -400,22 +405,22 @@ export function PaymentMethodsPage() {
                                 placeholder="https://checkout.fapshi.com/pay/..."
                             />
                             <p className="text-xs text-muted-foreground">
-                                Get this from your Fapshi dashboard under Payment Links
+                                {t('fapshiHint')}
                             </p>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowAddModal(false)}>
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button onClick={handleAdd} disabled={adding || !checkoutUrl}>
                             {adding ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Adding...
+                                    {t('adding')}
                                 </>
                             ) : (
-                                'Add Payment Method'
+                                t('addFapshi')
                             )}
                         </Button>
                     </DialogFooter>
@@ -426,14 +431,14 @@ export function PaymentMethodsPage() {
             <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Payment Method</DialogTitle>
+                        <DialogTitle>{t('edit')}</DialogTitle>
                         <DialogDescription>
-                            Update your Fapshi checkout URL.
+                            {t('addFapshiDesc')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="editCheckoutUrl">Fapshi Checkout URL</Label>
+                            <Label htmlFor="editCheckoutUrl">{t('fapshiUrl')}</Label>
                             <Input
                                 id="editCheckoutUrl"
                                 value={checkoutUrl}
@@ -444,16 +449,16 @@ export function PaymentMethodsPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowEditModal(false)}>
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button onClick={handleUpdate} disabled={updating || !checkoutUrl}>
                             {updating ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Saving...
+                                    {t('saving')}
                                 </>
                             ) : (
-                                'Save Changes'
+                                t('save')
                             )}
                         </Button>
                     </DialogFooter>
@@ -464,24 +469,23 @@ export function PaymentMethodsPage() {
             <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Remove Payment Method</DialogTitle>
+                        <DialogTitle>{t('deleteMethodTitle')}</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to remove this payment method? Your customers won't be able
-                            to pay using this method until you add it again.
+                            {t('deleteMethodDesc')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button variant="destructive" onClick={handleDelete} disabled={removing}>
                             {removing ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Removing...
+                                    {t('removing')}
                                 </>
                             ) : (
-                                'Remove'
+                                t('remove')
                             )}
                         </Button>
                     </DialogFooter>

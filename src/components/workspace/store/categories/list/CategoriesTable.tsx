@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu'
 import { MoreHorizontal, Eye, EyeOff, Edit, Trash } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface Category {
   id: string
@@ -49,16 +50,18 @@ export function CategoriesTable({
   onToggleVisibility,
   onDelete,
 }: CategoriesTableProps) {
+  const t = useTranslations('Categories.table');
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-20"></TableHead>
-            <TableHead className="w-96">Category</TableHead>
-            <TableHead className="text-center">Products</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-center">Featured</TableHead>
+            <TableHead className="w-96">{t('columnCategory')}</TableHead>
+            <TableHead className="text-center">{t('columnProducts')}</TableHead>
+            <TableHead className="text-center">{t('columnStatus')}</TableHead>
+            <TableHead className="text-center">{t('columnFeatured')}</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
@@ -66,7 +69,7 @@ export function CategoriesTable({
           {categories.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm">
-                No categories found
+                {t('noCategoriesFound')}
               </TableCell>
             </TableRow>
           ) : (
@@ -82,7 +85,7 @@ export function CategoriesTable({
                     />
                   ) : (
                     <div className="h-16 w-16 rounded-md bg-muted flex items-center justify-center border">
-                      <span className="text-xs text-muted-foreground">No img</span>
+                      <span className="text-xs text-muted-foreground">{t('noImage')}</span>
                     </div>
                   )}
                 </TableCell>
@@ -106,11 +109,11 @@ export function CategoriesTable({
                 <TableCell className="text-center">
                   {category.isVisible ? (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      Visible
+                      {t('statusVisible')}
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                      Hidden
+                      {t('statusHidden')}
                     </Badge>
                   )}
                 </TableCell>
@@ -119,9 +122,9 @@ export function CategoriesTable({
                 <TableCell className="text-center">
                   {category.isFeatured && (
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      Featured
+                      {t('statusFeatured')}
                     </Badge>
-                  )}
+                  ) || '-'}
                 </TableCell>
 
                 {/* Actions */}
@@ -135,18 +138,18 @@ export function CategoriesTable({
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onEdit?.(category.id)}>
                         <Edit className="mr-2 h-4 w-4" />
-                        Edit
+                        {t('edit')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => onToggleVisibility?.(category.id)}>
                         {category.isVisible ? (
                           <>
                             <EyeOff className="mr-2 h-4 w-4" />
-                            Hide
+                            {t('hide')}
                           </>
                         ) : (
                           <>
                             <Eye className="mr-2 h-4 w-4" />
-                            Show
+                            {t('show')}
                           </>
                         )}
                       </DropdownMenuItem>
@@ -155,7 +158,7 @@ export function CategoriesTable({
                         className="text-destructive"
                       >
                         <Trash className="mr-2 h-4 w-4" />
-                        Delete
+                        {t('delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

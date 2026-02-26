@@ -22,12 +22,14 @@ import {
 } from "@/components/shadcn-ui/dropdown-menu"
 import { useAuth } from "@/hooks/authentication/useAuth"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 interface WorkspaceSidebarProps {
   config: WorkspaceSidebarConfig
 }
 
 export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
+  const t = useTranslations('Dashboard.navigation')
   const pathname = usePathname()
   const router = useRouter()
   const { logout } = useAuth()
@@ -54,7 +56,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
           className="flex items-center gap-2 font-semibold text-sidebar-foreground hover:text-sidebar-foreground/80"
         >
           <config.workspaceConfig.icon className="h-5 w-5" />
-          <span className="text-base">{config.workspaceConfig.name}</span>
+          <span className="text-base">{t(config.workspaceConfig.name)}</span>
         </Link>
         <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider dark:bg-blue-900/40 dark:text-blue-300">
           Beta
@@ -91,7 +93,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4" />}
-                    <span className="flex-1 text-left">{item.title}</span>
+                    <span className="flex-1 text-left">{t(item.title)}</span>
                     <IconChevronDown className={cn(
                       "h-4 w-4 transition-transform duration-200",
                       isOpen && "rotate-180"
@@ -110,7 +112,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                           )}
                         >
                           {isSubActive && <IconCornerDownRight className="h-3 w-3" />}
-                          <span>{subItem.title}</span>
+                          <span>{t(subItem.title)}</span>
                         </Link>
                       )
                     })}
@@ -138,7 +140,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4" />}
-                    <span className="flex-1 text-left">{item.title}</span>
+                    <span className="flex-1 text-left">{t(item.title)}</span>
                   </Link>
                   <CollapsibleTrigger className="p-2 hover:bg-sidebar-accent rounded-md transition-colors">
                     <IconChevronDown className={cn(
@@ -160,7 +162,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                         )}
                       >
                         {isSubActive && <IconCornerDownRight className="h-3 w-3" />}
-                        <span>{subItem.title}</span>
+                        <span>{t(subItem.title)}</span>
                       </Link>
                     )
                   })}
@@ -180,7 +182,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
               )}
             >
               {Icon && <Icon className="h-4 w-4" />}
-              <span>{item.title}</span>
+              <span>{t(item.title)}</span>
             </Link>
           )
         })}
@@ -225,7 +227,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                           )}
                         >
                           {Icon && <Icon className="h-4 w-4" />}
-                          <span className="flex-1 text-left">{item.name}</span>
+                          <span className="flex-1 text-left">{t(item.name)}</span>
                           <IconChevronRight className={cn(
                             "h-4 w-4 transition-transform duration-200",
                             isOpen && "rotate-90"
@@ -244,7 +246,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                                 )}
                               >
                                 {isSubActive && <IconCornerDownRight className="h-3 w-3" />}
-                                <span>{subItem.title}</span>
+                                <span>{t(subItem.title)}</span>
                               </Link>
                             )
                           })}
@@ -272,7 +274,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                           )}
                         >
                           {Icon && <Icon className="h-4 w-4" />}
-                          <span className="flex-1 text-left">{item.name}</span>
+                          <span className="flex-1 text-left">{t(item.name)}</span>
                         </Link>
                         <CollapsibleTrigger className="p-2 hover:bg-sidebar-accent rounded-md transition-colors">
                           <IconChevronRight className={cn(
@@ -294,7 +296,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                               )}
                             >
                               {isSubActive && <IconCornerDownRight className="h-3 w-3" />}
-                              <span>{subItem.title}</span>
+                              <span>{t(subItem.title)}</span>
                             </Link>
                           )
                         })}
@@ -314,7 +316,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4" />}
-                    <span>{item.name}</span>
+                    <span>{t(item.name)}</span>
                   </Link>
                 )
               })}
@@ -355,7 +357,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
               )}
             >
               {Icon && <Icon className="h-4 w-4" />}
-              <span>{item.title}</span>
+              <span>{t(item.title)}</span>
             </Link>
           )
         })}

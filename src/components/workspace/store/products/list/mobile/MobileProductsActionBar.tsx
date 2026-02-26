@@ -43,6 +43,7 @@ import { AddProductsToCategoryDocument } from '@/services/graphql/admin-store/mu
 import { RemoveProductsFromCategoryDocument } from '@/services/graphql/admin-store/mutations/categories/__generated__/removeProductsFromCategory.generated';
 import { CategoriesDocument } from '@/services/graphql/admin-store/queries/categories/__generated__/categories.generated';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface MobileProductsActionBarProps {
     selectedCount: number;
@@ -65,6 +66,7 @@ export function MobileProductsActionBar({
     onExport,
     onCategoryUpdate,
 }: MobileProductsActionBarProps) {
+    const t = useTranslations('Products');
     const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false);
     const [showRemoveCategoryDialog, setShowRemoveCategoryDialog] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -90,12 +92,12 @@ export function MobileProductsActionBar({
 
     const confirmBulkAddToCategory = async () => {
         if (!selectedCategory) {
-            toast.error('Please select a category');
+            toast.error(t('messages.selectCategory'));
             return;
         }
 
         if (selectedProductIds.length === 0) {
-            toast.error('No products selected');
+            toast.error(t('messages.noProductsSelected'));
             return;
         }
 
@@ -108,27 +110,27 @@ export function MobileProductsActionBar({
             });
 
             if (data?.addProductsToCategory?.success) {
-                toast.success(`${selectedProductIds.length} products added to category`);
+                toast.success(t('messages.addedToCategory', { count: selectedProductIds.length }));
                 setShowAddCategoryDialog(false);
                 setSelectedCategory('');
                 onCategoryUpdate?.();
             } else {
-                toast.error(data?.addProductsToCategory?.error || 'Failed to add products to category');
+                toast.error(data?.addProductsToCategory?.error || t('messages.addCategoryFailed'));
             }
         } catch (err: any) {
-            toast.error(err.message || 'Failed to add products to category');
+            toast.error(err.message || t('messages.addCategoryFailed'));
             console.error('Bulk add to category error:', err);
         }
     };
 
     const confirmBulkRemoveFromCategory = async () => {
         if (!selectedCategory) {
-            toast.error('Please select a category');
+            toast.error(t('messages.selectCategory'));
             return;
         }
 
         if (selectedProductIds.length === 0) {
-            toast.error('No products selected');
+            toast.error(t('messages.noProductsSelected'));
             return;
         }
 
@@ -141,15 +143,15 @@ export function MobileProductsActionBar({
             });
 
             if (data?.removeProductsFromCategory?.success) {
-                toast.success(`${selectedProductIds.length} products removed from category`);
+                toast.success(t('messages.removedFromCategory', { count: selectedProductIds.length }));
                 setShowRemoveCategoryDialog(false);
                 setSelectedCategory('');
                 onCategoryUpdate?.();
             } else {
-                toast.error(data?.removeProductsFromCategory?.error || 'Failed to remove products from category');
+                toast.error(data?.removeProductsFromCategory?.error || t('messages.removeCategoryFailed'));
             }
         } catch (err: any) {
-            toast.error(err.message || 'Failed to remove products from category');
+            toast.error(err.message || t('messages.removeCategoryFailed'));
             console.error('Bulk remove from category error:', err);
         }
     };
@@ -162,14 +164,14 @@ export function MobileProductsActionBar({
                 <button
                     onClick={onCancel}
                     className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-zinc-900/10 transition-colors"
-                    aria-label="Cancel selection"
+                    aria-label={t('toolbar.cancelSelection')}
                 >
                     <span className="text-lg">✕</span>
                 </button>
 
                 {/* Selected Count */}
                 <span className="text-sm font-medium px-2 min-w-[60px] text-center">
-                    {selectedCount} selected
+                    {t('selectedCount', { count: selectedCount })}
                 </span>
 
                 {/* Divider */}
@@ -179,8 +181,8 @@ export function MobileProductsActionBar({
                 <button
                     onClick={onArchive}
                     className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-zinc-900/10 transition-colors"
-                    aria-label="Archive"
-                    title="Archive"
+                    aria-label={t('toolbar.archive')}
+                    title={t('toolbar.archive')}
                 >
                     <IconArchive className="w-5 h-5" />
                 </button>
@@ -188,8 +190,8 @@ export function MobileProductsActionBar({
                 <button
                     onClick={onDelete}
                     className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-zinc-900/10 transition-colors text-red-400"
-                    aria-label="Delete"
-                    title="Delete"
+                    aria-label={t('toolbar.delete')}
+                    title={t('toolbar.delete')}
                 >
                     <IconTrash className="w-5 h-5" />
                 </button>
@@ -199,7 +201,7 @@ export function MobileProductsActionBar({
                     <DropdownMenuTrigger asChild>
                         <button
                             className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-zinc-900/10 transition-colors"
-                            aria-label="More actions"
+                            aria-label={t('table.actions.openMenu')}
                         >
                             <IconDotsVertical className="w-5 h-5" />
                         </button>
@@ -212,22 +214,22 @@ export function MobileProductsActionBar({
                         {onDuplicate && (
                             <DropdownMenuItem onClick={onDuplicate}>
                                 <IconCopy className="mr-2 h-4 w-4" />
-                                Duplicate
+                                {t('table.actions.duplicate')}
                             </DropdownMenuItem>
                         )}
                         {onExport && (
                             <DropdownMenuItem onClick={onExport}>
-                                Export Selected
+                                {t('table.actions.exportSelected')}
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleBulkAddToCategory}>
                             <FolderPlus className="mr-2 h-4 w-4" />
-                            Add to category
+                            {t('table.actions.addToCategory')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleBulkRemoveFromCategory}>
                             <FolderMinus className="mr-2 h-4 w-4" />
-                            Remove from category
+                            {t('table.actions.removeFromCategory')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -237,9 +239,9 @@ export function MobileProductsActionBar({
             <Dialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
                 <DialogContent className="mx-4">
                     <DialogHeader>
-                        <DialogTitle>Add to Category</DialogTitle>
+                        <DialogTitle>{t('table.dialogs.addCategoryTitle')}</DialogTitle>
                         <DialogDescription>
-                            Select a category to add {selectedProductIds.length} selected products to.
+                            {t('table.dialogs.addCategoryBulkDescription', { count: selectedProductIds.length })}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
@@ -252,15 +254,15 @@ export function MobileProductsActionBar({
                                 >
                                     {selectedCategory
                                         ? categories.find((category) => category?.id === selectedCategory)?.name
-                                        : "Select category..."}
+                                        : t('table.dialogs.selectCategoryPlaceholder')}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-full p-0">
                                 <Command>
-                                    <CommandInput placeholder="Search categories..." />
+                                    <CommandInput placeholder={t('table.dialogs.searchCategoriesPlaceholder')} />
                                     <CommandList>
-                                        <CommandEmpty>No category found.</CommandEmpty>
+                                        <CommandEmpty>{t('table.dialogs.noCategoryFound')}</CommandEmpty>
                                         <CommandGroup>
                                             {categories.map((category) => (
                                                 <CommandItem
@@ -288,10 +290,10 @@ export function MobileProductsActionBar({
                             variant="outline"
                             onClick={() => setShowAddCategoryDialog(false)}
                         >
-                            Cancel
+                            {t('table.dialogs.cancel')}
                         </Button>
                         <Button onClick={confirmBulkAddToCategory}>
-                            Add to Category
+                            {t('table.actions.addToCategory')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -301,9 +303,9 @@ export function MobileProductsActionBar({
             <Dialog open={showRemoveCategoryDialog} onOpenChange={setShowRemoveCategoryDialog}>
                 <DialogContent className="mx-4">
                     <DialogHeader>
-                        <DialogTitle>Remove from Category</DialogTitle>
+                        <DialogTitle>{t('table.dialogs.removeCategoryTitle')}</DialogTitle>
                         <DialogDescription>
-                            Select a category to remove {selectedProductIds.length} selected products from.
+                            {t('table.dialogs.removeCategoryBulkDescription', { count: selectedProductIds.length })}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
@@ -316,15 +318,15 @@ export function MobileProductsActionBar({
                                 >
                                     {selectedCategory
                                         ? categories.find((category) => category?.id === selectedCategory)?.name
-                                        : "Select category..."}
+                                        : t('table.dialogs.selectCategoryPlaceholder')}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-full p-0">
                                 <Command>
-                                    <CommandInput placeholder="Search categories..." />
+                                    <CommandInput placeholder={t('table.dialogs.searchCategoriesPlaceholder')} />
                                     <CommandList>
-                                        <CommandEmpty>No category found.</CommandEmpty>
+                                        <CommandEmpty>{t('table.dialogs.noCategoryFound')}</CommandEmpty>
                                         <CommandGroup>
                                             {categories.map((category) => (
                                                 <CommandItem
@@ -352,10 +354,10 @@ export function MobileProductsActionBar({
                             variant="outline"
                             onClick={() => setShowRemoveCategoryDialog(false)}
                         >
-                            Cancel
+                            {t('table.dialogs.cancel')}
                         </Button>
                         <Button onClick={confirmBulkRemoveFromCategory}>
-                            Remove from Category
+                            {t('table.actions.removeFromCategory')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Button } from '@/components/shadcn-ui/button';
+import { useTranslations } from 'next-intl';
 import { Clock, Mail, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -40,6 +41,7 @@ export function PendingInvitesTable({
     onCancelInvite,
     onResendInvite,
 }: PendingInvitesTableProps) {
+    const t = useTranslations('Staff');
     if (invites.length === 0) {
         return null; // Don't show anything if no pending invites
     }
@@ -54,7 +56,7 @@ export function PendingInvitesTable({
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-lg font-medium flex items-center gap-2">
                         <Clock className="h-4 w-4 text-yellow-600" />
-                        Pending Invitations
+                        {t('pendingInvites')}
                         <Badge variant="secondary" className="ml-2">{invites.length}</Badge>
                     </CardTitle>
                 </div>
@@ -64,12 +66,12 @@ export function PendingInvitesTable({
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="whitespace-nowrap">Email</TableHead>
-                                <TableHead className="whitespace-nowrap">Role</TableHead>
-                                <TableHead className="whitespace-nowrap">Invited By</TableHead>
-                                <TableHead className="whitespace-nowrap">Sent</TableHead>
-                                <TableHead className="whitespace-nowrap">Status</TableHead>
-                                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('email')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('role')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('invitedBy')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('sent')}</TableHead>
+                                <TableHead className="whitespace-nowrap">{t('status')}</TableHead>
+                                <TableHead className="text-right whitespace-nowrap">{t('actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -93,11 +95,11 @@ export function PendingInvitesTable({
                                     <TableCell className="whitespace-nowrap">
                                         {isExpired(invite.expiresAt) ? (
                                             <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-                                                Expired
+                                                {t('expired')}
                                             </Badge>
                                         ) : (
                                             <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                                                Pending
+                                                {t('pending')}
                                             </Badge>
                                         )}
                                     </TableCell>
@@ -110,7 +112,7 @@ export function PendingInvitesTable({
                                                     onClick={() => onResendInvite(invite.id)}
                                                     disabled={!isExpired(invite.expiresAt)}
                                                 >
-                                                    Resend
+                                                    {t('resend')}
                                                 </Button>
                                             )}
                                             {onCancelInvite && (

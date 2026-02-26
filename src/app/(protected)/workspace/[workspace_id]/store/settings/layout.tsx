@@ -28,14 +28,16 @@ export default function SettingsLayout({
 
   // Desktop layout with sidebar
   return (
-    <div className="@container/main flex flex-1 flex-col gap-2">
-      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-        <div className="px-4 lg:px-6">
-          <div className="flex gap-8">
-            <SettingsSidebar />
-            <div className="flex-1 min-w-0">
-              {children}
+    <div className="@container/main flex flex-1 flex-col">
+      <div className="flex-1 px-4 lg:px-6 py-4 md:py-6">
+        <div className="flex gap-8">
+          <aside className="hidden md:block w-48 flex-shrink-0">
+            <div className="sticky top-6">
+              <SettingsSidebar />
             </div>
+          </aside>
+          <div className="flex-1 min-w-0">
+            {children}
           </div>
         </div>
       </div>

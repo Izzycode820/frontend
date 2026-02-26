@@ -1,4 +1,5 @@
 import { Search, SlidersHorizontal } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/shadcn-ui/input';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -30,39 +31,6 @@ interface OrdersFiltersProps {
   onShippingRegionChange: (value: string | null) => void;
 }
 
-export const PAYMENT_STATUSES = [
-  { value: 'PAID', label: 'Paid' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'FAILED', label: 'Failed' },
-  { value: 'REFUNDED', label: 'Refunded' },
-];
-
-export const PAYMENT_METHODS = [
-  { value: 'cash_on_delivery', label: 'Cash on Delivery' },
-  { value: 'mobile_money', label: 'Mobile Money' },
-  { value: 'bank_transfer', label: 'Bank Transfer' },
-  { value: 'card', label: 'Credit/Debit Card' },
-];
-
-export const ORDER_SOURCES = [
-  { value: 'WHATSAPP', label: 'WhatsApp' },
-  { value: 'ADMIN', label: 'Admin' },
-  { value: 'WEB', label: 'Online Store' },
-];
-
-export const CAMEROON_REGIONS = [
-  { value: 'centre', label: 'Centre' },
-  { value: 'littoral', label: 'Littoral' },
-  { value: 'west', label: 'West' },
-  { value: 'northwest', label: 'Northwest' },
-  { value: 'southwest', label: 'Southwest' },
-  { value: 'adamawa', label: 'Adamawa' },
-  { value: 'east', label: 'East' },
-  { value: 'far_north', label: 'Far North' },
-  { value: 'north', label: 'North' },
-  { value: 'south', label: 'South' },
-];
-
 export function OrdersFilters({
   searchTerm,
   onSearchChange,
@@ -75,6 +43,42 @@ export function OrdersFilters({
   shippingRegion,
   onShippingRegionChange,
 }: OrdersFiltersProps) {
+  const t = useTranslations('Orders.filters');
+  const tBadges = useTranslations('Orders.badges');
+  const tTable = useTranslations('Orders.table');
+
+  const PAYMENT_STATUSES = [
+    { value: 'PAID', label: tBadges('paid') },
+    { value: 'PENDING', label: tBadges('pending') },
+    { value: 'FAILED', label: tBadges('failed') },
+    { value: 'REFUNDED', label: tBadges('refunded') },
+  ];
+
+  const PAYMENT_METHODS = [
+    { value: 'CASH_ON_DELIVERY', label: tTable('methods.cash_on_delivery') },
+    { value: 'MOBILE_MONEY', label: t('mobileMoney') },
+    { value: 'BANK_TRANSFER', label: t('bankTransfer') },
+    { value: 'CARD', label: t('card') },
+  ];
+
+  const ORDER_SOURCES = [
+    { value: 'WHATSAPP', label: tTable('channels.whatsapp') },
+    { value: 'MANUAL', label: tTable('channels.manual') },
+    { value: 'WEB', label: tTable('channels.web') },
+  ];
+
+  const CAMEROON_REGIONS = [
+    { value: 'CENTRE', label: t('regions.centre') },
+    { value: 'LITTORAL', label: t('regions.littoral') },
+    { value: 'WEST', label: t('regions.west') },
+    { value: 'NORTHWEST', label: t('regions.northwest') },
+    { value: 'SOUTHWEST', label: t('regions.southwest') },
+    { value: 'ADAMAWA', label: t('regions.adamawa') },
+    { value: 'EAST', label: t('regions.east') },
+    { value: 'FAR_NORTH', label: t('regions.far_north') },
+    { value: 'NORTH', label: t('regions.north') },
+    { value: 'SOUTH', label: t('regions.south') },
+  ];
   const hasActiveFilters = paymentStatus || paymentMethod || orderSource || shippingRegion;
 
   const clearFilters = () => {
@@ -90,7 +94,7 @@ export function OrdersFilters({
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search orders..."
+          placeholder={t('searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9"
@@ -102,7 +106,7 @@ export function OrdersFilters({
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="gap-2">
             <SlidersHorizontal className="h-4 w-4" />
-            Filters
+            {t('filters')}
             {hasActiveFilters && (
               <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
                 {[paymentStatus, paymentMethod, orderSource, shippingRegion].filter(Boolean).length}
@@ -112,7 +116,7 @@ export function OrdersFilters({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80">
           <DropdownMenuLabel className="flex items-center justify-between">
-            <span>Filters</span>
+            <span>{t('filters')}</span>
             {hasActiveFilters && (
               <Button
                 variant="ghost"
@@ -120,7 +124,7 @@ export function OrdersFilters({
                 onClick={clearFilters}
                 className="h-auto p-1 text-xs"
               >
-                Clear all
+                {t('clearAll')}
               </Button>
             )}
           </DropdownMenuLabel>
@@ -128,16 +132,16 @@ export function OrdersFilters({
 
           {/* Payment Status Filter */}
           <div className="p-2">
-            <label className="text-sm font-medium mb-2 block">Payment Status</label>
+            <label className="text-sm font-medium mb-2 block">{t('paymentStatus')}</label>
             <Select
               value={paymentStatus || 'all'}
               onValueChange={(value) => onPaymentStatusChange(value === 'all' ? null : value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="All statuses" />
+                <SelectValue placeholder={t('allStatuses')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="all">{t('allStatuses')}</SelectItem>
                 {PAYMENT_STATUSES.map((status) => (
                   <SelectItem key={status.value} value={status.value}>
                     {status.label}
@@ -149,16 +153,16 @@ export function OrdersFilters({
 
           {/* Payment Method Filter */}
           <div className="p-2">
-            <label className="text-sm font-medium mb-2 block">Payment Method</label>
+            <label className="text-sm font-medium mb-2 block">{t('paymentMethod')}</label>
             <Select
               value={paymentMethod || 'all'}
               onValueChange={(value) => onPaymentMethodChange(value === 'all' ? null : value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="All methods" />
+                <SelectValue placeholder={t('allMethods')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All methods</SelectItem>
+                <SelectItem value="all">{t('allMethods')}</SelectItem>
                 {PAYMENT_METHODS.map((method) => (
                   <SelectItem key={method.value} value={method.value}>
                     {method.label}
@@ -170,16 +174,16 @@ export function OrdersFilters({
 
           {/* Order Source Filter */}
           <div className="p-2">
-            <label className="text-sm font-medium mb-2 block">Order Source</label>
+            <label className="text-sm font-medium mb-2 block">{t('orderSource')}</label>
             <Select
               value={orderSource || 'all'}
               onValueChange={(value) => onOrderSourceChange(value === 'all' ? null : value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="All sources" />
+                <SelectValue placeholder={t('allSources')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All sources</SelectItem>
+                <SelectItem value="all">{t('allSources')}</SelectItem>
                 {ORDER_SOURCES.map((source) => (
                   <SelectItem key={source.value} value={source.value}>
                     {source.label}
@@ -191,16 +195,16 @@ export function OrdersFilters({
 
           {/* Shipping Region Filter */}
           <div className="p-2">
-            <label className="text-sm font-medium mb-2 block">Shipping Region</label>
+            <label className="text-sm font-medium mb-2 block">{t('shippingRegion')}</label>
             <Select
               value={shippingRegion || 'all'}
               onValueChange={(value) => onShippingRegionChange(value === 'all' ? null : value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="All regions" />
+                <SelectValue placeholder={t('allRegions')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All regions</SelectItem>
+                <SelectItem value="all">{t('allRegions')}</SelectItem>
                 {CAMEROON_REGIONS.map((region) => (
                   <SelectItem key={region.value} value={region.value}>
                     {region.label}

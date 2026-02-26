@@ -3,6 +3,7 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/shadcn-ui/input';
+import { useTranslations } from 'next-intl';
 import { InventoryCard } from './InventoryCard';
 import { InventoryFilterChips } from './InventoryFilterChips';
 import type { GetInventoryQuery } from '@/services/graphql/admin-store/queries/inventory/__generated__/GetInventory.generated';
@@ -50,6 +51,7 @@ export function MobileInventoryList({
     onClearSelection,
     isLoading,
 }: MobileInventoryListProps) {
+    const t = useTranslations('Inventory');
     const isSelectionMode = selectedItems.length > 0;
 
     return (
@@ -58,7 +60,7 @@ export function MobileInventoryList({
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                 <Input
-                    placeholder="Search inventory..."
+                    placeholder={t('list.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => onSearchChange(e.target.value)}
                     className="pl-10 h-12 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
@@ -79,9 +81,9 @@ export function MobileInventoryList({
                 </div>
             ) : inventory.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-zinc-500 dark:text-zinc-400">No inventory found</p>
+                    <p className="text-zinc-500 dark:text-zinc-400">{t('list.noInventory')}</p>
                     <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
-                        Inventory is created when you add products with variants
+                        {t('list.noInventoryDetail')}
                     </p>
                 </div>
             ) : (
@@ -111,7 +113,7 @@ export function MobileInventoryList({
                             ✕
                         </button>
                         <span className="text-sm font-medium px-2">
-                            {selectedItems.length} selected
+                            {t('mobile.selected', { count: selectedItems.length })}
                         </span>
                     </div>
                 </div>

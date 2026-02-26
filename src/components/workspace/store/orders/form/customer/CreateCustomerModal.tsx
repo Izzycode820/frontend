@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import {
   Dialog,
@@ -37,23 +38,35 @@ const CAMEROON_REGIONS = [
   { value: 'north', label: 'North' },
   { value: 'south', label: 'South' },
 ] as const;
-
-const CUSTOMER_TYPES = [
-  { value: 'individual', label: 'Individual' },
-  { value: 'business', label: 'Business' },
-] as const;
-
-const CAMEROON_PHONE_REGEX = /^\+237[0-9]{9}$/;
-
-function validateCameroonPhone(phone: string): boolean {
-  return CAMEROON_PHONE_REGEX.test(phone);
-}
-
 export function CreateCustomerModal({
   open,
   onOpenChange,
   onCustomerCreated,
 }: CreateCustomerModalProps) {
+  const t = useTranslations('Orders.form.customer');
+  const commonT = useTranslations('Orders.form');
+  
+  const CUSTOMER_TYPES = [
+    { value: 'individual', label: t('types.individual') },
+    { value: 'business', label: t('types.business') },
+  ] as const;
+
+  const CAMEROON_REGIONS_LOCALIZED = [
+    { value: 'centre', label: useTranslations('Orders.filters.regions')('centre') },
+    { value: 'littoral', label: useTranslations('Orders.filters.regions')('littoral') },
+    { value: 'west', label: useTranslations('Orders.filters.regions')('west') },
+    { value: 'northwest', label: useTranslations('Orders.filters.regions')('northwest') },
+    { value: 'southwest', label: useTranslations('Orders.filters.regions')('southwest') },
+    { value: 'adamawa', label: useTranslations('Orders.filters.regions')('adamawa') },
+    { value: 'east', label: useTranslations('Orders.filters.regions')('east') },
+    { value: 'far_north', label: useTranslations('Orders.filters.regions')('far_north') },
+    { value: 'north', label: useTranslations('Orders.filters.regions')('north') },
+    { value: 'south', label: useTranslations('Orders.filters.regions')('south') },
+  ];
+
+  const CAMEROON_PHONE_REGEX = /^\+237[0-9]{9}$/;
+  const validateCameroonPhone = (phone: string) => CAMEROON_PHONE_REGEX.test(phone);
+
   const {
     register,
     handleSubmit,
@@ -84,23 +97,23 @@ export function CreateCustomerModal({
   const [createCustomer, { loading }] = useMutation(CreateCustomerDocument, {
     onCompleted: (data) => {
       if (data.createCustomer?.success && data.createCustomer?.customer) {
-        toast.success(`Customer ${data.createCustomer.customer.name} created successfully`);
+        toast.success(commonT('messages.successCreateCustomer', { name: data.createCustomer.customer.name }));
         onCustomerCreated(data.createCustomer.customer.id);
         onOpenChange(false);
         reset();
       } else {
-        toast.error(data.createCustomer?.error || 'Failed to create customer');
+        toast.error(data.createCustomer?.error || commonT('messages.errorCreateCustomer'));
       }
     },
     onError: (error) => {
-      toast.error(error.message || 'An unexpected error occurred');
+      toast.error(error.message || commonT('messages.errorUnexpected'));
     },
   });
 
   const onSubmit = async (data: CustomerFormData) => {
     // Validate phone
     if (!validateCameroonPhone(data.phone)) {
-      toast.error('Phone must be in format +237XXXXXXXXX');
+      toast.error(t('errors.phoneFormat'));
       return;
     }
 
@@ -136,27 +149,27 @@ export function CreateCustomerModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create a new customer</DialogTitle>
+          <DialogTitle>{t('createModal.title')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Basic Information</h3>
+            <h3 className="text-sm font-semibold">{t('fields.basic')}</h3>
 
             <div className="grid grid-cols-2 gap-4">
               {/* Phone Number */}
               <div className="space-y-2">
                 <Label htmlFor="phone">
-                  Phone number <span className="text-red-500">*</span>
+                  {t('fields.phone')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="phone"
                   {...register('phone', {
-                    required: 'Phone number is required',
+                    required: t('errors.phoneRequired'),
                     validate: (value) =>
                       validateCameroonPhone(value) ||
-                      'Phone must be in format +237XXXXXXXXX',
+                      t('errors.phoneFormat'),
                   })}
                   placeholder="+237 670 123 456"
                   className={errors.phone ? 'border-red-500' : ''}
@@ -169,15 +182,15 @@ export function CreateCustomerModal({
               {/* Full Name */}
               <div className="space-y-2">
                 <Label htmlFor="name">
-                  Full name <span className="text-red-500">*</span>
+                  {t('fields.fullName')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="name"
                   {...register('name', {
-                    required: 'Name is required',
+                    required: t('errors.nameRequired'),
                     minLength: {
                       value: 2,
-                      message: 'Name must be at least 2 characters',
+                      message: t('errors.nameMinLength'),
                     },
                   })}
                   placeholder="John Doe"
@@ -192,14 +205,14 @@ export function CreateCustomerModal({
             <div className="grid grid-cols-2 gap-4">
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('fields.email')}</Label>
                 <Input
                   id="email"
                   type="email"
                   {...register('email', {
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: 'Invalid email format',
+                      message: t('errors.emailFormat'),
                     },
                   })}
                   placeholder="john.doe@example.com"
@@ -212,13 +225,13 @@ export function CreateCustomerModal({
 
               {/* Customer Type */}
               <div className="space-y-2">
-                <Label htmlFor="customerType">Customer type</Label>
+                <Label htmlFor="customerType">{t('fields.type')}</Label>
                 <Select
                   value={customerType || 'individual'}
                   onValueChange={(value) => setValue('customerType', value)}
                 >
                   <SelectTrigger id="customerType">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={commonT('placeholders.selectType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CUSTOMER_TYPES.map((type) => (
@@ -236,12 +249,12 @@ export function CreateCustomerModal({
 
           {/* Location Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Location</h3>
+            <h3 className="text-sm font-semibold">{t('fields.location')}</h3>
 
             <div className="grid grid-cols-2 gap-4">
               {/* City */}
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city">{t('fields.city')}</Label>
                 <Input
                   id="city"
                   {...register('city')}
@@ -251,16 +264,16 @@ export function CreateCustomerModal({
 
               {/* Region */}
               <div className="space-y-2">
-                <Label htmlFor="region">Region</Label>
+                <Label htmlFor="region">{t('fields.region')}</Label>
                 <Select
                   value={region || ''}
                   onValueChange={(value) => setValue('region', value)}
                 >
                   <SelectTrigger id="region">
-                    <SelectValue placeholder="Select region" />
+                    <SelectValue placeholder={commonT('placeholders.selectRegion')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {CAMEROON_REGIONS.map((reg) => (
+                    {CAMEROON_REGIONS_LOCALIZED.map((reg) => (
                       <SelectItem key={reg.value} value={reg.value}>
                         {reg.label}
                       </SelectItem>
@@ -272,11 +285,11 @@ export function CreateCustomerModal({
 
             {/* Address */}
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address">{t('fields.address')}</Label>
               <Textarea
                 id="address"
                 {...register('address')}
-                placeholder="Enter full address"
+                placeholder={commonT('placeholders.enterAddress')}
                 rows={2}
               />
             </div>
@@ -286,18 +299,18 @@ export function CreateCustomerModal({
 
           {/* Additional Information */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Additional Information</h3>
+            <h3 className="text-sm font-semibold">{t('fields.additional')}</h3>
 
             {/* Tags */}
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags</Label>
+              <Label htmlFor="tags">{t('fields.tags')}</Label>
               <Input
                 id="tags"
                 {...register('tags')}
                 placeholder="VIP, Wholesale, Returning (comma-separated)"
               />
               <p className="text-xs text-muted-foreground">
-                Separate multiple tags with commas
+                {commonT('placeholders.tagsHint')}
               </p>
             </div>
           </div>
@@ -306,7 +319,7 @@ export function CreateCustomerModal({
 
           {/* Notification Preferences */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Notification Preferences</h3>
+            <h3 className="text-sm font-semibold">{t('fields.notifications')}</h3>
 
             <div className="space-y-3">
               {/* SMS Notifications */}
@@ -322,7 +335,7 @@ export function CreateCustomerModal({
                   htmlFor="smsNotifications"
                   className="text-sm font-normal cursor-pointer"
                 >
-                  SMS notifications
+                  {t('fields.sms')}
                 </Label>
               </div>
 
@@ -339,7 +352,7 @@ export function CreateCustomerModal({
                   htmlFor="whatsappNotifications"
                   className="text-sm font-normal cursor-pointer"
                 >
-                  WhatsApp notifications
+                  {t('fields.whatsapp')}
                 </Label>
               </div>
             </div>
@@ -353,10 +366,10 @@ export function CreateCustomerModal({
               onClick={handleCancel}
               disabled={loading}
             >
-              Cancel
+              {commonT('actions.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Add customer'}
+              {loading ? commonT('actions.creating') : commonT('actions.addCustomer')}
             </Button>
           </DialogFooter>
         </form>

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Separator } from '@/components/shadcn-ui/separator';
@@ -26,6 +27,8 @@ export function PaymentCard({
   currency,
   itemCount,
 }: PaymentCardProps) {
+  const t = useTranslations('Orders.details.payment');
+  const statusT = useTranslations('Orders.badges');
   return (
     <Card>
       <CardHeader className="bg-green-50 dark:bg-green-900/10 border-b">
@@ -34,7 +37,7 @@ export function PaymentCard({
             <CreditCard className="h-4 w-4 text-green-700 dark:text-green-400" />
           </div>
           <CardTitle className="text-base capitalize">
-            {paymentStatus?.toLowerCase()}
+            {statusT(paymentStatus?.toLowerCase() || 'unknown')}
           </CardTitle>
         </div>
       </CardHeader>
@@ -42,8 +45,8 @@ export function PaymentCard({
         {/* Subtotal */}
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            Subtotal
-            <span className="ml-2">{itemCount} {itemCount === 1 ? 'item' : 'items'}</span>
+            {t('subtotal')}
+            <span className="ml-2">{t('itemCount', { count: itemCount })}</span>
           </span>
           <span className="font-medium">{currency} {formatCurrency(subtotal)}</span>
         </div>
@@ -51,7 +54,7 @@ export function PaymentCard({
         {/* Shipping */}
         {parseFloat(shippingCost) > 0 && (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Shipping</span>
+            <span className="text-muted-foreground">{t('shipping')}</span>
             <span className="font-medium">{currency} {formatCurrency(shippingCost)}</span>
           </div>
         )}
@@ -59,7 +62,7 @@ export function PaymentCard({
         {/* Tax */}
         {parseFloat(taxAmount) > 0 && (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Tax</span>
+            <span className="text-muted-foreground">{t('tax')}</span>
             <span className="font-medium">{currency} {formatCurrency(taxAmount)}</span>
           </div>
         )}
@@ -67,7 +70,7 @@ export function PaymentCard({
         {/* Discount */}
         {parseFloat(discountAmount) > 0 && (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Discount</span>
+            <span className="text-muted-foreground">{t('discount')}</span>
             <span className="font-medium text-red-600">
               -{currency} {formatCurrency(discountAmount)}
             </span>
@@ -78,7 +81,7 @@ export function PaymentCard({
 
         {/* Total */}
         <div className="flex items-center justify-between">
-          <span className="font-semibold">Total</span>
+          <span className="font-semibold">{t('total')}</span>
           <span className="font-bold text-lg">{currency} {formatCurrency(totalAmount)}</span>
         </div>
 
@@ -87,7 +90,7 @@ export function PaymentCard({
         {/* Payment Method */}
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium capitalize">
-            {paymentStatus?.toLowerCase()}
+            {statusT(paymentStatus?.toLowerCase() || 'unknown')}
           </span>
           <span className="font-medium">{currency} {formatCurrency(totalAmount)}</span>
         </div>

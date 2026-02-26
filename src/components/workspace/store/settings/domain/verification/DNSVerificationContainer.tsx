@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { CustomDomainDocument } from '@/services/graphql/domains/queries/custom-domains/__generated__/customDomain.generated';
 import { VerifyCustomDomainDocument } from '@/services/graphql/domains/mutations/custom-domains/__generated__/verifyCustomDomain.generated';
 // import { WorkspaceHostingCustomDomainStatusChoices } from '@/types/hosting/graphql-base';
@@ -39,6 +40,8 @@ interface DNSRecord {
 
 export function DNSVerificationContainer() {
   const params = useParams();
+  const t = useTranslations('Domains');
+  const tGen = useTranslations('General');
   const router = useRouter();
   const domainId = params.customdomainid as string;
 
@@ -64,12 +67,12 @@ export function DNSVerificationContainer() {
       });
 
       if (verifyData?.verifyCustomDomain?.success) {
-        toast.success('DNS verification initiated');
+        toast.success(t('dnsVerifiedToast'));
       } else {
-        toast.error(verifyData?.verifyCustomDomain?.error || 'Verification failed');
+        toast.error(verifyData?.verifyCustomDomain?.error || t('verificationFailed'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Verification failed');
+      toast.error(err.message || t('verificationFailed'));
       console.error('Verify domain error:', err);
     }
   };
@@ -85,7 +88,7 @@ export function DNSVerificationContainer() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Failed to load domain: {error.message}</AlertDescription>
+        <AlertDescription>{t('failedToLoad')}: {error.message}</AlertDescription>
       </Alert>
     );
   }
@@ -94,7 +97,7 @@ export function DNSVerificationContainer() {
   if (!domain) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Domain not found</AlertDescription>
+        <AlertDescription>{t('domainNotFound')}</AlertDescription>
       </Alert>
     );
   }
@@ -110,40 +113,45 @@ export function DNSVerificationContainer() {
   const isSSLProvisioned = domain.sslEnabled;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push(`/workspace/${params.workspace_id}/store/settings/domains`)}
-            className="md:hidden"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <Globe className="h-6 w-6 text-muted-foreground" />
-          <div>
+    <div className="space-y-8 pb-10 max-w-[1000px] mx-auto min-w-0 px-4 md:px-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push(`/workspace/${params.workspace_id}/store/settings/domains`)}
+              className="-ml-2"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Globe className="h-6 w-6 text-muted-foreground" />
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold">{domain.domain}</h1>
+              <h1 className="text-2xl font-bold tracking-tight">{domain.domain}</h1>
               {!isVerified && (
-                <Badge variant="destructive" className="text-xs">Invalid DNS</Badge>
+                <Badge variant="destructive" className="text-xs">{t('invalidDns')}</Badge>
               )}
               {isVerified && (
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 text-xs">Connected</Badge>
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 text-xs">{t('connected')}</Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Managed by External Provider •
-              Added on {new Date(domain.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </p>
+          </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <Button variant="outline" onClick={() => router.back()}>
+              {tGen('back')}
+            </Button>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => router.back()}>
-            View
-          </Button>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {t('externalProvider')} • {t('addedOn', {
+            date: (domain.createdAt ? new Date(domain.createdAt) : new Date()).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            }),
+          })}
+        </p>
       </div>
 
       {/* Help Banner */}
@@ -152,10 +160,10 @@ export function DNSVerificationContainer() {
           <Info className="h-4 w-4 text-purple-600" />
           <div className="flex items-center justify-between w-full">
             <AlertDescription className="text-purple-900">
-              Hey, need help with your domain?
+              {t('needHelp')}
             </AlertDescription>
             <Button variant="outline" size="sm" className="ml-4">
-              Help setup domain
+              {t('helpSetup')}
             </Button>
           </div>
         </Alert>
@@ -168,13 +176,13 @@ export function DNSVerificationContainer() {
             {!isDNSValid && (
               <>
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                <h3 className="text-lg font-semibold">DNS records are not pointing to Huzilerz</h3>
+                <h3 className="text-lg font-semibold">{t('dnsNotPointing')}</h3>
               </>
             )}
             {isDNSValid && (
               <>
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
-                <h3 className="text-lg font-semibold">DNS records are correctly configured</h3>
+                <h3 className="text-lg font-semibold">{t('dnsCorrect')}</h3>
               </>
             )}
           </div>
@@ -183,21 +191,21 @@ export function DNSVerificationContainer() {
           {!isDNSValid && (
             <>
               <p className="text-sm">
-                1. Log in to your provider and open DNS management for {domain.domain}
+                {t('dnsStep1', { domain: domain.domain })}
               </p>
 
               {/* Remove Records */}
               {recordsToRemove.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">2. Remove these existing records</p>
+                  <p className="text-sm font-medium">{t('dnsStep2')}</p>
                   <div className="border rounded-lg overflow-x-auto">
                     <div className="min-w-[400px]">
                       <Table>
                         <TableHeader className="bg-muted/50">
                           <TableRow>
-                            <TableHead className="w-24">Type</TableHead>
-                            <TableHead className="w-32">Name</TableHead>
-                            <TableHead>Current values</TableHead>
+                            <TableHead className="w-24">{t('type')}</TableHead>
+                            <TableHead className="w-32">{t('name')}</TableHead>
+                            <TableHead>{t('currentValues')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -218,17 +226,17 @@ export function DNSVerificationContainer() {
               {/* Add Records */}
               {recordsToAdd.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">3. Add these new DNS records</p>
+                  <p className="text-sm font-medium">{t('dnsStep3')}</p>
                   <div className="border rounded-lg overflow-x-auto">
                     <div className="min-w-[500px]">
                       <Table>
                         <TableHeader className="bg-muted/50">
                           <TableRow>
-                            <TableHead className="w-24">Type</TableHead>
-                            <TableHead className="w-32">Name</TableHead>
-                            <TableHead>Current value</TableHead>
+                            <TableHead className="w-24">{t('type')}</TableHead>
+                            <TableHead className="w-32">{t('name')}</TableHead>
+                            <TableHead>{t('currentValue')}</TableHead>
                             <TableHead className="w-12"></TableHead>
-                            <TableHead>Update to</TableHead>
+                            <TableHead>{t('updateTo')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -236,7 +244,7 @@ export function DNSVerificationContainer() {
                             <TableRow key={idx}>
                               <TableCell className="font-medium">{record.type}</TableCell>
                               <TableCell>{record.name}</TableCell>
-                              <TableCell className="text-muted-foreground">(empty)</TableCell>
+                              <TableCell className="text-muted-foreground">{t('empty')}</TableCell>
                               <TableCell>
                                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
                               </TableCell>
@@ -253,16 +261,16 @@ export function DNSVerificationContainer() {
               {/* Update Records */}
               {recordsToUpdate.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">4. Update these existing records</p>
+                  <p className="text-sm font-medium">{t('dnsStep4')}</p>
                   <div className="border rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader className="bg-muted/50">
                         <TableRow>
-                          <TableHead className="w-24">Type</TableHead>
-                          <TableHead className="w-32">Name</TableHead>
-                          <TableHead>Current value</TableHead>
+                          <TableHead className="w-24">{t('type')}</TableHead>
+                          <TableHead className="w-32">{t('name')}</TableHead>
+                          <TableHead>{t('currentValue')}</TableHead>
                           <TableHead className="w-12"></TableHead>
-                          <TableHead>Update to</TableHead>
+                          <TableHead>{t('updateTo')}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -289,7 +297,7 @@ export function DNSVerificationContainer() {
                   disabled={verifying}
                   className="bg-black hover:bg-black/90 text-white"
                 >
-                  {verifying ? 'Verifying...' : 'I updated DNS records'}
+                  {verifying ? t('verifying') : t('iUpdatedDns')}
                 </Button>
               </div>
             </>
@@ -303,12 +311,12 @@ export function DNSVerificationContainer() {
           {isDNSValid ? (
             <>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span className="text-green-600">DNS propagation complete</span>
+              <span className="text-green-600">{t('dnsPropagationComplete')}</span>
             </>
           ) : (
             <>
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              <span className="text-muted-foreground">DNS propagation</span>
+              <span className="text-muted-foreground">{t('dnsPropagation')}</span>
             </>
           )}
         </div>
@@ -317,12 +325,12 @@ export function DNSVerificationContainer() {
           {isSSLProvisioned ? (
             <>
               <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span className="text-green-600">TLS certificate is provisioned</span>
+              <span className="text-green-600">{t('tlsProvisioned')}</span>
             </>
           ) : (
             <>
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              <span className="text-muted-foreground">TLS certificate is not provisioned</span>
+              <span className="text-muted-foreground">{t('tlsNotProvisioned')}</span>
             </>
           )}
         </div>
@@ -333,9 +341,9 @@ export function DNSVerificationContainer() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Domain is not live</strong>
+            <strong>{t('domainNotLive')}</strong>
             <br />
-            Ensure DNS records are pointing to Huzilerz
+            {t('ensureDnsPointing')}
           </AlertDescription>
         </Alert>
       )}

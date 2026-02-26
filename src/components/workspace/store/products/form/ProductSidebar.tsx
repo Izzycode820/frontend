@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/shadcn-ui/select'
+import { useTranslations } from 'next-intl'
 
 interface ProductSidebarProps {
   status: 'draft' | 'published'
@@ -19,29 +20,30 @@ export function ProductSidebar({
   status,
   onStatusChange,
 }: ProductSidebarProps) {
+  const t = useTranslations('Products.form.sidebar');
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Status</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Product Status */}
         <div className="space-y-2">
-          <Label htmlFor="status">Product Status</Label>
+          <Label htmlFor="status">{t('productStatus')}</Label>
           <Select value={status} onValueChange={onStatusChange}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="draft">{t('draft')}</SelectItem>
+              <SelectItem value="published">{t('published')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Product Availability */}
         <div className="space-y-2">
-          <Label>Product Availability</Label>
+          <Label>{t('availability')}</Label>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <input
@@ -51,7 +53,7 @@ export function ProductSidebar({
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <Label htmlFor="online-store" className="text-sm font-normal">
-                Online store
+                {t('onlineStore')}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
@@ -61,7 +63,7 @@ export function ProductSidebar({
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <Label htmlFor="pos" className="text-sm font-normal">
-                Point of Sale (POS)
+                {t('pos')}
               </Label>
             </div>
           </div>

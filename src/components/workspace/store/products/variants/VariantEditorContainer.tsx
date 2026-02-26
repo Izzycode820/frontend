@@ -10,6 +10,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { GetProductDocument } from "@/services/graphql/admin-store/queries/products/__generated__/GetProduct.generated";
 import { UpdateVariantDocument } from "@/services/graphql/admin-store/mutations/variants/__generated__/UpdateVariant.generated";
@@ -29,6 +30,7 @@ export default function VariantEditorContainer() {
   const currentWorkspace = useWorkspaceStore(
     workspaceSelectors.currentWorkspace,
   );
+  const t = useTranslations("Products.variants.editor");
 
   const productId = params.id as string;
   const variantIdParam = params.variant_id as string;
@@ -123,15 +125,15 @@ export default function VariantEditorContainer() {
       });
 
       if (updateData_?.updateVariant?.success) {
-        toast.success("Variant updated successfully");
+        toast.success(t("updateSuccess"));
         refetch(); // Refresh data
       } else {
         toast.error(
-          updateData_?.updateVariant?.error || "Failed to update variant",
+          updateData_?.updateVariant?.error || t("updateFailed"),
         );
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to update variant");
+      toast.error(err.message || t("updateFailed"));
       console.error("Update variant error:", err);
     } finally {
       setIsSaving(false);
@@ -149,7 +151,7 @@ export default function VariantEditorContainer() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Loading variants...</p>
+          <p className="text-muted-foreground">{t("loading")}</p>
         </div>
       </div>
     );
@@ -160,7 +162,7 @@ export default function VariantEditorContainer() {
     return (
       <Card className="p-6">
         <div className="text-center text-destructive">
-          <p>Failed to load product</p>
+          <p>{t("loadFailed")}</p>
           {error && (
             <p className="text-sm text-muted-foreground">{error.message}</p>
           )}
@@ -201,7 +203,7 @@ export default function VariantEditorContainer() {
         ) : (
           <Card className="p-6">
             <div className="text-center text-muted-foreground">
-              <p>Select a variant to edit</p>
+              <p>{t("selectToEdit")}</p>
             </div>
           </Card>
         )}

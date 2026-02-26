@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Check, ChevronsUpDown, Plus, X } from 'lucide-react';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -25,6 +26,7 @@ export function CustomerSearchDropdown({
   onCustomerIdChange,
   onCreateCustomerClick,
 }: CustomerSearchDropdownProps) {
+  const t = useTranslations('Orders.form.customer');
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -67,7 +69,7 @@ export function CustomerSearchDropdown({
             className="w-full justify-between text-left font-normal"
           >
             <span className="truncate">
-              {selectedCustomer ? selectedCustomer.name : 'Search or create a customer'}
+              {selectedCustomer ? selectedCustomer.name : t('searchPlaceholder')}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -75,13 +77,13 @@ export function CustomerSearchDropdown({
         <PopoverContent className="w-full p-0" align="start">
           <Command shouldFilter={false}>
             <CommandInput
-              placeholder="Search customers..."
+              placeholder={t('inputPlaceholder')}
               value={searchTerm}
               onValueChange={setSearchTerm}
             />
             <CommandEmpty>
               <div className="p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-2">No customer found</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('noResults')}</p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -92,7 +94,7 @@ export function CustomerSearchDropdown({
                   className="w-full"
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Create a new customer
+                  {t('createAction')}
                 </Button>
               </div>
             </CommandEmpty>
@@ -106,12 +108,12 @@ export function CustomerSearchDropdown({
                 className="border-b"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Create a new customer
+                {t('createAction')}
               </CommandItem>
 
               {/* Customer list */}
               {loading ? (
-                <CommandItem disabled>Loading customers...</CommandItem>
+                <CommandItem disabled>{t('loading')}</CommandItem>
               ) : (
                 customers.map((customer) => (
                   <CommandItem

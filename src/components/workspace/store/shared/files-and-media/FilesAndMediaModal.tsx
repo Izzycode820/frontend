@@ -13,6 +13,7 @@ import { SearchAndFilters } from './SearchAndFilters'
 import { ViewModeToggle } from './ViewModeToggle'
 import type { MediaModalProps, MediaItem } from './types'
 import { Link, Sparkles } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export function FilesAndMediaModal({
   open,
@@ -22,6 +23,7 @@ export function FilesAndMediaModal({
   maxSelection,
   selectedItems = [],
 }: MediaModalProps) {
+  const t = useTranslations('Shared.media');
   const [activeTab, setActiveTab] = useState('library')
   const {
     selectedIds,
@@ -124,17 +126,17 @@ export function FilesAndMediaModal({
       <div className="text-sm text-muted-foreground">
         {selectedCount > 0 && (
           <span>
-            {selectedCount} selected
-            {maxSelection && ` (max ${maxSelection})`}
+            {t('selectedCount', { count: selectedCount })}
+            {maxSelection && ` ${t('maxSelected', { max: maxSelection })}`}
           </span>
         )}
       </div>
       <div className="flex gap-2">
         <Button variant="outline" onClick={handleCancel}>
-          Cancel
+          {t('cancel')}
         </Button>
         <Button onClick={handleConfirm} disabled={selectedCount === 0}>
-          Done
+          {t('done')}
         </Button>
       </div>
     </div>
@@ -144,7 +146,7 @@ export function FilesAndMediaModal({
     <ResponsiveModal
       open={open}
       onClose={handleCancel}
-      title="Select files"
+      title={t('title')}
       dialogClassName="max-w-[95vw] w-[1000px] h-[85vh] max-h-[900px] flex flex-col"
       footer={footerContent}
     >
@@ -159,15 +161,15 @@ export function FilesAndMediaModal({
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="flex-wrap h-auto">
                 <TabsTrigger value="library" className="text-xs md:text-sm">
-                  {isMobile ? 'Library' : 'Media Library'}
+                  {isMobile ? t('libraryShort') : t('library')}
                 </TabsTrigger>
                 <TabsTrigger value="url" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
                   <Link className="h-3 w-3 md:h-4 md:w-4" />
-                  URL
+                  {t('url')}
                 </TabsTrigger>
                 <TabsTrigger value="generate" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
                   <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
-                  {isMobile ? 'AI' : 'AI Generate'}
+                  {isMobile ? t('aiShort') : t('ai')}
                 </TabsTrigger>
               </TabsList>
             </Tabs>

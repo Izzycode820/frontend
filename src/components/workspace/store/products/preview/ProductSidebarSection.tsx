@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn-ui/button";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Star, Package, Truck } from "lucide-react";
@@ -54,6 +55,7 @@ export function ProductSidebarSection({
   requiresShipping,
   weight,
 }: ProductSidebarSectionProps) {
+  const t = useTranslations("Products.previewPage");
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
   // Parse options if it's a JSON array
@@ -110,7 +112,7 @@ export function ProductSidebarSection({
                   />
                 ))}
               </div>
-              <span className="text-sm text-muted-foreground">({reviewCount})</span>
+              <span className="text-sm text-muted-foreground">{t("reviewCount", { count: reviewCount })}</span>
             </div>
           )}
         </div>
@@ -163,7 +165,7 @@ export function ProductSidebarSection({
           className="w-full rounded-none h-12 uppercase font-bold tracking-wider"
           disabled
         >
-          Add into Cart
+          {t("addToCart")}
         </Button>
       </div>
 
@@ -174,17 +176,17 @@ export function ProductSidebarSection({
           {isInStock ? (
             <>
               <Package className="h-4 w-4 text-green-600" />
-              <span className="text-green-600 font-medium">Available</span>
+              <span className="text-green-600 font-medium">{t("available")}</span>
               {totalStock !== null && totalStock > 0 && (
                 <span className="text-muted-foreground">
-                  ({totalStock} in stock)
+                  {t("inStock", { count: totalStock })}
                 </span>
               )}
             </>
           ) : (
             <>
               <Package className="h-4 w-4 text-destructive" />
-              <span className="text-destructive font-medium">Out of stock</span>
+              <span className="text-destructive font-medium">{t("outOfStock")}</span>
             </>
           )}
         </div>
@@ -193,7 +195,7 @@ export function ProductSidebarSection({
         {requiresShipping && (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Truck className="h-4 w-4" />
-            <span>Shipping within 3-4 days</span>
+            <span>{t("shippingDays", { days: "3-4" })}</span>
           </div>
         )}
       </div>
@@ -201,7 +203,7 @@ export function ProductSidebarSection({
       {/* Description - matching sneaker theme accordion style */}
       {description && (
         <div className="border-t pt-6">
-          <h3 className="font-semibold mb-2">Description</h3>
+          <h3 className="font-semibold mb-2">{t("description")}</h3>
           <div className="prose prose-sm max-w-none">
             <p className="text-muted-foreground whitespace-pre-wrap">{description}</p>
           </div>
@@ -210,12 +212,9 @@ export function ProductSidebarSection({
 
       {/* Shipping & Returns */}
       <div className="border-t pt-6">
-        <h3 className="font-semibold mb-2">Shipping & Returns</h3>
+        <h3 className="font-semibold mb-2">{t("shippingReturns")}</h3>
         <div className="prose prose-sm text-muted-foreground">
-          <p>
-            We ship every where in Cameroon. Standard shipping takes 1-2 business days.
-            Express shipping options available at checkout.
-          </p>
+          <p>{t("shippingReturnsText")}</p>
         </div>
       </div>
 
@@ -224,13 +223,13 @@ export function ProductSidebarSection({
         <div className="border-t pt-4 flex flex-col gap-2 text-sm">
           {brand && (
             <div className="flex gap-2">
-              <span className="text-muted-foreground">Brand:</span>
+              <span className="text-muted-foreground">{t("brand")}:</span>
               <span className="font-medium">{brand}</span>
             </div>
           )}
           {vendor && (
             <div className="flex gap-2">
-              <span className="text-muted-foreground">Vendor:</span>
+              <span className="text-muted-foreground">{t("vendor")}:</span>
               <span className="font-medium">{vendor}</span>
             </div>
           )}
@@ -240,7 +239,7 @@ export function ProductSidebarSection({
       {/* Tags - Show if available */}
       {tags && Array.isArray(tags) && tags.length > 0 && (
         <div className="border-t pt-4">
-          <span className="text-sm text-muted-foreground mb-2 block">Tags:</span>
+          <span className="text-sm text-muted-foreground mb-2 block">{t("tags")}:</span>
           <div className="flex gap-2 flex-wrap">
             {tags.map((tag: string, index: number) => (
               <Badge key={index} variant="secondary">

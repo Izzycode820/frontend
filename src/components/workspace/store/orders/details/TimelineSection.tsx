@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { format } from 'date-fns';
 import { Button } from '@/components/shadcn-ui/button';
@@ -33,6 +34,8 @@ export function TimelineSection({
   events = [],
   onCommentAdded,
 }: TimelineSectionProps) {
+  const t = useTranslations('Orders.details.timeline');
+  const commonT = useTranslations('Orders.details.toasts');
   const [comment, setComment] = useState('');
 
   // Sorting events: Newest first
@@ -73,7 +76,7 @@ export function TimelineSection({
           addOrderComment: {
             __typename: 'AddOrderComment',
             success: true,
-            message: 'Comment added',
+            message: commonT('commentPosted'),
             error: null,
             comment: newComment as any
           }
@@ -115,23 +118,23 @@ export function TimelineSection({
       });
 
       if (result.data?.addOrderComment?.success) {
-        toast.success('Comment posted');
+        toast.success(commonT('commentPosted'));
         setComment('');
         // No need to call onCommentAdded() if we are updating cache directly, 
         // but keeping it if parent needs to do other things
         onCommentAdded?.();
       } else {
-        toast.error(result.data?.addOrderComment?.error || 'Failed to post comment');
+        toast.error(result.data?.addOrderComment?.error || commonT('unexpectedError'));
       }
     } catch (error) {
-      toast.error('An error occurred while posting comment');
+      toast.error(commonT('unexpectedError'));
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Timeline</CardTitle>
+        <CardTitle className="text-base">{t('title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Comment Input */}
@@ -141,7 +144,7 @@ export function TimelineSection({
               <Input
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Leave a comment..."
+                placeholder={t('leaveComment')}
                 className="pr-16"
                 disabled={postingComment}
                 onKeyDown={(e) => {
@@ -158,11 +161,11 @@ export function TimelineSection({
                 onClick={handlePostComment}
                 disabled={postingComment || !comment.trim()}
               >
-                Post
+                {t('post')}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2 text-right">
-              Only you and other staff can see comments
+              {t('staffOnly')}
             </p>
           </div>
         </div>
@@ -186,7 +189,7 @@ export function TimelineSection({
                         {event.author ? (
                           <span className="font-medium mr-1">{event.author.name}</span>
                         ) : (
-                          <span className="font-medium mr-1 text-muted-foreground">System</span>
+                          <span className="font-medium mr-1 text-muted-foreground">{t('system')}</span>
                         )}
                         {event.message}
                       </span>
@@ -198,15 +201,15 @@ export function TimelineSection({
                     {/* Metadata / Specifics */}
                     {event.type === 'ORDER_CREATED' && event.metadata?.order_source && (
                       <p className="text-xs text-muted-foreground">
-                        Order received from {event.metadata.order_source === 'whatsapp' ? 'WhatsApp' : event.metadata.order_source === 'payment' ? 'Payment Gateway' : 'Manual Entry'}
+                        {t('orderReceivedFrom')} {event.metadata.order_source === 'whatsapp' ? t('sources.whatsapp') : event.metadata.order_source === 'payment' ? t('sources.payment') : t('sources.manual')}
                       </p>
                     )}
                     {event.type === 'STATUS_CHANGE' && event.metadata && (
                       <p className="text-xs text-muted-foreground">
                         {event.metadata.old_status && event.metadata.new_status ?
-                          `Changed from ${event.metadata.old_status} to ${event.metadata.new_status}` :
+                          t('changedFromTo', { old: event.metadata.old_status, new: event.metadata.new_status }) :
                           event.metadata.tracking_number ?
-                            `Tracking: ${event.metadata.tracking_number}` :
+                            t('tracking', { number: event.metadata.tracking_number }) :
                             ''
                         }
                       </p>

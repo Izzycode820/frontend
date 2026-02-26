@@ -39,59 +39,59 @@ export function getStoreSidebarConfig(
   // Main navigation (matches Shopify 2024 exactly)
   const navMain: NavMainItem[] = [
     {
-      title: "Home",
+      title: "home",
       url: STORE_ROUTES.HOME(workspaceId),
       icon: IconHome,
     },
     {
-      title: "Orders",
+      title: "orders",
       url: STORE_ROUTES.ORDERS.LIST(workspaceId),
       icon: IconShoppingCart,
     },
     {
-      title: "Products",
+      title: "products",
       url: STORE_ROUTES.PRODUCTS.LIST(workspaceId),
       icon: IconPackage,
       defaultOpen: false,
       navigateToFirstChild: false, // Click navigates to Products page itself
       items: [
         {
-          title: "Inventory",
+          title: "inventory",
           url: STORE_ROUTES.PRODUCTS.INVENTORY(workspaceId),
         },
         {
-          title: "Collections",
+          title: "collections",
           url: STORE_ROUTES.PRODUCTS.COLLECTIONS(workspaceId),
         },
       ],
     },
     {
-      title: "Customers",
+      title: "customers",
       url: STORE_ROUTES.CUSTOMERS.LIST(workspaceId),
       icon: IconUsers,
     },
     {
-      title: "Analytics",
+      title: "analytics",
       url: STORE_ROUTES.ANALYTICS.OVERVIEW(workspaceId),
       icon: IconChartBar,
     },
     {
-      title: "Discounts",
+      title: "discounts",
       url: STORE_ROUTES.DISCOUNTS.LIST(workspaceId),
       icon: IconDiscount,
     },
     {
-      title: "Studio",
+      title: "studio",
       url: STORE_ROUTES.STUDIO.BLOGS.LIST(workspaceId),
       icon: IconPencil,
       navigateToFirstChild: true,
       items: [
         {
-          title: "Blog posts",
+          title: "blogPosts",
           url: STORE_ROUTES.STUDIO.BLOGS.LIST(workspaceId),
         },
         {
-          title: "Pages",
+          title: "pages",
           url: STORE_ROUTES.STUDIO.PAGES.LIST(workspaceId),
         },
       ],
@@ -101,24 +101,24 @@ export function getStoreSidebarConfig(
   // Multiple sections (Shopify-style: Sales channels + Apps)
   const navSections: NavSectionProps[] = [
     {
-      label: "Sales channels",
+      label: "salesChannels",
       items: [
         {
-          name: "Online Store",
+          name: "onlineStore",
           url: STORE_ROUTES.CHANNELS.THEMES(workspaceId), // Points to first child
           icon: IconWorldWww,
           navigateToFirstChild: true, // Click opens children and navigates to first child
           items: [
             {
-              title: "Themes",
+              title: "themes",
               url: STORE_ROUTES.CHANNELS.THEMES(workspaceId),
             },
             {
-              title: "Navigation",
+              title: "navigation",
               url: STORE_ROUTES.CHANNELS.NAVIGATION.LIST(workspaceId),
             },
             {
-              title: "Preferences",
+              title: "preferences",
               url: STORE_ROUTES.CHANNELS.PREFERENCES(workspaceId),
             },
           ],
@@ -130,12 +130,12 @@ export function getStoreSidebarConfig(
   // Secondary navigation (bottom) - Notifications above Settings
   const navSecondary: NavSecondaryItem[] = [
     {
-      title: "Notifications",
+      title: "notifications",
       url: `#notifications:${workspaceId}`, // Embed ID for robust extraction
       icon: IconBell,
     },
     {
-      title: "Settings",
+      title: "settings",
       url: STORE_ROUTES.SETTINGS.GENERAL(workspaceId),
       icon: IconSettings,
     },
@@ -143,7 +143,7 @@ export function getStoreSidebarConfig(
 
   // Workspace configuration
   const workspaceConfig: WorkspaceConfig = {
-    name: "Store",
+    name: "store",
     icon: IconBuildingStore,
   }
 
@@ -160,7 +160,7 @@ export function getStoreSidebarConfig(
 // Export default config (for static use without workspace ID)
 export const defaultStoreConfig = {
   workspaceConfig: {
-    name: "Store",
+    name: "store",
     icon: IconBuildingStore,
   },
 }

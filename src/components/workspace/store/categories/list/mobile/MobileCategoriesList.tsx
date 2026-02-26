@@ -22,6 +22,7 @@ import {
     SelectValue,
 } from '@/components/shadcn-ui/select';
 import { Label } from '@/components/shadcn-ui/label';
+import { useTranslations } from 'next-intl';
 
 interface Category {
     id: string;
@@ -74,6 +75,7 @@ export function MobileCategoriesList({
     featuredFilter,
     onFeaturedFilterChange,
 }: MobileCategoriesListProps) {
+    const t = useTranslations('Categories.mobile');
     const isSelectionMode = selectedCategories.length > 0;
     const activeFilterCount = [visibilityFilter, featuredFilter].filter(Boolean).length;
 
@@ -89,7 +91,7 @@ export function MobileCategoriesList({
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                     <Input
-                        placeholder="Search categories..."
+                        placeholder={t('searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="pl-10 h-12 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
@@ -113,42 +115,42 @@ export function MobileCategoriesList({
                     <SheetContent side="bottom" className="h-[85vh] rounded-t-[20px] p-0">
                         <div className="flex flex-col h-full">
                             <SheetHeader className="p-6 pb-2 text-left">
-                                <SheetTitle className="text-xl">Filters</SheetTitle>
+                                <SheetTitle className="text-xl">{t('filters')}</SheetTitle>
                             </SheetHeader>
 
                             <div className="flex-1 overflow-y-auto p-6 pt-2 space-y-6">
                                 {/* Visibility Filter */}
                                 <div className="space-y-2">
-                                    <Label>Visibility</Label>
+                                    <Label>{t('visibility')}</Label>
                                     <Select
                                         value={visibilityFilter || 'all'}
                                         onValueChange={(val) => onVisibilityFilterChange(val === 'all' ? undefined : val)}
                                     >
                                         <SelectTrigger className="h-12">
-                                            <SelectValue placeholder="All Visibility" />
+                                            <SelectValue placeholder={t('allVisibility')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">All Visibility</SelectItem>
-                                            <SelectItem value="visible">Visible</SelectItem>
-                                            <SelectItem value="hidden">Hidden</SelectItem>
+                                            <SelectItem value="all">{t('allVisibility')}</SelectItem>
+                                            <SelectItem value="visible">{t('visible')}</SelectItem>
+                                            <SelectItem value="hidden">{t('hidden')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
 
                                 {/* Featured Filter */}
                                 <div className="space-y-2">
-                                    <Label>Featured</Label>
+                                    <Label>{t('featured')}</Label>
                                     <Select
                                         value={featuredFilter || 'all'}
                                         onValueChange={(val) => onFeaturedFilterChange(val === 'all' ? undefined : val)}
                                     >
                                         <SelectTrigger className="h-12">
-                                            <SelectValue placeholder="All Categories" />
+                                            <SelectValue placeholder={t('allCategories')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">All Categories</SelectItem>
-                                            <SelectItem value="featured">Featured Only</SelectItem>
-                                            <SelectItem value="not-featured">Not Featured</SelectItem>
+                                            <SelectItem value="all">{t('allCategories')}</SelectItem>
+                                            <SelectItem value="featured">{t('featuredOnly')}</SelectItem>
+                                            <SelectItem value="not-featured">{t('notFeatured')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -158,12 +160,12 @@ export function MobileCategoriesList({
                                 <div className="flex w-full gap-3">
                                     <SheetTrigger asChild>
                                         <Button variant="outline" className="flex-1 h-12" onClick={handleClearFilters}>
-                                            Clear all
+                                            {t('clearAll')}
                                         </Button>
                                     </SheetTrigger>
                                     <SheetTrigger asChild>
                                         <Button className="flex-1 h-12">
-                                            View Results
+                                            {t('viewResults')}
                                         </Button>
                                     </SheetTrigger>
                                 </div>
@@ -193,9 +195,9 @@ export function MobileCategoriesList({
                 </div>
             ) : categories.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-zinc-500 dark:text-zinc-400">No categories found</p>
+                    <p className="text-zinc-500 dark:text-zinc-400">{t('noCategoriesFound')}</p>
                     <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
-                        Try adjusting your search
+                        {t('adjustSearch')}
                     </p>
                 </div>
             ) : (
@@ -225,7 +227,7 @@ export function MobileCategoriesList({
                             ✕
                         </button>
                         <span className="text-sm font-medium px-2">
-                            {selectedCategories.length} selected
+                            {t('selectedCount', { count: selectedCategories.length })}
                         </span>
                     </div>
                 </div>

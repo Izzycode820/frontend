@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface Category {
     id: string;
@@ -34,6 +35,7 @@ export function CategoryCard({
     onSelect,
     onLongPress,
 }: CategoryCardProps) {
+    const t = useTranslations('Categories.mobile');
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
     const [isPressed, setIsPressed] = React.useState(false);
 
@@ -100,7 +102,7 @@ export function CategoryCard({
                     {category.name}
                 </span>
                 {!category.isVisible && (
-                    <span className="text-xs text-zinc-400">Hidden</span>
+                    <span className="text-xs text-zinc-400">{t('hidden')}</span>
                 )}
             </div>
 
@@ -110,7 +112,7 @@ export function CategoryCard({
                     {category.productCount}
                 </div>
                 <div className="text-xs text-zinc-500">
-                    products
+                    {t('products')}
                 </div>
             </div>
         </Link>

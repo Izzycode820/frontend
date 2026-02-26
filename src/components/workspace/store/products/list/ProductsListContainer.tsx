@@ -39,9 +39,11 @@ import { WorkspaceStoreProductStatusChoices } from '@/types/workspace/store/grap
 import { DeleteProductDocument } from '@/services/graphql/admin-store/mutations/products/__generated__/DeleteProduct.generated';
 import { DuplicateProductDocument } from '@/services/graphql/admin-store/mutations/products/__generated__/DuplicateProduct.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 export default function ProductsListContainer() {
+  const t = useTranslations('Products');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
@@ -270,7 +272,7 @@ export default function ProductsListContainer() {
         const newProductSlug = duplicateData?.duplicateProduct?.product?.slug;
 
         toast.success(
-          `Product duplicated: ${newProductName}${newProductSlug ? ` (${newProductSlug})` : ''}`
+          t('messages.duplicated', { name: `${newProductName}${newProductSlug ? ` (${newProductSlug})` : ''}` })
         );
 
         setDuplicateModalOpen(false);
@@ -279,10 +281,10 @@ export default function ProductsListContainer() {
         setProductToDuplicate(null);
         // refetch(); // Removed: Handled by cache update
       } else {
-        toast.error(duplicateData?.duplicateProduct?.error || 'Failed to duplicate product');
+        toast.error(duplicateData?.duplicateProduct?.error || t('messages.duplicateFailed'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to duplicate product');
+      toast.error(err.message || t('messages.duplicateFailed'));
       console.error('Duplicate product error:', err);
     }
   };
@@ -303,21 +305,20 @@ export default function ProductsListContainer() {
       });
 
       if (deleteData?.deleteProduct?.success) {
-        toast.success('Product deleted successfully');
-        toast.success('Product deleted successfully');
+        toast.success(t('messages.deleted'));
         // refetch(); // Removed: Handled by cache update
       } else {
-        toast.error(deleteData?.deleteProduct?.error || 'Failed to delete product');
+        toast.error(deleteData?.deleteProduct?.error || t('messages.deleteFailed'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete product');
+      toast.error(err.message || t('messages.deleteFailed'));
       console.error('Delete product error:', err);
     }
   };
 
   const handleBulkAction = (action: 'archive' | 'delete' | 'export') => {
     // TODO: Implement bulk actions with GraphQL mutations
-    toast.info(`Bulk ${action} ${selectedProducts.length} products - Coming soon!`);
+    toast.info(t('messages.bulkActionSoon', { action, count: selectedProducts.length }));
   };
 
   // Pagination handlers
@@ -362,17 +363,17 @@ export default function ProductsListContainer() {
   // Bulk delete handler for mobile
   const handleBulkDelete = async () => {
     if (selectedProducts.length === 0) return;
-    if (!confirm(`Delete ${selectedProducts.length} product(s)?`)) return;
+    if (!confirm(t('messages.confirmDelete', { count: selectedProducts.length }))) return;
 
     try {
       await Promise.all(
         selectedProducts.map(id => deleteProduct({ variables: { productId: id } }))
       );
-      toast.success(`${selectedProducts.length} product(s) deleted`);
+      toast.success(t('messages.productsDeleted', { count: selectedProducts.length }));
       setSelectedProducts([]);
       refetch();
     } catch (err) {
-      toast.error('Failed to delete products');
+      toast.error(t('messages.bulkDeleteFailed'));
     }
   };
 
@@ -389,7 +390,7 @@ export default function ProductsListContainer() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              <p>Failed to load products</p>
+              <p>{t('messages.loadFailed')}</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </CardContent>
@@ -409,9 +410,9 @@ export default function ProductsListContainer() {
 
   // Mobile filter chips
   const mobileFilterChips = [
-    { value: 'all', label: 'All' },
-    { value: 'PUBLISHED', label: 'Published' },
-    { value: 'DRAFT', label: 'Draft' },
+    { value: 'all', label: t('filters.all') },
+    { value: 'PUBLISHED', label: t('filters.published') },
+    { value: 'DRAFT', label: t('filters.draft') },
   ];
 
   // Map status filter to chip value
@@ -474,9 +475,9 @@ export default function ProductsListContainer() {
     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Products</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">
-          Manage your store products ({data?.products?.totalCount || 0} total)
+          {t('subtitle', { count: data?.products?.totalCount || 0 })}
         </p>
       </div>
 
@@ -506,7 +507,7 @@ export default function ProductsListContainer() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading products...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           </CardContent>
         </Card>
@@ -514,8 +515,8 @@ export default function ProductsListContainer() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No products found</p>
-              <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+              <p className="text-muted-foreground">{t('noProducts')}</p>
+              <p className="text-sm text-muted-foreground">{t('adjustFilters')}</p>
             </div>
           </CardContent>
         </Card>
@@ -545,7 +546,7 @@ export default function ProductsListContainer() {
 
               <PaginationItem>
                 <div className="flex items-center justify-center px-4 font-medium min-w-[100px]">
-                  Page {currentPage} of {Math.ceil(totalCount / pageSize)}
+                  {t('pageOf', { current: currentPage, total: Math.ceil(totalCount / pageSize) })}
                 </div>
               </PaginationItem>
 

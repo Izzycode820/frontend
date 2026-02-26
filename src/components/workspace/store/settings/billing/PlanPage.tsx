@@ -21,9 +21,12 @@ import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Settings, AlertCircle, RefreshCw, XCircle, Phone } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations, useFormatter } from 'next-intl';
 
 export function PlanPage() {
   const router = useRouter();
+  const t = useTranslations('Billing');
+  const format = useFormatter();
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
@@ -47,7 +50,7 @@ export function PlanPage() {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return format.dateTime(date, {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -55,8 +58,8 @@ export function PlanPage() {
   };
 
   const formatCurrency = (amount: number | null | undefined) => {
-    if (amount === null || amount === undefined) return '0';
-    return amount.toFixed(0);
+    if (amount === null || amount === undefined) return format.number(0);
+    return format.number(amount);
   };
 
   // Determine current price
@@ -84,13 +87,13 @@ export function PlanPage() {
 
       if (result.success) {
         setShowCancelDialog(false);
-        alert(result.message || 'Subscription cancelled successfully.');
+        toast.success(result.message || t('cancelSuccess'));
         window.location.reload();
       } else {
-        alert(`Cancellation failed: ${result.error || 'Unknown error'}`);
+        toast.error(t('cancelFailed', { error: result.error || 'Unknown error' }));
       }
     } catch (error: any) {
-      alert(`Cancellation error: ${error.message || 'Failed to cancel subscription'}`);
+      toast.error(t('cancelFailed', { error: error.message || 'Failed to cancel subscription' }));
     } finally {
       setIsCancelling(false);
     }
@@ -102,13 +105,13 @@ export function PlanPage() {
       const result = await resumeSubscription();
 
       if (result.success) {
-        alert(result.message || 'Subscription resumed successfully.');
+        toast.success(result.message || t('resumeSuccess'));
         window.location.reload();
       } else {
-        alert(`Resume failed: ${result.error || 'Unknown error'}`);
+        toast.error(t('resumeFailed', { error: result.error || 'Unknown error' }));
       }
     } catch (error: any) {
-      alert(`Resume error: ${error.message || 'Failed to resume subscription'}`);
+      toast.error(t('resumeFailed', { error: error.message || 'Failed to resume subscription' }));
     } finally {
       setIsResuming(false);
     }
@@ -122,13 +125,13 @@ export function PlanPage() {
 
       if (result.success) {
         setShowVoidDialog(false);
-        alert(result.message || 'Pending subscription cancelled. You can now start fresh.');
+        toast.success(result.message || t('cancelSuccess'));
         window.location.reload();
       } else {
-        alert(`Failed to cancel: ${result.error || 'Unknown error'}`);
+        toast.error(t('error') + `: ${result.error || 'Unknown error'}`);
       }
     } catch (error: any) {
-      alert(`Error: ${error.message || 'Failed to cancel pending subscription'}`);
+      toast.error(t('error') + `: ${error.message || 'Failed to cancel pending subscription'}`);
     } finally {
       setIsVoiding(false);
     }
@@ -136,7 +139,7 @@ export function PlanPage() {
 
   const handleRetryPayment = async () => {
     if (!phoneNumber.trim()) {
-      toast.error('Please enter your phone number');
+      toast.error(t('please_enter_your_phone_number'));
       return;
     }
 
@@ -150,17 +153,17 @@ export function PlanPage() {
       if (result.success) {
         setShowRetryDialog(false);
         if (result.existing_payment) {
-          toast.success('Payment session already active - complete the USSD prompt on your phone');
+          toast.success(t('ussdPromptHint'));
         } else {
-          toast.success(result.message || 'New payment session created - check your phone for USSD prompt');
+          toast.success(result.message || t('ussdPromptHint'));
         }
         // Refresh the page to update status
         window.location.reload();
       } else {
-        toast.error(result.error || 'Failed to initiate payment');
+        toast.error(result.error || t('failedToSaveGeneric'));
       }
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.error || error.message || 'Failed to retry payment';
+      const errorMessage = error?.response?.data?.error || error.message || t('failedToSaveGeneric');
       toast.error(errorMessage);
     } finally {
       setIsRetrying(false);
@@ -172,16 +175,16 @@ export function PlanPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Plan</h1>
+          <h1 className="text-2xl font-bold">{t('plan')}</h1>
         </div>
 
         {/* Plan Details Card */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">Plan details</CardTitle>
+              <CardTitle className="text-base font-semibold">{t('planDetails')}</CardTitle>
               <Button variant="outline" onClick={handleChangePlan}>
-                {isFree ? 'Choose plan' : 'Change plan'}
+                {isFree ? t('choosePlan') : t('changePlan')}
               </Button>
             </div>
           </CardHeader>
@@ -208,7 +211,7 @@ export function PlanPage() {
                     <h2 className="text-2xl sm:text-3xl font-bold">{plan?.name}</h2>
                   </div>
                   <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100 w-fit">
-                    PAYMENT PENDING
+                    {t('paymentPending')}
                   </Badge>
                 </div>
 
@@ -218,11 +221,10 @@ export function PlanPage() {
                     <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-amber-900 dark:text-amber-200">
-                        Payment Required
+                        {t('paymentRequired')}
                       </p>
                       <p className="text-sm text-amber-800 dark:text-amber-300 mt-1">
-                        Your {plan?.name} subscription is waiting for payment confirmation.
-                        Complete the payment or cancel to start fresh.
+                        {t('paymentRequiredDesc', { plan: plan?.name || '' })}
                       </p>
                     </div>
                   </div>
@@ -236,7 +238,7 @@ export function PlanPage() {
                     className="flex items-center justify-center gap-2 w-full sm:w-auto"
                   >
                     <RefreshCw className={`h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
-                    {isRetrying ? 'Processing...' : 'Complete Payment'}
+                    {isRetrying ? t('resuming') : t('completePayment')}
                   </Button>
                   <Button
                     variant="outline"
@@ -245,7 +247,7 @@ export function PlanPage() {
                     className="flex items-center justify-center gap-2 text-destructive hover:text-destructive w-full sm:w-auto"
                   >
                     <XCircle className="h-4 w-4" />
-                    Cancel Request
+                    {t('cancelRequest')}
                   </Button>
                 </div>
               </>
@@ -272,7 +274,7 @@ export function PlanPage() {
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-bold">XAF {formatCurrency(currentPrice)}</span>
                     <span className="text-lg text-muted-foreground">
-                      /{billingPeriod}
+                      /{billingPeriod === 'year' ? t('year') : t('month')}
                     </span>
                   </div>
 
@@ -280,8 +282,8 @@ export function PlanPage() {
                   {subscription?.expiresAt && (
                     <p className="text-sm text-muted-foreground">
                       {isCancelled
-                        ? `Resume before ${formatDate(subscription.expiresAt)}`
-                        : `Until ${formatDate(subscription.expiresAt)}`
+                        ? t('resumeBefore', { date: formatDate(subscription.expiresAt) })
+                        : t('until', { date: formatDate(subscription.expiresAt) })
                       }
                     </p>
                   )}
@@ -293,7 +295,7 @@ export function PlanPage() {
                     <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
                       <Settings className="h-4 w-4" />
                       <p className="font-medium">
-                        Pay XAF {formatCurrency(plan.regularPriceYearly)}/year
+                        {t('payYearly', { amount: `XAF ${formatCurrency(plan.regularPriceYearly)}` })}
                       </p>
                     </div>
                   </div>
@@ -307,7 +309,7 @@ export function PlanPage() {
                       disabled={isResuming || new Date(subscription.expiresAt) < new Date()}
                       className={new Date(subscription.expiresAt) < new Date() ? 'opacity-50 cursor-not-allowed' : ''}
                     >
-                      {isResuming ? 'Resuming...' : 'Resume Subscription'}
+                      {isResuming ? t('resuming') : t('resumeSubscription')}
                     </Button>
                   </div>
                 )}
@@ -320,13 +322,13 @@ export function PlanPage() {
         {!isFree && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              View the{' '}
+              {t('viewTerms')}
               <Button variant="link" className="text-blue-600 p-0 h-auto text-sm">
-                terms of service
+                {t('termsOfService')}
               </Button>
-              {' '}and{' '}
+              {t('and')}
               <Button variant="link" className="text-blue-600 p-0 h-auto text-sm">
-                privacy policy
+                {t('privacyPolicy')}
               </Button>
             </p>
             <Button
@@ -336,7 +338,7 @@ export function PlanPage() {
               onClick={() => !isCancelled && setShowCancelDialog(true)}
               disabled={isCancelling || isCancelled}
             >
-              {isCancelled ? 'Plan Cancelled' : 'Cancel plan'}
+              {isCancelled ? t('planCancelled') : t('cancelPlan')}
             </Button>
           </div>
         )}
@@ -346,23 +348,23 @@ export function PlanPage() {
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel {plan?.name} Plan?</DialogTitle>
+            <DialogTitle>{t('cancelDialogTitle', { plan: plan?.name || '' })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="text-sm">
-                <span className="font-medium">Current:</span> {plan?.name} Plan {subscription?.isOnIntroPricing && '(Intro Pricing)'}
+                <span className="font-medium">{t('currentLabel')}</span> {plan?.name} {t('plan')} {subscription?.isOnIntroPricing && '(Intro Pricing)'}
               </div>
               <div className="text-sm">
-                <span className="font-medium">Paid:</span> {formatCurrency(currentPrice)} XAF on{' '}
+                <span className="font-medium">{t('paidLabel')}</span> {formatCurrency(currentPrice)} XAF {t('on')}{' '}
                 {subscription?.expiresAt && formatDate(subscription.expiresAt)}
               </div>
             </div>
 
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <div className="text-sm font-medium text-amber-900">⚠️ What happens:</div>
+              <div className="text-sm font-medium text-amber-900">{t('warningWhatHappens')}</div>
               <div className="text-sm text-amber-800 mt-1">
-                ✗ After {subscription?.expiresAt && formatDate(subscription.expiresAt)}: Downgrade to Free
+                {t('downgradeWarning', { date: subscription?.expiresAt ? formatDate(subscription.expiresAt) : '' })}
               </div>
             </div>
           </div>
@@ -372,14 +374,14 @@ export function PlanPage() {
               onClick={() => setShowCancelDialog(false)}
               disabled={isCancelling}
             >
-              Keep Plan
+              {t('keepPlan')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleCancelPlan}
               disabled={isCancelling}
             >
-              {isCancelling ? 'Cancelling...' : 'Cancel Plan'}
+              {isCancelling ? t('resuming') : t('cancelPlan')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -389,18 +391,18 @@ export function PlanPage() {
       <Dialog open={showVoidDialog} onOpenChange={setShowVoidDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel Pending {plan?.name} Subscription?</DialogTitle>
+            <DialogTitle>{t('voidDialogTitle', { plan: plan?.name || '' })}</DialogTitle>
             <DialogDescription>
-              This will cancel your pending subscription request. You can start a new subscription anytime.
+              {t('voidDialogDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-              <div className="text-sm font-medium text-amber-900 dark:text-amber-200">What happens:</div>
+              <div className="text-sm font-medium text-amber-900 dark:text-amber-200">{t('whatHappens')}</div>
               <ul className="text-sm text-amber-800 dark:text-amber-300 mt-1 space-y-1">
-                <li>- Your pending payment will be cancelled</li>
-                <li>- No charges will be made</li>
-                <li>- You can choose a new plan or retry anytime</li>
+                <li>- {t('voidWhatHappens1')}</li>
+                <li>- {t('voidWhatHappens2')}</li>
+                <li>- {t('voidWhatHappens3')}</li>
               </ul>
             </div>
           </div>
@@ -410,14 +412,14 @@ export function PlanPage() {
               onClick={() => setShowVoidDialog(false)}
               disabled={isVoiding}
             >
-              Keep Request
+              {t('keepRequest')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleVoidPendingPayment}
               disabled={isVoiding}
             >
-              {isVoiding ? 'Cancelling...' : 'Yes, Cancel Request'}
+              {isVoiding ? t('resuming') : t('yesCancelRequest')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -427,36 +429,36 @@ export function PlanPage() {
       <Dialog open={showRetryDialog} onOpenChange={setShowRetryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Complete Payment for {plan?.name}</DialogTitle>
+            <DialogTitle>{t('retryDialogTitle', { plan: plan?.name || '' })}</DialogTitle>
             <DialogDescription>
-              Enter your mobile money number to receive a payment prompt.
+              {t('retryDialogDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="phone-number" className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                Phone Number
+                {t('phoneNumber')}
               </Label>
               <Input
                 id="phone-number"
                 type="tel"
-                placeholder="e.g. 6XXXXXXXX"
+                placeholder={t('phonePlaceholder')}
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 disabled={isRetrying}
               />
               <p className="text-xs text-muted-foreground">
-                You'll receive a USSD prompt on this number to confirm payment.
+                {t('ussdPromptHint')}
               </p>
             </div>
 
             <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
               <div className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                Amount: XAF {formatCurrency(currentPrice)}
+                {t('amountLabel', { amount: `XAF ${formatCurrency(currentPrice)}` })}
               </div>
               <div className="text-xs text-blue-800 dark:text-blue-300 mt-1">
-                {plan?.name} Plan - {billingPeriod}ly billing
+                {t('billingCycleLabel', { plan: plan?.name || '', cycle: billingPeriod === 'year' ? t('year') : t('month') })}
               </div>
             </div>
           </div>
@@ -469,13 +471,13 @@ export function PlanPage() {
               }}
               disabled={isRetrying}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               onClick={handleRetryPayment}
               disabled={isRetrying || !phoneNumber.trim()}
             >
-              {isRetrying ? 'Processing...' : 'Pay Now'}
+              {isRetrying ? t('resuming') : t('payNow')}
             </Button>
           </DialogFooter>
         </DialogContent>

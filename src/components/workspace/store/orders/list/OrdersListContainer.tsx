@@ -15,6 +15,7 @@ import { OrdersTable } from './OrdersTable';
 import { OrdersFilters } from './OrdersFilters';
 import { MobileOrdersList } from './mobile';
 import { useIsMobile } from '@/hooks/shadcn/use-mobile';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/shadcn-ui/tabs';
@@ -50,6 +51,8 @@ export default function OrdersListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
+  const t = useTranslations('Orders.list');
+  const tActions = useTranslations('Orders.actions');
 
   // State
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
@@ -216,7 +219,7 @@ export default function OrdersListContainer() {
   const handleBulkArchive = async () => {
     if (selectedOrders.length === 0) return;
 
-    if (!confirm(`Are you sure you want to archive ${selectedOrders.length} order(s)?`)) return;
+    if (!confirm(tActions('confirmArchive', { count: selectedOrders.length }))) return;
 
     try {
       // Run all archive operations in parallel
@@ -231,16 +234,16 @@ export default function OrdersListContainer() {
 
       // Show results
       if (successCount > 0) {
-        toast.success(`${successCount} order(s) archived successfully`);
+        toast.success(tActions('successArchived', { count: successCount }));
       }
       if (failCount > 0) {
-        toast.error(`Failed to archive ${failCount} order(s)`);
+        toast.error(tActions('failArchived', { count: failCount }));
       }
 
       // Clear selection and refetch will happen automatically
       setSelectedOrders([]);
     } catch (e) {
-      toast.error('An error occurred during bulk archive');
+      toast.error(tActions('errorBulkArchive'));
       console.error('Bulk archive error:', e);
     }
   };
@@ -248,7 +251,7 @@ export default function OrdersListContainer() {
   const handleBulkCancel = async () => {
     if (selectedOrders.length === 0) return;
 
-    if (!confirm(`Are you sure you want to cancel ${selectedOrders.length} order(s)? This action cannot be undone.`)) return;
+    if (!confirm(tActions('confirmCancel', { count: selectedOrders.length }))) return;
 
     try {
       // Run all cancel operations in parallel
@@ -263,16 +266,16 @@ export default function OrdersListContainer() {
 
       // Show results
       if (successCount > 0) {
-        toast.success(`${successCount} order(s) cancelled successfully`);
+        toast.success(tActions('successCancelled', { count: successCount }));
       }
       if (failCount > 0) {
-        toast.error(`Failed to cancel ${failCount} order(s)`);
+        toast.error(tActions('failCancelled', { count: failCount }));
       }
 
       // Clear selection and refetch will happen automatically
       setSelectedOrders([]);
     } catch (e) {
-      toast.error('An error occurred during bulk cancel');
+      toast.error(tActions('errorBulkCancel'));
       console.error('Bulk cancel error:', e);
     }
   };
@@ -280,7 +283,7 @@ export default function OrdersListContainer() {
   const handleBulkMarkAsPaid = async () => {
     if (selectedOrders.length === 0) return;
 
-    if (!confirm(`Are you sure you want to mark ${selectedOrders.length} order(s) as paid?`)) return;
+    if (!confirm(tActions('confirmMarkAsPaid', { count: selectedOrders.length }))) return;
 
     try {
       // Run all operations in parallel
@@ -295,16 +298,16 @@ export default function OrdersListContainer() {
 
       // Show results
       if (successCount > 0) {
-        toast.success(`${successCount} order(s) marked as paid`);
+        toast.success(tActions('successMarkedAsPaid', { count: successCount }));
       }
       if (failCount > 0) {
-        toast.error(`Failed to mark ${failCount} order(s) as paid`);
+        toast.error(tActions('failMarkedAsPaid', { count: failCount }));
       }
 
       // Clear selection and refetch will happen automatically
       setSelectedOrders([]);
     } catch (e) {
-      toast.error('An error occurred during bulk mark as paid');
+      toast.error(tActions('errorBulkMarkAsPaid'));
       console.error('Bulk mark as paid error:', e);
     }
   };
@@ -329,19 +332,19 @@ export default function OrdersListContainer() {
 
         if (successfulUpdates && successfulUpdates > 0) {
           const label = statusLabel || newStatus;
-          toast.success(`${successfulUpdates} order(s) marked as ${label}`);
+          toast.success(tActions('successMarkedAs', { count: successfulUpdates, label }));
         }
         if (failedUpdates && failedUpdates.length > 0) {
-          toast.error(`Failed to update ${failedUpdates.length} order(s)`);
+          toast.error(tActions('failUpdate', { count: failedUpdates.length }));
         }
 
         // Clear selection and refetch will happen automatically
         setSelectedOrders([]);
       } else {
-        toast.error(result.data?.bulkUpdateOrderStatus?.error || 'Failed to update orders');
+        toast.error(result.data?.bulkUpdateOrderStatus?.error || tActions('failUpdate', { count: selectedOrders.length }));
       }
     } catch (e) {
-      toast.error('An error occurred during bulk update');
+      toast.error(tActions('errorBulkUpdate'));
       console.error('Bulk status update error:', e);
     }
   };
@@ -352,12 +355,12 @@ export default function OrdersListContainer() {
       const result = await archiveOrder({ variables: { orderId } });
 
       if (result.data?.archiveOrder?.success) {
-        toast.success('Order archived successfully');
+        toast.success(tActions('successArchivedSingle'));
       } else {
-        toast.error(result.data?.archiveOrder?.error || 'Failed to archive order');
+        toast.error(result.data?.archiveOrder?.error || tActions('failArchived', { count: 1 }));
       }
     } catch (e) {
-      toast.error('An error occurred while archiving order');
+      toast.error(tActions('errorArchive'));
       console.error('Archive order error:', e);
     }
   };
@@ -367,12 +370,12 @@ export default function OrdersListContainer() {
       const result = await unarchiveOrder({ variables: { orderId } });
 
       if (result.data?.unarchiveOrder?.success) {
-        toast.success('Order unarchived successfully');
+        toast.success(tActions('successUnarchivedSingle'));
       } else {
-        toast.error(result.data?.unarchiveOrder?.error || 'Failed to unarchive order');
+        toast.error(result.data?.unarchiveOrder?.error || tActions('errorUnarchive'));
       }
     } catch (e) {
-      toast.error('An error occurred while unarchiving order');
+      toast.error(tActions('errorUnarchive'));
       console.error('Unarchive order error:', e);
     }
   };
@@ -390,7 +393,7 @@ export default function OrdersListContainer() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              <p>Failed to load orders</p>
+              <p>{t('failedToLoad')}</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </CardContent>
@@ -401,11 +404,11 @@ export default function OrdersListContainer() {
 
   // Mobile filter chips based on tabs
   const mobileFilterChips = [
-    { value: 'all', label: 'All' },
-    { value: 'unfulfilled', label: 'Unfulfilled' },
-    { value: 'unpaid', label: 'Unpaid' },
-    { value: 'open', label: 'Open' },
-    { value: 'archived', label: 'Archived' },
+    { value: 'all', label: t('tabs.all') },
+    { value: 'unfulfilled', label: t('tabs.unfulfilled') },
+    { value: 'unpaid', label: t('tabs.unpaid') },
+    { value: 'open', label: t('tabs.open') },
+    { value: 'archived', label: t('tabs.archived') },
   ];
 
   // Mobile View
@@ -417,7 +420,6 @@ export default function OrdersListContainer() {
           workspaceId={currentWorkspace?.id || ''}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          chips={mobileFilterChips}
           activeChip={activeTab}
           onChipChange={handleTabChange}
           selectedOrders={selectedOrders}
@@ -427,10 +429,7 @@ export default function OrdersListContainer() {
           onBulkArchive={handleBulkArchive}
           onBulkMarkAsPaid={handleBulkMarkAsPaid}
           onBulkCancel={handleBulkCancel}
-          onBulkMarkAsDelivered={() => handleBulkStatusUpdate('delivered', 'delivered')}
-          onBulkMarkOnHold={() => handleBulkStatusUpdate('on_hold', 'on hold')}
-          onBulkMarkProcessing={() => handleBulkStatusUpdate('processing', 'processing')}
-          onBulkMarkAsNotDelivered={() => handleBulkStatusUpdate('unfulfilled', 'unfulfilled')}
+          onBulkStatusUpdate={handleBulkStatusUpdate}
           isLoading={loading}
           // Filter Props
           paymentStatus={paymentStatus}
@@ -452,25 +451,25 @@ export default function OrdersListContainer() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Orders</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your store orders ({totalCount} total)
+            {t('subtitle', { count: totalCount })}
           </p>
         </div>
         <Button onClick={handleAddOrder}>
           <Plus className="mr-2 h-4 w-4" />
-          Create order
+          {t('createOrder')}
         </Button>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="unfulfilled">Unfulfilled</TabsTrigger>
-          <TabsTrigger value="unpaid">Unpaid</TabsTrigger>
-          <TabsTrigger value="open">Open</TabsTrigger>
-          <TabsTrigger value="archived">Archived</TabsTrigger>
+          <TabsTrigger value="all">{t('tabs.all')}</TabsTrigger>
+          <TabsTrigger value="unfulfilled">{t('tabs.unfulfilled')}</TabsTrigger>
+          <TabsTrigger value="unpaid">{t('tabs.unpaid')}</TabsTrigger>
+          <TabsTrigger value="open">{t('tabs.open')}</TabsTrigger>
+          <TabsTrigger value="archived">{t('tabs.archived')}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -494,7 +493,7 @@ export default function OrdersListContainer() {
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">
-                {selectedOrders.length} order{selectedOrders.length !== 1 ? 's' : ''} selected
+                {tActions('selectedCount', { count: selectedOrders.length })}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -503,7 +502,7 @@ export default function OrdersListContainer() {
                   onClick={handleBulkCancel}
                 >
                   <XCircle className="mr-1 h-3 w-3" />
-                  Cancel orders
+                  {tActions('cancelOrders')}
                 </Button>
                 <Button
                   variant="outline"
@@ -511,7 +510,7 @@ export default function OrdersListContainer() {
                   onClick={handleBulkArchive}
                 >
                   <Archive className="mr-1 h-3 w-3" />
-                  Archive
+                  {tActions('archive')}
                 </Button>
                 <Button
                   variant="outline"
@@ -519,45 +518,45 @@ export default function OrdersListContainer() {
                   onClick={handleBulkMarkAsPaid}
                 >
                   <CreditCard className="mr-1 h-3 w-3" />
-                  Mark as paid
+                  {tActions('markAsPaid')}
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
                       <Package className="mr-1 h-3 w-3" />
-                      Fulfillment
+                      {tActions('fulfillment')}
                       <ChevronDown className="ml-1 h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleBulkStatusUpdate('delivered', 'delivered')}>
-                      Mark as delivered
+                    <DropdownMenuItem onClick={() => handleBulkStatusUpdate('delivered', tActions('markAsDelivered'))}>
+                      {tActions('markAsDelivered')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleBulkStatusUpdate('unfulfilled', 'unfulfilled')}>
-                      Mark as not delivered
+                    <DropdownMenuItem onClick={() => handleBulkStatusUpdate('unfulfilled', tActions('markAsNotDelivered'))}>
+                      {tActions('markAsNotDelivered')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleBulkStatusUpdate('on_hold', 'on hold')}
+                  onClick={() => handleBulkStatusUpdate('on_hold', tActions('markOnHold'))}
                 >
-                  Mark on hold
+                  {tActions('markOnHold')}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleBulkStatusUpdate('processing', 'processing')}
+                  onClick={() => handleBulkStatusUpdate('processing', tActions('markProcessing'))}
                 >
-                  Mark processing
+                  {tActions('markProcessing')}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedOrders([])}
                 >
-                  Clear selection
+                  {tActions('clearSelection')}
                 </Button>
               </div>
             </div>
@@ -571,7 +570,7 @@ export default function OrdersListContainer() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading orders...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           </CardContent>
         </Card>
@@ -579,14 +578,14 @@ export default function OrdersListContainer() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No orders found</p>
+              <p className="text-muted-foreground">{t('noOrders')}</p>
               {(searchTerm || paymentStatus || paymentMethod || orderSource || shippingRegion) ? (
-                <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters</p>
+                <p className="text-sm text-muted-foreground mt-2">{t('adjustFilters')}</p>
               ) : (
                 <div className="mt-4">
                   <Button onClick={handleAddOrder}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Create your first order
+                    {t('createFirstOrder')}
                   </Button>
                 </div>
               )}
@@ -602,6 +601,7 @@ export default function OrdersListContainer() {
           workspaceId={currentWorkspace?.id || ''}
           onArchiveOrder={handleArchiveOrder}
           onUnarchiveOrder={handleUnarchiveOrder}
+          totalCount={totalCount}
         />
       )}
 
@@ -609,7 +609,11 @@ export default function OrdersListContainer() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} orders
+            {t('pagination', { 
+              start: ((currentPage - 1) * pageSize) + 1, 
+              end: Math.min(currentPage * pageSize, totalCount), 
+              total: totalCount 
+            })}
           </div>
           <Pagination>
             <PaginationContent>

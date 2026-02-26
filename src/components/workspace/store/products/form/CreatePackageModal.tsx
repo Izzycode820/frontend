@@ -14,6 +14,7 @@ import { Label } from '@/components/shadcn-ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select'
 import { Checkbox } from '@/components/shadcn-ui/checkbox'
 import { Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface CreatePackageModalProps {
   open: boolean
@@ -28,6 +29,8 @@ export function CreatePackageModal({
   onSubmit,
   loading,
 }: CreatePackageModalProps) {
+  const t = useTranslations('Products.form.shipping.packages')
+  
   const [formData, setFormData] = useState({
     name: '',
     packageType: 'box',
@@ -89,18 +92,18 @@ export function CreatePackageModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Package</DialogTitle>
+          <DialogTitle>{t('createTitle')}</DialogTitle>
           <DialogDescription>
-            Add a new shipping package to use for this product.
+            {t('createDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Package Name</Label>
+            <Label htmlFor="name">{t('packageName')}</Label>
             <Input
               id="name"
-              placeholder="e.g., Standard Box"
+              placeholder={t('packageNamePlaceholder')}
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
               required
@@ -109,52 +112,52 @@ export function CreatePackageModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="packageType">Package Type</Label>
+              <Label htmlFor="packageType">{t('packageType')}</Label>
               <Select value={formData.packageType} onValueChange={(value) => handleChange('packageType', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="box">Box</SelectItem>
-                  <SelectItem value="envelope">Envelope</SelectItem>
-                  <SelectItem value="soft_package">Soft Package</SelectItem>
+                  <SelectItem value="box">{t('box')}</SelectItem>
+                  <SelectItem value="envelope">{t('envelope')}</SelectItem>
+                  <SelectItem value="soft_package">{t('softPackage')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="size">Size</Label>
+              <Label htmlFor="size">{t('size')}</Label>
               <Select value={formData.size} onValueChange={(value) => handleChange('size', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="small">Small</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="large">Large</SelectItem>
+                  <SelectItem value="small">{t('small')}</SelectItem>
+                  <SelectItem value="medium">{t('medium')}</SelectItem>
+                  <SelectItem value="large">{t('large')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="weight">Weight (kg)</Label>
+            <Label htmlFor="weight">{t('weightLabel')}</Label>
             <Input
               id="weight"
               type="number"
               step="0.01"
               min="0"
-              placeholder="0.00"
+              placeholder={t('weightPlaceholder')}
               value={formData.weight}
               onChange={(e) => handleChange('weight', e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="method">Shipping Method</Label>
+            <Label htmlFor="method">{t('shippingMethod')}</Label>
             <Input
               id="method"
-              placeholder="e.g., Standard, Express"
+              placeholder={t('shippingMethodPlaceholder')}
               value={formData.method}
               onChange={(e) => handleChange('method', e.target.value)}
               required
@@ -164,7 +167,7 @@ export function CreatePackageModal({
           {/* Region Fees Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Region & Fees</Label>
+              <Label>{t('regionFees')}</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -173,7 +176,7 @@ export function CreatePackageModal({
                 className="h-7 px-2 text-xs"
               >
                 <Plus className="h-3 w-3 mr-1" />
-                Add Region
+                {t('addRegion')}
               </Button>
             </div>
 
@@ -181,11 +184,11 @@ export function CreatePackageModal({
               <div key={index} className="grid grid-cols-2 gap-2 items-end">
                 <div className="space-y-1">
                   <Label htmlFor={`region-${index}`} className="text-xs">
-                    Region {index + 1}
+                    {t('regionLabel', { index: index + 1 })}
                   </Label>
                   <Input
                     id={`region-${index}`}
-                    placeholder="e.g., Yaounde, Douala"
+                    placeholder={t('regionPlaceholder')}
                     value={regionFee.region}
                     onChange={(e) => handleRegionFeeChange(index, 'region', e.target.value)}
                     required
@@ -193,7 +196,7 @@ export function CreatePackageModal({
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor={`fee-${index}`} className="text-xs">
-                    Fee (FCFA)
+                    {t('feeLabel', { currency: t('currency') })}
                   </Label>
                   <div className="flex gap-2">
                     <Input
@@ -201,7 +204,7 @@ export function CreatePackageModal({
                       type="number"
                       step="0.01"
                       min="0"
-                      placeholder="0.00"
+                      placeholder={t('feePlaceholder')}
                       value={regionFee.fee}
                       onChange={(e) => handleRegionFeeChange(index, 'fee', e.target.value)}
                       required
@@ -222,15 +225,15 @@ export function CreatePackageModal({
               </div>
             ))}
             <p className="text-xs text-muted-foreground">
-              Add multiple regions with their respective shipping fees
+              {t('regionFeesHint')}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="estimatedDays">Est. Days</Label>
+            <Label htmlFor="estimatedDays">{t('estimatedDays')}</Label>
             <Input
               id="estimatedDays"
-              placeholder="3-5"
+              placeholder={t('estimatedDaysPlaceholder')}
               value={formData.estimatedDays}
               onChange={(e) => handleChange('estimatedDays', e.target.value)}
               required
@@ -244,7 +247,7 @@ export function CreatePackageModal({
               onCheckedChange={(checked) => handleChange('useAsDefault', checked)}
             />
             <Label htmlFor="useAsDefault" className="text-sm">
-              Use as default package
+              {t('useAsDefault')}
             </Label>
           </div>
 
@@ -255,10 +258,10 @@ export function CreatePackageModal({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Package'}
+              {loading ? t('creating') : t('create')}
             </Button>
           </div>
         </form>

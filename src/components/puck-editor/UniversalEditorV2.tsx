@@ -8,6 +8,10 @@ import { loadThemeConfig } from '@/registry/theme-registry';
 import { puckOverrides } from './overrides/puck-overrides';
 import { Button } from '@/components/shadcn-ui/button';
 import { MediaLibraryProvider } from './MediaLibraryProvider';
+import { useQuery } from '@apollo/client/react';
+import { useParams } from 'next/navigation';
+import { hostinClient } from '@/services/graphql/clients';
+import { DomainsDocument } from '@/services/graphql/domains/queries/custom-domains/__generated__/domains.generated';
 
 /**
  * UniversalEditorV2 - Production Multi-Tenant Architecture with Shopify-style sidebar
@@ -42,6 +46,19 @@ export default function UniversalEditorV2({
   const [data, setData] = useState<Data>(puckData);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const params = useParams();
+  const workspaceId = params.workspace_id as string;
+
+  // Fetch merchant domains to construct the preview URL
+  const { data: domainData } = useQuery(DomainsDocument, {
+    variables: { workspaceId },
+    skip: !workspaceId,
+    client: hostinClient,
+  });
+
+  const domains = domainData?.domains || [];
+  const primaryDomain = domains.find(d => d?.isPrimary)?.domain || domains[0]?.domain;
 
   useEffect(() => {
     loadMasterConfig();
@@ -145,7 +162,13 @@ export default function UniversalEditorV2({
                   <Button
                     variant="outline"
                     size="default"
-                    onClick={onPreview}
+                    onClick={() => {
+                      if (primaryDomain) {
+                        window.open(`https://${primaryDomain}`, '_blank');
+                      } else {
+                        onPreview?.();
+                      }
+                    }}
                     title="Preview changes in a new window"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

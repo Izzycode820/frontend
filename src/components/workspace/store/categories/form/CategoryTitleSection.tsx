@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui
 import { Input } from '@/components/shadcn-ui/input'
 import { Textarea } from '@/components/shadcn-ui/textarea'
 import { Label } from '@/components/shadcn-ui/label'
+import { useTranslations } from 'next-intl'
 
 interface CategoryTitleSectionProps {
   name: string
@@ -18,17 +19,18 @@ export function CategoryTitleSection({
   onNameChange,
   onDescriptionChange,
 }: CategoryTitleSectionProps) {
+  const t = useTranslations('Categories.form.titleDescription')
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Category Information</CardTitle>
+        <CardTitle>{t('sectionTitle')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="category-name">Category Name *</Label>
+          <Label htmlFor="category-name">{t('titleLabelRequired')}</Label>
           <Input
             id="category-name"
-            placeholder="Enter category name"
+            placeholder={t('titlePlaceholder')}
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             required
@@ -36,16 +38,16 @@ export function CategoryTitleSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="category-description">Description</Label>
+          <Label htmlFor="category-description">{t('descriptionLabel')}</Label>
           <Textarea
             id="category-description"
-            placeholder="Describe this category..."
+            placeholder={t('descriptionPlaceholder')}
             value={description}
             onChange={(e) => onDescriptionChange(e.target.value)}
             rows={6}
           />
           <p className="text-sm text-muted-foreground">
-            Customers will see this on your category page.
+            {t('descriptionHelp')}
           </p>
         </div>
       </CardContent>

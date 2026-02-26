@@ -3,6 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { useTranslations } from 'next-intl';
+import { Check, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { OrderStatusBadge } from '../OrderStatusBadge';
 import { formatCurrency } from '@/utils/currency';
@@ -31,6 +33,7 @@ export function OrderCard({
     onSelect,
     onLongPress,
 }: OrderCardProps) {
+    const t = useTranslations('Orders.table');
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
     const [isPressed, setIsPressed] = React.useState(false);
 
@@ -81,54 +84,57 @@ export function OrderCard({
             onMouseUp={handleTouchEnd}
             onMouseLeave={handleTouchEnd}
             className={cn(
-                "block rounded-xl p-4 transition-all duration-200 active:scale-[0.98]",
+                "flex items-center gap-3 p-3 rounded-xl transition-all duration-200 active:scale-[0.99]",
                 isSelected
-                    ? "bg-primary/10 border-2 border-primary ring-2 ring-primary/20"
+                    ? "bg-primary/10 border-2 border-primary ring-1 ring-primary/20"
                     : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800",
                 isPressed && !isSelected && "bg-zinc-50 dark:bg-zinc-800/50"
             )}
         >
-            {/* Header: Order # + Time + Channel */}
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm">
-                        #{order.orderNumber}
-                    </span>
-                    <span className="text-xs text-zinc-400">
-                        {getChannelIcon(order.orderSource)}
-                    </span>
+            {/* Left Side: Channel Icon (matching product thumbnail size) */}
+            <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                    <span className="text-xl">{getChannelIcon(order.orderSource)}</span>
                 </div>
-                <span className="text-xs text-zinc-500">
-                    {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
-                </span>
             </div>
 
-            {/* Customer + Amount */}
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex flex-col">
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                        {order.customerName || 'No customer'}
+            {/* Middle: Order Info */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-0.5">
+                    <span className="font-semibold text-sm truncate">
+                        #{order.orderNumber}
                     </span>
-                    {order.customerPhone && (
-                        <span className="text-xs text-zinc-500">
-                            {order.customerPhone}
+                    <span className="text-[10px] text-zinc-500 font-medium bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded uppercase">
+                        {order.orderSource}
+                    </span>
+                </div>
+                <div className="flex flex-col">
+                    {order.customerName ? (
+                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                            {order.customerName}
+                        </span>
+                    ) : (
+                        <span className="text-sm font-medium text-muted-foreground truncate">
+                            {t('noCustomer')}
                         </span>
                     )}
-                </div>
-                <div className="text-right">
-                    <span className="font-semibold text-sm">
-                        {order.currency} {formatCurrency(order.totalAmount)}
-                    </span>
-                    <div className="text-xs text-zinc-500">
-                        {order.itemCount} {order.itemCount === 1 ? 'item' : 'items'}
+                    <div className="flex items-center gap-2 mt-0.5">
+                         <span className="text-xs text-zinc-500">
+                            {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+                        </span>
                     </div>
                 </div>
             </div>
 
-            {/* Status Badges */}
-            <div className="flex items-center gap-2">
-                <OrderStatusBadge status={order.paymentStatus} type="payment" />
+            {/* Right Side: Amount + Fulfillment Status */}
+            <div className="flex-shrink-0 text-right space-y-1">
+                <div className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                    {order.currency} {formatCurrency(order.totalAmount)}
+                </div>
                 <OrderStatusBadge status={order.status} type="fulfillment" />
+                <div className="text-[10px] text-zinc-400">
+                    {t('itemCount', { count: order.itemCount ?? 0 })}
+                </div>
             </div>
         </Link>
     );

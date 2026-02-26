@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { SearchDomainsDocument } from '@/services/graphql/domains/queries/purchases/__generated__/searchDomains.generated';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
@@ -14,6 +15,7 @@ import { Globe, Search, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Ar
 export function BuyDomainSearch() {
   const router = useRouter();
   const params = useParams();
+  const t = useTranslations('Domains');
   const workspaceId = params.workspace_id as string;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,15 +68,15 @@ export function BuyDomainSearch() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <Globe className="h-6 w-6 text-muted-foreground" />
-        <h1 className="text-xl sm:text-2xl font-bold">Buy new domain</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">{t('buyNew')}</h1>
       </div>
 
       {/* Search Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Find the perfect domain</CardTitle>
+          <CardTitle className="text-lg">{t('findPerfect')}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Purchase, host, and manage your domain all in one place with Huzilerz
+            {t('searchDesc')}
           </p>
         </CardHeader>
         <CardContent>
@@ -82,7 +84,7 @@ export function BuyDomainSearch() {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="them.com"
+              placeholder={t('searchPlaceholder')}
               className="flex-1"
             />
             <Button
@@ -91,7 +93,7 @@ export function BuyDomainSearch() {
               className="bg-black hover:bg-black/90 text-white px-6 w-full sm:w-auto"
             >
               <Search className="h-4 w-4 mr-2" />
-              Search
+              {loading ? t('searching') : t('search')}
             </Button>
           </form>
 
@@ -102,14 +104,14 @@ export function BuyDomainSearch() {
                 <Alert className="bg-green-50 border-green-200">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-900">
-                    {searchResults.query} is available!
+                    {t('available', { domain: searchResults.query })}
                   </AlertDescription>
                 </Alert>
               ) : (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {searchResults.query} isn't available. Choose a suggested domain below or search again.
+                    {t('notAvailable', { domain: searchResults.query })}
                   </AlertDescription>
                 </Alert>
               )}
@@ -128,7 +130,7 @@ export function BuyDomainSearch() {
       {/* Error State */}
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>Failed to search domains: {error.message}</AlertDescription>
+          <AlertDescription>{t('verificationFailed')}: {error.message}</AlertDescription>
         </Alert>
       )}
 
@@ -140,9 +142,9 @@ export function BuyDomainSearch() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <CardTitle className="text-lg">You might like these</CardTitle>
+                  <CardTitle className="text-lg">{t('youMightLike')}</CardTitle>
                 </div>
-                <Badge variant="outline" className="w-fit mt-2">Suggested</Badge>
+                <Badge variant="outline" className="w-fit mt-2">{t('suggested')}</Badge>
               </CardHeader>
               <CardContent className="space-y-3">
                 {suggestedDomains.map((domain, idx) => (
@@ -164,7 +166,7 @@ export function BuyDomainSearch() {
                       variant="outline"
                       className="px-6"
                     >
-                      Buy
+                      {t('buy')}
                     </Button>
                   </div>
                 ))}
@@ -176,7 +178,7 @@ export function BuyDomainSearch() {
           {otherExtensions.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Other extensions</CardTitle>
+                <CardTitle className="text-lg">{t('otherExtensions')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {otherExtensions.map((domain, idx) => (
@@ -198,7 +200,7 @@ export function BuyDomainSearch() {
                       variant="outline"
                       className="px-6"
                     >
-                      Buy
+                      {t('buy')}
                     </Button>
                   </div>
                 ))}
@@ -215,7 +217,7 @@ export function BuyDomainSearch() {
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <span className="text-sm text-muted-foreground">
-                      Page {currentPage}
+                      {t('page', { page: currentPage })}
                     </span>
                     <Button
                       variant="outline"
@@ -236,8 +238,8 @@ export function BuyDomainSearch() {
             <Card>
               <CardContent className="py-12">
                 <div className="text-center">
-                  <p className="text-muted-foreground">No domain suggestions available</p>
-                  <p className="text-sm text-muted-foreground mt-1">Try searching for a different domain</p>
+                  <p className="text-muted-foreground">{t('noSuggestions')}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t('tryDifferent')}</p>
                 </div>
               </CardContent>
             </Card>

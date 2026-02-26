@@ -15,71 +15,65 @@ import {
     ChevronRight
 } from 'lucide-react';
 
+import { useTranslations } from 'next-intl';
+
 // Setting navigation items grouped by section
 const settingsSections = [
     {
-        title: 'Store settings',
+        id: 'store',
         items: [
             {
-                label: 'Store details',
-                description: 'Basic store information',
+                id: 'general',
                 href: '/general',
                 icon: Settings,
             },
         ],
     },
     {
-        title: 'Plan and Permissions',
+        id: 'plan',
         items: [
             {
-                label: 'Plan',
-                description: 'Manage your subscription',
+                id: 'plan',
                 href: '/plan',
                 icon: Crown,
             },
             {
-                label: 'Billing',
-                description: 'Payment and invoices',
+                id: 'billing',
                 href: '/billing',
                 icon: Receipt,
             },
             {
-                label: 'Staff',
-                description: 'Team members and permissions',
+                id: 'staff',
                 href: '/staff',
                 icon: Users,
             },
         ],
     },
     {
-        title: 'Checkout',
+        id: 'checkout',
         items: [
             {
-                label: 'Payments',
-                description: 'Accepted payment methods',
+                id: 'payments',
                 href: '/payments',
                 icon: CreditCard,
             },
             {
-                label: 'Shipping and delivery',
-                description: 'Shipping rates and zones',
+                id: 'shipping',
                 href: '/shipping',
                 icon: Truck,
             },
         ],
     },
     {
-        title: 'Store',
+        id: 'store_extra',
         items: [
             {
-                label: 'Domains',
-                description: 'Custom and Shopify domains',
+                id: 'domains',
                 href: '/domains',
                 icon: Globe,
             },
             {
-                label: 'Notifications',
-                description: 'Email and SMS notifications',
+                id: 'notifications',
                 href: '/notifications',
                 icon: Bell,
             },
@@ -90,6 +84,7 @@ const settingsSections = [
 export function MobileSettingsList() {
     const params = useParams();
     const pathname = usePathname();
+    const t = useTranslations('SettingsNav');
     const workspaceId = params.workspace_id as string;
     const baseUrl = `/workspace/${workspaceId}/store/settings`;
 
@@ -99,7 +94,7 @@ export function MobileSettingsList() {
                 <div key={sectionIndex} className="flex flex-col">
                     {/* Section Title */}
                     <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider px-1 mb-2">
-                        {section.title}
+                        {t(`sections.${section.id}` as any)}
                     </h2>
 
                     {/* Settings Cards */}
@@ -132,10 +127,10 @@ export function MobileSettingsList() {
                                     {/* Text */}
                                     <div className="flex-1 min-w-0">
                                         <div className="font-medium text-sm text-zinc-900 dark:text-zinc-100">
-                                            {item.label}
+                                            {t(`items.${item.id}.label` as any)}
                                         </div>
                                         <div className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-                                            {item.description}
+                                            {t(`items.${item.id}.description` as any)}
                                         </div>
                                     </div>
 

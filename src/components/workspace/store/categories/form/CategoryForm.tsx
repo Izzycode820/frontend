@@ -10,6 +10,7 @@ import { CategoryMediaSection } from './CategoryMediaSection'
 import { CategoryVisibilitySection } from './CategoryVisibilitySection'
 import { CategorySidebar } from './CategorySidebar'
 import { Save, Eye } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { MediaItem } from '@/components/workspace/store/shared/files-and-media'
 
 // Form data based on CreateCategory mutation variables
@@ -50,6 +51,7 @@ export function CategoryForm({
   existingImage,
   onRemoveExistingImage,
 }: CategoryFormProps) {
+  const t = useTranslations('Categories.form.main')
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     description: '',
@@ -139,14 +141,14 @@ export function CategoryForm({
               disabled={isLoading}
             >
               <Save className="mr-2 h-4 w-4" />
-              Save draft
+              {t('saveDraft')}
             </Button>
             <Button
               onClick={handleSubmit}
               className="flex-1"
               disabled={isLoading}
             >
-              {isLoading ? 'Saving...' : (isEditing ? 'Update category' : 'Publish category')}
+              {isLoading ? t('saving') : (isEditing ? t('update') : t('publish'))}
             </Button>
           </div>
 
@@ -157,7 +159,7 @@ export function CategoryForm({
             disabled={isLoading}
           >
             <Eye className="mr-2 h-4 w-4" />
-            Preview
+            {t('preview')}
           </Button>
         </Card>
       </div>

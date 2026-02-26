@@ -22,6 +22,7 @@ import { Input } from '@/components/shadcn-ui/input'
 import { Label } from '@/components/shadcn-ui/label'
 import { Button } from '@/components/shadcn-ui/button'
 import { Checkbox } from '@/components/shadcn-ui/checkbox'
+import { useTranslations } from 'next-intl'
 
 interface DuplicateProductModalProps {
   open: boolean
@@ -38,8 +39,9 @@ export function DuplicateProductModal({
   onConfirm,
   isLoading = false,
 }: DuplicateProductModalProps) {
+  const t = useTranslations('Products.duplicateModal')
   // Suggested name (user can edit or leave as-is)
-  const suggestedName = `${productName} (Copy)`
+  const suggestedName = `${productName} ${t('copySuffix')}`
 
   const [customName, setCustomName] = useState(suggestedName)
   const [copyVariants, setCopyVariants] = useState(true)
@@ -71,33 +73,33 @@ export function DuplicateProductModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Duplicate Product</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Create a copy of "{productName}". You can customize the name or use the suggested one.
+            {t('description', { name: productName })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* Product Name Input */}
           <div className="space-y-2">
-            <Label htmlFor="product-name">Product Name</Label>
+            <Label htmlFor="product-name">{t('fields.name')}</Label>
             <Input
               id="product-name"
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter product name"
+              placeholder={t('fields.namePlaceholder')}
               disabled={isLoading}
               autoFocus
             />
             <p className="text-xs text-muted-foreground">
-              Leave as suggested for auto-numbering: "Product (Copy 1)", "Product (Copy 2)", etc.
+              {t('fields.nameHint')}
             </p>
           </div>
 
           {/* Copy Options */}
           <div className="space-y-3 pt-2 border-t">
-            <Label className="text-sm font-medium">Copy Options</Label>
+            <Label className="text-sm font-medium">{t('options.title')}</Label>
 
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -110,7 +112,7 @@ export function DuplicateProductModal({
                 htmlFor="copy-variants"
                 className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Copy variants (recommended)
+                {t('options.copyVariants')}
               </label>
             </div>
 
@@ -125,7 +127,7 @@ export function DuplicateProductModal({
                 htmlFor="copy-inventory"
                 className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Copy inventory quantities
+                {t('options.copyInventory')}
               </label>
             </div>
           </div>
@@ -138,14 +140,14 @@ export function DuplicateProductModal({
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            {t('buttons.cancel')}
           </Button>
           <Button
             type="button"
             onClick={handleConfirm}
             disabled={isLoading || !customName.trim()}
           >
-            {isLoading ? 'Duplicating...' : 'Duplicate Product'}
+            {isLoading ? t('buttons.duplicating') : t('buttons.duplicate')}
           </Button>
         </DialogFooter>
       </DialogContent>
