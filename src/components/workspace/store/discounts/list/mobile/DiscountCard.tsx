@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/shadcn-ui/badge';
 import * as Types from '@/types/workspace/store/graphql-base';
+import { useTranslations } from 'next-intl';
 
 interface Discount {
     id: string;
@@ -29,7 +30,6 @@ interface DiscountCardProps {
     onLongPress: (discountId: string) => void;
     onClick?: () => void;
 }
-
 export function DiscountCard({
     discount,
     workspaceId,
@@ -39,6 +39,7 @@ export function DiscountCard({
     onLongPress,
     onClick,
 }: DiscountCardProps) {
+    const t = useTranslations('Discounts');
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
     const [isPressed, setIsPressed] = React.useState(false);
 
@@ -70,43 +71,43 @@ export function DiscountCard({
 
     // Get status badge
     const getStatusBadge = () => {
-        if (discount.isExpired) {
+         if (discount.isExpired) {
             return (
                 <Badge variant="outline" className="bg-zinc-100 text-zinc-600 border-zinc-200 text-xs">
-                    Expired
+                    {t('list.expired')}
                 </Badge>
             );
         }
         if (!discount.isActive) {
             return (
                 <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
-                    Scheduled
+                    {t('list.scheduled')}
                 </Badge>
             );
         }
         return (
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
-                Active
+                {t('list.active')}
             </Badge>
         );
     };
 
     // Get discount value description
     const getDiscountValue = () => {
-        if (discount.discountValueType === Types.WorkspaceStoreDiscountDiscountValueTypeChoices.Percentage) {
-            return `${discount.value}% off`;
+         if (discount.discountValueType === Types.WorkspaceStoreDiscountDiscountValueTypeChoices.Percentage) {
+            return t('list.percentageOff', { amount: discount.value });
         }
         if (discount.discountValueType === Types.WorkspaceStoreDiscountDiscountValueTypeChoices.FixedAmount) {
-            return `FCFA ${parseFloat(discount.value).toLocaleString()} off`;
+            return t('list.off', { amount: `FCFA ${parseFloat(discount.value).toLocaleString()}` });
         }
         return discount.discountType.replace(/_/g, ' ');
     };
 
     // Get method label
     const getMethodLabel = () => {
-        return discount.method === Types.WorkspaceStoreDiscountMethodChoices.DiscountCode
-            ? '🏷️ Code'
-            : '⚡ Auto';
+         return discount.method === Types.WorkspaceStoreDiscountMethodChoices.DiscountCode
+            ? `🏷️ ${t('method.code')}`
+            : `⚡ ${t('method.automatic')}`;
     };
 
     return (
@@ -154,8 +155,8 @@ export function DiscountCard({
                 <div className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
                     {discount.usageCount}
                 </div>
-                <div className="text-xs text-zinc-500">
-                    used
+                 <div className="text-xs text-zinc-500">
+                    {t('list.tableUsed').toLowerCase()}
                 </div>
             </div>
         </div>

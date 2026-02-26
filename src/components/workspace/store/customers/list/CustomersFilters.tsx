@@ -1,4 +1,5 @@
 import { Search, SlidersHorizontal } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/shadcn-ui/input';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -52,6 +53,7 @@ export function CustomersFilters({
   region,
   onRegionChange,
 }: CustomersFiltersProps) {
+  const t = useTranslations('Customers');
   const hasActiveFilters = customerType || region;
 
   const clearFilters = () => {
@@ -65,7 +67,7 @@ export function CustomersFilters({
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search customers by name or phone..."
+          placeholder={t('list.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9"
@@ -77,7 +79,7 @@ export function CustomersFilters({
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="gap-2">
             <SlidersHorizontal className="h-4 w-4" />
-            Filters
+            {t('list.filters.title')}
             {hasActiveFilters && (
               <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
                 {[customerType, region].filter(Boolean).length}
@@ -87,7 +89,7 @@ export function CustomersFilters({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80">
           <DropdownMenuLabel className="flex items-center justify-between">
-            <span>Filters</span>
+            <span>{t('list.filters.title')}</span>
             {hasActiveFilters && (
               <Button
                 variant="ghost"
@@ -95,7 +97,7 @@ export function CustomersFilters({
                 onClick={clearFilters}
                 className="h-auto p-1 text-xs"
               >
-                Clear all
+                {t('list.filters.clearAll')}
               </Button>
             )}
           </DropdownMenuLabel>
@@ -103,19 +105,19 @@ export function CustomersFilters({
 
           {/* Customer Type Filter */}
           <div className="p-2">
-            <label className="text-sm font-medium mb-2 block">Customer Type</label>
+            <label className="text-sm font-medium mb-2 block">{t('list.filters.type')}</label>
             <Select
               value={customerType || 'all'}
               onValueChange={(value) => onCustomerTypeChange(value === 'all' ? null : value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="All types" />
+                <SelectValue placeholder={t('list.filters.allTypes')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="all">{t('list.filters.allTypes')}</SelectItem>
                 {CUSTOMER_TYPES.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
-                    {type.label}
+                    {t(`list.filters.types.${type.value}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -124,19 +126,19 @@ export function CustomersFilters({
 
           {/* Region Filter */}
           <div className="p-2">
-            <label className="text-sm font-medium mb-2 block">Region</label>
+            <label className="text-sm font-medium mb-2 block">{t('list.filters.region')}</label>
             <Select
               value={region || 'all'}
               onValueChange={(value) => onRegionChange(value === 'all' ? null : value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="All regions" />
+                <SelectValue placeholder={t('list.filters.allRegions')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All regions</SelectItem>
+                <SelectItem value="all">{t('list.filters.allRegions')}</SelectItem>
                 {CAMEROON_REGIONS.map((reg) => (
                   <SelectItem key={reg.value} value={reg.value}>
-                    {reg.label}
+                    {t(`list.filters.regions.${reg.value}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

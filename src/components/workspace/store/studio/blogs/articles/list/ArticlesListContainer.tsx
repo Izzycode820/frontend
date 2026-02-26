@@ -18,8 +18,10 @@ import { GetArticlesDocument } from '@/services/graphql/admin-store/queries/blog
 import { DeleteArticleDocument } from '@/services/graphql/admin-store/mutations/blogs/__generated__/DeleteArticle.generated';
 import { GetBlogsDocument } from '@/services/graphql/admin-store/queries/blogs/__generated__/GetBlogs.generated';
 import { STORE_ROUTES } from '@/routes/domains/workspace';
+import { useTranslations } from 'next-intl';
 
 export default function ArticlesListContainer() {
+  const t = useTranslations('Studio');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
@@ -61,24 +63,28 @@ export default function ArticlesListContainer() {
     router.push(STORE_ROUTES.STUDIO.BLOGS.COMMENTS(currentWorkspace?.id || ''));
   };
 
+  const handleManageArticleComments = (articleId: string) => {
+    router.push(STORE_ROUTES.STUDIO.BLOGS.COMMENTS_ARTICLE(currentWorkspace?.id || '', articleId));
+  };
+
   const handleDeleteArticle = async (articleId: string, articleTitle: string) => {
-    if (!confirm(`Delete "${articleTitle}"? This action cannot be undone.`)) return;
+    if (!confirm(t('articles.form.toasts.deleteConfirm', { title: articleTitle }))) return;
 
     try {
       await deleteArticle({ variables: { id: articleId } });
-      toast.success('Article deleted successfully');
+      toast.success(t('articles.form.toasts.deleteSuccess'));
       refetch();
     } catch (err: any) {
-      toast.error('Failed to delete article: ' + err.message);
+      toast.error(t('articles.form.toasts.deleteError', { error: err.message }));
     }
   };
 
   if (loading && !data) {
-    return <div className="p-8 text-center text-muted-foreground">Loading articles...</div>;
+    return <div className="p-8 text-center text-muted-foreground">{t('articles.loading')}</div>;
   }
 
   if (error) {
-    return <div className="p-8 text-center text-destructive">Error loading articles: {error.message}</div>;
+    return <div className="p-8 text-center text-destructive">{t('articles.error', { error: error.message })}</div>;
   }
 
   // Extract and filter articles
@@ -96,20 +102,20 @@ export default function ArticlesListContainer() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Blog posts</h1>
+          <h1 className="text-2xl font-bold">{t('articles.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Create and manage blog articles for your store
+            {t('articles.description')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleManageBlogs}>
-            Manage blogs
+            {t('articles.manageBlogs')}
           </Button>
           <Button variant="outline" onClick={handleManageComments}>
-            Manage comments
+            {t('articles.manageComments')}
           </Button>
           <Button onClick={handleAddArticle}>
-            <Plus className="mr-2 h-4 w-4" /> Add blog post
+            <Plus className="mr-2 h-4 w-4" /> {t('articles.add')}
           </Button>
         </div>
       </div>
@@ -120,7 +126,7 @@ export default function ArticlesListContainer() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search articles..."
+            placeholder={t('articles.search')}
             className="pl-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -132,7 +138,7 @@ export default function ArticlesListContainer() {
           value={selectedBlog}
           onChange={(e) => setSelectedBlog(e.target.value)}
         >
-          <option value="">All blogs</option>
+          <option value="">{t('articles.allBlogs')}</option>
           {blogs.map((blog: any) => (
             <option key={blog.id} value={blog.id}>
               {blog.title}
@@ -145,9 +151,9 @@ export default function ArticlesListContainer() {
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
-          <option value="">All statuses</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
+          <option value="">{t('articles.allStatuses')}</option>
+          <option value="published">{t('articles.published')}</option>
+          <option value="draft">{t('articles.draft')}</option>
         </select>
       </div>
 
@@ -155,7 +161,7 @@ export default function ArticlesListContainer() {
       {filteredArticles.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center py-12">
-            <p className="text-muted-foreground">No articles found.</p>
+            <p className="text-muted-foreground">{t('articles.noArticles')}</p>
           </CardContent>
         </Card>
       ) : isMobile ? (
@@ -163,12 +169,14 @@ export default function ArticlesListContainer() {
           articles={filteredArticles}
           onEdit={handleEditArticle}
           onDelete={handleDeleteArticle}
+          onManageComments={handleManageArticleComments}
         />
       ) : (
         <ArticlesTable
           articles={filteredArticles}
           onEdit={handleEditArticle}
           onDelete={handleDeleteArticle}
+          onManageComments={handleManageArticleComments}
         />
       )}
     </div>

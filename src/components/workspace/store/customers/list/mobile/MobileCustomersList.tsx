@@ -14,6 +14,7 @@ import {
     SheetTrigger,
     SheetFooter,
 } from '@/components/shadcn-ui/sheet';
+import { useTranslations } from 'next-intl';
 import {
     Select,
     SelectContent,
@@ -99,6 +100,7 @@ export function MobileCustomersList({
     region,
     onRegionChange,
 }: MobileCustomersListProps) {
+    const t = useTranslations('Customers');
     const isSelectionMode = selectedCustomers.length > 0;
     const activeFilterCount = [customerType, region].filter(Boolean).length;
 
@@ -114,7 +116,7 @@ export function MobileCustomersList({
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                     <Input
-                        placeholder="Search customers..."
+                        placeholder={t('list.searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="pl-10 h-12 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
@@ -144,18 +146,20 @@ export function MobileCustomersList({
                             <div className="flex-1 overflow-y-auto p-6 pt-2 space-y-6">
                                 {/* Customer Type Filter */}
                                 <div className="space-y-2">
-                                    <Label>Customer Type</Label>
+                                    <Label>{t('list.filters.type')}</Label>
                                     <Select
                                         value={customerType || 'all'}
                                         onValueChange={(val) => onCustomerTypeChange(val === 'all' ? null : val)}
                                     >
                                         <SelectTrigger className="h-12">
-                                            <SelectValue placeholder="All Types" />
+                                            <SelectValue placeholder={t('list.filters.allTypes')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">All Types</SelectItem>
+                                            <SelectItem value="all">{t('list.filters.allTypes')}</SelectItem>
                                             {CUSTOMER_TYPES.map((opt) => (
-                                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                <SelectItem key={opt.value} value={opt.value}>
+                                                    {t(`list.filters.types.${opt.value.toLowerCase()}`)}
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -163,18 +167,20 @@ export function MobileCustomersList({
 
                                 {/* Region Filter */}
                                 <div className="space-y-2">
-                                    <Label>Region</Label>
+                                    <Label>{t('list.filters.region')}</Label>
                                     <Select
                                         value={region || 'all'}
                                         onValueChange={(val) => onRegionChange(val === 'all' ? null : val)}
                                     >
                                         <SelectTrigger className="h-12">
-                                            <SelectValue placeholder="All Regions" />
+                                            <SelectValue placeholder={t('list.filters.allRegions')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">All Regions</SelectItem>
+                                            <SelectItem value="all">{t('list.filters.allRegions')}</SelectItem>
                                             {CAMEROON_REGIONS.map((opt) => (
-                                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                <SelectItem key={opt.value} value={opt.value}>
+                                                    {t(`list.filters.regions.${opt.value.toLowerCase()}`)}
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -185,12 +191,12 @@ export function MobileCustomersList({
                                 <div className="flex w-full gap-3">
                                     <SheetTrigger asChild>
                                         <Button variant="outline" className="flex-1 h-12" onClick={handleClearFilters}>
-                                            Clear all
+                                            {t('list.filters.clearAll')}
                                         </Button>
                                     </SheetTrigger>
                                     <SheetTrigger asChild>
                                         <Button className="flex-1 h-12">
-                                            View Results
+                                            {t('list.filters.viewResults')}
                                         </Button>
                                     </SheetTrigger>
                                 </div>
@@ -223,9 +229,9 @@ export function MobileCustomersList({
                 </div>
             ) : customers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-zinc-500 dark:text-zinc-400">No customers found</p>
+                    <p className="text-zinc-500 dark:text-zinc-400">{t('list.empty.noFound')}</p>
                     <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
-                        Try adjusting your filters
+                        {t('list.empty.failed')}
                     </p>
                 </div>
             ) : (
@@ -255,7 +261,7 @@ export function MobileCustomersList({
                             ✕
                         </button>
                         <span className="text-sm font-medium px-2">
-                            {selectedCustomers.length} selected
+                            {t('list.selection.simpleSelected', { count: selectedCustomers.length })}
                         </span>
                     </div>
                 </div>

@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/shadcn-ui/scroll-area';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { History, ArrowLeftCircle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { ThemeVersionHistoryDocument } from '@/services/graphql/themes/queries/mythemes/__generated__/themeVersionHistory.generated';
 import { RollbackThemeVersionDocument } from '@/services/graphql/themes/mutations/mythemes/__generated__/rollbackThemeVersion.generated';
 
@@ -35,6 +36,7 @@ export function ThemeVersionHistoryModal({
   activeVersionId,
   onRollbackSuccess,
 }: ThemeVersionHistoryModalProps) {
+  const t = useTranslations('Themes');
   // Fetch history
   const { data, loading, refetch } = useQuery(ThemeVersionHistoryDocument, {
     variables: { customizationId },
@@ -46,21 +48,21 @@ export function ThemeVersionHistoryModal({
   const [rollbackThemeVersion, { loading: isRollingBack }] = useMutation(RollbackThemeVersionDocument, {
     onCompleted: (result) => {
       if (result.rollbackThemeVersion?.success) {
-        toast.success(`Successfully restored version.`);
+        toast.success(t('modals.history.success'));
         onRollbackSuccess?.();
         onClose();
       } else {
-        toast.error(result.rollbackThemeVersion?.error || 'Failed to rollback version');
+        toast.error(result.rollbackThemeVersion?.error || t('modals.history.error'));
       }
     },
     onError: (err) => {
-      toast.error('An error occurred during rollback.');
+      toast.error(t('modals.history.genericError'));
       console.error(err);
     }
   });
 
   const handleRollback = (versionId: string) => {
-    if (confirm('Are you sure you want to restore this version? Any unsaved edits in the current version will be lost.')) {
+    if (confirm(t('modals.history.confirm'))) {
       rollbackThemeVersion({ variables: { id: customizationId, versionId } });
     }
   };
@@ -73,18 +75,18 @@ export function ThemeVersionHistoryModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            Version History
+            {t('modals.history.title')}
           </DialogTitle>
           <DialogDescription>
-            {themeName} timeline. Restore any previous snapshot.
+            {t('modals.history.description', { themeName })}
           </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh] pr-4 mt-4">
           {loading ? (
-            <div className="flex justify-center p-8 text-muted-foreground">Loading history...</div>
+            <div className="flex justify-center p-8 text-muted-foreground">{t('modals.history.loading')}</div>
           ) : history.length === 0 ? (
-            <div className="flex justify-center p-8 text-muted-foreground">No history found.</div>
+            <div className="flex justify-center p-8 text-muted-foreground">{t('modals.history.noHistory')}</div>
           ) : (
             <div className="relative pl-6 py-2 border-l-2 border-muted space-y-8 ml-2">
               {history.map((version) => {
@@ -108,16 +110,16 @@ export function ThemeVersionHistoryModal({
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-foreground">
-                              Version {version.versionNumber}
+                              {t('library.card.version', { version: version.versionNumber })}
                             </span>
                             {isActive && (
                               <Badge variant="default" className="text-[10px] h-5 px-1.5 py-0 leading-none">
-                                Active
+                                {t('modals.history.active')}
                               </Badge>
                             )}
                             {version.isSystemUpdate && !isActive && (
                               <Badge variant="secondary" className="text-[10px] h-5 px-1.5 py-0 leading-none bg-blue-100 text-blue-800 hover:bg-blue-100">
-                                Global Update
+                                {t('modals.history.globalUpdate')}
                               </Badge>
                             )}
                           </div>
@@ -125,7 +127,7 @@ export function ThemeVersionHistoryModal({
                             {format(date, 'MMM d, yyyy - h:mm a')}
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            By {version.createdByActor || 'System'}
+                            {t('modals.history.by', { actor: version.createdByActor || 'System' })}
                           </p>
                         </div>
 
@@ -138,7 +140,7 @@ export function ThemeVersionHistoryModal({
                             disabled={isRollingBack}
                           >
                             <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                            Restore
+                            {t('modals.history.restore')}
                           </Button>
                         )}
                       </div>

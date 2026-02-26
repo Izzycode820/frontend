@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui
 import Link from 'next/link';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { useAuth } from '@/hooks/authentication/useAuth';
+import { useTranslations } from 'next-intl';
 
 type LockedSectionProps = {
     title: string;
@@ -12,6 +13,7 @@ type LockedSectionProps = {
 };
 
 export function LockedSection({ title, requiredPlan, height = 'h-64' }: LockedSectionProps) {
+    const t = useTranslations('Analytics');
     const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
     const { subscription } = useAuth();
 
@@ -30,7 +32,7 @@ export function LockedSection({ title, requiredPlan, height = 'h-64' }: LockedSe
                         href={`/workspace/${currentWorkspace?.id}/store/settings/plan`}
                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
-                        Data not available for {subscription?.tier || 'current'} plan
+                        {t('locked.notAvailable', { plan: subscription?.tier || 'current' })}
                     </Link>
                 </div>
             </CardContent>

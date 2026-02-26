@@ -16,6 +16,7 @@ import { Calendar } from '@/components/shadcn-ui/calendar';
 import { ArrowLeft, Loader2, CalendarIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 import { RichTextEditor } from '@/components/workspace/store/shared/RichTextEditor';
 import { FilesAndMediaModal } from '@/components/workspace/store/shared/files-and-media';
@@ -33,6 +34,7 @@ interface ArticleFormProps {
 }
 
 export default function ArticleForm({ articleId }: ArticleFormProps) {
+  const t = useTranslations('Studio');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isEditing = !!articleId;
@@ -119,12 +121,12 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('articles.form.toasts.validation'));
       return;
     }
 
     if (!blogId) {
-      toast.error('Please select a blog');
+      toast.error(t('articles.form.toasts.selectBlog'));
       return;
     }
 
@@ -137,7 +139,7 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
       finalPublishedAt = new Date().toISOString();
     } else if (visibilityMode === 'scheduled') {
       if (!publishedAt) {
-        toast.error('Please select a publish date');
+        toast.error(t('articles.form.toasts.selectDate'));
         return;
       }
       finalIsPublished = false; // Will be published at scheduled time
@@ -166,14 +168,14 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
     try {
       if (isEditing) {
         await updateArticle({ variables: { id: articleId, input } });
-        toast.success('Article updated');
+        toast.success(t('articles.form.toasts.updateSuccess'));
       } else {
         await createArticle({ variables: { input } });
-        toast.success('Article created');
+        toast.success(t('articles.form.toasts.createSuccess'));
       }
       router.push(STORE_ROUTES.STUDIO.BLOGS.LIST(currentWorkspace?.id || ''));
     } catch (err: any) {
-      toast.error('Failed to save article: ' + err.message);
+      toast.error(t('articles.form.toasts.updateError') + ': ' + err.message);
     }
   };
 
@@ -203,13 +205,13 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
       <div className="sticky top-0 z-10 bg-background border-b px-4 lg:px-6 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <Button variant="ghost" onClick={() => router.back()} className="pl-0">
-            <ArrowLeft className="mr-2 h-4 w-4" /> {isEditing ? 'Edit' : 'Add'} blog post
+            <ArrowLeft className="mr-2 h-4 w-4" /> {isEditing ? t('common.edit') : t('common.add')} {t('articles.title')}
           </Button>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => router.back()}>Cancel</Button>
+            <Button variant="outline" onClick={() => router.back()}>{t('common.cancel')}</Button>
             <Button onClick={handleSubmit} disabled={isCreating || isUpdating}>
               {(isCreating || isUpdating) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+              {t('common.save')}
             </Button>
           </div>
         </div>
@@ -221,33 +223,33 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
           <Card>
             <CardContent className="pt-6 space-y-4">
               <div className="grid gap-2">
-                <Label>Title</Label>
+                <Label>{t('articles.form.title')}</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Blog about your latest products or deals"
+                  placeholder={t('articles.form.titlePlaceholder')}
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label>Content</Label>
+                <Label>{t('articles.form.content')}</Label>
                 <RichTextEditor
                   value={bodyHtml}
                   onChange={setBodyHtml}
-                  placeholder="Write your article content..."
+                  placeholder={t('articles.form.contentPlaceholder')}
                   minHeight="min-h-[300px]"
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label>Excerpt</Label>
+                <Label>{t('articles.form.excerpt')}</Label>
                 <Input
                   value={summaryHtml}
                   onChange={(e) => setSummaryHtml(e.target.value)}
-                  placeholder="Add a summary of the post to appear on your home page or blog"
+                  placeholder={t('articles.form.excerptPlaceholder')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Shown on blog listing pages and search results
+                  {t('articles.form.excerptHelp')}
                 </p>
               </div>
             </CardContent>
@@ -269,33 +271,33 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Visibility</CardTitle>
+              <CardTitle>{t('articles.form.visibility')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <RadioGroup value={visibilityMode} onValueChange={(val: any) => setVisibilityMode(val)}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="visible" id="visible" />
                   <Label htmlFor="visible" className="font-normal cursor-pointer">
-                    Visible
+                    {t('common.visible')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="hidden" id="hidden" />
                   <Label htmlFor="hidden" className="font-normal cursor-pointer">
-                    Hidden
+                    {t('common.hidden')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="scheduled" id="scheduled" />
                   <Label htmlFor="scheduled" className="font-normal cursor-pointer">
-                    Scheduled
+                    {t('common.scheduled')}
                   </Label>
                 </div>
               </RadioGroup>
 
               {visibilityMode === 'scheduled' && (
                 <div className="pt-2">
-                  <Label className="text-sm mb-2">Publish date</Label>
+                  <Label className="text-sm mb-2">{t('articles.form.publishDate')}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -306,7 +308,7 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {publishedAt ? format(publishedAt, 'PPP p') : 'Pick a date'}
+                        {publishedAt ? format(publishedAt, 'PPP p') : t('pages.form.pickDate')}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -325,7 +327,7 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Featured image</CardTitle>
+              <CardTitle>{t('articles.form.featuredImage')}</CardTitle>
             </CardHeader>
             <CardContent>
               {mediaItem || image ? (
@@ -351,9 +353,9 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
                     onClick={() => setShowMediaModal(true)}
                     className="mb-2"
                   >
-                    Add image
+                    {t('articles.form.addImage')}
                   </Button>
-                  <p className="text-xs text-muted-foreground">or drop an image to upload</p>
+                  <p className="text-xs text-muted-foreground">{t('articles.form.dropzone')}</p>
                 </div>
               )}
             </CardContent>
@@ -361,23 +363,23 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Organization</CardTitle>
+              <CardTitle>{t('articles.form.organization')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-2">
-                <Label>Author</Label>
+                <Label>{t('articles.form.author')}</Label>
                 <Input
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Your name"
+                  placeholder={t('articles.form.authorPlaceholder')}
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label>Blog</Label>
+                <Label>{t('articles.form.blog')}</Label>
                 <Select value={blogId} onValueChange={setBlogId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a blog" />
+                    <SelectValue placeholder={t('articles.form.selectBlog')} />
                   </SelectTrigger>
                   <SelectContent>
                     {blogs.map((blog: any) => (
@@ -390,14 +392,14 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
               </div>
 
               <div className="grid gap-2">
-                <Label>Tags</Label>
+                <Label>{t('articles.form.tags')}</Label>
                 <Input
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
-                  placeholder="tag1, tag2, tag3"
+                  placeholder={t('articles.form.tagsPlaceholder')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Separate tags with commas
+                  {t('articles.form.tagsHelp')}
                 </p>
               </div>
             </CardContent>
@@ -405,12 +407,12 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Theme template</CardTitle>
+              <CardTitle>{t('articles.form.template')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Select value={templateSuffix} onValueChange={setTemplateSuffix}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Default template" />
+                  <SelectValue placeholder={t('articles.form.templatePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="default">Default</SelectItem>
@@ -420,7 +422,7 @@ export default function ArticleForm({ articleId }: ArticleFormProps) {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-2">
-                Assign a template from your current theme to define how the article is displayed
+                {t('articles.form.templateHelp')}
               </p>
             </CardContent>
           </Card>

@@ -5,6 +5,7 @@ import { Label } from '@/components/shadcn-ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/shadcn-ui/radio-group';
 import { Input } from '@/components/shadcn-ui/input';
 import * as Types from '@/types/workspace/store/graphql-base';
+import { useTranslations } from 'next-intl';
 
 interface MinimumRequirementsSectionProps {
   minimumRequirementType: Types.WorkspaceStoreDiscountMinimumRequirementTypeChoices;
@@ -23,10 +24,12 @@ export function MinimumRequirementsSection({
   onPurchaseAmountChange,
   onQuantityChange,
 }: MinimumRequirementsSectionProps) {
+  const t = useTranslations('Discounts');
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Minimum purchase requirements</CardTitle>
+        <CardTitle>{t('form.minRequirements.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <RadioGroup
@@ -41,7 +44,7 @@ export function MinimumRequirementsSection({
               id="min-none"
             />
             <Label htmlFor="min-none" className="font-normal cursor-pointer">
-              No minimum requirements
+              {t('form.minRequirements.none')}
             </Label>
           </div>
 
@@ -52,7 +55,7 @@ export function MinimumRequirementsSection({
                 id="min-amount"
               />
               <Label htmlFor="min-amount" className="font-normal cursor-pointer">
-                Minimum purchase amount (FCFA)
+                {t('form.minRequirements.amount')}
               </Label>
             </div>
             {minimumRequirementType === Types.WorkspaceStoreDiscountMinimumRequirementTypeChoices.MinimumAmount && (
@@ -74,7 +77,7 @@ export function MinimumRequirementsSection({
                 id="min-quantity"
               />
               <Label htmlFor="min-quantity" className="font-normal cursor-pointer">
-                Minimum quantity of items
+                {t('form.minRequirements.quantity')}
               </Label>
             </div>
             {minimumRequirementType === Types.WorkspaceStoreDiscountMinimumRequirementTypeChoices.MinimumQuantity && (

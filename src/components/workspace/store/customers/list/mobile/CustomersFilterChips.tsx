@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface FilterChip {
     value: string;
@@ -23,10 +24,11 @@ const DEFAULT_CUSTOMER_CHIPS: FilterChip[] = [
 ];
 
 export function CustomersFilterChips({
-    chips = DEFAULT_CUSTOMER_CHIPS,
+    chips,
     activeChip,
     onChipChange,
 }: CustomersFilterChipsProps) {
+    const t = useTranslations('Customers');
     return (
         <div
             className="flex gap-2 overflow-x-auto scrollbar-none pb-2 -mx-4 px-4"
@@ -46,7 +48,7 @@ export function CustomersFilterChips({
                             : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                     )}
                 >
-                    {chip.label}
+                    {t(`list.tabs.${chip.value}`)}
                     {chip.count !== undefined && (
                         <span className="ml-1.5 text-xs opacity-70">
                             {chip.count}

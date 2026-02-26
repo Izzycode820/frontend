@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/shadcn-ui/button';
 import { Card } from '@/components/shadcn-ui/card';
 import { ArrowLeft, Loader2, Save, Eye } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 // Sections
 import { PageTitleSection } from './PageTitleSection';
@@ -24,6 +25,7 @@ interface PageFormProps {
 }
 
 export default function PageForm({ pageId }: PageFormProps) {
+  const t = useTranslations('Studio');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isEditing = !!pageId;
@@ -64,8 +66,8 @@ export default function PageForm({ pageId }: PageFormProps) {
 
   const validate = () => {
      const newErrors: Record<string, string> = {};
-     if (!title.trim()) newErrors.title = 'Title is required';
-     if (!handle.trim()) newErrors.handle = 'Handle is required';
+     if (!title.trim()) newErrors.title = t('pages.form.toasts.validation');
+     if (!handle.trim()) newErrors.handle = t('pages.form.toasts.validation');
      
      setErrors(newErrors);
      return Object.keys(newErrors).length === 0;
@@ -73,7 +75,7 @@ export default function PageForm({ pageId }: PageFormProps) {
 
   const handleSubmit = async () => {
      if (!validate()) {
-        toast.error('Please fix the errors in the form');
+        toast.error(t('pages.form.toasts.validation'));
         return;
      }
 
@@ -99,9 +101,9 @@ export default function PageForm({ pageId }: PageFormProps) {
            });
            
             if (!data?.pageUpdate?.success) {
-                toast.error(data?.pageUpdate?.error || 'Update failed');
+                toast.error(data?.pageUpdate?.error || t('pages.form.toasts.updateError'));
             } else {
-                toast.success('Page updated successfully');
+                toast.success(t('pages.form.toasts.updateSuccess'));
                 router.push(`/workspace/${currentWorkspace?.id}/store/studio/pages`);
             }
         } else {
@@ -114,9 +116,9 @@ export default function PageForm({ pageId }: PageFormProps) {
            });
            
             if (!data?.pageCreate?.success) {
-                toast.error(data?.pageCreate?.error || 'Create failed');
+                toast.error(data?.pageCreate?.error || t('pages.form.toasts.createError'));
             } else {
-                toast.success('Page created successfully');
+                toast.success(t('pages.form.toasts.createSuccess'));
                 router.push(`/workspace/${currentWorkspace?.id}/store/studio/pages`);
             }
         }
@@ -136,7 +138,7 @@ export default function PageForm({ pageId }: PageFormProps) {
        
        <div className="mb-6">
             <Button variant="ghost" onClick={() => router.back()} className="pl-0 hover:pl-0 hover:bg-transparent">
-               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Pages
+               <ArrowLeft className="mr-2 h-4 w-4" /> {t('pages.form.back')}
             </Button>
        </div>
 
@@ -181,14 +183,14 @@ export default function PageForm({ pageId }: PageFormProps) {
                     disabled={isCreating || isUpdating}
                 >
                     {(isCreating || isUpdating) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isEditing ? 'Update Page' : 'Save Page'}
+                    {isEditing ? t('pages.form.update') : t('pages.form.save')}
                 </Button>
                 <Button
                    variant="outline"
                    onClick={() => router.back()}
                    className="w-full"
                 >
-                   Cancel
+                   {t('common.cancel')}
                 </Button>
              </Card>
           </div>

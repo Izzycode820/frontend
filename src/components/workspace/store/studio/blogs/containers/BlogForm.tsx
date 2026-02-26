@@ -11,6 +11,7 @@ import { Label } from '@/components/shadcn-ui/label';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/shadcn-ui/radio-group';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { CreateBlogDocument } from '@/services/graphql/admin-store/mutations/blogs/__generated__/CreateBlog.generated';
 import { UpdateBlogDocument } from '@/services/graphql/admin-store/mutations/blogs/__generated__/UpdateBlog.generated';
@@ -18,6 +19,7 @@ import { GetBlogDocument } from '@/services/graphql/admin-store/queries/blogs/__
 import { GetBlogsDocument } from '@/services/graphql/admin-store/queries/blogs/__generated__/GetBlogs.generated';
 
 export default function BlogForm() {
+  const t = useTranslations('Studio');
   const router = useRouter();
   const searchParams = useSearchParams();
   const blogId = searchParams.get('id');
@@ -53,7 +55,7 @@ export default function BlogForm() {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('blogs.form.toasts.validation'));
       return;
     }
 
@@ -66,22 +68,22 @@ export default function BlogForm() {
       if (isEditing) {
         const result = await updateBlog({ variables: { id: blogId, input } });
         if (result.data?.updateBlog?.success) {
-          toast.success('Blog updated');
+          toast.success(t('blogs.form.toasts.updateSuccess'));
           router.back();
         } else {
-          toast.error(result.data?.updateBlog?.message || 'Failed to update blog');
+          toast.error(result.data?.updateBlog?.message || t('blogs.form.toasts.updateError'));
         }
       } else {
         const result = await createBlog({ variables: { input } });
         if (result.data?.createBlog?.success) {
-          toast.success('Blog created');
+          toast.success(t('blogs.form.toasts.createSuccess'));
           router.back();
         } else {
-          toast.error(result.data?.createBlog?.message || 'Failed to create blog');
+          toast.error(result.data?.createBlog?.message || t('blogs.form.toasts.createError'));
         }
       }
     } catch (err: any) {
-      toast.error('Failed to save blog: ' + err.message);
+      toast.error(t('blogs.form.toasts.updateError') + ': ' + err.message);
     }
   };
 
@@ -93,13 +95,13 @@ export default function BlogForm() {
     <div className="max-w-2xl mx-auto pb-10 space-y-6 px-4 lg:px-6 py-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => router.back()} className="pl-0 hover:pl-0 hover:bg-transparent">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t('common.back')}
         </Button>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => router.back()}>Cancel</Button>
+          <Button variant="outline" onClick={() => router.back()}>{t('common.cancel')}</Button>
           <Button onClick={handleSubmit} disabled={isCreating || isUpdating}>
             {(isCreating || isUpdating) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save
+            {t('common.save')}
           </Button>
         </div>
       </div>
@@ -107,28 +109,28 @@ export default function BlogForm() {
       <Card>
         <CardContent className="pt-6 space-y-6">
           <div className="grid gap-2">
-            <Label>Blog title</Label>
+            <Label>{t('blogs.form.title')}</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., News, Updates, Announcements"
+              placeholder={t('blogs.form.placeholder')}
             />
             <p className="text-xs text-muted-foreground">
-              A blog is a collection of related articles. Customers can view all articles in a blog.
+              {t('blogs.form.help')}
             </p>
           </div>
 
           <div className="grid gap-3">
-            <Label>Comment policy</Label>
+            <Label>{t('blogs.form.policy')}</Label>
             <RadioGroup value={commentPolicy} onValueChange={(value: any) => setCommentPolicy(value)}>
               <div className="flex items-start space-x-2">
                 <RadioGroupItem value="auto" id="enabled" className="mt-0.5" />
                 <div className="grid gap-1.5 leading-none">
                   <label htmlFor="enabled" className="text-sm font-medium cursor-pointer">
-                    Allow comments
+                    {t('blogs.form.allowComments')}
                   </label>
                   <p className="text-xs text-muted-foreground">
-                    Comments are published automatically
+                    {t('blogs.form.allowHelp')}
                   </p>
                 </div>
               </div>
@@ -136,10 +138,10 @@ export default function BlogForm() {
                 <RadioGroupItem value="moderate" id="moderated" className="mt-0.5" />
                 <div className="grid gap-1.5 leading-none">
                   <label htmlFor="moderated" className="text-sm font-medium cursor-pointer">
-                    Moderate comments
+                    {t('blogs.form.moderateComments')}
                   </label>
                   <p className="text-xs text-muted-foreground">
-                    Comments must be approved before publishing
+                    {t('blogs.form.moderateHelp')}
                   </p>
                 </div>
               </div>
@@ -147,10 +149,10 @@ export default function BlogForm() {
                 <RadioGroupItem value="no" id="disabled" className="mt-0.5" />
                 <div className="grid gap-1.5 leading-none">
                   <label htmlFor="disabled" className="text-sm font-medium cursor-pointer">
-                    Disable comments
+                    {t('blogs.form.disableComments')}
                   </label>
                   <p className="text-xs text-muted-foreground">
-                    Don't allow comments on articles in this blog
+                    {t('blogs.form.disableHelp')}
                   </p>
                 </div>
               </div>

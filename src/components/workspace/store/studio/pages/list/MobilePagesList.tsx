@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 interface MobilePagesListProps {
   pages: Page[];
@@ -22,6 +23,7 @@ interface MobilePagesListProps {
 }
 
 export function MobilePagesList({ pages, onEdit, onView, onDelete }: MobilePagesListProps) {
+  const t = useTranslations('Studio');
   return (
     <div className="space-y-4">
           {pages.map((page) => (
@@ -34,33 +36,43 @@ export function MobilePagesList({ pages, onEdit, onView, onDelete }: MobilePages
                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
+                            <span className="sr-only">{t('common.openMenu')}</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => onEdit(page.id)}>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit page
+                            <Pencil className="mr-2 h-4 w-4" /> {t('pages.form.update')}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => onView(page.id)}>
-                            <ExternalLink className="mr-2 h-4 w-4" /> View in store
+                            <ExternalLink className="mr-2 h-4 w-4" /> {t('articles.form.view')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                               onClick={() => onDelete(page.id)}
                               className="text-red-600"
                           >
-                            <Trash className="mr-2 h-4 w-4" /> Delete
+                            <Trash className="mr-2 h-4 w-4" /> {t('common.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                      </DropdownMenu>
                  </div>
                  <div className="flex items-center justify-between text-sm">
                      <Badge variant={page.isPublished ? 'outline' : 'secondary'} className={page.isPublished ? 'bg-green-50 text-green-700 border-green-200' : ''}>
-                        {page.isPublished ? 'Published' : 'Hidden'}
+                        {page.isPublished ? t('common.published') : t('common.hidden')}
                      </Badge>
-                     <span className="text-muted-foreground">{format(new Date(page.updatedAt), 'MMM d, yyyy')}</span>
+                     <span className="text-muted-foreground">
+                       {(() => {
+                         try {
+                           const date = new Date(page.updatedAt);
+                           if (isNaN(date.getTime())) return t('common.invalidDate');
+                           return format(date, 'MMM d, yyyy');
+                         } catch {
+                           return t('common.invalidDate');
+                         }
+                       })()}
+                     </span>
                  </div>
              </div>
           ))}

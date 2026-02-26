@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu'
 import { format } from 'date-fns'
+import { useTranslations } from 'next-intl'
 
 export interface Page {
   id: string
@@ -47,6 +48,7 @@ export function PagesTable({
   onView,
   onDelete,
 }: PagesTableProps) {
+  const t = useTranslations('Studio');
   const [selectedPages, setSelectedPages] = useState<string[]>([])
 
   const handleSelectAll = (checked: boolean) => {
@@ -72,13 +74,13 @@ export function PagesTable({
                 <Checkbox
                     checked={selectedPages.length === pages.length && pages.length > 0}
                     onCheckedChange={handleSelectAll}
-                    aria-label="Select all"
+                    aria-label={t('common.selectAll')}
                 />
                 </TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Handle</TableHead>
-                <TableHead>Last Updated</TableHead>
+                <TableHead>{t('pages.table.title')}</TableHead>
+                <TableHead>{t('pages.table.status')}</TableHead>
+                <TableHead>{t('pages.table.handle')}</TableHead>
+                <TableHead>{t('pages.table.updated')}</TableHead>
                 <TableHead className="w-12"></TableHead>
             </TableRow>
             </TableHeader>
@@ -89,7 +91,7 @@ export function PagesTable({
                     <Checkbox
                     checked={selectedPages.includes(page.id)}
                     onCheckedChange={(checked) => handleSelectPage(page.id, checked as boolean)}
-                    aria-label={`Select ${page.title}`}
+                    aria-label={t('common.selectItem', { name: page.title })}
                     />
                 </TableCell>
                 <TableCell className="font-medium">
@@ -97,7 +99,7 @@ export function PagesTable({
                 </TableCell>
                 <TableCell>
                     <Badge variant={page.isPublished ? 'outline' : 'secondary'} className={page.isPublished ? 'bg-green-50 text-green-700 border-green-200' : ''}>
-                        {page.isPublished ? 'Published' : 'Hidden'}
+                        {page.isPublished ? t('common.published') : t('common.hidden')}
                     </Badge>
                 </TableCell>
                 <TableCell>
@@ -108,10 +110,10 @@ export function PagesTable({
                       {(() => {
                         try {
                           const date = new Date(page.updatedAt);
-                          if (isNaN(date.getTime())) return 'Invalid date';
+                          if (isNaN(date.getTime())) return t('common.invalidDate');
                           return format(date, 'MMM d, yyyy');
                         } catch {
-                          return 'Invalid date';
+                          return t('common.invalidDate');
                         }
                       })()}
                     </span>
@@ -120,24 +122,24 @@ export function PagesTable({
                     <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">{t('common.openMenu')}</span>
                         <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => onEdit(page.id)}>
-                        <Pencil className="mr-2 h-4 w-4" /> Edit page
+                        <Pencil className="mr-2 h-4 w-4" /> {t('pages.form.update')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onView(page.id)}>
-                        <ExternalLink className="mr-2 h-4 w-4" /> View in store
+                        <ExternalLink className="mr-2 h-4 w-4" /> {t('articles.form.view')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
                             onClick={() => onDelete(page.id)}
                             className="text-red-600 focus:text-red-600 focus:bg-red-50"
                         >
-                        <Trash className="mr-2 h-4 w-4" /> Delete page
+                        <Trash className="mr-2 h-4 w-4" /> {t('common.delete')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                     </DropdownMenu>

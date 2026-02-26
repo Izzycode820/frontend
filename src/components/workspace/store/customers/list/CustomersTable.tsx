@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import { Badge } from '@/components/shadcn-ui/badge';
+import { useTranslations } from 'next-intl';
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ export function CustomersTable({
   onSelectAll,
   workspaceId,
 }: CustomersTableProps) {
+  const t = useTranslations('Customers');
   const allSelected = customers.length > 0 && selectedCustomers.length === customers.length;
   const someSelected = selectedCustomers.length > 0 && selectedCustomers.length < customers.length;
 
@@ -50,12 +52,12 @@ export function CustomersTable({
                 className={someSelected ? 'data-[state=checked]:bg-primary' : ''}
               />
             </TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead className="text-right">Orders</TableHead>
-            <TableHead className="text-right">Amount spent</TableHead>
-            <TableHead>Last order</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead>{t('list.table.customer')}</TableHead>
+            <TableHead>{t('list.table.location')}</TableHead>
+            <TableHead className="text-right">{t('list.table.orders')}</TableHead>
+            <TableHead className="text-right">{t('list.table.amountSpent')}</TableHead>
+            <TableHead>{t('list.table.lastOrder')}</TableHead>
+            <TableHead>{t('list.table.type')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -112,7 +114,7 @@ export function CustomersTable({
                   {customer.lastOrderAt ? (
                     formatDistanceToNow(new Date(customer.lastOrderAt), { addSuffix: true })
                   ) : (
-                    'Never'
+                    t('list.table.never')
                   )}
                 </TableCell>
                 <TableCell>

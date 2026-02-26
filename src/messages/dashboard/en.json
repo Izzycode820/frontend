@@ -52,7 +52,9 @@
       "myStore": "My Store",
       "light": "Light",
       "dark": "Dark",
-      "toggleTheme": "Toggle theme"
+      "toggleTheme": "Toggle theme",
+      "All Workspaces": "All Workspaces",
+      "Huzilerz": "Huzilerz"
     },
     "chart": {
       "title": "Revenue & Orders",

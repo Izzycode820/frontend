@@ -9,12 +9,14 @@ import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Plus, Search, Pencil, Trash, MessageSquare } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { GetBlogsDocument } from '@/services/graphql/admin-store/queries/blogs/__generated__/GetBlogs.generated';
 import { DeleteBlogDocument } from '@/services/graphql/admin-store/mutations/blogs/__generated__/DeleteBlog.generated';
 import { STORE_ROUTES } from '@/routes/domains/workspace';
 
 export default function BlogsListContainer() {
+  const t = useTranslations('Studio');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const [search, setSearch] = useState('');
@@ -35,23 +37,23 @@ export default function BlogsListContainer() {
   };
 
   const handleDeleteBlog = async (blogId: string, blogTitle: string) => {
-    if (!confirm(`Delete "${blogTitle}"? All articles in this blog will also be deleted.`)) return;
+    if (!confirm(t('blogs.form.toasts.deleteConfirm', { title: blogTitle }))) return;
 
     try {
       await deleteBlog({ variables: { id: blogId } });
-      toast.success('Blog deleted successfully');
+      toast.success(t('blogs.form.toasts.deleteSuccess'));
       refetch();
     } catch (err: any) {
-      toast.error('Failed to delete blog: ' + err.message);
+      toast.error(t('blogs.form.toasts.deleteError', { error: err.message }));
     }
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-muted-foreground">Loading blogs...</div>;
+    return <div className="p-8 text-center text-muted-foreground">{t('blogs.loading')}</div>;
   }
 
   if (error) {
-    return <div className="p-8 text-center text-destructive">Error loading blogs: {error.message}</div>;
+    return <div className="p-8 text-center text-destructive">{t('blogs.error', { error: error.message })}</div>;
   }
 
   const blogs = data?.blogs?.edges?.map(edge => edge?.node).filter(Boolean) || [];
@@ -63,9 +65,9 @@ export default function BlogsListContainer() {
     <div className="space-y-4 px-4 lg:px-6 py-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Manage blogs</h1>
+          <h1 className="text-2xl font-bold">{t('blogs.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Organize your blog posts into different blogs (e.g., News, Updates)
+            {t('blogs.description')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -73,10 +75,10 @@ export default function BlogsListContainer() {
             variant="outline" 
             onClick={() => router.push(STORE_ROUTES.STUDIO.BLOGS.LIST(currentWorkspace?.id || ''))}
           >
-            View all posts
+            {t('blogs.viewPosts')}
           </Button>
           <Button onClick={handleAddBlog}>
-            <Plus className="mr-2 h-4 w-4" /> Add blog
+            <Plus className="mr-2 h-4 w-4" /> {t('blogs.add')}
           </Button>
         </div>
       </div>
@@ -86,7 +88,7 @@ export default function BlogsListContainer() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search blogs..."
+            placeholder={t('blogs.search')}
             className="pl-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -97,7 +99,7 @@ export default function BlogsListContainer() {
       {filteredBlogs.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center py-12">
-            <p className="text-muted-foreground">No blogs found.</p>
+            <p className="text-muted-foreground">{t('blogs.noBlogs')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -112,10 +114,10 @@ export default function BlogsListContainer() {
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4" />
-                        {blog.articleCount || 0} articles
+                        {t('blogs.articles', { count: blog.articleCount || 0 })}
                       </span>
                       <span>
-                        Comments: {blog.commentPolicy.toLowerCase().replace('_', ' ')}
+                        {t('blogs.comments', { policy: blog.commentPolicy.toLowerCase().replace('_', ' ') })}
                       </span>
                     </div>
                   </div>
@@ -126,7 +128,7 @@ export default function BlogsListContainer() {
                       onClick={() => handleEditBlog(blog.id)}
                     >
                       <Pencil className="mr-2 h-4 w-4" />
-                      Edit
+                      {t('common.edit')}
                     </Button>
                     <Button
                       variant="outline"

@@ -14,6 +14,7 @@ import {
 } from '@/components/shadcn-ui/dropdown-menu';
 import { MoreHorizontal, Package, Edit2, Copy, DownloadCloud, History } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { ThemeVersionHistoryModal } from '../modals/ThemeVersionHistoryModal';
 import { ApplyThemeUpdateModal } from '../modals/ApplyThemeUpdateModal';
 
@@ -52,6 +53,7 @@ export function ActiveThemeCard({
   onUpdateSuccess,
   onRollbackSuccess,
 }: ActiveThemeCardProps) {
+  const t = useTranslations('Themes');
   const params = useParams();
   const workspaceId = params?.workspace_id as string;
   
@@ -62,7 +64,7 @@ export function ActiveThemeCard({
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -94,7 +96,7 @@ export function ActiveThemeCard({
             {isPasswordProtected && (
               <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
                 <Badge variant="secondary" className="bg-black/70 text-white backdrop-blur-sm border-0 font-medium hover:bg-black/80 text-xs sm:text-sm">
-                  <span className="mr-1 sm:mr-1.5">🔒</span> Protected
+                  <span className="mr-1 sm:mr-1.5">🔒</span> {t('library.activeTheme.protected')}
                 </Badge>
               </div>
             )}
@@ -108,18 +110,18 @@ export function ActiveThemeCard({
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <h3 className="text-base font-semibold truncate">{themeName}</h3>
               <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                Current theme
+                {t('library.activeTheme.currentTheme')}
               </Badge>
             </div>
 
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
-                Added: {formatDate(createdAt)}
+                {t('library.activeTheme.added', { date: formatDate(createdAt) })}
               </p>
-                Version {activeVersionNumber}
+                {t('library.activeTheme.version', { version: activeVersionNumber })}
                 {hasUpdate && (
                   <Badge variant="outline" className="ml-2 text-[10px] py-0 h-4 bg-blue-50 text-blue-700 border-blue-200">
-                    Update available: {currentVersion}
+                    {t('library.activeTheme.updateAvailable', { version: currentVersion || '' })}
                   </Badge>
                 )}
 
@@ -128,13 +130,13 @@ export function ActiveThemeCard({
                 <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-md flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
                   <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
                     <span className="text-xs">🔒</span>
-                    <span>Your store is password protected.</span>
+                    <span>{t('library.activeTheme.passwordPrompt')}</span>
                   </div>
                   <a
                     href={`/workspace/${workspaceId}/store/themes/preferences`}
                     className="text-amber-700 dark:text-amber-300 font-medium underline hover:text-amber-800 dark:hover:text-amber-100 whitespace-nowrap"
                   >
-                    Unlock it
+                    {t('library.activeTheme.unlock')}
                   </a>
                 </div>
               )}
@@ -142,7 +144,7 @@ export function ActiveThemeCard({
               {/* Show password if protected (secondary info) */}
               {isPasswordProtected && storefrontPassword && (
                 <div className="flex flex-wrap items-center gap-2 mt-2 p-2 bg-muted/50 rounded-md w-fit max-w-full">
-                  <span className="text-xs font-medium text-muted-foreground">Password:</span>
+                  <span className="text-xs font-medium text-muted-foreground">{t('library.activeTheme.passwordLabel')}</span>
                   <code className="text-xs bg-background px-1.5 py-0.5 rounded border truncate max-w-[150px] sm:max-w-none">{storefrontPassword}</code>
                 </div>
               )}
@@ -159,18 +161,18 @@ export function ActiveThemeCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => toast.info('Customize coming soon')}>
-                  Customize
+                  {t('library.activeTheme.customize')}
                 </DropdownMenuItem>
                 {onDuplicate && (
                   <DropdownMenuItem onClick={onDuplicate}>
                     <Copy className="mr-2 h-4 w-4" />
-                    Duplicate
+                    {t('library.activeTheme.duplicate')}
                   </DropdownMenuItem>
                 )}
                 {onRename && (
                   <DropdownMenuItem onClick={onRename}>
                     <Edit2 className="mr-2 h-4 w-4" />
-                    Rename
+                    {t('library.activeTheme.rename')}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -186,19 +188,19 @@ export function ActiveThemeCard({
                 {isUpdating ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-current border-b-transparent animate-spin" />
-                    Updating...
+                    {t('library.activeTheme.updating')}
                   </>
                 ) : (
                   <>
                     <DownloadCloud className="w-4 h-4" />
-                    Update to v{currentVersion}
+                    {t('library.activeTheme.updateTo', { version: currentVersion || '' })}
                   </>
                 )}
               </Button>
             )}
 
             <Button onClick={onEditTheme} variant="default" className="flex-1 sm:flex-none">
-              Edit theme
+              {t('library.activeTheme.editTheme')}
             </Button>
             
             <Button 
@@ -207,7 +209,7 @@ export function ActiveThemeCard({
               className="gap-2 hidden sm:flex text-muted-foreground hover:text-foreground"
             >
               <History className="w-4 h-4" />
-              History
+              {t('library.activeTheme.history')}
             </Button>
           </div>
         </div>

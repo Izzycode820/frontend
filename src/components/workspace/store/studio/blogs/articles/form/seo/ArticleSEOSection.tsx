@@ -19,6 +19,7 @@ import { Textarea } from '@/components/shadcn-ui/textarea';
 import { Button } from '@/components/shadcn-ui/button';
 import { Edit2 } from 'lucide-react';
 import { DomainsDocument } from '@/services/graphql/domains/queries/custom-domains/__generated__/domains.generated';
+import { useTranslations } from 'next-intl';
 import { SEO_LIMITS } from './types';
 import {
   generateMetaTitle,
@@ -54,6 +55,7 @@ export function ArticleSEOSection({
   onMetaTitleChange,
   onMetaDescriptionChange,
 }: ArticleSEOSectionProps) {
+  const t = useTranslations('Studio');
   const [isEditing, setIsEditing] = useState(false);
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
 
@@ -64,7 +66,7 @@ export function ArticleSEOSection({
   });
 
   const primaryDomain = domainsData?.domains?.find(d => d?.isPrimary);
-  const domainUrl = primaryDomain?.domain || 'mystore.com';
+  const domainUrl = primaryDomain?.domain || t('seo.previewStoreName');
 
   // Display values (use utility functions for proper truncation/defaults)
   const displayTitle = generateMetaTitle(articleTitle, metaTitle);
@@ -80,7 +82,7 @@ export function ArticleSEOSection({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Search engine listing</CardTitle>
+          <CardTitle>{t('seo.listing')}</CardTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -95,13 +97,13 @@ export function ArticleSEOSection({
         <div className="border rounded-lg p-4 bg-muted/30 space-y-2 break-words">
           <p className="text-sm text-muted-foreground break-all">{domainUrl}</p>
           <p className="text-xs text-muted-foreground break-all">
-            {getUrlBreadcrumbs(blogHandle || 'blog', displaySlug)}
+            {getUrlBreadcrumbs(t('seo.breadcrumbs.blogs'), blogHandle || 'blog', displaySlug)}
           </p>
           <h3 className="text-blue-600 font-medium text-lg hover:underline cursor-pointer break-words">
-            {displayTitle || 'Article Title'}
+            {displayTitle || t('articles.form.titlePlaceholder')}
           </h3>
           <p className="text-sm text-muted-foreground line-clamp-2 break-words">
-            {displayDescription || 'Add a description to see how this article might appear in search engine listings.'}
+            {displayDescription || t('seo.previewFallbackDesc', { type: 'article' })}
           </p>
         </div>
 
@@ -110,40 +112,40 @@ export function ArticleSEOSection({
           <div className="space-y-4 pt-4 border-t">
             {/* Meta Title */}
             <div className="space-y-2">
-              <Label htmlFor="meta-title">Meta title</Label>
+              <Label htmlFor="meta-title">{t('seo.metaTitle')}</Label>
               <Input
                 id="meta-title"
-                placeholder={articleTitle || "Enter article title first"}
+                placeholder={articleTitle || t('seo.placeholderTitle', { type: 'article' })}
                 value={metaTitle}
                 onChange={(e) => onMetaTitleChange(e.target.value)}
                 maxLength={SEO_LIMITS.TITLE}
               />
               <p className={`text-xs ${titleCount.isExceeding ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {titleCount.message}
+                {t('seo.characterLimit', { count: titleCount.count, limit: SEO_LIMITS.TITLE })}
               </p>
             </div>
 
             {/* Meta Description */}
             <div className="space-y-2">
-              <Label htmlFor="meta-description">Meta description</Label>
+              <Label htmlFor="meta-description">{t('seo.metaDescription')}</Label>
               <Textarea
                 id="meta-description"
-                placeholder={plainContent ? truncateText(plainContent, 150) : "Enter article content to auto-generate description"}
+                placeholder={plainContent ? truncateText(plainContent, 150) : t('seo.placeholderDesc', { type: 'article' })}
                 value={metaDescription}
                 onChange={(e) => onMetaDescriptionChange(e.target.value)}
                 maxLength={SEO_LIMITS.DESCRIPTION}
                 rows={3}
               />
               <p className={`text-xs ${descCount.isExceeding ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {descCount.message}
+                {t('seo.characterLimit', { count: descCount.count, limit: SEO_LIMITS.DESCRIPTION })}
               </p>
             </div>
 
             {/* URL Preview */}
             <div className="space-y-2">
-              <Label>URL preview</Label>
+              <Label>{t('seo.urlPreview')}</Label>
               <p className="text-sm text-muted-foreground break-all font-mono bg-muted px-3 py-2 rounded-md">
-                https://{domainUrl}/blogs/{blogHandle || 'blog'}/{displaySlug}
+                https://{domainUrl}/{t('seo.breadcrumbs.blogs')}/{blogHandle || 'blog'}/{displaySlug}
               </p>
             </div>
           </div>
@@ -152,7 +154,7 @@ export function ArticleSEOSection({
         {/* Info text when not editing */}
         {!isEditing && (
           <p className="text-xs text-muted-foreground">
-            Add a title and description to see how this article might appear in a search engine listing.
+            {t('seo.help', { type: 'article' })}
           </p>
         )}
       </CardContent>

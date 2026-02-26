@@ -19,6 +19,7 @@ import {
 } from '@/components/shadcn-ui/card';
 import { Label } from '@/components/shadcn-ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/shadcn-ui/radio-group';
+import { useTranslations } from 'next-intl';
 
 interface PageVisibilitySectionProps {
   isPublished: boolean;
@@ -33,15 +34,16 @@ export function PageVisibilitySection({
   onVisibilityChange,
   onDateChange,
 }: PageVisibilitySectionProps) {
+  const t = useTranslations('Studio');
   
   const dateValue = publishedAt ? new Date(publishedAt) : undefined;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Visibility</CardTitle>
+        <CardTitle>{t('pages.form.visibility')}</CardTitle>
         <CardDescription>
-          Set page visibility status
+          {t('pages.form.visibilityDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -52,16 +54,16 @@ export function PageVisibilitySection({
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="visible" id="vis-visible" />
-            <Label htmlFor="vis-visible" className="cursor-pointer">Visible</Label>
+            <Label htmlFor="vis-visible" className="cursor-pointer">{t('common.visible')}</Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="hidden" id="vis-hidden" />
-            <Label htmlFor="vis-hidden" className="cursor-pointer">Hidden</Label>
+            <Label htmlFor="vis-hidden" className="cursor-pointer">{t('common.hidden')}</Label>
           </div>
         </RadioGroup>
 
         <div className="pt-2 border-t">
-            <Label className="text-sm text-muted-foreground mb-2 block">Publish Date</Label>
+            <Label className="text-sm text-muted-foreground mb-2 block">{t('pages.form.publishDate')}</Label>
             <Popover>
             <PopoverTrigger asChild>
                 <Button
@@ -72,7 +74,7 @@ export function PageVisibilitySection({
                 )}
                 >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
+                {dateValue ? format(dateValue, "PPP") : <span>{t('pages.form.pickDate')}</span>}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -86,7 +88,7 @@ export function PageVisibilitySection({
             </PopoverContent>
             </Popover>
              <p className="text-xs text-muted-foreground mt-1">
-                {isPublished ? "Page is live." : "Page is hidden."} {dateValue && `Scheduled for ${format(dateValue, "PPP")}`}
+                {isPublished ? t('pages.form.isLive') : t('pages.form.isHidden')} {dateValue && t('pages.form.scheduledFor', { date: format(dateValue, "PPP") })}
             </p>
         </div>
       </CardContent>

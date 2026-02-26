@@ -12,6 +12,7 @@ import { UpdateStorefrontSeoDocument } from '@/services/graphql/hosting/mutation
 import { FilesAndMediaModal } from '@/components/workspace/store/shared/files-and-media';
 import type { MediaSelection } from '@/components/workspace/store/shared/files-and-media';
 import { IconInfoCircle, IconX } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 import { adminStoreClient } from '@/services/graphql/clients';
 
 interface SeoSettingsCardProps {
@@ -31,6 +32,7 @@ export function SeoSettingsCard({
   initialFaviconUrl,
   assignedDomain
 }: SeoSettingsCardProps) {
+  const t = useTranslations('Themes');
   const params = useParams();
   const workspaceId = params?.workspace_id as string;
 
@@ -137,7 +139,7 @@ export function SeoSettingsCard({
     <div className="w-full max-w-[1000px] mx-auto px-6">
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-6">
-          <h2 className="text-base font-semibold">Social sharing image and SEO</h2>
+          <h2 className="text-base font-semibold">{t('preferences.seo.title')}</h2>
           <IconInfoCircle className="w-4 h-4 text-muted-foreground" />
         </div>
 
@@ -170,10 +172,10 @@ export function SeoSettingsCard({
               ) : (
                 <>
                   <Button variant="outline" size="sm">
-                    Add image
+                    {t('preferences.seo.addImage')}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Recommended: 1200 x 628 px
+                    {t('preferences.seo.recommendedSize')}
                   </p>
                 </>
               )}
@@ -210,15 +212,15 @@ export function SeoSettingsCard({
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">Favicon</p>
-                <p className="text-xs text-muted-foreground">32×32px recommended</p>
+                <p className="text-sm font-medium">{t('preferences.seo.faviconLabel')}</p>
+                <p className="text-xs text-muted-foreground">{t('preferences.seo.faviconRecommended')}</p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowFaviconModal(true)}
               >
-                {faviconUrl ? 'Change' : 'Upload'}
+                {faviconUrl ? t('preferences.seo.change') : t('preferences.seo.upload')}
               </Button>
             </div>
 
@@ -231,7 +233,7 @@ export function SeoSettingsCard({
                 {title || assignedDomain || 'yourdomain.huzilerz.com'}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {description || 'My Store'}
+                {description || t('common.myStore')}
               </p>
             </div>
           </div>
@@ -240,7 +242,7 @@ export function SeoSettingsCard({
           <div className="space-y-5">
             {/* Home Page Title */}
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">Home page title</Label>
+              <Label htmlFor="title" className="text-sm font-medium">{t('preferences.seo.titleLabel')}</Label>
               <Input
                 id="title"
                 type="text"
@@ -250,32 +252,32 @@ export function SeoSettingsCard({
                 placeholder={assignedDomain || ''}
               />
               <p className="text-xs text-muted-foreground">
-                {titleLength} of 70 characters used
+                {t('preferences.seo.characterLimit', { count: titleLength, limit: 70 })}
               </p>
             </div>
 
             {/* Meta Description */}
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium">Meta description</Label>
+              <Label htmlFor="description" className="text-sm font-medium">{t('preferences.seo.descriptionLabel')}</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => handleDescriptionChange(e.target.value)}
                 maxLength={320}
                 rows={5}
-                placeholder="Enter a description to be shown on search engines like Google"
+                placeholder={t('preferences.seo.descriptionPlaceholder')}
                 className="resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                {descriptionLength} of 320 characters used
+                {t('preferences.seo.characterLimit', { count: descriptionLength, limit: 320 })}
               </p>
             </div>
 
             {/* Keywords - Tag Input */}
             <div className="space-y-2">
               <Label htmlFor="keywords" className="text-sm font-medium">
-                Keywords
-                <span className="text-muted-foreground font-normal ml-1">(optional)</span>
+                {t('preferences.seo.keywordsLabel')}
+                <span className="text-muted-foreground font-normal ml-1">({t('preferences.seo.optional')})</span>
               </Label>
 
               <div className="min-h-[42px] w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
@@ -302,7 +304,7 @@ export function SeoSettingsCard({
                     onChange={(e) => setKeywordInput(e.target.value)}
                     onKeyDown={handleKeywordKeyDown}
                     onBlur={() => keywordInput && addKeyword(keywordInput)}
-                    placeholder={keywords.length === 0 ? "Type and press Enter..." : ""}
+                    placeholder={keywords.length === 0 ? t('preferences.seo.keywordsPlaceholder') : ""}
                     className="flex-1 min-w-[120px] bg-transparent outline-none text-sm placeholder:text-muted-foreground"
                     disabled={keywords.length >= 10}
                   />
@@ -310,7 +312,7 @@ export function SeoSettingsCard({
               </div>
 
               <p className="text-xs text-muted-foreground">
-                {keywords.length}/10 keywords · Press Enter or comma to add
+                {t('preferences.seo.keywordsHelp', { count: keywords.length, limit: 10 })}
               </p>
             </div>
 
@@ -321,7 +323,7 @@ export function SeoSettingsCard({
                 disabled={!hasChanges || loading}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {loading ? 'Saving...' : 'Save changes'}
+                {loading ? t('preferences.saving') : t('preferences.save')}
               </Button>
             </div>
           </div>

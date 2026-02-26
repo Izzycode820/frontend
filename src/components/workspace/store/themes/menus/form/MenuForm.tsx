@@ -10,6 +10,7 @@ import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { ArrowLeft, Plus, Loader2, GripVertical, Trash, Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { CreateNavigationDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/CreateNavigation.generated';
 import { UpdateNavigationDocument } from '@/services/graphql/admin-store/mutations/navigation/__generated__/UpdateNavigation.generated';
@@ -26,6 +27,7 @@ interface MenuFormProps {
 }
 
 export default function MenuForm({ menuId }: MenuFormProps) {
+  const t = useTranslations('Themes');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isEditing = !!menuId && menuId !== 'new'; // Ensure 'new' param doesn't trigger edit mode
@@ -98,7 +100,7 @@ export default function MenuForm({ menuId }: MenuFormProps) {
   
   const handleSubmit = async () => {
       if (!title.trim()) {
-          toast.error('Title is required');
+          toast.error(t('menus.form.titleRequired'));
           return;
       }
 
@@ -171,23 +173,23 @@ export default function MenuForm({ menuId }: MenuFormProps) {
              await Promise.all(itemPromises);
          }
 
-         toast.success(isEditing ? 'Menu updated' : 'Menu created');
+         toast.success(isEditing ? t('menus.form.updated') : t('menus.form.created'));
          router.back();
       } catch (err: any) {
-          toast.error('Failed to save menu: ' + err.message);
+          toast.error(t('menus.form.saveError') + ': ' + err.message);
       }
   };
 
   const handleRemoveExistingItem = async (index: number) => {
       const item = items[index];
       if (item.id && !item.id.startsWith('temp')) {
-          if(!confirm('Delete this item now?')) return;
+          if(!confirm(t('menus.form.confirmDeleteItem'))) return;
           try {
              await deleteMenuItem({ variables: { id: item.id } });
-             toast.success('Item deleted');
+             toast.success(t('menus.itemDeleted'));
              setItems(items.filter((_, i) => i !== index));
           } catch(e: any) {
-             toast.error('Failed to delete item: ' + e.message);
+             toast.error(t('menus.deleteItemError') + ': ' + e.message);
           }
       } else {
           setItems(items.filter((_, i) => i !== index));
@@ -200,13 +202,13 @@ export default function MenuForm({ menuId }: MenuFormProps) {
     <div className="max-w-4xl mx-auto pb-10 space-y-6">
        <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={() => router.back()} className="pl-0 hover:pl-0 hover:bg-transparent">
-             <ArrowLeft className="mr-2 h-4 w-4" /> Back
+             <ArrowLeft className="mr-2 h-4 w-4" /> {t('common.back')}
           </Button>
           <div className="flex items-center gap-2">
-             <Button variant="outline" onClick={() => router.back()}>Cancel</Button>
+             <Button variant="outline" onClick={() => router.back()}>{t('common.cancel')}</Button>
              <Button onClick={handleSubmit} disabled={isCreating || isUpdating}>
                 {(isCreating || isUpdating) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
+                {t('common.save')}
              </Button>
           </div>
        </div>
@@ -215,23 +217,23 @@ export default function MenuForm({ menuId }: MenuFormProps) {
           <Card>
               <CardContent className="pt-6 space-y-4">
                   <div className="grid gap-2">
-                      <Label>Title</Label>
-                      <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Main Menu" />
+                      <Label>{t('menus.form.titleLabel')}</Label>
+                      <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('menus.form.titlePlaceholder')} />
                   </div>
               {isEditing && (
                   <div className="grid gap-2">
                       <Label className="flex items-center gap-2">
-                          Handle
-                          <span className="text-xs font-normal text-muted-foreground">(System ID)</span>
+                          {t('menus.form.handleLabel')}
+                          <span className="text-xs font-normal text-muted-foreground">{t('menus.form.systemId')}</span>
                       </Label>
                       <Input 
                           value={handle} 
                           readOnly
                           className="bg-muted text-muted-foreground cursor-not-allowed font-mono text-sm"
-                          title="This unique identifier is used by themes"
+                          title={t('menus.form.handleTooltip')}
                       />
                       <p className="text-[0.8rem] text-muted-foreground">
-                          A unique identifier (slug) reserved by the system to display this menu in your theme.
+                          {t('menus.form.handleDescription')}
                       </p>
                   </div>
               )}
@@ -240,13 +242,13 @@ export default function MenuForm({ menuId }: MenuFormProps) {
 
           <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Menu Items</CardTitle>
+                  <CardTitle>{t('menus.form.itemsTitle')}</CardTitle>
                   {/* Dashed button removed from header to match screenshot style if preferred, usually bottom of list */}
               </CardHeader>
               <CardContent className="space-y-4">
                   {items.length === 0 && (
                       <div className="text-center text-muted-foreground py-6 border-2 border-dashed rounded-md">
-                          No items yet. Add links to your menu.
+                          {t('menus.form.noItems')}
                       </div>
                   )}
                   {items.map((item, index) => (
@@ -283,7 +285,7 @@ export default function MenuForm({ menuId }: MenuFormProps) {
                       className="w-full border-dashed" 
                       onClick={handleAddItem}
                   >
-                      <Plus className="mr-2 h-4 w-4" /> Add menu item
+                      <Plus className="mr-2 h-4 w-4" /> {t('menus.form.addItem')}
                   </Button>
               </CardContent>
           </Card>

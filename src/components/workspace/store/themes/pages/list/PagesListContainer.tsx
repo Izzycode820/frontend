@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Plus, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { PagesTable, Page } from '@/components/workspace/store/themes/pages/list/PagesTable';
 import { MobilePagesList } from '@/components/workspace/store/themes/pages/list/MobilePagesList';
@@ -21,6 +22,7 @@ import { DomainsDocument } from '@/services/graphql/domains/queries/custom-domai
 import { hostinClient } from '@/services/graphql/clients';
 
 export default function PagesListContainer() {
+  const t = useTranslations('Themes');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
@@ -73,28 +75,28 @@ export default function PagesListContainer() {
          const protocol = domain.includes('localhost') ? 'http' : 'https';
          window.open(`${protocol}://${domain}/pages/${page.handle}`, '_blank');
      } else {
-         toast.error('Could not resolve storefront URL');
+         toast.error(t('pages.resolveUrlError'));
      }
   };
 
   const handleDeletePage = async (pageId: string) => {
-      if(!confirm('Are you sure you want to delete this page?')) return;
+      if(!confirm(t('pages.deleteConfirm'))) return;
       
       try {
         await deletePage({ variables: { id: pageId } });
-        toast.success('Page deleted successfully');
+        toast.success(t('pages.deletedSuccess'));
         refetch();
       } catch (err: any) {
-        toast.error('Failed to delete page: ' + err.message);
+        toast.error(t('pages.deletedError') + err.message);
       }
   };
 
   if (pagesLoading) {
-      return <div className="p-8 text-center text-muted-foreground">Loading pages...</div>;
+      return <div className="p-8 text-center text-muted-foreground">{t('common.loading')}</div>;
   }
 
   if (pagesError) {
-       return <div className="p-8 text-center text-destructive">Error loading pages: {pagesError.message}</div>;
+       return <div className="p-8 text-center text-destructive">{t('common.error')}: {pagesError.message}</div>;
   }
 
   // Transform data
@@ -132,7 +134,7 @@ export default function PagesListContainer() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search pages..."
+              placeholder={t('pages.searchPlaceholder')}
               className="pl-8"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

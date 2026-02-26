@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/shadcn-ui/badge';
+import { useTranslations } from 'next-intl';
 import { formatCurrency } from '@/utils/currency';
 import type { GetCustomersQuery } from '@/services/graphql/admin-store/queries/customers/__generated__/GetCustomers.generated';
 
@@ -31,6 +32,7 @@ export function CustomerCard({
     onSelect,
     onLongPress,
 }: CustomerCardProps) {
+    const t = useTranslations('Customers');
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
     const [isPressed, setIsPressed] = React.useState(false);
 
@@ -113,7 +115,7 @@ export function CustomerCard({
             {/* Right Side: Orders + Spent */}
             <div className="flex-shrink-0 text-right">
                 <div className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
-                    {customer.totalOrders} orders
+                    {t('list.table.ordersCount', { count: customer.totalOrders })}
                 </div>
                 <div className="text-xs text-zinc-500">
                     FCFA {formatCurrency(customer.totalSpent)}

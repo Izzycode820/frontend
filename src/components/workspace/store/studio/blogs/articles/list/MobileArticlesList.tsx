@@ -5,24 +5,28 @@ import { format } from 'date-fns';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
-import { Pencil, Trash, Eye } from 'lucide-react';
+import { Pencil, Trash, Eye, MessageSquare } from 'lucide-react';
 import { Article } from './ArticlesTable';
+import { useTranslations } from 'next-intl';
 
 interface MobileArticlesListProps {
   articles: Article[];
   onEdit: (id: string) => void;
   onDelete: (id: string, title: string) => void;
+  onManageComments: (id: string) => void;
 }
 
-export function MobileArticlesList({ articles, onEdit, onDelete }: MobileArticlesListProps) {
+export function MobileArticlesList({ articles, onEdit, onDelete, onManageComments }: MobileArticlesListProps) {
+  const t = useTranslations('Studio');
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid date';
+      if (isNaN(date.getTime())) return t('common.invalidDate');
       return format(date, 'MMM d, yyyy');
     } catch {
-      return 'Invalid date';
+      return t('common.invalidDate');
     }
   };
 
@@ -39,9 +43,9 @@ export function MobileArticlesList({ articles, onEdit, onDelete }: MobileArticle
 
               <div className="flex items-center gap-2 flex-wrap">
                 {article.isPublished ? (
-                  <Badge variant="default" className="bg-green-600">Published</Badge>
+                  <Badge variant="default" className="bg-green-600">{t('common.published')}</Badge>
                 ) : (
-                  <Badge variant="secondary">Draft</Badge>
+                  <Badge variant="secondary">{t('common.draft')}</Badge>
                 )}
                 <span className="text-xs text-muted-foreground">{article.blog.title}</span>
                 <span className="text-xs text-muted-foreground">•</span>
@@ -49,7 +53,7 @@ export function MobileArticlesList({ articles, onEdit, onDelete }: MobileArticle
               </div>
 
               <div className="text-xs text-muted-foreground">
-                Published: {formatDate(article.publishedAt || article.createdAt)}
+                {t('articles.table.published')}: {formatDate(article.publishedAt || article.createdAt)}
               </div>
 
               <div className="flex items-center gap-2 pt-2">
@@ -60,7 +64,14 @@ export function MobileArticlesList({ articles, onEdit, onDelete }: MobileArticle
                   className="flex-1"
                 >
                   <Pencil className="mr-2 h-4 w-4" />
-                  Edit
+                  {t('common.edit')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onManageComments(article.id)}
+                >
+                  <MessageSquare className="h-4 w-4" />
                 </Button>
                 {article.url && (
                   <Button

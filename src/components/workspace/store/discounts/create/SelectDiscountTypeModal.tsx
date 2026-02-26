@@ -9,6 +9,7 @@ import {
 } from '@/components/shadcn-ui/dialog';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { ChevronRight, Tag, Gift, ShoppingCart, Truck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SelectDiscountTypeModalProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface SelectDiscountTypeModalProps {
 export function SelectDiscountTypeModal({ open, onOpenChange }: SelectDiscountTypeModalProps) {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
+  const t = useTranslations('Discounts');
 
   const handleSelectType = (type: string) => {
     if (type === 'amount_off_product' || type === 'buy_x_get_y') {
@@ -30,29 +32,29 @@ export function SelectDiscountTypeModal({ open, onOpenChange }: SelectDiscountTy
     {
       id: 'amount_off_product',
       icon: Tag,
-      title: 'Amount off products',
-      description: 'Discount specific products or collections of products',
+      title: t('type.amountOffProductTitle'),
+      description: t('type.amountOffProductDesc'),
       available: true,
     },
     {
       id: 'buy_x_get_y',
       icon: Gift,
-      title: 'Buy X get Y',
-      description: 'Discount specific products or collections of products',
+      title: t('type.buyXGetYTitle'),
+      description: t('type.buyXGetYDesc'),
       available: true,
     },
     {
       id: 'amount_off_order',
       icon: ShoppingCart,
-      title: 'Amount off order',
-      description: 'Discount the total order amount',
+      title: t('type.amountOffOrderTitle'),
+      description: t('type.amountOffOrderDesc'),
       available: false,
     },
     {
       id: 'free_shipping',
       icon: Truck,
-      title: 'Free shipping',
-      description: 'Offer free shipping on an order',
+      title: t('type.freeShippingTitle'),
+      description: t('type.freeShippingDesc'),
       available: false,
     },
   ];
@@ -61,7 +63,7 @@ export function SelectDiscountTypeModal({ open, onOpenChange }: SelectDiscountTy
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Select discount type</DialogTitle>
+          <DialogTitle>{t('type.modalTitle')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
           {discountTypes.map((type) => (
@@ -81,7 +83,7 @@ export function SelectDiscountTypeModal({ open, onOpenChange }: SelectDiscountTy
                   <div className="font-medium flex items-center gap-2">
                     {type.title}
                     {!type.available && (
-                      <span className="text-xs text-muted-foreground font-normal">Coming soon</span>
+                      <span className="text-xs text-muted-foreground font-normal">{t('type.comingSoon')}</span>
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground">{type.description}</div>

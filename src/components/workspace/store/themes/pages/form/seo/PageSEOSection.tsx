@@ -15,6 +15,7 @@ import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Textarea } from '@/components/shadcn-ui/textarea';
 import { Button } from '@/components/shadcn-ui/button';
+import { useTranslations } from 'next-intl';
 import { Edit2 } from 'lucide-react';
 import { SEO_LIMITS } from './types';
 import {
@@ -52,6 +53,7 @@ export function PageSEOSection({
   onSeoDescriptionChange,
   onHandleChange,
 }: PageSEOSectionProps) {
+  const t = useTranslations('Themes');
   const [isEditing, setIsEditing] = useState(false);
 
   // Track if handle has been manually edited
@@ -90,7 +92,7 @@ export function PageSEOSection({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Search engine listing</CardTitle>
+          <CardTitle>{t('pages.form.seoListing')}</CardTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -103,7 +105,7 @@ export function PageSEOSection({
       <CardContent className="space-y-4">
         {/* Preview Card */}
         <div className="border rounded-lg p-4 bg-muted/30 space-y-2 break-words">
-          <p className="text-sm text-muted-foreground break-all">My Store</p>
+          <p className="text-sm text-muted-foreground break-all">{t('common.myStore')}</p>
           <p className="text-xs text-muted-foreground break-all">
             {getUrlBreadcrumbs(displaySlug)}
           </p>
@@ -111,7 +113,7 @@ export function PageSEOSection({
             {displayTitle}
           </h3>
           <p className="text-sm text-muted-foreground line-clamp-2 break-words">
-             {displayDescription || 'Add a description to see how this page might appear in search engine listings.'}
+             {displayDescription || t('pages.form.seoListingPlaceholder')}
           </p>
         </div>
 
@@ -120,10 +122,10 @@ export function PageSEOSection({
           <div className="space-y-4 pt-4 border-t">
             {/* Page Title */}
             <div className="space-y-2">
-              <Label htmlFor="seo-title">Page title</Label>
+              <Label htmlFor="seo-title">{t('pages.form.titleLabel')}</Label>
               <Input
                 id="seo-title"
-                placeholder={pageTitle || "Enter page title first"}
+                placeholder={pageTitle || t('pages.form.enterTitleFirst')}
                 value={seoTitle}
                 onChange={(e) => onSeoTitleChange(e.target.value)}
                 maxLength={SEO_LIMITS.TITLE}
@@ -135,10 +137,10 @@ export function PageSEOSection({
 
             {/* Meta Description */}
             <div className="space-y-2">
-              <Label htmlFor="seo-description">Meta description</Label>
+              <Label htmlFor="seo-description">{t('pages.form.metaDescriptionLabel')}</Label>
               <Textarea
                 id="seo-description"
-                placeholder={plainContent ? truncateText(plainContent, 150) : "Enter page content to auto-generate description"}
+                placeholder={plainContent ? truncateText(plainContent, 150) : t('pages.form.metaDescriptionPlaceholder')}
                 value={seoDescription}
                 onChange={(e) => onSeoDescriptionChange(e.target.value)}
                 maxLength={SEO_LIMITS.DESCRIPTION}
@@ -151,7 +153,7 @@ export function PageSEOSection({
 
             {/* URL Handle */}
             <div className="space-y-2">
-              <Label htmlFor="url-handle">URL handle</Label>
+              <Label htmlFor="url-handle">{t('pages.form.urlHandleLabel')}</Label>
               <div className="flex rounded-md shadow-sm">
                   <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
                     /pages/
@@ -174,7 +176,7 @@ export function PageSEOSection({
         {/* Info text when not editing */}
         {!isEditing && (
           <p className="text-xs text-muted-foreground">
-            Add a title and description to see how this page might appear in a search engine listing.
+            {t('pages.form.seoListingHelp')}
           </p>
         )}
       </CardContent>

@@ -15,6 +15,7 @@ import { MoreHorizontal, Package, Edit2, Eye, Copy, Trash2, ChevronDown, Downloa
 import { toast } from 'sonner';
 import { ThemeVersionHistoryModal } from '../modals/ThemeVersionHistoryModal';
 import { ApplyThemeUpdateModal } from '../modals/ApplyThemeUpdateModal';
+import { useTranslations } from 'next-intl';
 
 interface ThemeLibraryCardProps {
   id: string;
@@ -59,6 +60,7 @@ export function ThemeLibraryCard({
   onUpdateSuccess,
   onRollbackSuccess,
 }: ThemeLibraryCardProps) {
+  const t = useTranslations('Themes');
   const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = React.useState(false);
 
@@ -105,13 +107,13 @@ export function ThemeLibraryCard({
             </h4>
             <div className="space-y-0.5">
               <p className="text-sm text-muted-foreground">
-                Added: {formatDate(createdAt)}
+                {t('library.card.added', { date: formatDate(createdAt) })}
               </p>
               <div className="flex items-center gap-1">
-                  Version {activeVersionNumber}
+                  {t('library.card.version', { version: activeVersionNumber })}
                   {currentVersion !== activeVersionNumber && (
                     <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap">
-                      New: {currentVersion}
+                      {t('library.card.new', { version: currentVersion || '' })}
                     </span>
                   )}
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
@@ -129,7 +131,7 @@ export function ThemeLibraryCard({
                 disabled={isPublishing}
                 className="flex-1 sm:flex-none"
               >
-                {isPublishing ? 'Publishing...' : 'Publish'}
+                {isPublishing ? t('library.card.publishing') : t('library.card.publish')}
               </Button>
             )}
             <Button
@@ -139,13 +141,13 @@ export function ThemeLibraryCard({
               disabled={isPublishing}
               className="flex-1 sm:flex-none"
             >
-              Edit theme
+              {t('library.card.editTheme')}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0">
                   <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">{t('library.card.openMenu')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -157,19 +159,19 @@ export function ThemeLibraryCard({
                     {isUpdating ? (
                       <>
                         <div className="mr-2 w-4 h-4 rounded-full border-2 border-current border-b-transparent animate-spin" />
-                        Updating...
+                        {t('library.card.updating')}
                       </>
                     ) : (
                       <>
                         <DownloadCloud className="mr-2 h-4 w-4" />
-                        Update to v{currentVersion}
+                        {t('library.card.updateTo', { version: currentVersion || '' })}
                       </>
                     )}
                   </DropdownMenuItem>
                 
                 <DropdownMenuItem onClick={() => setIsHistoryModalOpen(true)}>
                   <History className="mr-2 h-4 w-4" />
-                  Version History
+                  {t('library.card.history')}
                 </DropdownMenuItem>
                 
                 <DropdownMenuSeparator />
@@ -177,17 +179,17 @@ export function ThemeLibraryCard({
                 {onRename && (
                   <DropdownMenuItem onClick={onRename}>
                     <Edit2 className="mr-2 h-4 w-4" />
-                    Rename
+                    {t('library.card.rename')}
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => toast.info('Preview coming soon')}>
+                <DropdownMenuItem onClick={() => toast.info(t('library.card.previewComingSoon'))}>
                   <Eye className="mr-2 h-4 w-4" />
-                  Preview
+                  {t('library.card.preview')}
                 </DropdownMenuItem>
                 {onDuplicate && (
                   <DropdownMenuItem onClick={onDuplicate} disabled={isDuplicating}>
                     <Copy className="mr-2 h-4 w-4" />
-                    {isDuplicating ? 'Duplicating...' : 'Duplicate'}
+                    {isDuplicating ? t('library.card.duplicating') : t('library.card.duplicate')}
                   </DropdownMenuItem>
                 )}
                 {canDelete && onDelete && (
@@ -195,7 +197,7 @@ export function ThemeLibraryCard({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={onDelete} className="text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
+                      {t('library.card.delete')}
                     </DropdownMenuItem>
                   </>
                 )}

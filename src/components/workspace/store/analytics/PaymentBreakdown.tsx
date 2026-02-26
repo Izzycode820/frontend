@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
+import { useTranslations } from 'next-intl';
 
 type PaymentBreakdownProps = {
     data: {
@@ -13,22 +14,23 @@ type PaymentBreakdownProps = {
 };
 
 export function PaymentBreakdown({ data }: PaymentBreakdownProps) {
+    const t = useTranslations('Analytics');
     if (!data) {
         return null;
     }
 
     const methods = [
-        { label: 'Mobile Money', value: data.mobileMoney },
-        { label: 'Cash on Delivery', value: data.cashOnDelivery },
-        { label: 'Card', value: data.card },
-        { label: 'WhatsApp', value: data.whatsapp },
-        { label: 'Bank Transfer', value: data.bankTransfer },
+        { label: t('payments.mobileMoney'), value: data.mobileMoney },
+        { label: t('payments.cashOnDelivery'), value: data.cashOnDelivery },
+        { label: t('payments.card'), value: data.card },
+        { label: t('payments.whatsapp'), value: data.whatsapp },
+        { label: t('payments.bankTransfer'), value: data.bankTransfer },
     ].filter(m => m.value !== null);
 
     return (
         <Card className="h-full flex flex-col">
             <CardHeader>
-                <CardTitle>Payment Methods</CardTitle>
+                <CardTitle>{t('payments.title')}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1">
                 <div className="flex flex-col justify-between h-full text-sm">

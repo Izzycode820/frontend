@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface FilterChip {
     value: string;
@@ -10,23 +11,27 @@ interface FilterChip {
 }
 
 interface DiscountsFilterChipsProps {
-    chips: FilterChip[];
+    chips?: FilterChip[];
     activeChip: string;
     onChipChange: (value: string) => void;
 }
 
-const DEFAULT_DISCOUNT_CHIPS: FilterChip[] = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'scheduled', label: 'Scheduled' },
-    { value: 'expired', label: 'Expired' },
-];
-
 export function DiscountsFilterChips({
-    chips = DEFAULT_DISCOUNT_CHIPS,
+    chips,
     activeChip,
     onChipChange,
 }: DiscountsFilterChipsProps) {
+    const t = useTranslations('Discounts');
+
+    const defaultChips: FilterChip[] = [
+        { value: 'all', label: t('list.all') },
+        { value: 'active', label: t('list.active') },
+        { value: 'scheduled', label: t('list.scheduled') },
+        { value: 'expired', label: t('list.expired') },
+    ];
+
+    const displayChips = chips || defaultChips;
+
     return (
         <div
             className="flex gap-2 overflow-x-auto scrollbar-none pb-2 -mx-4 px-4"
@@ -35,7 +40,7 @@ export function DiscountsFilterChips({
                 msOverflowStyle: 'none',
             }}
         >
-            {chips.map((chip) => (
+            {displayChips.map((chip) => (
                 <button
                     key={chip.value}
                     onClick={() => onChipChange(chip.value)}
@@ -57,5 +62,3 @@ export function DiscountsFilterChips({
         </div>
     );
 }
-
-export { DEFAULT_DISCOUNT_CHIPS };

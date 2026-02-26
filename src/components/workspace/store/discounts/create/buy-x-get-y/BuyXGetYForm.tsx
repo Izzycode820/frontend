@@ -21,6 +21,7 @@ import { ActiveDatesSection } from '../shared/ActiveDatesSection';
 import { ProductSearchModal } from '../../../shared/products/ProductSearchModal';
 import { CollectionSearchModal } from '../../../shared/collections/CollectionSearchModal';
 import * as Types from '@/types/workspace/store/graphql-base';
+import { useTranslations } from 'next-intl';
 
 export interface BuyXGetYFormData {
   code: string;
@@ -79,6 +80,8 @@ export function BuyXGetYForm({
   initialGetsProducts = [],
   initialGetsCollections = [],
 }: BuyXGetYFormProps) {
+  const t = useTranslations('Discounts');
+
   const [formData, setFormData] = useState<BuyXGetYFormData>(() => ({
     code: initialData?.code || '',
     name: initialData?.name,
@@ -186,9 +189,9 @@ export function BuyXGetYForm({
         {/* Main Form Column */}
         <div className="flex-1 max-w-3xl space-y-6">
           {/* Method & Code */}
-          <Card>
+           <Card>
             <CardHeader>
-              <CardTitle>Method</CardTitle>
+              <CardTitle>{t('method.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <RadioGroup
@@ -200,19 +203,19 @@ export function BuyXGetYForm({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={Types.WorkspaceStoreDiscountMethodChoices.DiscountCode} id="method-code" />
                   <Label htmlFor="method-code" className="font-normal cursor-pointer">
-                    Discount code
+                    {t('method.code')}
                   </Label>
                 </div>
                 {/* Automatic discount removed as requested */}
               </RadioGroup>
 
               <div className="space-y-2">
-                <Label htmlFor="code">Discount code</Label>
+                <Label htmlFor="code">{t('form.code')}</Label>
                 <Input
                   id="code"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  placeholder="e.g., BUY2GET1"
+                  placeholder={t('form.bxgyCodePlaceholder')}
                   required
                 />
               </div>
@@ -220,14 +223,14 @@ export function BuyXGetYForm({
           </Card>
 
           {/* Customer Buys */}
-          <Card>
+           <Card>
             <CardHeader>
-              <CardTitle>Customer buys</CardTitle>
+              <CardTitle>{t('form.customerBuys')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="buys-type">Requirement type</Label>
+                  <Label htmlFor="buys-type">{t('form.requirementType')}</Label>
                   <Select
                     value={formData.customerBuysType}
                     onValueChange={(value) =>
@@ -242,10 +245,10 @@ export function BuyXGetYForm({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={Types.WorkspaceStoreDiscountCustomerBuysTypeChoices.MinimumQuantity}>
-                        Minimum quantity of items
+                        {t('form.minRequirements.quantity')}
                       </SelectItem>
                       <SelectItem value={Types.WorkspaceStoreDiscountCustomerBuysTypeChoices.MinimumPurchaseAmount}>
-                        Minimum purchase amount
+                        {t('form.minRequirements.amount')}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -286,9 +289,9 @@ export function BuyXGetYForm({
                 </div>
               </div>
 
-              <div className="pt-4 border-t space-y-4">
+               <div className="pt-4 border-t space-y-4">
                 <div className="space-y-2">
-                  <Label>Any items from</Label>
+                  <Label>{t('form.anyItemsFrom')}</Label>
                   <Select
                     value={buysResourceType}
                     onValueChange={(value: 'product' | 'collection') => setBuysResourceType(value)}
@@ -297,8 +300,8 @@ export function BuyXGetYForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="product">Specific products</SelectItem>
-                      <SelectItem value="collection">Specific collections</SelectItem>
+                      <SelectItem value="product">{t('form.specificProducts')}</SelectItem>
+                      <SelectItem value="collection">{t('form.specificCollections')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -308,7 +311,7 @@ export function BuyXGetYForm({
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder={`Search ${buysResourceType}s...`}
+                      placeholder={t('form.searchType', { type: buysResourceType === 'product' ? t('form.specificProducts').toLowerCase() : t('form.specificCollections').toLowerCase() })}
                       value={activeSection === 'buys' ? searchTerm : ''}
                       onChange={(e) => handleSearchChange(e.target.value, 'buys')}
                       className="pl-9"
@@ -319,7 +322,7 @@ export function BuyXGetYForm({
                     type="button"
                     onClick={() => handleBrowseClick('buys')}
                   >
-                    Browse
+                    {t('form.browse')}
                   </Button>
                 </div>
 
@@ -369,14 +372,14 @@ export function BuyXGetYForm({
           </Card>
 
           {/* Customer Gets */}
-          <Card>
+           <Card>
             <CardHeader>
-              <CardTitle>Customer gets</CardTitle>
+              <CardTitle>{t('form.customerGets')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="gets-quantity">Quantity</Label>
+                  <Label htmlFor="gets-quantity">{t('form.quantity')}</Label>
                   <Input
                     id="gets-quantity"
                     type="number"
@@ -388,7 +391,7 @@ export function BuyXGetYForm({
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Any items from</Label>
+                  <Label>{t('form.anyItemsFrom')}</Label>
                   <Select
                     value={getsResourceType}
                     onValueChange={(value: 'product' | 'collection') => setGetsResourceType(value)}
@@ -397,8 +400,8 @@ export function BuyXGetYForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="product">Specific products</SelectItem>
-                      <SelectItem value="collection">Specific collections</SelectItem>
+                      <SelectItem value="product">{t('form.specificProducts')}</SelectItem>
+                      <SelectItem value="collection">{t('form.specificCollections')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -408,7 +411,7 @@ export function BuyXGetYForm({
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder={`Search ${getsResourceType}s...`}
+                      placeholder={t('form.searchType', { type: getsResourceType === 'product' ? t('form.specificProducts').toLowerCase() : t('form.specificCollections').toLowerCase() })}
                       value={activeSection === 'gets' ? searchTerm : ''}
                       onChange={(e) => handleSearchChange(e.target.value, 'gets')}
                       className="pl-9"
@@ -419,7 +422,7 @@ export function BuyXGetYForm({
                     type="button"
                     onClick={() => handleBrowseClick('gets')}
                   >
-                    Browse
+                    {t('form.browse')}
                   </Button>
                 </div>
 
@@ -465,9 +468,9 @@ export function BuyXGetYForm({
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                 <div className="grid grid-cols-2 gap-4 border-t pt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="discount-type">At a discounted value</Label>
+                    <Label htmlFor="discount-type">{t('form.atDiscountedValue')}</Label>
                     <Select
                       value={formData.bxgyDiscountType}
                       onValueChange={(value) =>
@@ -482,12 +485,12 @@ export function BuyXGetYForm({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value={Types.WorkspaceStoreDiscountBxgyDiscountTypeChoices.Percentage}>
-                          Percentage
+                          {t('form.percentage')}
                         </SelectItem>
                         <SelectItem value={Types.WorkspaceStoreDiscountBxgyDiscountTypeChoices.AmountOffEach}>
-                          Amount off each
+                          {t('form.amountOffEach')}
                         </SelectItem>
-                        <SelectItem value={Types.WorkspaceStoreDiscountBxgyDiscountTypeChoices.Free}>Free</SelectItem>
+                        <SelectItem value={Types.WorkspaceStoreDiscountBxgyDiscountTypeChoices.Free}>{t('form.free')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -496,8 +499,8 @@ export function BuyXGetYForm({
                     <div className="space-y-2">
                       <Label htmlFor="bxgy-value">
                         {formData.bxgyDiscountType === Types.WorkspaceStoreDiscountBxgyDiscountTypeChoices.Percentage
-                          ? 'Value'
-                          : 'Amount'}
+                          ? t('form.value')
+                          : t('form.amount')}
                       </Label>
                       <div className="relative">
                         <Input
@@ -517,7 +520,7 @@ export function BuyXGetYForm({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="max-uses">Set a maximum number of uses per order (optional)</Label>
+                  <Label htmlFor="max-uses">{t('form.maxUsesPerOrder')}</Label>
                   <Input
                     id="max-uses"
                     type="number"
@@ -543,13 +546,13 @@ export function BuyXGetYForm({
         {/* Sidebar Column */}
         <div className="w-full lg:w-96 lg:flex-shrink-0 space-y-6">
           {/* Action Buttons (Sticky) */}
-          <Card className="p-4 space-y-3 sticky top-6 z-10">
+           <Card className="p-4 space-y-3 sticky top-6 z-10">
             <Button
               onClick={handleSubmit}
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? 'Saving...' : isEditing ? 'Update discount' : 'Save discount'}
+              {isLoading ? t('saving') : isEditing ? t('update') : t('save')}
             </Button>
             <Button
               variant="outline"
@@ -557,7 +560,7 @@ export function BuyXGetYForm({
               className="w-full"
               disabled={isLoading}
             >
-              Discard
+              {t('discard')}
             </Button>
           </Card>
 

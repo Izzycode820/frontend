@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
+import { useTranslations } from 'next-intl';
 
 type ConversionFunnelProps = {
     data: {
@@ -18,6 +19,7 @@ type ConversionFunnelProps = {
 };
 
 export function ConversionFunnel({ data }: ConversionFunnelProps) {
+    const t = useTranslations('Analytics');
     if (!data) {
         return null;
     }
@@ -27,7 +29,7 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Conversion Funnel</CardTitle>
+                <CardTitle>{t('funnel.title')}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
@@ -51,7 +53,7 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
                         <div className="pt-3 mt-3 border-t space-y-2 text-sm">
                             {data.metrics.conversionRate !== null && (
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Conversion Rate</span>
+                                    <span className="text-muted-foreground">{t('funnel.conversionRate')}</span>
                                     <span className="font-medium">
                                         {data.metrics.conversionRate.toFixed(2)}%
                                     </span>
@@ -59,7 +61,7 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
                             )}
                             {data.metrics.abandonmentRate !== null && (
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Abandonment Rate</span>
+                                    <span className="text-muted-foreground">{t('funnel.abandonmentRate')}</span>
                                     <span className="font-medium">
                                         {data.metrics.abandonmentRate.toFixed(2)}%
                                     </span>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { Check, ChevronsUpDown, ChevronRight, ArrowLeft, Search as SearchIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -45,6 +46,7 @@ interface LinkPickerProps {
 type PickerView = 'ROOT' | 'COLLECTIONS' | 'PAGES' | 'BLOGS' | 'ARTICLES';
 
 export function LinkPicker({ value, onChange, className, workspaceId }: LinkPickerProps) {
+  const t = useTranslations('Themes');
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<PickerView>('ROOT');
   const [search, setSearch] = useState('');
@@ -89,13 +91,13 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
       
       switch(type) {
           case 'HOME':
-              result = { title: 'Home page', value: '/', type: 'HTTP' };
+              result = { title: t('menus.form.picker.home'), value: '/', type: 'HTTP' };
               break;
           case 'SEARCH':
-              result = { title: 'Search', value: 'search', type: 'SYSTEM_ROUTE' };
+              result = { title: t('menus.form.picker.search'), value: 'search', type: 'SYSTEM_ROUTE' };
               break;
           case 'PRODUCTS':
-              result = { title: 'All Products', value: '/products', type: 'HTTP' }; // User requested no drill down
+              result = { title: t('menus.form.picker.products'), value: '/products', type: 'HTTP' }; // User requested no drill down
               break;
           case 'BLOGS':
               setView('BLOGS');
@@ -106,7 +108,7 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
               setSearch('');
               return;
           case 'POLICIES':
-              result = { title: 'Policies', value: '/policies', type: 'POLICY' };
+              result = { title: t('menus.form.picker.policies'), value: '/policies', type: 'POLICY' };
               break;
       }
       
@@ -160,37 +162,37 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
 
   const renderRoot = () => (
       <>
-        <CommandGroup heading="Routes">
-            <CommandItem onSelect={() => handleSelectRoot('HOME', 'Home page')}>
-                <span className="flex-1">Home page</span>
+        <CommandGroup heading={t('menus.form.picker.routes')}>
+            <CommandItem onSelect={() => handleSelectRoot('HOME', t('menus.form.picker.home'))}>
+                <span className="flex-1">{t('menus.form.picker.home')}</span>
             </CommandItem>
-            <CommandItem onSelect={() => handleSelectRoot('SEARCH', 'Search')}>
-                <span className="flex-1">Search</span>
+            <CommandItem onSelect={() => handleSelectRoot('SEARCH', t('menus.form.picker.search'))}>
+                <span className="flex-1">{t('menus.form.picker.search')}</span>
             </CommandItem>
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Resources">
-            <CommandItem onSelect={() => handleSelectRoot('COLLECTIONS', 'Collections')}>
-                <span className="flex-1">Collections</span>
+        <CommandGroup heading={t('menus.form.picker.resources')}>
+            <CommandItem onSelect={() => handleSelectRoot('COLLECTIONS', t('menus.form.picker.collections'))}>
+                <span className="flex-1">{t('menus.form.picker.collections')}</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </CommandItem>
-            <CommandItem onSelect={() => handleSelectRoot('PRODUCTS', 'Products')}>
-                <span className="flex-1">Products</span>
+            <CommandItem onSelect={() => handleSelectRoot('PRODUCTS', t('menus.form.picker.products'))}>
+                <span className="flex-1">{t('menus.form.picker.products')}</span>
             </CommandItem>
-            <CommandItem onSelect={() => handleSelectRoot('PAGES', 'Pages')}>
-                <span className="flex-1">Pages</span>
+            <CommandItem onSelect={() => handleSelectRoot('PAGES', t('menus.form.picker.pages'))}>
+                <span className="flex-1">{t('menus.form.picker.pages')}</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </CommandItem>
-            <CommandItem onSelect={() => handleSelectRoot('BLOGS', 'Blogs')}>
-                <span className="flex-1">Blogs</span>
+            <CommandItem onSelect={() => handleSelectRoot('BLOGS', t('menus.form.picker.blogs'))}>
+                <span className="flex-1">{t('menus.form.picker.blogs')}</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </CommandItem>
-            <CommandItem onSelect={() => handleSelectRoot('ARTICLES', 'Blog Posts')}>
-                <span className="flex-1">Blog Posts</span>
+            <CommandItem onSelect={() => handleSelectRoot('ARTICLES', t('menus.form.picker.blogPosts'))}>
+                <span className="flex-1">{t('menus.form.picker.blogPosts')}</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </CommandItem>
-            <CommandItem onSelect={() => handleSelectRoot('POLICIES', 'Policies')}>
-                <span className="flex-1">Policies</span>
+            <CommandItem onSelect={() => handleSelectRoot('POLICIES', t('menus.form.picker.policies'))}>
+                <span className="flex-1">{t('menus.form.picker.policies')}</span>
             </CommandItem>
         </CommandGroup>
       </>
@@ -205,13 +207,13 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
            <>
               <div className="flex items-center p-2 border-b cursor-pointer hover:bg-muted/50" onClick={() => setView('ROOT')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  <span className="text-sm font-medium">Back to Link types</span>
+                  <span className="text-sm font-medium">{t('menus.form.picker.backToLinkTypes')}</span>
               </div>
-              <CommandGroup heading="Collections">
+              <CommandGroup heading={t('menus.form.picker.collections')}>
                   {categoriesLoading && (
-                      <CommandItem disabled>Loading collections...</CommandItem>
+                      <CommandItem disabled>{t('menus.form.picker.loadingCollections')}</CommandItem>
                   )}
-                  {!categoriesLoading && collections.length === 0 && <CommandEmpty>No collections found.</CommandEmpty>}
+                  {!categoriesLoading && collections.length === 0 && <CommandEmpty>{t('menus.form.picker.noCollections')}</CommandEmpty>}
                   {collections.map((c: any) => (
                       <CommandItem key={c.id} onSelect={() => handleSelectCollection(c)}>
                           {c.name}
@@ -233,13 +235,13 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
            <>
               <div className="flex items-center p-2 border-b cursor-pointer hover:bg-muted/50" onClick={() => setView('ROOT')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  <span className="text-sm font-medium">Back to Link types</span>
+                  <span className="text-sm font-medium">{t('menus.form.picker.backToLinkTypes')}</span>
               </div>
-              <CommandGroup heading="Pages">
+              <CommandGroup heading={t('menus.form.picker.pages')}>
                   {pagesLoading && (
-                      <CommandItem disabled>Loading pages...</CommandItem>
+                      <CommandItem disabled>{t('menus.form.picker.loadingPages')}</CommandItem>
                   )}
-                  {!pagesLoading && pages.length === 0 && <CommandEmpty>No pages found.</CommandEmpty>}
+                  {!pagesLoading && pages.length === 0 && <CommandEmpty>{t('menus.form.picker.noPagesResult')}</CommandEmpty>}
                   {pages.map((p: any) => (
                       <CommandItem key={p.id} onSelect={() => handleSelectPage(p)}>
                           {p.title}
@@ -258,13 +260,13 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
            <>
               <div className="flex items-center p-2 border-b cursor-pointer hover:bg-muted/50" onClick={() => setView('ROOT')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  <span className="text-sm font-medium">Back to Link types</span>
+                  <span className="text-sm font-medium">{t('menus.form.picker.backToLinkTypes')}</span>
               </div>
-              <CommandGroup heading="Blogs">
+              <CommandGroup heading={t('menus.form.picker.blogs')}>
                   {blogsLoading && (
-                      <CommandItem disabled>Loading blogs...</CommandItem>
+                      <CommandItem disabled>{t('menus.form.picker.loadingBlogs')}</CommandItem>
                   )}
-                  {!blogsLoading && blogs.length === 0 && <CommandEmpty>No blogs found.</CommandEmpty>}
+                  {!blogsLoading && blogs.length === 0 && <CommandEmpty>{t('menus.form.picker.noBlogs')}</CommandEmpty>}
                   {blogs.map((b: any) => (
                       <CommandItem key={b.id} onSelect={() => handleSelectBlog(b)}>
                           {b.title}
@@ -283,13 +285,13 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
            <>
               <div className="flex items-center p-2 border-b cursor-pointer hover:bg-muted/50" onClick={() => setView('ROOT')}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  <span className="text-sm font-medium">Back to Link types</span>
+                  <span className="text-sm font-medium">{t('menus.form.picker.backToLinkTypes')}</span>
               </div>
-              <CommandGroup heading="Blog Posts">
+              <CommandGroup heading={t('menus.form.picker.blogPosts')}>
                   {articlesLoading && (
-                      <CommandItem disabled>Loading articles...</CommandItem>
+                      <CommandItem disabled>{t('menus.form.picker.loadingArticles')}</CommandItem>
                   )}
-                  {!articlesLoading && articles.length === 0 && <CommandEmpty>No articles found.</CommandEmpty>}
+                  {!articlesLoading && articles.length === 0 && <CommandEmpty>{t('menus.form.picker.noArticles')}</CommandEmpty>}
                   {articles.map((a: any) => (
                       <CommandItem key={a.id} onSelect={() => handleSelectArticle(a)}>
                           <span className="flex-1 truncate">{a.title}</span>
@@ -316,23 +318,15 @@ export function LinkPicker({ value, onChange, className, workspaceId }: LinkPick
         >
           {value ? (
               <span className="truncate">{value}</span> 
-              // Value might be ID, we probably want to show Title. 
-              // But LinkPicker is controlled, so parent should pass display value?
-              // The `value` prop is used for display here? Or the ID?
-              // Standard Pattern: value is ID, we need a label.
-              // For now, let's assume the parent passes the Display Label as the `value` prop for simple UI, 
-              // or we allow children.
-              // Refactoring: Let's assume `value` passed here is the Display Title for MVP simplicity, 
-              // OR parent manages display.
           ) : (
-            "Search or paste a link..."
+            t('menus.form.picker.placeholder')
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[300px]" align="start">
         <Command>
-          <CommandInput placeholder="Search..." onValueChange={setSearch} />
+          <CommandInput placeholder={t('menus.form.picker.searchPlaceholder')} onValueChange={setSearch} />
           <CommandList>
               {view === 'ROOT' && renderRoot()}
               {view === 'COLLECTIONS' && renderCollections()}

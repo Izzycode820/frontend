@@ -59,21 +59,19 @@ export function generateMetaDescription(
 export function getCharacterCount(text: string, limit: number): {
   count: number;
   isExceeding: boolean;
-  message: string;
 } {
   const count = text.length;
   const isExceeding = count > limit;
 
   return {
     count,
-    isExceeding,
-    message: `${count} of ${limit} characters used`
+    isExceeding
   };
 }
 
 /**
  * Format URL breadcrumbs for article
  */
-export function getUrlBreadcrumbs(blogHandle: string, articleSlug: string): string {
-  return `blogs › ${blogHandle} › ${articleSlug}`;
+export function getUrlBreadcrumbs(blogLabel: string, blogHandle: string, articleSlug: string): string {
+  return `${blogLabel} › ${blogHandle} › ${articleSlug}`;
 }

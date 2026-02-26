@@ -38,7 +38,7 @@
       "store": "Boutique",
       "Store": "Boutique",
       "collections": "Collections",
-      "discounts": "Remises",
+      "discounts": "Réductions",
       "studio": "Studio",
       "blogPosts": "Articles de blog",
       "pages": "Pages",
@@ -52,7 +52,9 @@
       "myStore": "Ma Boutique",
       "light": "Clair",
       "dark": "Sombre",
-      "toggleTheme": "Changer le thème"
+      "toggleTheme": "Changer le thème",
+      "All Workspaces": "Tous les espaces de travail",
+      "Huzilerz": "Huzilerz"
     },
     "chart": {
       "title": "Chiffre d'affaires et Commandes",

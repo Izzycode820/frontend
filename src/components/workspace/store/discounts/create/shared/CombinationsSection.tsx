@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Label } from '@/components/shadcn-ui/label';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
+import { useTranslations } from 'next-intl';
 
 interface CombinationsSectionProps {
   canCombineWithProductDiscounts: boolean;
@@ -17,10 +18,12 @@ export function CombinationsSection({
   onProductDiscountsChange,
   onOrderDiscountsChange,
 }: CombinationsSectionProps) {
+  const t = useTranslations('Discounts');
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Combinations</CardTitle>
+        <CardTitle>{t('form.combinations.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Product Discounts (Active) */}
@@ -33,10 +36,10 @@ export function CombinationsSection({
           />
           <div className="grid gap-1.5 leading-none">
             <Label htmlFor="combine-product" className="font-semibold cursor-pointer">
-              Product discounts
+              {t('form.combinations.products')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              Each eligible item in the cart may receive up to one product discount
+              {t('form.combinations.productsHelp')}
             </p>
           </div>
         </div>
@@ -53,16 +56,16 @@ export function CombinationsSection({
             />
             <div className="grid gap-1.5 leading-none">
               <Label htmlFor="combine-order" className="font-semibold">
-                Order discounts
+                {t('form.combinations.orders')}
               </Label>
               <p className="text-sm text-muted-foreground">
-                All eligible order discounts will apply in addition to eligible product discounts
+                {t('form.combinations.ordersHelp')}
               </p>
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded border border-blue-400">
-              Coming Soon
+              {t('type.comingSoon')}
             </span>
           </div>
         </div>
@@ -78,16 +81,16 @@ export function CombinationsSection({
             />
             <div className="grid gap-1.5 leading-none">
               <Label htmlFor="combine-shipping" className="font-semibold">
-                Shipping discounts
+                {t('form.combinations.shipping')}
               </Label>
               <p className="text-sm text-muted-foreground">
-                The largest eligible shipping discount will apply in addition to eligible product discounts
+                {t('form.combinations.shippingHelp')}
               </p>
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded border border-blue-400">
-              Coming Soon
+              {t('type.comingSoon')}
             </span>
           </div>
         </div>

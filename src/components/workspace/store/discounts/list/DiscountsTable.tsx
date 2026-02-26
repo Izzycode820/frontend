@@ -14,6 +14,7 @@ import { Badge } from '@/components/shadcn-ui/badge';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import { DiscountRowActions } from './DiscountRowActions';
 import * as Types from '@/types/workspace/store/graphql-base';
+import { useTranslations } from 'next-intl';
 
 interface Discount {
   id: string;
@@ -54,6 +55,7 @@ export function DiscountsTable({
   const router = useRouter();
   const params = useParams();
   const workspaceId = params.workspace_id;
+  const t = useTranslations('Discounts');
 
   const handleSelectAll = (checked: boolean) => {
     const newSelected = checked ? discounts.map((d) => d.id) : [];
@@ -86,52 +88,52 @@ export function DiscountsTable({
   };
 
   const getStatusBadge = (discount: Discount) => {
-    if (discount.isExpired) {
+     if (discount.isExpired) {
       return (
         <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
-          Expired
+          {t('list.expired')}
         </Badge>
       );
     }
     if (!discount.isActive) {
       return (
         <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-          Scheduled
+          {t('list.scheduled')}
         </Badge>
       );
     }
     return (
       <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
-        Active
+        {t('list.active')}
       </Badge>
     );
   };
 
-  const getMethodBadge = (method: Types.WorkspaceStoreDiscountMethodChoices) => {
+   const getMethodBadge = (method: Types.WorkspaceStoreDiscountMethodChoices) => {
     return (
       <span className="text-sm">
-        {method === Types.WorkspaceStoreDiscountMethodChoices.DiscountCode ? 'Code' : 'Automatic'}
+        {method === Types.WorkspaceStoreDiscountMethodChoices.DiscountCode ? t('method.code') : t('method.automatic')}
       </span>
     );
   };
 
-  const getTypeBadge = (discountType: Types.WorkspaceStoreDiscountDiscountTypeChoices) => {
+   const getTypeBadge = (discountType: Types.WorkspaceStoreDiscountDiscountTypeChoices) => {
     const typeLabels = {
-      [Types.WorkspaceStoreDiscountDiscountTypeChoices.AmountOffProduct]: 'Amount off products',
-      [Types.WorkspaceStoreDiscountDiscountTypeChoices.BuyXGetY]: 'Buy X get Y',
-      [Types.WorkspaceStoreDiscountDiscountTypeChoices.AmountOffOrder]: 'Amount off order',
-      [Types.WorkspaceStoreDiscountDiscountTypeChoices.FreeShipping]: 'Free shipping',
+      [Types.WorkspaceStoreDiscountDiscountTypeChoices.AmountOffProduct]: t('type.amountOffProductTitle'),
+      [Types.WorkspaceStoreDiscountDiscountTypeChoices.BuyXGetY]: t('type.buyXGetYTitle'),
+      [Types.WorkspaceStoreDiscountDiscountTypeChoices.AmountOffOrder]: t('type.amountOffOrderTitle'),
+      [Types.WorkspaceStoreDiscountDiscountTypeChoices.FreeShipping]: t('type.freeShippingTitle'),
     };
     return <span className="text-sm">{typeLabels[discountType] || discountType}</span>;
   };
 
   const getCombinationIcons = (discount: Discount) => {
     const combinations = [];
-    if (discount.canCombineWithProductDiscounts) {
-      combinations.push('Products');
+     if (discount.canCombineWithProductDiscounts) {
+      combinations.push(t('list.products'));
     }
     if (discount.canCombineWithOrderDiscounts) {
-      combinations.push('Orders');
+      combinations.push(t('list.orders'));
     }
     return combinations.length > 0 ? (
       <span className="text-sm">{combinations.join(' • ')}</span>
@@ -143,29 +145,29 @@ export function DiscountsTable({
   const getDiscountDescription = (discount: Discount) => {
     const parts = [];
 
-    // Discount value
+     // Discount value
     if (discount.discountType === Types.WorkspaceStoreDiscountDiscountTypeChoices.AmountOffProduct) {
       if (discount.discountValueType === Types.WorkspaceStoreDiscountDiscountValueTypeChoices.Percentage) {
-        parts.push(`${discount.value}% off`);
+        parts.push(t('list.percentageOff', { amount: discount.value }));
       } else if (discount.discountValueType === Types.WorkspaceStoreDiscountDiscountValueTypeChoices.FixedAmount) {
-        parts.push(`FCFA${parseFloat(discount.value).toLocaleString()} off`);
+        parts.push(t('list.off', { amount: `FCFA${parseFloat(discount.value).toLocaleString()}` }));
       }
     } else if (discount.discountType === Types.WorkspaceStoreDiscountDiscountTypeChoices.BuyXGetY) {
       if (discount.customerBuysQuantity && discount.customerGetsQuantity) {
-        parts.push(`Buy ${discount.customerBuysQuantity}, get ${discount.customerGetsQuantity}`);
+        parts.push(t('list.buyXGetY', { x: discount.customerBuysQuantity, y: discount.customerGetsQuantity }));
       }
     }
 
-    // Minimum requirements
+     // Minimum requirements
     if (discount.minimumPurchaseAmount) {
-      parts.push(`Minimum purchase of FCFA${parseFloat(discount.minimumPurchaseAmount).toLocaleString()}`);
+      parts.push(t('list.minPurchase', { amount: parseFloat(discount.minimumPurchaseAmount).toLocaleString() }));
     } else if (discount.minimumQuantityItems) {
-      parts.push(`Minimum ${discount.minimumQuantityItems} items`);
+      parts.push(t('list.minQuantity', { count: discount.minimumQuantityItems }));
     }
 
     // Usage limit
     if (discount.limitOnePerCustomer) {
-      parts.push('One use per customer');
+      parts.push(t('list.onePerCustomer'));
     }
 
     return parts.join(' • ');
@@ -183,12 +185,12 @@ export function DiscountsTable({
                 aria-label="Select all"
               />
             </TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Method</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Combinations</TableHead>
-            <TableHead>Used</TableHead>
+             <TableHead>{t('list.tableTitle')}</TableHead>
+            <TableHead>{t('list.tableStatus')}</TableHead>
+            <TableHead>{t('list.tableMethod')}</TableHead>
+            <TableHead>{t('list.tableType')}</TableHead>
+            <TableHead>{t('list.tableCombinations')}</TableHead>
+            <TableHead>{t('list.tableUsed')}</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>

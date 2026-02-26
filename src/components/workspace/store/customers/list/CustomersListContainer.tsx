@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/shadcn/use-mobile';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/shadcn-ui/tabs';
+import { useTranslations } from 'next-intl';
 import {
   Pagination,
   PaginationContent,
@@ -26,6 +27,7 @@ import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/w
 type TabValue = 'all' | 'active' | 'inactive';
 
 export default function CustomersListContainer() {
+  const t = useTranslations('Customers');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
@@ -159,7 +161,7 @@ export default function CustomersListContainer() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              <p>Failed to load customers</p>
+              <p>{t('list.empty.failed')}</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </CardContent>
@@ -182,9 +184,9 @@ export default function CustomersListContainer() {
 
   // Mobile filter chips
   const mobileFilterChips = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'all', label: t('list.tabs.all') },
+    { value: 'active', label: t('list.tabs.active') },
+    { value: 'inactive', label: t('list.tabs.inactive') },
   ];
 
   // Handle chip change for mobile (maps to tab)
@@ -225,23 +227,23 @@ export default function CustomersListContainer() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Customers</h1>
+          <h1 className="text-2xl font-bold">{t('list.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your store customers ({totalCount} total)
+            {t('list.description', { count: totalCount })}
           </p>
         </div>
         <Button onClick={handleAddCustomer}>
           <Plus className="mr-2 h-4 w-4" />
-          Add customer
+          {t('list.add')}
         </Button>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          <TabsTrigger value="all">{t('list.tabs.all')}</TabsTrigger>
+          <TabsTrigger value="active">{t('list.tabs.active')}</TabsTrigger>
+          <TabsTrigger value="inactive">{t('list.tabs.inactive')}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -261,18 +263,18 @@ export default function CustomersListContainer() {
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">
-                {selectedCustomers.length} customer{selectedCustomers.length !== 1 ? 's' : ''} selected
+                {t('list.selection.selected', { count: selectedCustomers.length })}
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  Export
+                  {t('list.selection.export')}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedCustomers([])}
                 >
-                  Clear selection
+                  {t('list.selection.clear')}
                 </Button>
               </div>
             </div>
@@ -286,7 +288,7 @@ export default function CustomersListContainer() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading customers...</p>
+              <p className="text-muted-foreground">{t('list.loading')}</p>
             </div>
           </CardContent>
         </Card>
@@ -295,7 +297,7 @@ export default function CustomersListContainer() {
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-sm text-muted-foreground">
-                {(searchTerm || customerType || region) ? 'No customers found' : 'No customers yet'}
+                {(searchTerm || customerType || region) ? t('list.empty.noFound') : t('list.empty.noYet')}
               </p>
             </div>
           </CardContent>
@@ -314,7 +316,11 @@ export default function CustomersListContainer() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} customers
+            {t('list.pagination.showing', {
+              start: ((currentPage - 1) * pageSize) + 1,
+              end: Math.min(currentPage * pageSize, totalCount),
+              total: totalCount
+            })}
           </div>
           <Pagination>
             <PaginationContent>

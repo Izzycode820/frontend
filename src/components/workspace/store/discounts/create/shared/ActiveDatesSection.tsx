@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/shadcn-ui/select';
 import { Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ActiveDatesSectionProps {
   startsAt: string;
@@ -31,6 +32,8 @@ export function ActiveDatesSection({
   onStartsAtChange,
   onEndsAtChange,
 }: ActiveDatesSectionProps) {
+  const t = useTranslations('Discounts');
+
   // Helper to parse/format dates safely
   const getDateParts = (isoString?: string) => {
     if (!isoString) return { date: '', time: '00:00' };
@@ -75,13 +78,13 @@ export function ActiveDatesSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Active dates</CardTitle>
+        <CardTitle>{t('form.activeDates.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Start Date Row */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="start-date">Start date</Label>
+            <Label htmlFor="start-date">{t('form.activeDates.startDate')}</Label>
             <Input
               id="start-date"
               type="date"
@@ -91,7 +94,7 @@ export function ActiveDatesSection({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="start-time">Start time</Label>
+            <Label htmlFor="start-time">{t('form.activeDates.startTime')}</Label>
             <Select
               value={startTime}
               onValueChange={(val) => handleUpdate('start', 'time', val)}
@@ -99,7 +102,7 @@ export function ActiveDatesSection({
               <SelectTrigger id="start-time" className="w-full">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-muted-foreground" />
-                  <SelectValue placeholder="Select time" />
+                  <SelectValue placeholder={t('form.activeDates.selectTime')} />
                 </div>
               </SelectTrigger>
               <SelectContent>
@@ -116,7 +119,7 @@ export function ActiveDatesSection({
         {/* End Date Row */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="end-date">End date</Label>
+            <Label htmlFor="end-date">{t('form.activeDates.endDate')}</Label>
           </div>
 
           {!endsAt ? (
@@ -124,7 +127,7 @@ export function ActiveDatesSection({
               className="text-sm text-blue-600 hover:text-blue-800 font-medium"
               onClick={() => onEndsAtChange(new Date().toISOString())}
             >
-              + Set end date
+              {t('form.activeDates.setEndDate')}
             </button>
           ) : (
             <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -144,7 +147,7 @@ export function ActiveDatesSection({
                   <SelectTrigger id="end-time">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-muted-foreground" />
-                      <SelectValue placeholder="Select time" />
+                      <SelectValue placeholder={t('form.activeDates.selectTime')} />
                     </div>
                   </SelectTrigger>
                   <SelectContent>
@@ -159,7 +162,7 @@ export function ActiveDatesSection({
                   onClick={() => onEndsAtChange(undefined)}
                   className="absolute -top-6 right-0 text-xs text-red-500 hover:text-red-700 font-medium"
                 >
-                  Remove end date
+                  {t('form.activeDates.removeEndDate')}
                 </button>
               </div>
             </div>

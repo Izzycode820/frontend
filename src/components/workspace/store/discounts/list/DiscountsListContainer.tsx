@@ -17,6 +17,7 @@ import { DiscountsEmptyState } from './DiscountsEmptyState';
 import { MobileDiscountsList } from './mobile';
 import { SelectDiscountTypeModal } from '../create/SelectDiscountTypeModal';
 import { useIsMobile } from '@/hooks/shadcn/use-mobile';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -39,6 +40,7 @@ export default function DiscountsListContainer() {
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
+  const t = useTranslations('Discounts');
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
@@ -148,14 +150,14 @@ export default function DiscountsListContainer() {
         variables: { discountId },
       });
 
-      if (deleteData?.deleteDiscount?.success) {
-        toast.success('Discount deleted successfully');
+       if (deleteData?.deleteDiscount?.success) {
+        toast.success(t('list.successDeleting'));
         refetch();
       } else {
-        toast.error(deleteData?.deleteDiscount?.error || 'Failed to delete discount');
+        toast.error(deleteData?.deleteDiscount?.error || t('list.errorDeleting'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete discount');
+      toast.error(err.message || t('list.errorDeleting'));
       console.error('Delete discount error:', err);
     }
   };
@@ -187,11 +189,11 @@ export default function DiscountsListContainer() {
   // Error state
   if (error) {
     return (
-      <div className="px-4 lg:px-6">
+       <div className="px-4 lg:px-6">
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
-              <p>Failed to load discounts</p>
+              <p>{t('list.errorLoading')}</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </CardContent>
@@ -231,12 +233,12 @@ export default function DiscountsListContainer() {
     setSelectedDiscounts([]);
   };
 
-  // Mobile filter chips
+   // Mobile filter chips
   const mobileFilterChips = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'scheduled', label: 'Scheduled' },
-    { value: 'expired', label: 'Expired' },
+    { value: 'all', label: t('list.all') },
+    { value: 'active', label: t('list.active') },
+    { value: 'scheduled', label: t('list.scheduled') },
+    { value: 'expired', label: t('list.expired') },
   ];
 
   // Handle chip change for mobile
@@ -269,13 +271,13 @@ export default function DiscountsListContainer() {
 
   // Desktop View
   return (
-    <div className="space-y-4 px-4 lg:px-6">
+     <div className="space-y-4 px-4 lg:px-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Discounts</h1>
+          <h1 className="text-2xl font-bold">{t('list.title')}</h1>
         </div>
-        <Button onClick={handleAddDiscount}>Create discount</Button>
+        <Button onClick={handleAddDiscount}>{t('list.create')}</Button>
       </div>
 
       {/* Filters */}
@@ -288,20 +290,20 @@ export default function DiscountsListContainer() {
 
       {/* Discounts Table */}
       {loading && discounts.length === 0 ? (
-        <Card>
+       <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading discounts...</p>
+              <p className="text-muted-foreground">{t('list.loading')}</p>
             </div>
           </CardContent>
         </Card>
       ) : discounts.length === 0 ? (
-        <Card>
+       <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No discounts found</p>
-              <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+              <p className="text-muted-foreground">{t('list.noDiscounts')}</p>
+              <p className="text-sm text-muted-foreground">{t('list.adjustFilters')}</p>
             </div>
           </CardContent>
         </Card>
@@ -315,10 +317,13 @@ export default function DiscountsListContainer() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-2">
+         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalCount)} of{' '}
-            {totalCount} discounts
+            {t('list.showing', {
+              start: (currentPage - 1) * pageSize + 1,
+              end: Math.min(currentPage * pageSize, totalCount),
+              total: totalCount
+            })}
           </div>
           <Pagination>
             <PaginationContent>

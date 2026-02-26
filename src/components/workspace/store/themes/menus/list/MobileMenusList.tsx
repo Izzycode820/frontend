@@ -3,6 +3,7 @@
 import { Menu } from '@/components/workspace/store/themes/menus/list/MenusTable';
 import { Button } from '@/components/shadcn-ui/button';
 import { MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ interface MobileMenusListProps {
 }
 
 export function MobileMenusList({ menus, onEdit, onDelete }: MobileMenusListProps) {
+  const t = useTranslations('Themes');
   return (
     <div className="space-y-4">
         {menus.map((menu) => (
@@ -28,32 +30,32 @@ export function MobileMenusList({ menus, onEdit, onDelete }: MobileMenusListProp
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
+                      <span className="sr-only">{t('library.card.openMenu')}</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('library.card.actions')}</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => onEdit(menu.id)}>
-                      <Pencil className="mr-2 h-4 w-4" /> Edit menu
+                      <Pencil className="mr-2 h-4 w-4" /> {t('menus.table.edit')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                         onClick={() => onDelete(menu.id)}
                         className="text-red-600"
                     >
-                      <Trash className="mr-2 h-4 w-4" /> Delete menu
+                      <Trash className="mr-2 h-4 w-4" /> {t('menus.table.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
              </div>
              <div className="text-sm text-muted-foreground grid grid-cols-2 gap-2">
                  <div>
-                    <span className="block text-xs font-medium uppercase text-muted-foreground/70">Handle</span>
+                    <span className="block text-xs font-medium uppercase text-muted-foreground/70">{t('menus.table.handle')}</span>
                     <span className="font-mono">{menu.handle}</span>
                  </div>
                  <div>
-                    <span className="block text-xs font-medium uppercase text-muted-foreground/70">Items</span>
+                    <span className="block text-xs font-medium uppercase text-muted-foreground/70">{t('menus.table.items')}</span>
                     <span>{menu.itemsCount}</span>
                  </div>
              </div>

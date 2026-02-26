@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
+import { useTranslations } from 'next-intl';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,8 +34,9 @@ interface DiscountRowActionsProps {
   onDelete?: (discountId: string) => void;
 }
 
-export function DiscountRowActions({ discount, onEdit, onDelete }: DiscountRowActionsProps) {
+ export function DiscountRowActions({ discount, onEdit, onDelete }: DiscountRowActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const t = useTranslations('Discounts');
 
   const handleEdit = () => {
     onEdit?.(discount.id);
@@ -48,16 +50,16 @@ export function DiscountRowActions({ discount, onEdit, onDelete }: DiscountRowAc
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('actions.openMenu')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleEdit}>
             <Edit className="mr-2 h-4 w-4" />
-            Edit
+            {t('actions.edit')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -65,23 +67,23 @@ export function DiscountRowActions({ discount, onEdit, onDelete }: DiscountRowAc
             className="text-destructive focus:text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete
+            {t('actions.delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete discount</AlertDialogTitle>
+            <AlertDialogTitle>{t('actions.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{discount.code}"? This action cannot be undone.
+              {t('actions.deleteConfirm', { code: discount.code })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t('actions.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

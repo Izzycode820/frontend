@@ -9,6 +9,7 @@ import { Label } from '@/components/shadcn-ui/label';
 import { Button } from '@/components/shadcn-ui/button';
 import { Alert } from '@/components/shadcn-ui/alert';
 import { UpdateGoogleVerificationDocument } from '@/services/graphql/hosting/mutations/storefront/__generated__/updateGoogleVerification.generated';
+import { useTranslations } from 'next-intl';
 import { IconInfoCircle, IconExternalLink, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import {
     Dialog,
@@ -28,6 +29,7 @@ export function GoogleVerificationCard({
     initialVerificationCode,
     assignedDomain
 }: GoogleVerificationCardProps) {
+    const t = useTranslations('Themes');
     const params = useParams();
     const workspaceId = params?.workspace_id as string;
 
@@ -58,13 +60,13 @@ export function GoogleVerificationCard({
             });
 
             if (result.data?.updateGoogleVerification?.success) {
-                setSuccessMessage(result.data.updateGoogleVerification.message || 'Verification code saved successfully');
+                setSuccessMessage(result.data.updateGoogleVerification.message || t('preferences.google.saveSuccess'));
                 setHasChanges(false);
             } else {
-                setErrorMessage(result.data?.updateGoogleVerification?.error || 'Failed to save verification code');
+                setErrorMessage(result.data?.updateGoogleVerification?.error || t('preferences.google.saveError'));
             }
         } catch (error) {
-            setErrorMessage('An error occurred while saving the verification code');
+            setErrorMessage(t('preferences.saveError'));
             console.error('Google verification error:', error);
         }
     };
@@ -72,35 +74,35 @@ export function GoogleVerificationCard({
     return (
         <div className="w-full max-w-[1000px] mx-auto px-6">
             <Card className="p-6">
-                <h2 className="text-base font-semibold mb-6">Google Search Console</h2>
+                <h2 className="text-base font-semibold mb-6">{t('preferences.google.title')}</h2>
 
                 <div className="space-y-5">
                     {/* Info Section */}
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <p className="text-sm text-muted-foreground">
-                                Verify ownership to track your store's performance in Google search results
+                                {t('preferences.google.description')}
                             </p>
                         </div>
                         <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
                             <DialogTrigger asChild>
                                 <Button variant="ghost" size="sm">
                                     <IconInfoCircle className="w-4 h-4 mr-2" />
-                                    How to verify
+                                    {t('preferences.google.howToVerify')}
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
-                                    <DialogTitle>Verify Your Store in Google Search Console</DialogTitle>
+                                    <DialogTitle>{t('preferences.google.modalTitle')}</DialogTitle>
                                     <DialogDescription>
-                                        Follow these steps to verify your store ownership (takes ~2 minutes)
+                                        {t('preferences.google.modalSubtitle')}
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div className="space-y-4 text-sm">
                                     <div className="flex items-start gap-3">
                                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</div>
                                         <div>
-                                            <p className="font-medium">Open Google Search Console</p>
+                                            <p className="font-medium">{t('preferences.google.step1')}</p>
                                             <a
                                                 href="https://search.google.com/search-console"
                                                 target="_blank"
@@ -116,7 +118,7 @@ export function GoogleVerificationCard({
                                     <div className="flex items-start gap-3">
                                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">2</div>
                                         <div>
-                                            <p className="font-medium">Add your store as a property</p>
+                                            <p className="font-medium">{t('preferences.google.step2')}</p>
                                             <p className="text-muted-foreground mt-1">
                                                 Click "+ Add Property" and enter: <code className="bg-muted px-2 py-0.5 rounded text-xs">https://{assignedDomain}</code>
                                             </p>
@@ -126,7 +128,7 @@ export function GoogleVerificationCard({
                                     <div className="flex items-start gap-3">
                                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</div>
                                         <div>
-                                            <p className="font-medium">Choose "HTML tag" verification</p>
+                                            <p className="font-medium">{t('preferences.google.step3')}</p>
                                             <p className="text-muted-foreground mt-1">Copy only the content value:</p>
                                             <pre className="bg-muted p-2 rounded text-xs mt-2">
                                                 {`<meta name="google-site-verification" content="abc123..." />`}
@@ -137,15 +139,15 @@ export function GoogleVerificationCard({
                                     <div className="flex items-start gap-3">
                                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">4</div>
                                         <div>
-                                            <p className="font-medium">Paste code below and save</p>
+                                            <p className="font-medium">{t('preferences.google.step4')}</p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start gap-3">
                                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">5</div>
                                         <div>
-                                            <p className="font-medium">Click "Verify" in Google Console</p>
-                                            <p className="text-muted-foreground mt-1">Google confirms ownership instantly</p>
+                                            <p className="font-medium">{t('preferences.google.step5')}</p>
+                                            <p className="text-muted-foreground mt-1">{t('preferences.google.step6')}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -170,13 +172,13 @@ export function GoogleVerificationCard({
 
                     {/* Input */}
                     <div className="space-y-2">
-                        <Label htmlFor="google-verification">Verification Code</Label>
+                        <Label htmlFor="google-verification">{t('preferences.google.verificationLabel')}</Label>
                         <p className="text-xs text-muted-foreground">
-                            Paste the content value from Google (e.g., "abc123xyz...")
+                            {t('preferences.google.verificationHelp')}
                         </p>
                         <Input
                             id="google-verification"
-                            placeholder="Paste verification code"
+                            placeholder={t('preferences.google.verificationPlaceholder')}
                             value={verificationCode}
                             onChange={(e) => handleCodeChange(e.target.value)}
                             className="font-mono text-sm"
@@ -192,14 +194,14 @@ export function GoogleVerificationCard({
                             className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
                         >
                             <IconExternalLink className="w-3.5 h-3.5" />
-                            Open Search Console
+                            {t('preferences.google.openSearchConsole')}
                         </a>
                         <Button
                             onClick={handleSave}
                             disabled={!hasChanges || loading}
                             className="bg-blue-600 hover:bg-blue-700 text-white"
                         >
-                            {loading ? 'Saving...' : 'Save changes'}
+                            {loading ? t('preferences.saving') : t('preferences.save')}
                         </Button>
                     </div>
                 </div>

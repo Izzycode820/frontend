@@ -60,21 +60,19 @@ export function generateMetaDescription(
 export function getCharacterCount(text: string, limit: number): {
   count: number;
   isExceeding: boolean;
-  message: string;
 } {
   const count = text.length;
   const isExceeding = count > limit;
 
   return {
     count,
-    isExceeding,
-    message: `${count} of ${limit} characters used`
+    isExceeding
   };
 }
 
 /**
  * Format URL breadcrumbs
  */
-export function getUrlBreadcrumbs(slug: string): string {
-  return `pages › ${slug}`;
+export function getUrlBreadcrumbs(slug: string, prefix: string = 'pages'): string {
+  return `${prefix} › ${slug}`;
 }

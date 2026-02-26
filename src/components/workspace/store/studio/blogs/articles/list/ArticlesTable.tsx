@@ -18,7 +18,8 @@ import {
 } from '@/components/shadcn-ui/dropdown-menu';
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
-import { MoreHorizontal, Pencil, Trash, Eye } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash, Eye, MessageSquare } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export interface Article {
   id: string;
@@ -41,17 +42,20 @@ interface ArticlesTableProps {
   articles: Article[];
   onEdit: (id: string) => void;
   onDelete: (id: string, title: string) => void;
+  onManageComments: (id: string) => void;
 }
 
-export function ArticlesTable({ articles, onEdit, onDelete }: ArticlesTableProps) {
+export function ArticlesTable({ articles, onEdit, onDelete, onManageComments }: ArticlesTableProps) {
+  const t = useTranslations('Studio');
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid date';
+      if (isNaN(date.getTime())) return t('common.invalidDate');
       return format(date, 'MMM d, yyyy');
     } catch {
-      return 'Invalid date';
+      return t('common.invalidDate');
     }
   };
 
@@ -60,11 +64,11 @@ export function ArticlesTable({ articles, onEdit, onDelete }: ArticlesTableProps
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[40%]">Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Author</TableHead>
-            <TableHead>Blog</TableHead>
-            <TableHead>Published</TableHead>
+            <TableHead className="w-[40%]">{t('articles.table.title')}</TableHead>
+            <TableHead>{t('articles.table.status')}</TableHead>
+            <TableHead>{t('articles.table.author')}</TableHead>
+            <TableHead>{t('articles.table.blog')}</TableHead>
+            <TableHead>{t('articles.table.published')}</TableHead>
             <TableHead className="w-[80px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -79,9 +83,9 @@ export function ArticlesTable({ articles, onEdit, onDelete }: ArticlesTableProps
               </TableCell>
               <TableCell>
                 {article.isPublished ? (
-                  <Badge variant="default" className="bg-green-600">Published</Badge>
+                  <Badge variant="default" className="bg-green-600">{t('common.published')}</Badge>
                 ) : (
-                  <Badge variant="secondary">Draft</Badge>
+                  <Badge variant="secondary">{t('common.draft')}</Badge>
                 )}
               </TableCell>
               <TableCell>
@@ -105,12 +109,16 @@ export function ArticlesTable({ articles, onEdit, onDelete }: ArticlesTableProps
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onEdit(article.id)}>
                       <Pencil className="mr-2 h-4 w-4" />
-                      Edit
+                      {t('common.edit')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onManageComments(article.id)}>
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      {t('articles.manageComments')}
                     </DropdownMenuItem>
                     {article.url && (
                       <DropdownMenuItem onClick={() => window.open(article.url!, '_blank')}>
                         <Eye className="mr-2 h-4 w-4" />
-                        View
+                        {t('common.view')}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
@@ -118,7 +126,7 @@ export function ArticlesTable({ articles, onEdit, onDelete }: ArticlesTableProps
                       onClick={() => onDelete(article.id, article.title)}
                     >
                       <Trash className="mr-2 h-4 w-4" />
-                      Delete
+                      {t('common.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

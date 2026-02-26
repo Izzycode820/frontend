@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui
 import { Label } from '@/components/shadcn-ui/label';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import { Input } from '@/components/shadcn-ui/input';
+import { useTranslations } from 'next-intl';
 
 interface MaximumUsesSectionProps {
   limitTotalUses: boolean;
@@ -22,10 +23,12 @@ export function MaximumUsesSection({
   onUsageLimitChange,
   onLimitOnePerCustomerChange,
 }: MaximumUsesSectionProps) {
+  const t = useTranslations('Discounts');
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Maximum discount uses</CardTitle>
+        <CardTitle>{t('form.maximumUses.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -36,7 +39,7 @@ export function MaximumUsesSection({
               onCheckedChange={(checked) => onLimitTotalUsesChange(checked as boolean)}
             />
             <Label htmlFor="limit-total" className="font-normal cursor-pointer">
-              Limit number of times this discount can be used in total
+              {t('form.maximumUses.limitTotal')}
             </Label>
           </div>
           {limitTotalUses && (
@@ -58,7 +61,7 @@ export function MaximumUsesSection({
             onCheckedChange={(checked) => onLimitOnePerCustomerChange(checked as boolean)}
           />
           <Label htmlFor="limit-per-customer" className="font-normal cursor-pointer">
-            Limit to one use per customer
+            {t('form.maximumUses.limitOnePerCustomer')}
           </Label>
         </div>
       </CardContent>

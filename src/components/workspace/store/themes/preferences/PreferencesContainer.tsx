@@ -6,10 +6,12 @@ import { StorefrontSettingsDocument } from '@/services/graphql/hosting/queries/s
 import { StoreAccessCard } from './StoreAccessCard';
 import { SeoSettingsCard } from './SeoSettingsCard';
 import { GoogleVerificationCard } from './GoogleVerificationCard';
+import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
 import { Alert } from '@/components/shadcn-ui/alert';
 
 export function PreferencesContainer() {
+  const t = useTranslations('Themes');
   const params = useParams();
   const workspaceId = params?.workspace_id as string;
 
@@ -30,7 +32,7 @@ export function PreferencesContainer() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <div className="font-semibold">Error loading preferences</div>
+        <div className="font-semibold">{t('preferences.errorLoading')}</div>
         <div className="text-sm">{error.message}</div>
       </Alert>
     );
@@ -41,7 +43,7 @@ export function PreferencesContainer() {
   if (!settings) {
     return (
       <Alert>
-        <div className="text-sm">No storefront settings found</div>
+        <div className="text-sm">{t('preferences.noSettings')}</div>
       </Alert>
     );
   }

@@ -11,6 +11,7 @@ import { Switch } from '@/components/shadcn-ui/switch';
 import { Button } from '@/components/shadcn-ui/button';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { SetStorefrontPasswordDocument } from '@/services/graphql/hosting/mutations/storefront/__generated__/setStorefrontPassword.generated';
+import { useTranslations } from 'next-intl';
 import { IconInfoCircle, IconLock } from '@tabler/icons-react';
 
 interface StoreAccessCardProps {
@@ -26,6 +27,7 @@ export function StoreAccessCard({
   initialEnabled,
   initialDescription
 }: StoreAccessCardProps) {
+  const t = useTranslations('Themes');
   const params = useParams();
   const workspaceId = params?.workspace_id as string;
 
@@ -91,7 +93,7 @@ export function StoreAccessCard({
   return (
     <div className="w-full max-w-[1000px] mx-auto px-6">
       <Card className="p-6">
-        <h2 className="text-base font-semibold mb-6">Store access</h2>
+        <h2 className="text-base font-semibold mb-6">{t('preferences.storeAccess.title')}</h2>
 
         <div className="space-y-5">
           {/* Password Protection Header */}
@@ -100,11 +102,11 @@ export function StoreAccessCard({
               <IconLock className="w-5 h-5 mt-0.5 text-muted-foreground" />
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-medium">Password protection</h3>
+                  <h3 className="text-sm font-medium">{t('preferences.storeAccess.protection')}</h3>
                   <IconInfoCircle className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Restrict access to visitors with the password
+                  {t('preferences.storeAccess.description')}
                 </p>
               </div>
             </div>
@@ -121,7 +123,7 @@ export function StoreAccessCard({
             <Alert className="bg-blue-500/10 dark:bg-blue-500/10 border-blue-500/20 dark:border-blue-500/20">
               <IconInfoCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <AlertDescription className="ml-2 text-sm text-blue-900 dark:text-blue-300">
-                To password protect your online store, enable the switch above.
+                {t('preferences.storeAccess.enablePrompt')}
               </AlertDescription>
             </Alert>
           )}
@@ -129,7 +131,7 @@ export function StoreAccessCard({
           {/* Enabled State Info */}
           {enabled && (
             <div className="bg-muted/30 p-3 rounded-md border text-sm flex items-center justify-between">
-              <span className="text-muted-foreground">Preview your password page:</span>
+              <span className="text-muted-foreground">{t('preferences.storeAccess.previewLabel')}</span>
               <a
                 href={`https://${assignedDomain}`}
                 target="_blank"
@@ -146,36 +148,36 @@ export function StoreAccessCard({
 
             {/* Password Input */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">{t('preferences.storeAccess.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="text"
                 value={password}
                 onChange={(e) => handlePasswordChange(e.target.value)}
                 maxLength={100}
-                placeholder="Enter password"
+                placeholder={t('preferences.storeAccess.passwordPlaceholder')}
                 disabled={!enabled}
               />
               <p className="text-xs text-muted-foreground">
-                {passwordLength} of 100 characters used
+                {t('preferences.storeAccess.charactersUsed', { count: passwordLength, limit: 100 })}
               </p>
             </div>
 
             {/* Message to Visitors */}
             <div className="space-y-2">
-              <Label htmlFor="message" className="text-sm font-medium">Message to your visitors</Label>
+              <Label htmlFor="message" className="text-sm font-medium">{t('preferences.storeAccess.customMessageLabel')}</Label>
               <Textarea
                 id="message"
                 value={message}
                 onChange={(e) => handleMessageChange(e.target.value)}
                 maxLength={5000}
                 rows={3}
-                placeholder="Enter a message for your visitors"
+                placeholder={t('preferences.storeAccess.customMessagePlaceholder')}
                 className="resize-none"
                 disabled={!enabled}
               />
               <p className="text-xs text-muted-foreground">
-                {messageLength} of 5,000 characters used
+                {t('preferences.storeAccess.charactersUsed', { count: messageLength, limit: 5000 })}
               </p>
             </div>
 
@@ -186,7 +188,7 @@ export function StoreAccessCard({
                 disabled={!hasChanges || loading || !enabled}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {loading ? 'Saving...' : 'Save changes'}
+                {loading ? t('preferences.saving') : t('preferences.save')}
               </Button>
             </div>
           </div>

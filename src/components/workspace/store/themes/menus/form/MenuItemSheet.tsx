@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
+import { useTranslations } from 'next-intl';
 import { LinkPicker, LinkResult, LinkType } from './LinkPicker';
 
 export interface MenuItemData {
@@ -35,6 +36,7 @@ interface MenuItemSheetProps {
 }
 
 export function MenuItemSheet({ open, onOpenChange, initialItem, onSave, workspaceId }: MenuItemSheetProps) {
+  const t = useTranslations('Themes');
   const [title, setTitle] = useState('');
   const [linkValue, setLinkValue] = useState(''); // Display value for the picker button
   const [currentItem, setCurrentItem] = useState<Partial<MenuItemData>>({
@@ -108,25 +110,25 @@ export function MenuItemSheet({ open, onOpenChange, initialItem, onSave, workspa
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md w-full">
         <SheetHeader>
-          <SheetTitle>{initialItem ? 'Edit menu item' : 'Add menu item'}</SheetTitle>
+          <SheetTitle>{initialItem ? t('menus.form.editItem') : t('menus.form.addItemSheet')}</SheetTitle>
           <SheetDescription>
-            Configure the link and label for this navigation item.
+            {t('menus.form.itemDescription')}
           </SheetDescription>
         </SheetHeader>
         
         <div className="grid gap-6 py-6">
           <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('menus.form.nameLabel')}</Label>
             <Input 
                 id="name" 
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)} 
-                placeholder="e.g. About Us" 
+                placeholder={t('menus.form.namePlaceholder')} 
             />
           </div>
 
           <div className="grid gap-2">
-            <Label>Link</Label>
+            <Label>{t('menus.form.linkLabel')}</Label>
             <LinkPicker 
                 value={linkValue} 
                 onChange={handleLinkChange} 
@@ -136,9 +138,9 @@ export function MenuItemSheet({ open, onOpenChange, initialItem, onSave, workspa
         </div>
 
         <SheetFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('common.cancel')}</Button>
           <Button onClick={handleSave}>
-              {initialItem ? 'Save changes' : 'Add'}
+              {initialItem ? t('menus.form.saveChanges') : t('menus.form.add')}
           </Button>
         </SheetFooter>
       </SheetContent>

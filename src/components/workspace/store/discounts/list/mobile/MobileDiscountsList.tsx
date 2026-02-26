@@ -9,6 +9,7 @@ import { DiscountCard } from './DiscountCard';
 import { MobileDiscountCardSkeleton } from './MobileDiscountCardSkeleton';
 import { DiscountsFilterChips } from './DiscountsFilterChips';
 import * as Types from '@/types/workspace/store/graphql-base';
+import { useTranslations } from 'next-intl';
 
 interface Discount {
     id: string;
@@ -64,8 +65,9 @@ export function MobileDiscountsList({
     onLongPressDiscount,
     onClearSelection,
     isLoading,
-    onAddDiscount,
-}: MobileDiscountsListProps) {
+     onAddDiscount,
+ }: MobileDiscountsListProps) {
+    const t = useTranslations('Discounts');
     const isSelectionMode = selectedDiscounts.length > 0;
     const router = useRouter();
 
@@ -97,8 +99,8 @@ export function MobileDiscountsList({
             <div className="flex gap-3">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
-                    <Input
-                        placeholder="Search discounts..."
+                     <Input
+                        placeholder={t('form.bxgyCodePlaceholder')}
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="pl-10 h-12 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
@@ -128,10 +130,10 @@ export function MobileDiscountsList({
                     ))}
                 </div>
             ) : discounts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-zinc-500 dark:text-zinc-400">No discounts found</p>
+                 <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <p className="text-zinc-500 dark:text-zinc-400">{t('list.noDiscounts')}</p>
                     <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
-                        Try adjusting your filters
+                        {t('list.adjustFilters')}
                     </p>
                 </div>
             ) : (
@@ -161,8 +163,8 @@ export function MobileDiscountsList({
                         >
                             ✕
                         </button>
-                        <span className="text-sm font-medium px-2">
-                            {selectedDiscounts.length} selected
+                         <span className="text-sm font-medium px-2">
+                            {t('list.selected', { count: selectedDiscounts.length })}
                         </span>
                     </div>
                 </div>

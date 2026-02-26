@@ -13,6 +13,7 @@ import { Plus, Search } from 'lucide-react';
 import { PagesTable, Page } from '@/components/workspace/store/themes/pages/list/PagesTable';
 import { MobilePagesList } from '@/components/workspace/store/themes/pages/list/MobilePagesList';
 import { useIsMobile } from '@/hooks/shadcn/use-mobile'; 
+import { useTranslations } from 'next-intl';
 
 // Generated Documents
 import { GetPagesDocument }  from '@/services/graphql/admin-store/queries/pages/__generated__/GetPages.generated';
@@ -21,6 +22,7 @@ import { DomainsDocument } from '@/services/graphql/domains/queries/custom-domai
 import { hostinClient } from '@/services/graphql/clients';
 
 export default function PagesListContainer() {
+  const t = useTranslations('Studio');
   const router = useRouter();
   const currentWorkspace = useWorkspaceStore(workspaceSelectors.currentWorkspace);
   const isMobile = useIsMobile();
@@ -64,7 +66,6 @@ export default function PagesListContainer() {
   };
 
   const handleViewPage = (pageId: string) => {
-     // Fix: Access as array directly
      const page = (pagesData?.pages || []).find((p: any) => p?.id === pageId);
      const domain = getPrimaryDomain();
 
@@ -73,32 +74,31 @@ export default function PagesListContainer() {
          const protocol = domain.includes('localhost') ? 'http' : 'https';
          window.open(`${protocol}://${domain}/pages/${page.handle}`, '_blank');
      } else {
-         toast.error('Could not resolve storefront URL');
+         toast.error(t('common.errorResolveURL'));
      }
   };
 
   const handleDeletePage = async (pageId: string) => {
-      if(!confirm('Are you sure you want to delete this page?')) return;
+      if(!confirm(t('pages.form.toasts.deleteConfirm', { title: '' }))) return;
       
       try {
         await deletePage({ variables: { id: pageId } });
-        toast.success('Page deleted successfully');
+        toast.success(t('pages.form.toasts.deleteSuccess'));
         refetch();
       } catch (err: any) {
-        toast.error('Failed to delete page: ' + err.message);
+        toast.error(t('pages.form.toasts.deleteError', { error: err.message }));
       }
   };
 
   if (pagesLoading) {
-      return <div className="p-8 text-center text-muted-foreground">Loading pages...</div>;
+      return <div className="p-8 text-center text-muted-foreground">{t('pages.loading')}</div>;
   }
 
   if (pagesError) {
-       return <div className="p-8 text-center text-destructive">Error loading pages: {pagesError.message}</div>;
+       return <div className="p-8 text-center text-destructive">{t('pages.error', { error: pagesError.message })}</div>;
   }
 
   // Transform data
-  // Fix: Access as array directly
   const allPages = (pagesData?.pages || []).filter((p: any) => !!p);
   
   const filteredPages = allPages.filter((page: any) => 
@@ -107,8 +107,8 @@ export default function PagesListContainer() {
       id: p.id,
       title: p.title,
       handle: p.handle,
-      isPublished: p.isPublished, // GraphQL returns camelCase
-      updatedAt: p.updatedAt,      // GraphQL returns camelCase
+      isPublished: p.isPublished,
+      updatedAt: p.updatedAt,
       url: p.url
   }));
 
@@ -117,22 +117,22 @@ export default function PagesListContainer() {
     <div className="space-y-4 px-4 lg:px-6 py-6">
        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Pages</h1>
+            <h1 className="text-2xl font-bold">{t('pages.title')}</h1>
             <p className="text-sm text-muted-foreground">
-              Create and manage static content for your store.
+              {t('pages.description')}
             </p>
           </div>
           <Button onClick={handleAddPage}>
-            <Plus className="mr-2 h-4 w-4" /> Add page
+            <Plus className="mr-2 h-4 w-4" /> {t('pages.add')}
           </Button>
        </div>
 
-       <div className="flex items-center gap-2 max-w-sm">
+       <div className="flex items-center gap-2 max-sm">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search pages..."
+              placeholder={t('pages.search')}
               className="pl-8"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -143,7 +143,7 @@ export default function PagesListContainer() {
        {filteredPages.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center py-12">
-               <p className="text-muted-foreground">No pages found.</p>
+               <p className="text-muted-foreground">{t('pages.noPages')}</p>
             </CardContent>
           </Card>
        ) : isMobile ? (

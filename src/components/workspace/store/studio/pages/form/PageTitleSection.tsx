@@ -4,6 +4,7 @@ import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { RichTextEditor } from '@/components/workspace/store/shared/RichTextEditor';
+import { useTranslations } from 'next-intl';
 
 interface PageTitleSectionProps {
   title: string;
@@ -20,14 +21,15 @@ export function PageTitleSection({
   onBodyChange,
   errors = {},
 }: PageTitleSectionProps) {
+  const t = useTranslations('Studio');
   return (
     <Card>
       <CardContent className="pt-6 space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t('pages.form.title')}</Label>
           <Input
             id="title"
-            placeholder="e.g. About Us"
+            placeholder={t('pages.form.titlePlaceholder')}
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             className={errors.title ? 'border-destructive' : ''}
@@ -38,12 +40,12 @@ export function PageTitleSection({
         </div>
 
         <div className="space-y-2">
-          <Label>Content</Label>
+          <Label>{t('pages.form.content')}</Label>
           <div className={errors.body ? 'border rounded-md border-destructive' : ''}>
              <RichTextEditor
                 value={body}
                 onChange={onBodyChange}
-                placeholder="Write your page content here..."
+                placeholder={t('pages.form.contentPlaceholder')}
              />
           </div>
            {errors.body && (

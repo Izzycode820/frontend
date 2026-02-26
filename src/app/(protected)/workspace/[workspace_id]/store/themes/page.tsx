@@ -25,8 +25,10 @@ import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Eye, Plus, Package } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 function ThemesContent() {
+  const t = useTranslations('Themes');
   const params = useParams();
   const router = useRouter();
   const workspaceId = params.workspace_id as string;
@@ -53,7 +55,7 @@ function ThemesContent() {
         if (updatingTheme.activeVersion.versionNumber === updatingTheme.template.currentVersion) {
           stopPolling();
           setUpdatingThemeId(null);
-          toast.success(`${updatingTheme.themeName} has been successfully updated to v${updatingTheme.template.currentVersion}`);
+          toast.success(t('library.toasts.updateSuccess', { themeName: updatingTheme.themeName, version: updatingTheme.template.currentVersion }));
         }
       } else {
          stopPolling();
@@ -78,7 +80,7 @@ function ThemesContent() {
     onCompleted: (data) => {
       setPublishingThemeId(null);
       if (data?.publishTheme?.success) {
-        toast.success(data.publishTheme.message || 'Theme published successfully');
+        toast.success(data.publishTheme.message || t('library.toasts.publishSuccess'));
         refetch();
       } else if (data?.publishTheme?.error) {
         toast.error(data.publishTheme.error);
@@ -86,7 +88,7 @@ function ThemesContent() {
     },
     onError: (error) => {
       setPublishingThemeId(null);
-      toast.error(`Failed to publish theme: ${error.message}`);
+      toast.error(t('library.toasts.publishError', { error: error.message }));
     },
   });
 
@@ -95,7 +97,7 @@ function ThemesContent() {
     onCompleted: (data) => {
       setDeletingThemeId(null);
       if (data?.deleteTheme?.success) {
-        toast.success(data.deleteTheme.message || 'Theme deleted successfully');
+        toast.success(data.deleteTheme.message || t('library.toasts.deleteSuccess'));
         refetch();
       } else if (data?.deleteTheme?.error) {
         toast.error(data.deleteTheme.error);
@@ -103,7 +105,7 @@ function ThemesContent() {
     },
     onError: (error) => {
       setDeletingThemeId(null);
-      toast.error(`Failed to delete theme: ${error.message}`);
+      toast.error(t('library.toasts.deleteError', { error: error.message }));
     },
   });
 
@@ -112,7 +114,7 @@ function ThemesContent() {
     onCompleted: (data) => {
       setDuplicatingThemeId(null);
       if (data?.duplicateTheme?.success) {
-        toast.success(data.duplicateTheme.message || 'Theme duplicated successfully');
+        toast.success(data.duplicateTheme.message || t('library.toasts.duplicateSuccess'));
         refetch();
       } else if (data?.duplicateTheme?.error) {
         toast.error(data.duplicateTheme.error);
@@ -120,7 +122,7 @@ function ThemesContent() {
     },
     onError: (error) => {
       setDuplicatingThemeId(null);
-      toast.error(`Failed to duplicate theme: ${error.message}`);
+      toast.error(t('library.toasts.duplicateError', { error: error.message }));
     },
   });
 
@@ -128,14 +130,14 @@ function ThemesContent() {
     client: themeClient,
     onCompleted: (data) => {
       if (data?.renameTheme?.success) {
-        toast.success(data.renameTheme.message || 'Theme renamed successfully');
+        toast.success(data.renameTheme.message || t('library.toasts.renameSuccess'));
         refetch();
       } else if (data?.renameTheme?.error) {
         toast.error(data.renameTheme.error);
       }
     },
     onError: (error) => {
-      toast.error(`Failed to rename theme: ${error.message}`);
+      toast.error(t('library.toasts.renameError', { error: error.message }));
     },
   });
 
@@ -147,7 +149,7 @@ function ThemesContent() {
 
   const handleViewStore = () => {
     // TODO: Navigate to store preview
-    toast.info('Store preview coming soon');
+    toast.info(t('library.toasts.previewSoon'));
   };
 
   const handleAddTheme = () => {
@@ -202,7 +204,7 @@ function ThemesContent() {
 
   const handleRenameSubmit = async () => {
     if (!renameThemeId || !renameThemeName.trim()) {
-      toast.error('Theme name cannot be empty');
+      toast.error(t('library.toasts.renameEmpty'));
       return;
     }
     try {
@@ -254,17 +256,18 @@ function ThemesContent() {
               <div className="p-2 bg-primary rounded-lg flex-shrink-0">
                 <Package className="w-5 h-5 text-primary-foreground" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold">Themes</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">{t('library.title')}</h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <Button variant="outline" onClick={handleViewStore} size="sm" className="flex-1 sm:flex-none">
                 <Eye className="w-4 h-4 mr-2" />
-                <span className="hidden xs:inline">View your </span>store
+                <span className="hidden xs:inline">{t('library.viewYourStore')}</span>
+                <span className="xs:hidden">{t('library.activeTheme.store')}</span>
               </Button>
               <Button onClick={handleAddTheme} size="sm" className="flex-1 sm:flex-none">
                 <Plus className="w-4 h-4 mr-2" />
-                <span className="sm:hidden">Add</span>
-                <span className="hidden sm:inline">Add theme</span>
+                <span className="sm:hidden">{t('common.add')}</span>
+                <span className="hidden sm:inline">{t('library.addTheme')}</span>
               </Button>
             </div>
           </div>
@@ -296,11 +299,9 @@ function ThemesContent() {
           {libraryThemes.length > 0 && (
             <div>
               <div className="mb-4">
-                <h2 className="text-base font-semibold">Theme library</h2>
+                <h2 className="text-base font-semibold">{t('library.libraryTitle')}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  These themes are only visible to you.{' '}
-                  <span className="text-blue-600 dark:text-blue-400">Publishing a theme from your library</span>{' '}
-                  will switch it to your current theme.
+                  {t('library.libraryDescription')}
                 </p>
               </div>
               <div className="space-y-3">
@@ -338,11 +339,11 @@ function ThemesContent() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/50 mb-4">
                 <Package className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">No themes yet</h3>
-              <p className="text-muted-foreground mb-6">Add a theme from our showcase to get started</p>
+              <h3 className="text-lg font-semibold mb-2">{t('library.noThemesTitle')}</h3>
+              <p className="text-muted-foreground mb-6">{t('library.noThemesDescription')}</p>
               <Button onClick={handleAddTheme}>
                 <Plus className="w-4 h-4 mr-2" />
-                Browse themes
+                {t('library.browseThemes')}
               </Button>
             </div>
           )}
@@ -352,19 +353,19 @@ function ThemesContent() {
         <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Rename theme</DialogTitle>
+              <DialogTitle>{t('library.renameDialogTitle')}</DialogTitle>
               <DialogDescription>
-                Enter a new name for your theme
+                {t('library.renameDialogDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="theme-name">Theme name</Label>
+                <Label htmlFor="theme-name">{t('library.renameLabel')}</Label>
                 <Input
                   id="theme-name"
                   value={renameThemeName}
                   onChange={(e) => setRenameThemeName(e.target.value)}
-                  placeholder="Enter theme name"
+                  placeholder={t('library.renamePlaceholder')}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleRenameSubmit();
@@ -378,10 +379,10 @@ function ThemesContent() {
                 variant="outline"
                 onClick={() => setRenameDialogOpen(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button onClick={handleRenameSubmit}>
-                Rename
+                {t('library.card.rename')}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -21,6 +21,7 @@ import { ActiveDatesSection } from '../shared/ActiveDatesSection';
 import { ProductSearchModal } from '../../../shared/products/ProductSearchModal';
 import { CollectionSearchModal } from '../../../shared/collections/CollectionSearchModal';
 import * as Types from '@/types/workspace/store/graphql-base';
+import { useTranslations } from 'next-intl';
 
 export interface AmountOffProductFormData {
   code: string;
@@ -67,6 +68,8 @@ export function AmountOffProductForm({
   initialProducts = [],
   initialCollections = [],
 }: AmountOffProductFormProps) {
+  const t = useTranslations('Discounts');
+
   const [formData, setFormData] = useState<AmountOffProductFormData>(() => ({
     code: initialData?.code || '',
     name: initialData?.name,
@@ -140,9 +143,9 @@ export function AmountOffProductForm({
         {/* Main Form Column */}
         <div className="flex-1 max-w-3xl space-y-6">
           {/* Method & Code */}
-          <Card>
+           <Card>
             <CardHeader>
-              <CardTitle>Method</CardTitle>
+              <CardTitle>{t('method.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <RadioGroup
@@ -154,19 +157,19 @@ export function AmountOffProductForm({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={Types.WorkspaceStoreDiscountMethodChoices.DiscountCode} id="method-code" />
                   <Label htmlFor="method-code" className="font-normal cursor-pointer">
-                    Discount code
+                    {t('method.code')}
                   </Label>
                 </div>
                 {/* Automatic discount removed as requested */}
               </RadioGroup>
 
               <div className="space-y-2">
-                <Label htmlFor="code">Discount code</Label>
+                <Label htmlFor="code">{t('form.code')}</Label>
                 <Input
                   id="code"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  placeholder="e.g., SUMMER20"
+                  placeholder={t('form.codePlaceholder')}
                   required
                 />
               </div>
@@ -174,15 +177,15 @@ export function AmountOffProductForm({
           </Card>
 
           {/* Value & Applies To */}
-          <Card>
+           <Card>
             <CardHeader>
-              <CardTitle>Value</CardTitle>
+              <CardTitle>{t('form.value')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Side-by-side Value Inputs */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="value-type">Type</Label>
+                  <Label htmlFor="value-type">{t('form.type')}</Label>
                   <Select
                     value={formData.discountValueType}
                     onValueChange={(value) =>
@@ -197,17 +200,17 @@ export function AmountOffProductForm({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={Types.WorkspaceStoreDiscountDiscountValueTypeChoices.Percentage}>
-                        Percentage
+                        {t('form.percentage')}
                       </SelectItem>
                       <SelectItem value={Types.WorkspaceStoreDiscountDiscountValueTypeChoices.FixedAmount}>
-                        Fixed amount
+                        {t('form.fixedAmount')}
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="value">Value</Label>
+                  <Label htmlFor="value">{t('form.value')}</Label>
                   <div className="relative">
                     <Input
                       id="value"
@@ -226,7 +229,7 @@ export function AmountOffProductForm({
 
               <div className="pt-4 border-t space-y-4">
                 <div className="space-y-2">
-                  <Label>Applies to</Label>
+                  <Label>{t('form.appliesTo')}</Label>
                   <Select
                     value={resourceType}
                     onValueChange={(value: 'product' | 'collection') => {
@@ -237,8 +240,8 @@ export function AmountOffProductForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="product">Specific products</SelectItem>
-                      <SelectItem value="collection">Specific collections</SelectItem>
+                      <SelectItem value="product">{t('form.specificProducts')}</SelectItem>
+                      <SelectItem value="collection">{t('form.specificCollections')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -248,7 +251,7 @@ export function AmountOffProductForm({
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder={`Search ${resourceType}s...`}
+                      placeholder={t('form.searchType', { type: resourceType === 'product' ? t('form.specificProducts').toLowerCase() : t('form.specificCollections').toLowerCase() })}
                       value={searchTerm}
                       onChange={handleSearchChange}
                       className="pl-9"
@@ -259,7 +262,7 @@ export function AmountOffProductForm({
                     type="button"
                     onClick={() => resourceType === 'product' ? setIsProductModalOpen(true) : setIsCollectionModalOpen(true)}
                   >
-                    Browse
+                    {t('form.browse')}
                   </Button>
                 </div>
 
@@ -333,13 +336,13 @@ export function AmountOffProductForm({
         {/* Sidebar Column */}
         <div className="w-full lg:w-96 lg:flex-shrink-0 space-y-6">
           {/* Action Buttons (Sticky) */}
-          <Card className="p-4 space-y-3 sticky top-6 z-10">
+           <Card className="p-4 space-y-3 sticky top-6 z-10">
             <Button
               onClick={handleSubmit}
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? 'Saving...' : isEditing ? 'Update discount' : 'Save discount'}
+              {isLoading ? t('saving') : isEditing ? t('update') : t('save')}
             </Button>
             <Button
               variant="outline"
@@ -347,7 +350,7 @@ export function AmountOffProductForm({
               className="w-full"
               disabled={isLoading}
             >
-              Discard
+              {t('discard')}
             </Button>
           </Card>
 
