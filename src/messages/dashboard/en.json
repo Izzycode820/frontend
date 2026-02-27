@@ -229,6 +229,7 @@
       "variant": "Variant",
       "price": "Price ({currency})",
       "available": "Available",
+      "currency": "FCFA",
       "noVariants": "No variants yet. Add option values above to create variants.",
       "variantCount": "{count, plural, =1 {# variant} other {# variants}}",
       "inventoryLocationInfo": "Inventory is not tracked at Shop location",
@@ -304,6 +305,18 @@
       "tags": "Tags"
     },
     "form": {
+      "variants": {
+        "optionName": "Option name",
+        "optionNamePlaceholder": "e.g., Color, Size, Material",
+        "optionValues": "Option values",
+        "valuePlaceholder1": "e.g., Blue",
+        "valuePlaceholder2": "e.g., Black",
+        "addAnotherValue": "Add another value",
+        "addAnotherOption": "Add another option",
+        "remainingCount": "({count} remaining)",
+        "delete": "Delete",
+        "done": "Done"
+      },
       "save": "Save",
       "saveDraft": "Save draft",
       "saving": "Saving...",

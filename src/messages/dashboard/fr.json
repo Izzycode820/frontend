@@ -70,121 +70,121 @@
     }
   },
   "Products": {
-      "title": "Produits",
-      "subtitle": "Gérez les produits de votre boutique ({count} au total)",
-      "loading": "Chargement des produits...",
-      "noProducts": "Aucun produit trouvé",
-      "adjustFilters": "Essayez d'ajuster vos filtres",
-      "noImage": "Aucune image",
-      "inStock": "{count} en stock",
-      "selectedCount": "{count} {count, plural, one {produit sélectionné} other {produits sélectionnés}}",
-      "selectToPerform": "Sélectionnez des produits pour effectuer des actions groupées",
-      "addProduct": "Ajouter un produit",
-      "outOfStock": "En rupture de stock",
-      "active": "Actif",
-      "pageOf": "Page {current} sur {total}",
-      "toolbar": {
-        "bulkActions": "Actions groupées",
-        "cancelSelection": "Annuler la sélection",
-        "archive": "Archiver",
-        "export": "Exporter",
+    "title": "Produits",
+    "subtitle": "Gérez les produits de votre boutique ({count} au total)",
+    "loading": "Chargement des produits...",
+    "noProducts": "Aucun produit trouvé",
+    "adjustFilters": "Essayez d'ajuster vos filtres",
+    "noImage": "Aucune image",
+    "inStock": "{count} en stock",
+    "selectedCount": "{count} {count, plural, one {produit sélectionné} other {produits sélectionnés}}",
+    "selectToPerform": "Sélectionnez des produits pour effectuer des actions groupées",
+    "addProduct": "Ajouter un produit",
+    "outOfStock": "En rupture de stock",
+    "active": "Actif",
+    "pageOf": "Page {current} sur {total}",
+    "toolbar": {
+      "bulkActions": "Actions groupées",
+      "cancelSelection": "Annuler la sélection",
+      "archive": "Archiver",
+      "export": "Exporter",
+      "delete": "Supprimer",
+      "addToCategory": "Ajouter à la catégorie",
+      "removeFromCategory": "Retirer de la catégorie",
+      "selectCategory": "Sélectionner une catégorie...",
+      "searchCategories": "Rechercher des catégories...",
+      "noCategoryFound": "Aucune catégorie trouvée.",
+      "cancel": "Annuler"
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher des produits par nom ou SKU...",
+      "filters": "Filtres",
+      "status": "Statut",
+      "allStatuses": "Tous les statuts",
+      "category": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "clearFilters": "Effacer les filtres",
+      "activeFilters": "Filtres actifs :",
+      "search": "Recherche :",
+      "clearAll": "Tout effacer",
+      "viewResults": "Voir les Résultats",
+      "all": "Tous",
+      "published": "Publié",
+      "draft": "Brouillon",
+      "archived": "Archivé"
+    },
+    "table": {
+      "product": "Produit",
+      "status": "Statut",
+      "inventory": "Inventaire",
+      "price": "Prix",
+      "category": "Catégorie",
+      "type": "Type",
+      "vendor": "Vendeur",
+      "actions": {
+        "openMenu": "Ouvrir le menu",
+        "view": "Voir",
+        "edit": "Modifier",
+        "duplicate": "Dupliquer",
         "delete": "Supprimer",
+        "exportSelected": "Exporter la sélection",
         "addToCategory": "Ajouter à la catégorie",
-        "removeFromCategory": "Retirer de la catégorie",
-        "selectCategory": "Sélectionner une catégorie...",
-        "searchCategories": "Rechercher des catégories...",
+        "removeFromCategory": "Retirer de la catégorie"
+      },
+      "dialogs": {
+        "cancel": "Annuler",
+        "deleteTitle": "Supprimer le Produit",
+        "deleteDescription": "Êtes-vous sûr de vouloir supprimer « {name} » ? Cette action est irréversible.",
+        "addCategoryTitle": "Ajouter à la Catégorie",
+        "addCategoryDescription": "Sélectionnez une catégorie pour y ajouter « {name} ».",
+        "addCategoryBulkDescription": "Sélectionnez une catégorie pour y ajouter les {count} produits sélectionnés.",
+        "removeCategoryTitle": "Retirer de la Catégorie",
+        "removeCategoryDescription": "Sélectionnez une catégorie pour en retirer « {name} ».",
+        "removeCategoryBulkDescription": "Sélectionnez une catégorie pour en retirer les {count} produits sélectionnés.",
+        "selectCategoryPlaceholder": "Sélectionner une catégorie...",
+        "searchCategoriesPlaceholder": "Rechercher des catégories...",
         "noCategoryFound": "Aucune catégorie trouvée.",
-        "cancel": "Annuler"
+        "addToCategory": "Ajouter à la Catégorie",
+        "removeFromCategory": "Retirer de la Catégorie"
+      }
+    },
+    "duplicateModal": {
+      "title": "Dupliquer le Produit",
+      "description": "Créez une copie de « {name} ». Vous pouvez personnaliser le nom ou utiliser celui suggéré.",
+      "copySuffix": "(Copie)",
+      "fields": {
+        "name": "Nom du Produit",
+        "namePlaceholder": "Entrez le nom du produit",
+        "nameHint": "Laissez tel quel pour la numérotation automatique : « Produit (Copie 1) », « Produit (Copie 2) », etc."
       },
-      "filters": {
-        "searchPlaceholder": "Rechercher des produits par nom ou SKU...",
-        "filters": "Filtres",
-        "status": "Statut",
-        "allStatuses": "Tous les statuts",
-        "category": "Catégorie",
-        "allCategories": "Toutes les catégories",
-        "clearFilters": "Effacer les filtres",
-        "activeFilters": "Filtres actifs :",
-        "search": "Recherche :",
-        "clearAll": "Tout effacer",
-        "viewResults": "Voir les Résultats",
-        "all": "Tous",
-        "published": "Publié",
-        "draft": "Brouillon",
-        "archived": "Archivé"
+      "options": {
+        "title": "Options de Copie",
+        "copyVariants": "Copier les variantes (recommandé)",
+        "copyInventory": "Copier les quantités en stock"
       },
-      "table": {
-        "product": "Produit",
-        "status": "Statut",
-        "inventory": "Inventaire",
-        "price": "Prix",
-        "category": "Catégorie",
-        "type": "Type",
-        "vendor": "Vendeur",
-        "actions": {
-          "openMenu": "Ouvrir le menu",
-          "view": "Voir",
-          "edit": "Modifier",
-          "duplicate": "Dupliquer",
-          "delete": "Supprimer",
-          "exportSelected": "Exporter la sélection",
-          "addToCategory": "Ajouter à la catégorie",
-          "removeFromCategory": "Retirer de la catégorie"
-        },
-        "dialogs": {
-          "cancel": "Annuler",
-          "deleteTitle": "Supprimer le Produit",
-          "deleteDescription": "Êtes-vous sûr de vouloir supprimer « {name} » ? Cette action est irréversible.",
-          "addCategoryTitle": "Ajouter à la Catégorie",
-          "addCategoryDescription": "Sélectionnez une catégorie pour y ajouter « {name} ».",
-          "addCategoryBulkDescription": "Sélectionnez une catégorie pour y ajouter les {count} produits sélectionnés.",
-          "removeCategoryTitle": "Retirer de la Catégorie",
-          "removeCategoryDescription": "Sélectionnez une catégorie pour en retirer « {name} ».",
-          "removeCategoryBulkDescription": "Sélectionnez une catégorie pour en retirer les {count} produits sélectionnés.",
-          "selectCategoryPlaceholder": "Sélectionner une catégorie...",
-          "searchCategoriesPlaceholder": "Rechercher des catégories...",
-          "noCategoryFound": "Aucune catégorie trouvée.",
-          "addToCategory": "Ajouter à la Catégorie",
-          "removeFromCategory": "Retirer de la Catégorie"
-        }
-      },
-      "duplicateModal": {
-        "title": "Dupliquer le Produit",
-        "description": "Créez une copie de « {name} ». Vous pouvez personnaliser le nom ou utiliser celui suggéré.",
-        "copySuffix": "(Copie)",
-        "fields": {
-          "name": "Nom du Produit",
-          "namePlaceholder": "Entrez le nom du produit",
-          "nameHint": "Laissez tel quel pour la numérotation automatique : « Produit (Copie 1) », « Produit (Copie 2) », etc."
-        },
-        "options": {
-          "title": "Options de Copie",
-          "copyVariants": "Copier les variantes (recommandé)",
-          "copyInventory": "Copier les quantités en stock"
-        },
-        "buttons": {
-          "cancel": "Annuler",
-          "duplicate": "Dupliquer le Produit",
-          "duplicating": "Duplication..."
-        }
-      },
-      "messages": {
-        "duplicated": "Produit dupliqué : {name}",
-        "duplicateFailed": "Échec de la duplication du produit",
-        "deleted": "Produit supprimé avec succès",
-        "deleteFailed": "Échec de la suppression du produit",
-        "bulkActionSoon": "{action} en masse de {count} produits - Bientôt disponible !",
-        "confirmDelete": "Supprimer {count} produit(s) ?",
-        "productsDeleted": "{count} produit(s) supprimé(s)",
-        "bulkDeleteFailed": "Échec de la suppression des produits",
-        "loadFailed": "Échec du chargement des produits",
-        "selectCategory": "Veuillez sélectionner une catégorie",
-        "noProductsSelected": "Aucun produit sélectionné",
-        "addedToCategory": "{count} produits ajoutés à la catégorie",
-        "addCategoryFailed": "Échec de l'ajout des produits à la catégorie",
-        "removedFromCategory": "{count} produits retirés de la catégorie",
-        "removeCategoryFailed": "Échec du retrait des produits de la catégorie"
-      },
+      "buttons": {
+        "cancel": "Annuler",
+        "duplicate": "Dupliquer le Produit",
+        "duplicating": "Duplication..."
+      }
+    },
+    "messages": {
+      "duplicated": "Produit dupliqué : {name}",
+      "duplicateFailed": "Échec de la duplication du produit",
+      "deleted": "Produit supprimé avec succès",
+      "deleteFailed": "Échec de la suppression du produit",
+      "bulkActionSoon": "{action} en masse de {count} produits - Bientôt disponible !",
+      "confirmDelete": "Supprimer {count} produit(s) ?",
+      "productsDeleted": "{count} produit(s) supprimé(s)",
+      "bulkDeleteFailed": "Échec de la suppression des produits",
+      "loadFailed": "Échec du chargement des produits",
+      "selectCategory": "Veuillez sélectionner une catégorie",
+      "noProductsSelected": "Aucun produit sélectionné",
+      "addedToCategory": "{count} produits ajoutés à la catégorie",
+      "addCategoryFailed": "Échec de l'ajout des produits à la catégorie",
+      "removedFromCategory": "{count} produits retirés de la catégorie",
+      "removeCategoryFailed": "Échec du retrait des produits de la catégorie"
+    },
     "media": {
       "title": "Médias",
       "files": "{count} {count, plural, one {fichier} other {fichiers}}",
@@ -229,6 +229,7 @@
       "variant": "Variante",
       "price": "Prix ({currency})",
       "available": "Disponible",
+      "currency": "FCFA",
       "noVariants": "Aucune variante pour le moment. Ajoutez des valeurs d'option ci-dessus pour créer des variantes.",
       "variantCount": "{count, plural, =1 {# variante} other {# variantes}}",
       "inventoryLocationInfo": "L'inventaire n'est pas suivi à l'emplacement de la boutique",
@@ -304,11 +305,23 @@
       "tags": "Balises"
     },
     "form": {
+      "variants": {
+        "optionName": "Nom de l'option",
+        "optionNamePlaceholder": "ex: Couleur, Taille, Matériau",
+        "optionValues": "Valeurs de l'option",
+        "valuePlaceholder1": "ex: Bleu",
+        "valuePlaceholder2": "ex: Noir",
+        "addAnotherValue": "Ajouter une autre valeur",
+        "addAnotherOption": "Ajouter une autre option",
+        "remainingCount": "({count} restant(s))",
+        "delete": "Supprimer",
+        "done": "Terminé"
+      },
       "save": "Enregistrer",
       "saveDraft": "Enregistrer le brouillon",
       "saving": "Enregistrement...",
       "update": "Mettre à jour le produit",
-      "publish": "Publier le produit",
+      "publish": "Publier",
       "preview": "Aperçu",
       "info": {
         "title": "Informations sur le produit",
@@ -419,7 +432,6 @@
         "addTag": "Ajouter « {name} »"
       }
     }
-
   },
   "Shared": {
     "collections": {
@@ -927,87 +939,87 @@
       }
     },
     "details": {
-        "header": {
-          "placedOn": "Le",
-          "at": "à",
-          "ago": "il y a {time}",
-          "from": "via",
-          "markAsPaid": "Marquer payé",
-          "markPaidShort": "Payé",
-          "refund": "Rembourser",
-          "edit": "Modifier",
-          "print": "Imprimer",
-          "moreActions": "Actions",
-          "duplicate": "Dupliquer",
-          "archive": "Archiver",
-          "unarchive": "Désarchiver",
-          "cancel": "Annuler",
-          "backToOrders": "Retour"
-        },
-        "sidebar": {
-          "notes": "Notes",
-          "addNotesPlaceholder": "Ajouter des notes à propos de cette commande...",
-          "noNotes": "Aucune note du client",
-          "customer": "Client",
-          "orderCount": "{count, plural, one {# commande} other {# commandes}}",
-          "contactInfo": "Coordonnées",
-          "noEmail": "Aucun email fourni",
-          "noPhone": "Aucun numéro de téléphone",
-          "shippingAddress": "Adresse de livraison",
-          "noShippingAddress": "Aucune adresse de livraison fournie",
-          "billingAddress": "Adresse de facturation",
-          "noBillingAddress": "Aucune adresse de facturation fournie",
-          "conversionSummary": "Résumé de conversion",
-          "noConversionDetails": "Aucun détail de conversion disponible pour cette commande"
-        },
-        "payment": {
-          "subtotal": "Sous-total",
-          "shipping": "Livraison",
-          "tax": "Tva",
-          "discount": "Remise",
-          "total": "Total",
-          "itemCount": "{count, plural, one {# article} other {# articles}}"
-        },
-        "unfulfillment": {
-          "fulfilled": "Traitée",
-          "unfulfilled": "Non traitée",
-          "shipping": "Livraison",
-          "markAsFulfilled": "Marquer comme traitée"
-        },
-        "timeline": {
-          "title": "Historique",
-          "leaveComment": "Laisser un commentaire...",
-          "post": "Publier",
-          "staffOnly": "Seuls vous et les autres membres du personnel peuvent voir les commentaires",
-          "system": "Système",
-          "orderReceivedFrom": "Commande reçue depuis",
-          "changedFromTo": "Passé de {old} à {new}",
-          "tracking": "Suivi : {number}",
-          "sources": {
-            "whatsapp": "WhatsApp",
-            "payment": "Passerelle de paiement",
-            "manual": "Saisie manuelle"
-          }
-        },
-        "toasts": {
-          "notesSuccess": "Notes mises à jour avec succès",
-          "notesError": "Échec de la mise à jour des notes",
-          "unexpectedError": "Une erreur s'est produite",
-          "orderCancelled": "Commande annulée avec succès",
-          "orderArchived": "Commande archivée avec succès",
-          "orderUnarchived": "Commande désarchivée avec succès",
-          "markPaidSuccess": "Commande marquée comme payée",
-          "markFulfilledSuccess": "Commande marquée comme traitée",
-          "commentPosted": "Commentaire publié"
+      "header": {
+        "placedOn": "Le",
+        "at": "à",
+        "ago": "il y a {time}",
+        "from": "via",
+        "markAsPaid": "Marquer payé",
+        "markPaidShort": "Payé",
+        "refund": "Rembourser",
+        "edit": "Modifier",
+        "print": "Imprimer",
+        "moreActions": "Actions",
+        "duplicate": "Dupliquer",
+        "archive": "Archiver",
+        "unarchive": "Désarchiver",
+        "cancel": "Annuler",
+        "backToOrders": "Retour"
+      },
+      "sidebar": {
+        "notes": "Notes",
+        "addNotesPlaceholder": "Ajouter des notes à propos de cette commande...",
+        "noNotes": "Aucune note du client",
+        "customer": "Client",
+        "orderCount": "{count, plural, one {# commande} other {# commandes}}",
+        "contactInfo": "Coordonnées",
+        "noEmail": "Aucun email fourni",
+        "noPhone": "Aucun numéro de téléphone",
+        "shippingAddress": "Adresse de livraison",
+        "noShippingAddress": "Aucune adresse de livraison fournie",
+        "billingAddress": "Adresse de facturation",
+        "noBillingAddress": "Aucune adresse de facturation fournie",
+        "conversionSummary": "Résumé de conversion",
+        "noConversionDetails": "Aucun détail de conversion disponible pour cette commande"
+      },
+      "payment": {
+        "subtotal": "Sous-total",
+        "shipping": "Livraison",
+        "tax": "Tva",
+        "discount": "Remise",
+        "total": "Total",
+        "itemCount": "{count, plural, one {# article} other {# articles}}"
+      },
+      "unfulfillment": {
+        "fulfilled": "Traitée",
+        "unfulfilled": "Non traitée",
+        "shipping": "Livraison",
+        "markAsFulfilled": "Marquer comme traitée"
+      },
+      "timeline": {
+        "title": "Historique",
+        "leaveComment": "Laisser un commentaire...",
+        "post": "Publier",
+        "staffOnly": "Seuls vous et les autres membres du personnel peuvent voir les commentaires",
+        "system": "Système",
+        "orderReceivedFrom": "Commande reçue depuis",
+        "changedFromTo": "Passé de {old} à {new}",
+        "tracking": "Suivi : {number}",
+        "sources": {
+          "whatsapp": "WhatsApp",
+          "payment": "Passerelle de paiement",
+          "manual": "Saisie manuelle"
         }
       },
-      "messages": {
-        "successCreateCustomer": "Client {name} créé avec succès",
-        "errorCreateCustomer": "Échec de la création du client",
-        "errorUnexpected": "Une erreur inattendue s'est produite"
+      "toasts": {
+        "notesSuccess": "Notes mises à jour avec succès",
+        "notesError": "Échec de la mise à jour des notes",
+        "unexpectedError": "Une erreur s'est produite",
+        "orderCancelled": "Commande annulée avec succès",
+        "orderArchived": "Commande archivée avec succès",
+        "orderUnarchived": "Commande désarchivée avec succès",
+        "markPaidSuccess": "Commande marquée comme payée",
+        "markFulfilledSuccess": "Commande marquée comme traitée",
+        "commentPosted": "Commentaire publié"
       }
     },
-    "Inventory": {
+    "messages": {
+      "successCreateCustomer": "Client {name} créé avec succès",
+      "errorCreateCustomer": "Échec de la création du client",
+      "errorUnexpected": "Une erreur inattendue s'est produite"
+    }
+  },
+  "Inventory": {
     "list": {
       "title": "Stock",
       "subtitle": "Gérez et suivez les niveaux de stock par emplacement",
