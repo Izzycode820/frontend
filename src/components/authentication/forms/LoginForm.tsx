@@ -20,6 +20,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button'
@@ -70,8 +71,8 @@ function isNetworkError(error: unknown): boolean {
  * Get user-friendly error message based on error type
  * Now uses backend error_code for precise error handling
  */
-function getLoginErrorMessage(error: unknown): string {
-  if (!error) return 'Login failed. Please try again.'
+function getLoginErrorMessage(error: unknown, t: (key: string) => string): string {
+  if (!error) return t('failedDesc')
 
   // Check for network errors first (frontend-only detection)
   if (isNetworkError(error)) {
@@ -105,23 +106,14 @@ function getLoginErrorMessage(error: unknown): string {
     return error.message
   }
 
-  return 'Login failed. Please try again.'
+  return t('failedDesc')
 }
 
-// Validation Schema - aligned with LoginRequest interface
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters'),
-  remember_me: z.boolean()
-}) satisfies z.ZodType<LoginRequest>
-
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = {
+  email: string
+  password: string
+  remember_me: boolean
+}
 
 interface LoginFormProps {
   onSuccess?: () => void
@@ -140,6 +132,22 @@ export function LoginForm({
   showSocialLogin = true,
   showForgotPassword = true
 }: LoginFormProps) {
+  const t = useTranslations('Authentication.login')
+  const v = useTranslations('Authentication.validation')
+
+  // Validation Schema - aligned with LoginRequest interface
+  const loginSchema = React.useMemo(() => z.object({
+    email: z
+      .string()
+      .min(1, v('emailRequired'))
+      .email(v('emailInvalid')),
+    password: z
+      .string()
+      .min(1, v('passwordRequired'))
+      .min(8, v('passwordMin')),
+    remember_me: z.boolean()
+  }) satisfies z.ZodType<LoginRequest>, [v])
+
   const [showPassword, setShowPassword] = React.useState(false)
   const [isMounted, setIsMounted] = React.useState(false)
   const [hasRedirected, setHasRedirected] = React.useState(false)
@@ -208,8 +216,8 @@ export function LoginForm({
       setIsNavigating(true)
 
       // Show success toast
-      toast.success('Welcome back!', {
-        description: 'You have been signed in successfully.'
+      toast.success(t('welcomeBack'), {
+        description: t('welcomeBackDesc')
       })
 
       onSuccess?.()
@@ -242,10 +250,10 @@ export function LoginForm({
       // Reset navigation state on error so user can retry
       setIsNavigating(false)
 
-      const errorMessage = getLoginErrorMessage(err)
+      const errorMessage = getLoginErrorMessage(err, t)
 
       // Show error toast
-      toast.error('Sign in failed', {
+      toast.error(t('failed'), {
         description: errorMessage
       })
 
@@ -281,12 +289,12 @@ export function LoginForm({
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email address</FormLabel>
+                <FormLabel>{t('email')}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t('emailPlaceholder')}
                     autoComplete="email"
                     disabled={isLoading}
                     className="h-11"
@@ -303,13 +311,13 @@ export function LoginForm({
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t('password')}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
+                      placeholder={t('passwordPlaceholder')}
                       autoComplete="current-password"
                       disabled={isLoading}
                       className="h-11 pr-12"
@@ -351,7 +359,7 @@ export function LoginForm({
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel className="text-sm font-normal">
-                      Remember me
+                      {t('rememberMe')}
                     </FormLabel>
                   </div>
                 </FormItem>
@@ -364,7 +372,7 @@ export function LoginForm({
                 className="text-sm text-primary hover:underline"
                 tabIndex={isLoading ? -1 : 0}
               >
-                Forgot password?
+                {t('forgotPassword')}
               </Link>
             )}
           </div>
@@ -378,15 +386,15 @@ export function LoginForm({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                {t('submitting')}
               </>
             ) : isNavigating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Redirecting...
+                {t('redirecting')}
               </>
             ) : (
-              'Sign in'
+              t('submit')
             )}
           </Button>
 
@@ -399,7 +407,7 @@ export function LoginForm({
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
+                    {t('orContinueWith')}
                   </span>
                 </div>
               </div>
@@ -430,7 +438,7 @@ export function LoginForm({
                       fill="#EA4335"
                     />
                   </svg>
-                  Google
+                  {t('google')}
                 </Button>
 
                 <Button
@@ -446,7 +454,7 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  Apple
+                  {t('apple')}
                 </Button>
               </div>
             </>
@@ -457,12 +465,12 @@ export function LoginForm({
       {/* Sign Up Link */}
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Do not have an account?{' '}
+          {t('noAccount')}{' '}
           <Link
             href="/auth/signup"
             className="text-primary hover:underline font-medium"
           >
-            Create account
+            {t('createAccount')}
           </Link>
         </p>
       </div>

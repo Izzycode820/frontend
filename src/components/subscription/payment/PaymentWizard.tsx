@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { PaymentForm } from './PaymentForm';
@@ -50,6 +51,7 @@ export function PaymentWizard({
   onCancel,
   className
 }: PaymentWizardProps) {
+  const t = useTranslations('subscription.payment');
   // Read URL params (from pricing page navigation)
   const searchParams = useSearchParams();
 
@@ -62,9 +64,10 @@ export function PaymentWizard({
   const billingCycle = urlBillingCycle || propBillingPeriod || 'monthly';
   const pricingMode = urlPricingMode || propPricingMode || 'regular'; // Default to regular
 
-  // Check for renewal/reactivate action from URL
-  const action = searchParams?.get('action'); // 'renew' | 'reactivate' | null
+  // Check for renewal/upgrade/reactivate action from URL
+  const action = searchParams?.get('action'); // 'renew' | 'reactivate' | 'upgrade' | 'update' | null
   const isRenewal = action === 'renew' || action === 'reactivate';
+  const isUpgrade = action === 'upgrade' || action === 'update';
 
   // Component state
   const [stage, setStage] = useState<'input' | 'processing'>('input');
@@ -134,12 +137,12 @@ export function PaymentWizard({
     e.preventDefault();
 
     if (!validatePhone(phoneNumber)) {
-      setError('Invalid phone number format. Use Cameroonian number (e.g., 670123456)');
+      setError(t('wizard.phoneInvalid'));
       return;
     }
-
+  
     if (!isAuthenticated) {
-      setError('You must be logged in to subscribe');
+      setError(t('wizard.loginRequired'));
       onCancel();
       return;
     }
@@ -147,7 +150,7 @@ export function PaymentWizard({
     // NOTE: Workspace is optional for subscriptions - they are user-level, not workspace-scoped
 
     if (!selectedPaymentMethod) {
-      setError('Please select a payment method');
+      setError(t('wizard.methodRequired'));
       return;
     }
 
@@ -172,6 +175,16 @@ export function PaymentWizard({
 
         console.log('[PaymentWizard] Renewing subscription with payload:', renewPayload);
         response = await subscriptionService.renewSubscription(renewPayload);
+      } else if (isUpgrade) {
+        // UPGRADE/UPDATE FLOW: Call upgrade endpoint (user is changing plan)
+        const upgradePayload = {
+          new_plan_tier: planTier,
+          phone_number: phoneNumber.replace(/\s+/g, ''),
+          provider: selectedPaymentMethod.provider,
+          idempotency_key: idempotencyKey,
+        };
+
+        response = await subscriptionService.upgradeSubscription(upgradePayload);
       } else {
         // CREATE FLOW: Standard subscription creation
         // NOTE: workspace_id is optional - subscriptions are user-level, not workspace-level
@@ -194,7 +207,7 @@ export function PaymentWizard({
       }
 
       if (!response.success) {
-        throw new Error(response.error || 'Subscription creation failed');
+        throw new Error(response.error || t('wizard.failed'));
       }
 
       // Check if already processed (idempotent response)
@@ -209,16 +222,16 @@ export function PaymentWizard({
         sessionStorage.setItem(PAYMENT_INTENT_STORAGE, response.payment_intent_id);
         setStage('processing');
       } else {
-        throw new Error('No payment intent ID returned');
+        throw new Error(t('wizard.intentError'));
       }
     } catch (err: any) {
       // Extract error message - APIError.message now contains the actual backend error
       // Thanks to ErrorHandler fix that extracts 'error'/'message'/'detail' from response
-      const errorMessage = err.message || 'Subscription failed';
+      const errorMessage = err.message || t('wizard.failed');
       setError(errorMessage);
-
+  
       // Show toast notification for the error
-      toast.error('Subscription Error', {
+      toast.error(t('wizard.subscriptionError'), {
         description: errorMessage,
         duration: 6000,
       });
@@ -240,7 +253,7 @@ export function PaymentWizard({
     } else {
       // Payment failed - keep idempotency key for potential retry
       // But clear payment intent to allow fresh retry
-      setError(result.error || 'Payment failed');
+      setError(result.error || t('wizard.failed'));
       setStage('input');
       setPaymentIntentId(null);
       sessionStorage.removeItem(PAYMENT_INTENT_STORAGE);

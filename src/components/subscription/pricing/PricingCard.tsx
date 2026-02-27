@@ -7,6 +7,7 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/shadcn-ui/card';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 import type { GetPlansQuery } from '@/services/graphql/subscription/queries/pricing/__generated__/get-plans.generated';
 
 type PlanData = NonNullable<NonNullable<GetPlansQuery['plans']>[number]>;
@@ -28,6 +29,7 @@ export function PricingCard({
   loading = false,
   showIntroPrice = false,
 }: PricingCardProps) {
+  const t = useTranslations('subscription.pricing.cards');
   const showcase = plan.showcase;
 
   // Determine price to show
@@ -54,14 +56,14 @@ export function PricingCard({
 
   // Get CTA text based on intro eligibility
   const ctaText = isCurrentPlan
-    ? (showcase?.cta?.currentPlan || 'Current Plan')
+    ? (showcase?.cta?.currentPlan || t('currentPlan'))
     : showIntroPrice
-    ? 'Start promo'
-    : (showcase?.cta?.default || 'Choose plan');
+    ? t('startPromo')
+    : (showcase?.cta?.default || t('choosePlan'));
 
   // Format price
   const formatPrice = (amount: number): string => {
-    if (amount === 0) return 'Free';
+    if (amount === 0) return t('free');
     return new Intl.NumberFormat('en-US', {
       style: 'decimal',
       minimumFractionDigits: 0,
@@ -117,7 +119,7 @@ export function PricingCard({
         <div className="space-y-2 mt-4">
           <div className="flex items-baseline justify-center gap-2">
             {currentPrice === 0 ? (
-              <span className="text-4xl font-bold text-foreground">Free</span>
+              <span className="text-4xl font-bold text-foreground">{t('free')}</span>
             ) : (
               <>
                 {/* Show strikethrough regular price if on intro */}
@@ -127,7 +129,7 @@ export function PricingCard({
                       {formatPrice(billingCycle === 'yearly' ? (plan.regularPriceYearly ?? 0) : (plan.regularPriceMonthly ?? 0))}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      /{billingCycle === 'yearly' ? 'year' : 'month'}
+                      /{billingCycle === 'yearly' ? t('year') : t('month')}
                     </span>
                   </div>
                 )}
@@ -197,7 +199,7 @@ export function PricingCard({
           {loading ? (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              Processing...
+              {t('processing')}
             </div>
           ) : (
             ctaText

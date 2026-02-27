@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
+import { useTranslations } from 'next-intl';
 import { ThemeDetailsDocument } from '@/services/graphql/themes/queries/showcase/__generated__/themeDetails.generated';
 
 import { ThemeHeroSection } from '@/components/theme/details/ThemeHeroSection';
@@ -16,6 +17,7 @@ import { useAuthStore, authSelectors } from '@/stores/authentication/authStore';
 import { storeAuthIntent } from '@/utils/redirect-with-intent';
 
 export default function ThemeDetailsPage() {
+  const t = useTranslations('Showcase.page');
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
@@ -53,7 +55,7 @@ export default function ThemeDetailsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error loading theme</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('error')}</h2>
           <p className="text-gray-600">{error.message}</p>
         </div>
       </div>
@@ -64,8 +66,8 @@ export default function ThemeDetailsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Theme not found</h2>
-          <p className="text-gray-600">The theme you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('notFound')}</h2>
+          <p className="text-gray-600">{t('notFoundDesc')}</p>
         </div>
       </div>
     );

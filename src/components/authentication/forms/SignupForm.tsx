@@ -21,6 +21,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button'
@@ -87,8 +88,8 @@ function isNetworkError(error: unknown): boolean {
  * Parse signup error and determine which field it relates to
  * Now uses backend error_code for precise error handling
  */
-function parseSignupError(error: unknown): SignupErrorResult {
-  if (!error) return { message: 'Registration failed. Please try again.', field: 'general' }
+function parseSignupError(error: unknown, t: (key: string) => string): SignupErrorResult {
+  if (!error) return { message: t('failedDesc'), field: 'general' }
 
   // Check for network errors first
   if (isNetworkError(error)) {
@@ -130,47 +131,18 @@ function parseSignupError(error: unknown): SignupErrorResult {
     return { message: error.message, field: 'general' }
   }
 
-  return { message: 'Registration failed. Please try again.', field: 'general' }
+  return { message: t('failedDesc'), field: 'general' }
 }
 
-// Validation Schema
-const signupSchema = z.object({
-  first_name: z
-    .string()
-    .min(1, 'First name is required')
-    .min(2, 'First name must be at least 2 characters')
-    .max(30, 'First name must be less than 30 characters'),
-  last_name: z
-    .string()
-    .min(1, 'Last name is required')
-    .min(2, 'Last name must be at least 2 characters')
-    .max(30, 'Last name must be less than 30 characters'),
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
-  phone_number: z
-    .string()
-    .min(1, 'Phone number is required')
-    .regex(/^\+?[0-9]{8,15}$/, 'Please enter a valid phone number'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  confirmPassword: z
-    .string()
-    .min(1, 'Please confirm your password'),
-  acceptTerms: z
-    .boolean()
-    .refine(val => val === true, 'You must accept the terms and conditions')
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
-})
-
-type SignupFormValues = z.infer<typeof signupSchema>
+type SignupFormValues = {
+  first_name: string
+  last_name: string
+  email: string
+  phone_number: string
+  password: string
+  confirmPassword: string
+  acceptTerms: boolean
+}
 
 interface SignupFormProps {
   onSuccess?: () => void
@@ -187,6 +159,46 @@ export function SignupForm({
   className = '',
   showSocialLogin = true
 }: SignupFormProps) {
+  const t = useTranslations('Authentication.signup')
+  const v = useTranslations('Authentication.validation')
+
+  // Validation Schema
+  const signupSchema = React.useMemo(() => z.object({
+    first_name: z
+      .string()
+      .min(1, v('firstNameRequired'))
+      .min(2, v('firstNameMin'))
+      .max(30, v('firstNameMax')),
+    last_name: z
+      .string()
+      .min(1, v('lastNameRequired'))
+      .min(2, v('lastNameMin'))
+      .max(30, v('lastNameMax')),
+    email: z
+      .string()
+      .min(1, v('emailRequired'))
+      .email(v('emailInvalid')),
+    phone_number: z
+      .string()
+      .min(1, v('phoneRequired'))
+      .regex(/^\+?[0-9]{8,15}$/, v('phoneInvalid')),
+    password: z
+      .string()
+      .min(8, v('passwordMin'))
+      .regex(/[A-Z]/, v('passwordUpper'))
+      .regex(/[a-z]/, v('passwordLower'))
+      .regex(/[0-9]/, v('passwordNumber')),
+    confirmPassword: z
+      .string()
+      .min(1, v('confirmPasswordRequired')),
+    acceptTerms: z
+      .boolean()
+      .refine(val => val === true, v('acceptTerms'))
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: v('passwordsMatch'),
+    path: ["confirmPassword"]
+  }) satisfies z.ZodType<Partial<SignupFormValues>>, [v])
+
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [isMounted, setIsMounted] = React.useState(false)
@@ -252,8 +264,8 @@ export function SignupForm({
       await register(registerRequest)
 
       // Show success toast
-      toast.success('Account created!', {
-        description: 'Welcome to HUZILERZ. Please verify your email to get started.'
+      toast.success(t('success'), {
+        description: t('successDesc')
       })
 
       onSuccess?.()
@@ -279,7 +291,7 @@ export function SignupForm({
       // Use router.replace to prevent "back button → register again"
       router.replace(destination)
     } catch (err: unknown) {
-      const { message, field } = parseSignupError(err)
+      const { message, field } = parseSignupError(err, t)
 
       // Set inline error on the specific field if applicable
       if (field && field !== 'general') {
@@ -287,7 +299,7 @@ export function SignupForm({
       }
 
       // Show error toast
-      toast.error('Registration failed', {
+      toast.error(t('failed'), {
         description: message
       })
 
@@ -328,11 +340,11 @@ export function SignupForm({
               name="first_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First name</FormLabel>
+                  <FormLabel>{t('firstName')}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="First name"
+                      placeholder={t('firstNamePlaceholder')}
                       autoComplete="given-name"
                       disabled={isLoading}
                       className="h-11"
@@ -348,11 +360,11 @@ export function SignupForm({
               name="last_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Last name</FormLabel>
+                  <FormLabel>{t('lastName')}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Last name"
+                      placeholder={t('lastNamePlaceholder')}
                       autoComplete="family-name"
                       disabled={isLoading}
                       className="h-11"
@@ -370,12 +382,12 @@ export function SignupForm({
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email address</FormLabel>
+                <FormLabel>{t('emailAddress')}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t('emailPlaceholder')}
                     autoComplete="email"
                     disabled={isLoading}
                     className="h-11"
@@ -392,12 +404,12 @@ export function SignupForm({
             name="phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone number</FormLabel>
+                <FormLabel>{t('phoneNumber')}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="tel"
-                    placeholder="+237 6XX XXX XXX"
+                    placeholder={t('phonePlaceholder')}
                     autoComplete="tel"
                     disabled={isLoading}
                     className="h-11"
@@ -414,13 +426,13 @@ export function SignupForm({
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t('password')}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Create a password"
+                      placeholder={t('passwordPlaceholder')}
                       autoComplete="new-password"
                       disabled={isLoading}
                       className="h-11 pr-12"
@@ -452,13 +464,13 @@ export function SignupForm({
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm password</FormLabel>
+                <FormLabel>{t('confirmPassword')}</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Confirm your password"
+                      placeholder={t('confirmPasswordPlaceholder')}
                       autoComplete="new-password"
                       disabled={isLoading}
                       className="h-11 pr-12"
@@ -499,13 +511,13 @@ export function SignupForm({
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel className="text-sm font-normal leading-snug">
-                    I agree to the{' '}
+                    {t('acceptTerms')}{' '}
                     <Link href="/terms" className="text-primary hover:underline">
-                      Terms of Service
+                      {t('termsOfService')}
                     </Link>{' '}
-                    and{' '}
+                    {t('and')}{' '}
                     <Link href="/privacy" className="text-primary hover:underline">
-                      Privacy Policy
+                      {t('privacyPolicy')}
                     </Link>
                   </FormLabel>
                   <FormMessage />
@@ -523,10 +535,10 @@ export function SignupForm({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
+                {t('submitting')}
               </>
             ) : (
-              'Create account'
+              t('submit')
             )}
           </Button>
 
@@ -548,7 +560,7 @@ export function SignupForm({
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-background px-2 text-muted-foreground">
-                      Or continue with
+                      {t('orContinueWith')}
                     </span>
                   </div>
                 </div>
@@ -605,12 +617,12 @@ export function SignupForm({
       {/* Login Link */}
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{' '}
+          {t('alreadyHaveAccount')}{' '}
           <Link
             href="/auth/login"
             className="text-primary hover:underline font-medium"
           >
-            Sign in
+            {t('signIn')}
           </Link>
         </p>
       </div>

@@ -5,12 +5,14 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/shadcn-ui/button'
 
 interface Props {
   children: ReactNode
   fallback?: ReactNode
   onError?: (error: Error, errorInfo: ErrorInfo) => void
+  t: (key: string) => string
 }
 
 interface State {
@@ -18,7 +20,7 @@ interface State {
   error?: Error
 }
 
-export class AuthErrorBoundary extends Component<Props, State> {
+export class AuthErrorBoundaryBase extends Component<Props, State> {
   public state: State = {
     hasError: false
   }
@@ -50,11 +52,11 @@ export class AuthErrorBoundary extends Component<Props, State> {
             </div>
 
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Authentication Error
+              {this.props.t('title')}
             </h3>
 
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              {this.state.error?.message || 'Something went wrong with authentication. Please try again.'}
+              {this.state.error?.message || this.props.t('defaultMessage')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -65,7 +67,7 @@ export class AuthErrorBoundary extends Component<Props, State> {
                 className="flex items-center space-x-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span>Try Again</span>
+                <span>{this.props.t('tryAgain')}</span>
               </Button>
 
               <Button
@@ -73,7 +75,7 @@ export class AuthErrorBoundary extends Component<Props, State> {
                 variant="outline"
                 size="sm"
               >
-                Back to Login
+                {this.props.t('backToLogin')}
               </Button>
             </div>
           </div>
@@ -83,6 +85,14 @@ export class AuthErrorBoundary extends Component<Props, State> {
 
     return this.props.children
   }
+}
+ 
+/**
+ * Localized Wrapper for AuthErrorBoundary
+ */
+export function AuthErrorBoundary(props: Omit<Props, 't'>) {
+  const t = useTranslations('Authentication.errorBoundary')
+  return <AuthErrorBoundaryBase {...props} t={t} />
 }
 
 /**

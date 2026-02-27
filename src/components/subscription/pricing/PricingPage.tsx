@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuthWithRedirect } from '@/hooks/authentication/useAuthWithRedirect';
 import { buildPathWithParams } from '@/utils/redirect-with-intent';
 import { GetPlansDocument } from '@/services/graphql/subscription/queries/pricing/__generated__/get-plans.generated';
@@ -33,6 +34,7 @@ interface PricingPageProps {
 }
 
 export function PricingPage({ className }: PricingPageProps) {
+  const t = useTranslations('subscription.pricing');
   const router = useRouter();
   const { requireAuth, isAuthenticated } = useAuthWithRedirect();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
@@ -118,7 +120,7 @@ export function PricingPage({ className }: PricingPageProps) {
       const intent = result.data?.prepareIntent;
 
       if (!intent?.success) {
-        toast.error(intent?.error || 'Failed to determine action');
+        toast.error(intent?.error || t('messages.failedToDetermine'));
         setSelectedTier(null);
         return;
       }
@@ -170,15 +172,15 @@ export function PricingPage({ className }: PricingPageProps) {
 
         case 'already_on_plan':
           // User is on this plan, not in renewal window
-          toast.info(intent.message || `You're already on ${intent.planName}`);
+          toast.info(intent.message || t('messages.alreadyOnPlan', { planName: intent.planName || '' }));
           break;
 
         default:
-          toast.error('Unknown action type');
+          toast.error(t('messages.unknownAction'));
       }
     } catch (error) {
       console.error('PrepareIntent failed:', error);
-      toast.error('Failed to process plan selection');
+      toast.error(t('messages.failedToProcess'));
     } finally {
       setSelectedTier(null);
     }
@@ -194,16 +196,16 @@ export function PricingPage({ className }: PricingPageProps) {
       });
 
       if (result.success) {
-        toast.success(result.message || `Downgrade scheduled for ${downgradeDialog.scheduleDate}`);
+        toast.success(result.message || t('downgrade.success', { date: downgradeDialog.scheduleDate || '' }));
         setDowngradeDialog({ open: false, planName: '', currentPlan: '', scheduleDate: '', tier: '' });
         // Refresh the page to update UI
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to schedule downgrade');
+        toast.error(result.error || t('downgrade.failed'));
       }
     } catch (error: any) {
       console.error('Downgrade failed:', error);
-      toast.error(error?.message || 'Failed to schedule downgrade');
+      toast.error(error?.message || t('downgrade.failed'));
     }
   };
 
@@ -226,6 +228,7 @@ export function PricingPage({ className }: PricingPageProps) {
     return (
       <div className={cn('space-y-8', className)}>
         <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold">{t('loading')}</h2>
           <Skeleton className="h-12 w-96 mx-auto" />
           <Skeleton className="h-6 w-[500px] mx-auto" />
         </div>
@@ -246,7 +249,7 @@ export function PricingPage({ className }: PricingPageProps) {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Failed to load pricing plans. Please try again later.
+            {t('error')}
           </AlertDescription>
         </Alert>
       </div>
@@ -265,10 +268,10 @@ export function PricingPage({ className }: PricingPageProps) {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          Choose Your Perfect Plan
+          {t('title')}
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Flexible pricing with Mobile Money payment to grow your business
+          {t('description')}
         </p>
       </div>
 
@@ -277,13 +280,13 @@ export function PricingPage({ className }: PricingPageProps) {
         <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as 'monthly' | 'yearly')}>
           <TabsList className="grid w-[350px] grid-cols-2 bg-muted">
             <TabsTrigger value="monthly" className="data-[state=active]:bg-background">
-              Monthly
+              {t('monthly')}
             </TabsTrigger>
             <TabsTrigger value="yearly" className="data-[state=active]:bg-background">
-              Yearly
+              {t('yearly')}
               {savingsPercent > 0 && (
                 <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">
-                  Save {savingsPercent}%
+                  {t('savePercent', { percent: savingsPercent })}
                 </Badge>
               )}
             </TabsTrigger>
@@ -318,22 +321,22 @@ export function PricingPage({ className }: PricingPageProps) {
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <Smartphone className="w-4 h-4" />
           <span className="text-sm">
-            Secure payment via MTN Mobile Money, Orange Money, and Fapshi
+            {t('footer.securePayment')}
           </span>
         </div>
 
         <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground flex-wrap">
           <div className="flex items-center gap-1">
             <Check className="w-3 h-3 text-green-600" />
-            <span>Cancel anytime</span>
+            <span>{t('footer.cancelAnytime')}</span>
           </div>
           <div className="flex items-center gap-1">
             <Check className="w-3 h-3 text-green-600" />
-            <span>24/7 Support</span>
+            <span>{t('footer.support247')}</span>
           </div>
           <div className="flex items-center gap-1">
             <Check className="w-3 h-3 text-green-600" />
-            <span>No hidden fees</span>
+            <span>{t('footer.noHiddenFees')}</span>
           </div>
         </div>
       </div>
@@ -347,10 +350,13 @@ export function PricingPage({ className }: PricingPageProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              Schedule Downgrade
+              {t('downgrade.title')}
             </DialogTitle>
             <DialogDescription>
-              You are about to schedule a downgrade from <strong>{downgradeDialog.currentPlan}</strong> to <strong>{downgradeDialog.planName}</strong>.
+              {t.rich('downgrade.description', {
+                currentPlan: (chunks) => <strong>{downgradeDialog.currentPlan}</strong>,
+                planName: (chunks) => <strong>{downgradeDialog.planName}</strong>
+              })}
             </DialogDescription>
           </DialogHeader>
 
@@ -358,8 +364,10 @@ export function PricingPage({ className }: PricingPageProps) {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Your current plan features will remain active until <strong>{downgradeDialog.scheduleDate}</strong>.
-                After this date, your plan will automatically switch to {downgradeDialog.planName}.
+                {t.rich('downgrade.alert', {
+                  date: (chunks) => <strong>{downgradeDialog.scheduleDate || ''}</strong>,
+                  planName: downgradeDialog.planName || ''
+                })}
               </AlertDescription>
             </Alert>
           </div>
@@ -369,13 +377,13 @@ export function PricingPage({ className }: PricingPageProps) {
               variant="outline"
               onClick={() => setDowngradeDialog({ ...downgradeDialog, open: false })}
             >
-              Cancel
+              {t('downgrade.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleConfirmDowngrade}
             >
-              Confirm Downgrade
+              {t('downgrade.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

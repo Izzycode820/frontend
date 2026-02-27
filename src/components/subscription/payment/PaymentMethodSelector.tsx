@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Smartphone, Loader2, AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Label } from '@/components/shadcn-ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/shadcn-ui/radio-group';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
@@ -29,6 +30,7 @@ export function PaymentMethodSelector({
   disabled = false,
   className
 }: PaymentMethodSelectorProps) {
+  const t = useTranslations('subscription.payment.selector');
   // Fetch platform payment methods dynamically
   const {
     platformMethods,
@@ -42,7 +44,7 @@ export function PaymentMethodSelector({
   if (isLoadingMethods) {
     return (
       <div className={cn('space-y-3', className)}>
-        <Label>Select provider</Label>
+        <Label>{t('label')}</Label>
         <div className="grid grid-cols-2 gap-4">
           {[1, 2].map((i) => (
             <Skeleton key={i} className="h-28 w-full rounded-md" />
@@ -56,11 +58,11 @@ export function PaymentMethodSelector({
   if (methodsError) {
     return (
       <div className={cn('space-y-3', className)}>
-        <Label>Select provider</Label>
+        <Label>{t('label')}</Label>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Failed to load payment methods. Please refresh the page.
+            {t('error')}
           </AlertDescription>
         </Alert>
       </div>
@@ -71,11 +73,11 @@ export function PaymentMethodSelector({
   if (!hasPaymentMethods) {
     return (
       <div className={cn('space-y-3', className)}>
-        <Label>Select provider</Label>
+        <Label>{t('label')}</Label>
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            No payment methods available. Please contact support.
+            {t('noMethods')}
           </AlertDescription>
         </Alert>
       </div>
@@ -118,7 +120,7 @@ export function PaymentMethodSelector({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <Label>Select provider</Label>
+      <Label>{t('label')}</Label>
       <RadioGroup
         value={value}
         onValueChange={(v: string) => onChange(v)}
@@ -155,7 +157,7 @@ export function PaymentMethodSelector({
                     variant="secondary"
                     className="absolute top-2 right-2 text-xs bg-primary text-primary-foreground"
                   >
-                    Recommended
+                    {t('recommended')}
                   </Badge>
                 )}
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Percent, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Button } from '@/components/shadcn-ui/button';
@@ -23,6 +24,7 @@ export function DiscountBanner({
   dismissible = true,
   show = true
 }: DiscountBannerProps) {
+  const t = useTranslations('subscription.discount');
   const [isDismissed, setIsDismissed] = useState(false);
 
   if (isDismissed || !show) return null;
@@ -31,9 +33,9 @@ export function DiscountBanner({
   // TODO: Replace with API call to /api/subscription/discounts/ when backend is ready
   const YEARLY_DISCOUNT = {
     percentage: 15,
-    title: 'Save 15% with yearly billing',
-    description: 'Choose any yearly plan and get 2 months free. Pay once, save more.',
-    badge: '15% savings'
+    title: t('title'),
+    description: t('description'),
+    badge: t('badge')
   };
 
   return (
@@ -75,7 +77,7 @@ export function DiscountBanner({
 
           {/* Cameroon market specific messaging */}
           <div className="text-xs opacity-75 mt-2">
-            Payable with MTN Mobile Money, Orange Money, or Fapshi
+            {t('paymentNote')}
           </div>
         </div>
       </div>

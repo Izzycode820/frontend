@@ -8,19 +8,21 @@
 
 import React from 'react'
 import { SignupForm } from '@/components/authentication/forms/SignupForm'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card'
 
 export default function SignupPage() {
+  const t = useTranslations('Authentication.signup')
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="border-0 shadow-lg">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl font-semibold">
-              Create account
+              {t('createAccountTitle')}
             </CardTitle>
             <CardDescription>
-              Join HUZILERZ and start building your workspace
+              {t('joinHuzilerz')}
             </CardDescription>
           </CardHeader>
 

@@ -11,7 +11,7 @@
       "submit": "Sign in",
       "submitting": "Signing in...",
       "redirecting": "Redirecting...",
-      "welcomeBack": "Welcome back!",
+      "welcomeBack": "Welcome back",
       "welcomeBackDesc": "You have been signed in successfully.",
       "failed": "Sign in failed",
       "failedDesc": "Login failed. Please try again.",
@@ -19,7 +19,8 @@
       "createAccount": "Create account",
       "orContinueWith": "Or continue with",
       "google": "Google",
-      "apple": "Apple"
+      "apple": "Apple",
+      "signInToAccount": "Sign in to your HUZILERZ account"
     },
     "signup": {
       "title": "Create account",
@@ -28,8 +29,10 @@
       "lastName": "Last name",
       "lastNamePlaceholder": "Last name",
       "email": "Email address",
+      "emailAddress": "Email address",
       "emailPlaceholder": "Enter your email",
       "phone": "Phone number",
+      "phoneNumber": "Phone number",
       "phonePlaceholder": "+237 6XX XXX XXX",
       "password": "Password",
       "passwordPlaceholder": "Create a password",
@@ -37,8 +40,10 @@
       "confirmPasswordPlaceholder": "Confirm your password",
       "acceptTerms": "I agree to the",
       "terms": "Terms of Service",
+      "termsOfService": "Terms of Service",
       "and": "and",
       "privacy": "Privacy Policy",
+      "privacyPolicy": "Privacy Policy",
       "submit": "Create account",
       "submitting": "Creating account...",
       "success": "Account created!",
@@ -46,7 +51,10 @@
       "failed": "Registration failed",
       "comingSoon": "Coming Soon",
       "alreadyHaveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "joinHuzilerz": "Join HUZILERZ and start building your workspace",
+      "createAccountTitle": "Create account",
+      "orContinueWith": "Or continue with"
     },
     "profile": {
       "title": "Profile Settings",
@@ -77,7 +85,20 @@
       "securityNotifications": "Security notifications",
       "securityNotificationsDesc": "Receive notifications about security events and login attempts",
       "submit": "Save changes",
-      "submitting": "Updating profile..."
+      "submitting": "Updating profile...",
+      "avatar": {
+        "title": "Profile Picture",
+        "description": "Upload a profile picture to personalize your account",
+        "alt": "Profile picture",
+        "remove": "Remove",
+        "uploading": "Uploading...",
+        "dropzone": "Drop your image here, or click to browse",
+        "validTypes": "JPEG, PNG, WebP or GIF up to {size}MB",
+        "chooseFile": "Choose file",
+        "invalidType": "Please upload a valid image file (JPEG, PNG, WebP, or GIF)",
+        "tooLarge": "File size must be less than {size}MB",
+        "failed": "Failed to upload avatar. Please try again."
+      }
     },
     "verification": {
       "email": {
@@ -107,6 +128,47 @@
         "resend": "Resend code"
       }
     },
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "description": "Enter your email address and we'll send you a link to reset your password",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "sendLink": "Send reset link",
+      "sendingLink": "Sending reset link...",
+      "backToLogin": "Back to login",
+      "checkEmail": "Check your email",
+      "sentInstructions": "We've sent password reset instructions to",
+      "invalidEmail": "Please enter a valid email address",
+      "errorSending": "Failed to send reset email"
+    },
+    "resetPassword": {
+      "title": "Reset your password",
+      "description": "Enter your new password below",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmNewPassword": "Confirm new password",
+      "submit": "Reset password",
+      "submitting": "Resetting password...",
+      "success": "Password reset successful",
+      "successDesc": "Your password has been successfully reset. You can now log in with your new password.",
+      "continueToLogin": "Continue to login",
+      "invalidToken": "Invalid or missing reset token",
+      "failed": "Failed to reset password"
+    },
+    "verifyPage": {
+      "title": "Verify Your Account",
+      "description": "Complete verification to secure your account",
+      "continueDashboard": "Continue to Dashboard"
+    },
+    "oauth2": {
+      "processing": "Completing sign in...",
+      "processingDesc": "Please wait while we finish setting up your account.",
+      "success": "Sign in successful!",
+      "successDesc": "Redirecting to your workspace...",
+      "failed": "Sign in failed",
+      "failedDesc": "Something went wrong during authentication.",
+      "tryAgain": "Try again"
+    },
     "validation": {
       "emailRequired": "Email is required",
       "emailInvalid": "Please enter a valid email address",
@@ -130,6 +192,223 @@
       "usernameMax": "Username must be less than 20 characters",
       "usernameInvalid": "Username can only contain letters, numbers, hyphens, and underscores",
       "bioMax": "Bio must be less than 500 characters"
+    },
+    "guards": {
+      "checkingPermissions": "Checking permissions...",
+      "accessDenied": "Access Denied",
+      "needRolePermissions": "You need {role} permissions to access this resource.",
+      "noRequiredPermissions": "You don't have the required permissions to access this resource.",
+      "noPermission": "You don't have permission to access this resource.",
+      "goBack": "Go back"
+    },
+    "errorBoundary": {
+      "title": "Authentication Error",
+      "defaultMessage": "Something went wrong with authentication. Please try again.",
+      "tryAgain": "Try Again",
+      "backToLogin": "Back to Login"
+    },
+    "shared": {
+      "loading": "Loading..."
+    }
+  },
+  "subscription": {
+    "pricing": {
+      "title": "Choose Your Perfect Plan",
+      "description": "Flexible pricing with Mobile Money payment to grow your business",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "savePercent": "Save {percent}%",
+      "loading": "Loading pricing plans...",
+      "error": "Failed to load pricing plans. Please try again later.",
+      "footer": {
+        "securePayment": "Secure payment via MTN Mobile Money, Orange Money, and Fapshi",
+        "cancelAnytime": "Cancel anytime",
+        "support247": "24/7 Support",
+        "noHiddenFees": "No hidden fees"
+      },
+      "cards": {
+        "free": "Free",
+        "year": "year",
+        "month": "month",
+        "startPromo": "Start promo",
+        "choosePlan": "Choose plan",
+        "processing": "Processing...",
+        "currentPlan": "Current Plan"
+      },
+      "downgrade": {
+        "title": "Schedule Downgrade",
+        "description": "You are about to schedule a downgrade from {currentPlan} to {planName}.",
+        "alert": "Your current plan features will remain active until {date}. After this date, your plan will automatically switch to {planName}.",
+        "cancel": "Cancel",
+        "confirm": "Confirm Downgrade",
+        "success": "Downgrade scheduled for {date}",
+        "failed": "Failed to schedule downgrade"
+      },
+      "messages": {
+        "failedToDetermine": "Failed to determine action",
+        "alreadyOnPlan": "You're already on {planName}",
+        "unknownAction": "Unknown action type",
+        "failedToProcess": "Failed to process plan selection"
+      }
+    },
+    "discount": {
+      "title": "Save 15% with yearly billing",
+      "description": "Choose any yearly plan and get 2 months free. Pay once, save more.",
+      "badge": "15% savings",
+      "paymentNote": "Payable with MTN Mobile Money, Orange Money, or Fapshi"
+    },
+    "checkout": {
+      "title": "Complete Your Subscription",
+      "subtitle": "{planName} - {cycle} billing",
+      "introPricing": "(Introductory pricing)",
+      "preparing": "Preparing Checkout",
+      "validating": "Validating pricing and eligibility...",
+      "networkError": "Network error. Please check your connection and try again.",
+      "failedToPrepare": "Failed to prepare checkout. Please try again.",
+      "errorTitle": "Checkout Error",
+      "introAlreadyUsed": {
+        "title": "Intro discount already used",
+        "description": "Your introductory discount can only be used once. Regular pricing will apply."
+      },
+      "backToPlans": "Back to Plans",
+      "tryAgain": "Try Again",
+      "success": {
+        "title": "Payment Successful!",
+        "description": "Your {planName} subscription has been activated",
+        "redirecting": "Redirecting to your workspace..."
+      },
+      "breakdown": {
+        "regularPrice": "Regular Price:",
+        "introDiscount": "Intro Discount:",
+        "youPay": "You Pay:"
+      }
+    },
+    "payment": {
+      "shared": {
+        "cancel": "Cancel",
+        "tryAgain": "Try Again"
+      },
+      "title": "Payment Method",
+      "completeSub": "Complete your {planName} subscription",
+      "phoneLabel": "Phone number",
+      "total": "Total",
+      "pay": "Pay",
+      "processing": "Processing",
+      "operators": {
+        "mtn": "MTN Mobile Money",
+        "orange": "Orange Money",
+        "momo": "Mobile Money"
+      },
+      "wizard": {
+        "error": "Payment Error",
+        "subscriptionError": "Subscription Error",
+        "failed": "Subscription failed",
+        "phoneInvalid": "Invalid phone number format. Use Cameroonian number (e.g., 670123456)",
+        "loginRequired": "You must be logged in to subscribe",
+        "methodRequired": "Please select a payment method",
+        "intentError": "No payment intent ID returned"
+      },
+      "selector": {
+        "label": "Select provider",
+        "error": "Failed to load payment methods. Please refresh the page.",
+        "noMethods": "No payment methods available. Please contact support.",
+        "recommended": "Recommended"
+      },
+      "processor": {
+        "failed": "Payment Failed",
+        "success": "Payment Successful",
+        "confirmed": "Your payment has been confirmed",
+        "processing": "Processing Payment",
+        "instructions": "Please complete the payment on your mobile device",
+        "waiting": "Waiting for Payment",
+        "prompt": "Check your phone for the payment prompt",
+        "amount": "Amount:",
+        "method": "Method:",
+        "phone": "Phone:",
+        "reference": "Reference:",
+        "progress": "Progress",
+        "timeElapsed": "Time elapsed",
+        "step1": "1. Check your phone for the payment prompt",
+        "step2": "2. Enter your Mobile Money PIN to approve",
+        "step3": "3. Wait for confirmation (this may take up to 2 minutes)",
+        "successMsg": "Payment completed successfully!"
+      }
+    }
+  },
+  "Showcase": {
+    "page": {
+      "title": "Browse all themes",
+      "loading": "Loading...",
+      "themesCount": "{count} {count, plural, one {theme} other {themes}}",
+      "searchPlaceholder": "Search themes...",
+      "failedToLoad": "Failed to load themes",
+      "error": "Error loading theme",
+      "notFound": "Theme not found",
+      "notFoundDesc": "The theme you're looking for doesn't exist."
+    },
+    "placeholders": {
+      "relatedThemes": "Related Themes",
+      "reviewsRatings": "Reviews & Ratings",
+      "comingSoon": "Coming Soon",
+      "relatedThemesDesc": "We'll soon show themes similar to this one based on category and features.",
+      "reviewsDesc": "We're working on adding a review system for themes. Stay tuned for user ratings and feedback!"
+    }
+  },
+  "Theme": {
+    "list": {
+      "filters": {
+        "title": "Filter",
+        "price": "Price",
+        "industry": "Industry",
+        "done": "Done",
+        "clear": "Clear all filters"
+      },
+      "empty": {
+        "title": "No themes found",
+        "matchFilters": "No themes match your current filters. Try adjusting your search criteria.",
+        "unavailable": "No themes are currently available. Check back soon!"
+      },
+      "types": {
+        "ecommerce": "E-commerce",
+        "services": "Services",
+        "blog": "Blog",
+        "restaurant": "Restaurant"
+      },
+      "priceTiers": {
+        "free": "Free",
+        "paid": "Paid"
+      },
+      "badge": {
+        "new": "NEW"
+      }
+    },
+    "details": {
+      "hero": {
+        "noPreview": "No preview available"
+      },
+      "actions": {
+        "viewDemo": "View Demo",
+        "useTheme": "Use Theme"
+      },
+      "info": {
+        "priceFree": "Free",
+        "priceExclusive": "Exclusive",
+        "by": "by"
+      },
+      "features": "Features",
+      "modal": {
+        "title": "Assign Theme to Workspace",
+        "description": "Choose which workspace you'd like to use <theme>{themeName}</theme> in.",
+        "noWorkspaces": "No active workspaces found.",
+        "createWorkspace": "Create a workspace",
+        "adding": "Adding theme...",
+        "switching": "Switching workspace...",
+        "continue": "Continue",
+        "cancel": "Cancel",
+        "errorSelect": "Please select a workspace",
+        "success": "Theme added successfully!",
+        "failed": "Failed to add theme. Please try again."
+      }
     }
   }
 }

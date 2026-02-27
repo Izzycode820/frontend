@@ -9,6 +9,7 @@
 import React from 'react'
 import { useAuthStore, authSelectors } from '@/stores/authentication/authStore'
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore'
+import { useTranslations } from 'next-intl'
 import { AuthLoadingSpinner } from '../shared/AuthLoadingSpinner'
 
 export interface RoleGuardProps {
@@ -30,6 +31,7 @@ export function RoleGuard({
   onUnauthorized,
   mode = 'any'
 }: RoleGuardProps) {
+  const t = useTranslations('Authentication.guards')
   // Auth state
   const isAuthenticated = useAuthStore(authSelectors.isAuthenticated)
   const isLoading = useAuthStore(authSelectors.isLoading)
@@ -102,7 +104,7 @@ export function RoleGuard({
 
   // Show loading while checking permissions
   if (isLoading || isWorkspaceLoading) {
-    return fallback || <AuthLoadingSpinner text="Checking permissions..." />
+    return fallback || <AuthLoadingSpinner text={t('checkingPermissions')} />
   }
 
   // Show access denied
@@ -121,15 +123,15 @@ export function RoleGuard({
           </div>
 
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Access Denied
+            {t('accessDenied')}
           </h3>
 
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
             {requiredRole
-              ? `You need ${requiredRole} permissions to access this resource.`
+              ? t('needRolePermissions', { role: requiredRole })
               : requiredPermissions.length > 0
-                ? `You don't have the required permissions to access this resource.`
-                : 'You don\'t have permission to access this resource.'
+                ? t('noRequiredPermissions')
+                : t('noPermission')
             }
           </p>
 
@@ -137,7 +139,7 @@ export function RoleGuard({
             onClick={() => window.history.back()}
             className="text-primary hover:underline text-sm"
           >
-            Go back
+            {t('goBack')}
           </button>
         </div>
       </div>

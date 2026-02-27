@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
+import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 
 interface ThemeEmptyStateProps {
@@ -11,6 +12,8 @@ interface ThemeEmptyStateProps {
 }
 
 export function ThemeEmptyState({ hasFilters, onClearFilters }: ThemeEmptyStateProps) {
+  const t = useTranslations('Theme.list.empty');
+  const tFilters = useTranslations('Theme.list.filters');
   return (
     <Card>
       <CardContent className="flex flex-col items-center justify-center py-16 px-4">
@@ -28,7 +31,7 @@ export function ThemeEmptyState({ hasFilters, onClearFilters }: ThemeEmptyStateP
 
         {hasFilters && onClearFilters && (
           <Button onClick={onClearFilters} variant="outline">
-            Clear all filters
+            {tFilters('clear')}
           </Button>
         )}
       </CardContent>

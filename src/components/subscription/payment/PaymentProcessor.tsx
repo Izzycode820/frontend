@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   RefreshCw
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Progress } from '@/components/shadcn-ui/progress';
@@ -43,6 +44,7 @@ export function PaymentProcessor({
   onRetry,
   className
 }: PaymentProcessorProps) {
+  const t = useTranslations('subscription.payment');
   // Use refactored payment hook for polling
   const {
     paymentStatus,
@@ -82,7 +84,7 @@ export function PaymentProcessor({
 
     if (operatorLower.includes('mtn')) {
       return {
-        name: 'MTN Mobile Money',
+        name: t('operators.mtn'),
         color: 'text-yellow-600',
         bgColor: 'bg-yellow-50',
         icon: <Smartphone className="w-4 h-4" />
@@ -90,14 +92,14 @@ export function PaymentProcessor({
     }
     if (operatorLower.includes('orange')) {
       return {
-        name: 'Orange Money',
+        name: t('operators.orange'),
         color: 'text-orange-600',
         bgColor: 'bg-orange-50',
         icon: <Smartphone className="w-4 h-4" />
       };
     }
     return {
-      name: 'Mobile Money',
+      name: t('operators.momo'),
       color: 'text-gray-600',
       bgColor: 'bg-gray-50',
       icon: <Smartphone className="w-4 h-4" />
@@ -111,7 +113,7 @@ export function PaymentProcessor({
     if (error) {
       return {
         icon: <XCircle className="w-5 h-5 text-red-500" />,
-        title: 'Payment Failed',
+        title: t('processor.failed'),
         subtitle: error,
         variant: 'destructive' as const
       };
@@ -120,8 +122,8 @@ export function PaymentProcessor({
     if (isPaymentSuccess) {
       return {
         icon: <CheckCircle className="w-5 h-5 text-green-500" />,
-        title: 'Payment Successful',
-        subtitle: 'Your payment has been confirmed',
+        title: t('processor.success'),
+        subtitle: t('processor.confirmed'),
         variant: 'default' as const
       };
     }
@@ -129,8 +131,8 @@ export function PaymentProcessor({
     if (isPaymentFailed) {
       return {
         icon: <XCircle className="w-5 h-5 text-red-500" />,
-        title: 'Payment Failed',
-        subtitle: 'Please try again or use a different payment method',
+        title: t('processor.failed'),
+        subtitle: t('checkout.tryAgain'), // Reuse try again key
         variant: 'destructive' as const
       };
     }
@@ -138,16 +140,16 @@ export function PaymentProcessor({
     if (isPaymentPending) {
       return {
         icon: <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />,
-        title: 'Processing Payment',
-        subtitle: 'Please complete the payment on your mobile device',
+        title: t('processor.processing'),
+        subtitle: t('processor.instructions'),
         variant: 'default' as const
       };
     }
 
     return {
       icon: <Clock className="w-5 h-5 text-blue-500" />,
-      title: 'Waiting for Payment',
-      subtitle: 'Check your phone for the payment prompt',
+      title: t('processor.waiting'),
+      subtitle: t('processor.prompt'),
       variant: 'default' as const
     };
   };
@@ -239,25 +241,25 @@ export function PaymentProcessor({
         {/* Payment Details */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Amount:</span>
+            <span className="text-sm text-muted-foreground">{t('processor.amount')}</span>
             <span className="font-medium">{formatCurrency(amount)} FCFA</span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Method:</span>
+            <span className="text-sm text-muted-foreground">{t('processor.method')}</span>
             <Badge variant="outline" className={operatorDisplay.color}>
               {operatorDisplay.name}
             </Badge>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Phone:</span>
+            <span className="text-sm text-muted-foreground">{t('processor.phone')}</span>
             <span className="font-mono text-sm">{phoneNumber}</span>
           </div>
 
           {paymentStatus?.metadata?.payment_reference && (
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Reference:</span>
+              <span className="text-sm text-muted-foreground">{t('processor.reference')}</span>
               <span className="font-mono text-xs">{paymentStatus.metadata.payment_reference}</span>
             </div>
           )}
@@ -267,7 +269,7 @@ export function PaymentProcessor({
         {isPolling && !isPaymentSuccess && !isPaymentFailed && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Progress</span>
+              <span>{t('processor.progress')}</span>
               <span>{Math.round(getProgress())}%</span>
             </div>
             <Progress value={getProgress()} className="h-2" />
@@ -277,7 +279,7 @@ export function PaymentProcessor({
         {/* Timer */}
         {isPolling && secondsElapsed > 0 && (
           <div className="text-center">
-            <div className="text-sm text-muted-foreground">Time elapsed</div>
+            <div className="text-sm text-muted-foreground">{t('processor.timeElapsed')}</div>
             <div className="text-lg font-mono font-medium">
               {formatElapsedTime()}
             </div>
@@ -290,9 +292,9 @@ export function PaymentProcessor({
             <Smartphone className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-2 text-sm">
-                <div>1. Check your phone for the payment prompt</div>
-                <div>2. Enter your Mobile Money PIN to approve</div>
-                <div>3. Wait for confirmation (this may take up to 2 minutes)</div>
+                <div>{t('processor.step1')}</div>
+                <div>{t('processor.step2')}</div>
+                <div>{t('processor.step3')}</div>
               </div>
             </AlertDescription>
           </Alert>
@@ -317,7 +319,7 @@ export function PaymentProcessor({
               disabled={isPolling}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Try Again
+              {t('shared.tryAgain')}
             </Button>
           )}
 
@@ -330,7 +332,7 @@ export function PaymentProcessor({
               }}
               className="flex-1"
             >
-              Cancel
+              {t('shared.cancel')}
             </Button>
           )}
         </div>
@@ -338,7 +340,7 @@ export function PaymentProcessor({
         {/* Success State */}
         {isPaymentSuccess && (
           <div className="text-center text-green-600 font-medium">
-            ✅ Payment completed successfully!
+            ✅ {t('processor.successMsg')}
           </div>
         )}
       </CardContent>

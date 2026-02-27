@@ -7,6 +7,7 @@
 
 import React from 'react'
 import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 interface AuthLoadingSpinnerProps {
@@ -17,9 +18,11 @@ interface AuthLoadingSpinnerProps {
 
 export function AuthLoadingSpinner({
   size = 'md',
-  text = 'Loading...',
+  text,
   className
 }: AuthLoadingSpinnerProps) {
+  const t = useTranslations('Authentication.shared')
+  const displayText = text || t('loading')
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
@@ -35,9 +38,9 @@ export function AuthLoadingSpinner({
         'animate-spin text-muted-foreground',
         sizeClasses[size]
       )} />
-      {text && (
+      {displayText && (
         <span className="text-sm text-muted-foreground">
-          {text}
+          {displayText}
         </span>
       )}
     </div>
@@ -135,7 +138,9 @@ export function AuthPageSpinner() {
 /**
  * Compact branded spinner for inline use
  */
-export function AuthBrandedSpinner({ text = 'Loading...' }: { text?: string }) {
+export function AuthBrandedSpinner({ text }: { text?: string }) {
+  const t = useTranslations('Authentication.shared')
+  const displayText = text || t('loading')
   return (
     <div className="flex flex-col items-center justify-center space-y-4 p-8">
       <div className="animate-pulse">
@@ -143,7 +148,7 @@ export function AuthBrandedSpinner({ text = 'Loading...' }: { text?: string }) {
       </div>
       <div className="flex items-center space-x-2">
         <Loader2 className="h-4 w-4 animate-spin text-primary" />
-        <span className="text-sm text-muted-foreground">{text}</span>
+        <span className="text-sm text-muted-foreground">{displayText}</span>
       </div>
     </div>
   )

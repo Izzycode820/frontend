@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/shadcn-ui/collapsible';
 import { ChevronDown } from 'lucide-react';
 
@@ -14,6 +15,7 @@ interface ThemeFeaturesSectionProps {
 }
 
 export function ThemeFeaturesSection({ features }: ThemeFeaturesSectionProps) {
+  const t = useTranslations('Theme.details');
   if (!features || features.length === 0) {
     return null;
   }
@@ -22,14 +24,14 @@ export function ThemeFeaturesSection({ features }: ThemeFeaturesSectionProps) {
     <section id="features" className="w-full bg-background border-b">
       <div className="w-full px-4 md:px-8 lg:px-12 py-20">
         <div className="max-w-[1920px] mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-12">Features</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-12">{t('features')}</h2>
 
           {/* Desktop View: Clean 4-column Grid */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {features.map((featureCategory, categoryIndex) => (
               <div key={`desktop-${categoryIndex}`} className="space-y-6">
                 <h3 className="text-lg font-bold text-foreground">
-                  {featureCategory.category || 'Features'}
+                  {featureCategory.category || t('features')}
                 </h3>
                 <ul className="space-y-3">
                   {(featureCategory.items || [])
@@ -51,7 +53,7 @@ export function ThemeFeaturesSection({ features }: ThemeFeaturesSectionProps) {
             {features.map((featureCategory, categoryIndex) => (
               <Collapsible key={`mobile-${categoryIndex}`} className="border rounded-lg bg-card text-card-foreground shadow-sm">
                 <CollapsibleTrigger className="flex items-center justify-between w-full p-4 font-medium hover:bg-muted/50 transition-colors [&[data-state=open]>svg]:rotate-180">
-                  <span className="text-lg font-bold">{featureCategory.category || 'Features'}</span>
+                  <span className="text-lg font-bold">{featureCategory.category || t('features')}</span>
                   <ChevronDown className="h-5 w-5 transition-transform duration-200" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>

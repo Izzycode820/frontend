@@ -12,12 +12,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/shadcn-ui/button'
 import { EmailVerificationCard } from '@/components/authentication/verification'
 import { useAuth } from '@/hooks/authentication/useAuth'
+import { useTranslations } from 'next-intl'
 // import { Clock } from 'lucide-react'  // Uncomment when SMS verification is enabled
 
 
 export default function VerifyPage() {
     const router = useRouter()
     const { user, isAuthenticated, isLoading } = useAuth()
+    const t = useTranslations('Authentication.verifyPage')
 
     const [emailVerified, setEmailVerified] = React.useState(false)
 
@@ -46,7 +48,9 @@ export default function VerifyPage() {
     if (isLoading || !user) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse text-muted-foreground">Loading...</div>
+                <div className="animate-pulse text-muted-foreground">
+                    {useTranslations('Authentication.shared')('loading')}
+                </div>
             </div>
         )
     }
@@ -58,10 +62,10 @@ export default function VerifyPage() {
                 <Card className="border-0 shadow-lg">
                     <CardHeader className="text-center pb-2 px-4 sm:px-6">
                         <CardTitle className="text-xl sm:text-2xl font-semibold">
-                            Verify Your Account
+                            {t('title')}
                         </CardTitle>
                         <CardDescription className="text-xs sm:text-sm">
-                            Complete verification to secure your account
+                            {t('description')}
                         </CardDescription>
                     </CardHeader>
                 </Card>
@@ -101,23 +105,8 @@ export default function VerifyPage() {
                     className="w-full h-11 sm:h-12 text-sm sm:text-base"
                     size="lg"
                 >
-                    Continue to Dashboard
+                    {t('continueDashboard')}
                 </Button>
-
-                {/* Skip Button - Beta testing */}
-                {!canContinue && (
-                    <Button
-                        variant="ghost"
-                        onClick={handleContinue}
-                        className="w-full h-9 sm:h-10 text-sm text-muted-foreground hover:text-foreground"
-                    >
-                        Skip for now (Beta)
-                    </Button>
-                )}
-
-                <p className="text-center text-xs text-muted-foreground">
-                    You can verify later in Settings
-                </p>
             </div>
         </div>
     )

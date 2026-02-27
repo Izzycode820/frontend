@@ -8,6 +8,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Loader2, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button'
@@ -48,6 +49,7 @@ export function EmailVerificationCard({
     onVerified,
     className = ''
 }: EmailVerificationCardProps) {
+    const t = useTranslations('Authentication.verification.email')
     const [step, setStep] = useState<VerificationStep>('initial')
     const [otpValues, setOtpValues] = useState<string[]>(['', '', '', '', '', ''])
     const [countdown, setCountdown] = useState(0)
@@ -159,9 +161,9 @@ export function EmailVerificationCard({
     return (
         <Card className={className}>
             <CardHeader className="pb-4 px-4 sm:px-6">
-                <CardTitle className="text-base sm:text-lg">Email Verification</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t('title')}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                    Verify your email address to secure your account
+                    {t('description')}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 px-4 sm:px-6">
@@ -177,7 +179,7 @@ export function EmailVerificationCard({
                     <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                         <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span className="text-sm text-green-600 dark:text-green-400">
-                            Email verified
+                            {t('verified')}
                         </span>
                     </div>
                 ) : (
@@ -185,7 +187,7 @@ export function EmailVerificationCard({
                         {/* Email Display + Request Button */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
                             <div className="min-w-0">
-                                <Label className="text-xs sm:text-sm text-muted-foreground">Email</Label>
+                                <Label className="text-xs sm:text-sm text-muted-foreground">{t('label')}</Label>
                                 <p className="font-medium text-sm sm:text-base truncate">{maskedEmail}</p>
                             </div>
 
@@ -200,10 +202,10 @@ export function EmailVerificationCard({
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Sending...
+                                            {t('sending')}
                                         </>
                                     ) : (
-                                        'Request Code'
+                                        t('requestCode')
                                     )}
                                 </Button>
                             )}
@@ -213,7 +215,7 @@ export function EmailVerificationCard({
                         {step === 'code_sent' && (
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-2">
-                                    <Label className="text-sm">Enter verification code</Label>
+                                    <Label className="text-sm">{t('enterCode')}</Label>
                                     <div className="flex gap-1.5 sm:gap-2 justify-center">
                                         {otpValues.map((value, index) => (
                                             <Input
@@ -242,17 +244,17 @@ export function EmailVerificationCard({
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Verifying...
+                                            {t('verifying')}
                                         </>
                                     ) : (
-                                        'Verify'
+                                        t('verify')
                                     )}
                                 </Button>
 
                                 {/* Resend Link */}
                                 <div className="text-center text-sm text-muted-foreground">
                                     {countdown > 0 ? (
-                                        <span>Resend code in {countdown}s</span>
+                                        <span>{t('resendIn', { seconds: countdown })}</span>
                                     ) : (
                                         <button
                                             type="button"
@@ -260,7 +262,7 @@ export function EmailVerificationCard({
                                             disabled={isLoading}
                                             className="text-primary hover:underline disabled:opacity-50"
                                         >
-                                            Resend code
+                                            {t('resend')}
                                         </button>
                                     )}
                                 </div>

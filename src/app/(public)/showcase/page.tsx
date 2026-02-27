@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/shadcn-ui/input';
 import { Button } from '@/components/shadcn-ui/button';
 import { Search, Filter } from 'lucide-react';
@@ -18,6 +19,8 @@ import { useDebounce } from '@/hooks/theme/useDebounce';
 const ITEMS_PER_PAGE = 24;
 
 export default function ThemeStorePage() {
+  const t = useTranslations('Showcase.page');
+  const tTheme = useTranslations('Theme.list.filters');
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,7 +90,7 @@ export default function ThemeStorePage() {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-destructive py-12">
-            <p className="text-lg font-semibold mb-2">Failed to load themes</p>
+            <p className="text-lg font-semibold mb-2">{t('failedToLoad')}</p>
             <p className="text-sm text-muted-foreground">{error.message}</p>
           </div>
         </div>
@@ -101,9 +104,9 @@ export default function ThemeStorePage() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">Browse all themes</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground text-lg">
-              {loading ? <span className="animate-pulse">Loading...</span> : `${totalCount} ${totalCount === 1 ? 'theme' : 'themes'}`}
+              {loading ? <span className="animate-pulse">{t('loading')}</span> : t('themesCount', { count: totalCount })}
             </p>
           </div>
 
@@ -112,17 +115,17 @@ export default function ThemeStorePage() {
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetTrigger asChild>
                 <Button variant="default" className="rounded-full px-6">
-                  Filter
+                  {tTheme('title')}
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px] overflow-y-auto">
                 <SheetHeader className="mb-6">
-                  <SheetTitle>Filter</SheetTitle>
+                  <SheetTitle>{tTheme('title')}</SheetTitle>
                 </SheetHeader>
                 {filterComponent}
                 <div className="mt-8 pt-4 border-t">
                   <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
-                    Done
+                    {tTheme('done')}
                   </Button>
                 </div>
               </SheetContent>
@@ -136,7 +139,7 @@ export default function ThemeStorePage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               type="text"
-              placeholder="Search themes..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-background/50 border-muted-foreground/20"

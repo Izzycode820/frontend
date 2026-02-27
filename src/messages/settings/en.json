@@ -169,6 +169,10 @@
     "status": "Status",
     "noBills": "No bills found",
     "pending": "Pending",
+    "cancel": "Cancel",
+    "error": "Error",
+    "please_enter_your_phone_number": "Please enter your phone number",
+    "failedToSaveGeneric": "Failed to save settings",
     "actions": {
       "CREATED": "Subscription created",
       "RENEWED": "Billing cycle ended",

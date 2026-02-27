@@ -8,19 +8,21 @@
 
 import React from 'react'
 import { LoginForm } from '@/components/authentication/forms/LoginForm'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card'
 
 export default function LoginPage() {
+  const t = useTranslations('Authentication.login')
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="border-0 shadow-lg">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl font-semibold">
-              Welcome back
+              {t('welcomeBack')}
             </CardTitle>
             <CardDescription>
-              Sign in to your HUZILERZ account
+              {t('signInToAccount')}
             </CardDescription>
           </CardHeader>
 

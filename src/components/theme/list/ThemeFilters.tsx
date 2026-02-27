@@ -3,6 +3,7 @@
 import React from 'react';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 import { Label } from '@/components/shadcn-ui/label';
+import { useTranslations } from 'next-intl';
 import { ThemeTemplateTemplateTypeChoices, ThemeTemplatePriceTierChoices } from '@/types/themes/graphql-base';
 import { cn } from '@/lib/utils';
 
@@ -19,16 +20,20 @@ export function ThemeFilters({
   onTemplateTypeChange,
   onPriceTierChange,
 }: ThemeFiltersProps) {
+  const t = useTranslations('Theme.list.types');
+  const tFilters = useTranslations('Theme.list.filters');
+
   const templateTypes = [
-    { value: ThemeTemplateTemplateTypeChoices.Ecommerce, label: 'E-commerce' },
-    { value: ThemeTemplateTemplateTypeChoices.Services, label: 'Services' },
-    { value: ThemeTemplateTemplateTypeChoices.Blog, label: 'Blog' },
-    { value: ThemeTemplateTemplateTypeChoices.Restaurant, label: 'Restaurant' },
+    { value: ThemeTemplateTemplateTypeChoices.Ecommerce, label: t('ecommerce') },
+    { value: ThemeTemplateTemplateTypeChoices.Services, label: t('services') },
+    { value: ThemeTemplateTemplateTypeChoices.Blog, label: t('blog') },
+    { value: ThemeTemplateTemplateTypeChoices.Restaurant, label: t('restaurant') },
   ];
 
+  const tPrice = useTranslations('Theme.list.priceTiers');
   const priceTiers = [
-    { value: ThemeTemplatePriceTierChoices.Free, label: 'Free' },
-    { value: ThemeTemplatePriceTierChoices.Paid, label: 'Paid' },
+    { value: ThemeTemplatePriceTierChoices.Free, label: tPrice('free') },
+    { value: ThemeTemplatePriceTierChoices.Paid, label: tPrice('paid') },
     // { value: ThemeTemplatePriceTierChoices.Exclusive, label: 'Exclusive' }, // Hidden based on ref image usually just showing Free/Paid or specific count
   ];
 
@@ -36,7 +41,7 @@ export function ThemeFilters({
     <div className="sticky top-8 space-y-8 pr-4">
       {/* Price Filter */}
       <div className="space-y-4">
-        <h3 className="font-bold text-base text-foreground/90">Price</h3>
+        <h3 className="font-bold text-base text-foreground/90">{tFilters('price')}</h3>
         <div className="space-y-3">
           {priceTiers.map((tier) => (
             <div key={tier.value} className="flex items-center space-x-3 group">
@@ -66,7 +71,7 @@ export function ThemeFilters({
 
       {/* Industry Filter */}
       <div className="space-y-4">
-        <h3 className="font-bold text-base text-foreground/90">Industry</h3>
+        <h3 className="font-bold text-base text-foreground/90">{tFilters('industry')}</h3>
         <div className="space-y-3">
           {templateTypes.map((type) => (
             <div key={type.value} className="flex items-center space-x-3 group">

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/shadcn-ui/card';
 import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
@@ -38,6 +39,7 @@ export function PaymentForm({
   className,
   children
 }: PaymentFormProps) {
+  const t = useTranslations('subscription.payment');
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'decimal',
@@ -49,9 +51,9 @@ export function PaymentForm({
   return (
     <Card className={cn('max-w-md mx-auto', className)}>
       <CardHeader>
-        <CardTitle>Payment Method</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          Complete your {planName} subscription
+          {t('completeSub', { planName: planName || '' })}
         </CardDescription>
       </CardHeader>
 
@@ -68,7 +70,7 @@ export function PaymentForm({
 
           {/* Phone Number */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone number</Label>
+            <Label htmlFor="phone">{t('phoneLabel')}</Label>
             <Input
               id="phone"
               type="tel"
@@ -81,7 +83,7 @@ export function PaymentForm({
 
           {/* Amount Display */}
           <div className="flex items-center justify-between py-4 border-t">
-            <span className="text-sm text-muted-foreground">Total</span>
+            <span className="text-sm text-muted-foreground">{t('total')}</span>
             <span className="text-2xl font-bold">{formatCurrency(amount)} FCFA</span>
           </div>
 
@@ -94,7 +96,7 @@ export function PaymentForm({
               disabled={isSubmitting}
               className="flex-1"
             >
-              Cancel
+              {t('shared.cancel')}
             </Button>
             <Button
               type="submit"
@@ -104,10 +106,10 @@ export function PaymentForm({
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing
+                  {t('processing')}
                 </>
               ) : (
-                'Pay'
+                t('pay')
               )}
             </Button>
           </div>

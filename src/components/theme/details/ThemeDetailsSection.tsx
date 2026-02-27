@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/shadcn-ui/button';
 
 interface ShowcaseSection {
@@ -31,9 +32,10 @@ export function ThemeDetailsSection({
   demoUrl,
   onUseTheme,
 }: ThemeDetailsSectionProps) {
+  const t = useTranslations('Theme.details');
   const formatPrice = () => {
-    if (priceTier === 'free') return 'Free';
-    if (priceTier === 'exclusive') return 'Exclusive';
+    if (priceTier === 'free') return t('info.priceFree');
+    if (priceTier === 'exclusive') return t('info.priceExclusive');
     return `FCFA ${priceAmount}`;
   };
 
@@ -55,7 +57,7 @@ export function ThemeDetailsSection({
                   Reference: "Free" (top right), "by Shopify" (under 'Free').
               */}
               <div className="flex items-center gap-2 text-muted-foreground text-lg">
-                <span>by</span>
+                <span>{t('info.by')}</span>
                 <span className="font-semibold text-foreground underline decoration-1 underline-offset-4">{author}</span>
               </div>
             </div>
@@ -74,11 +76,11 @@ export function ThemeDetailsSection({
                   className="px-8 rounded-full font-semibold text-lg h-12"
                   onClick={() => window.open(demoUrl, '_blank')}
                 >
-                  View Demo
+                  {t('actions.viewDemo')}
                 </Button>
               )}
               <Button onClick={onUseTheme} size="lg" className="px-8 rounded-full font-semibold text-lg h-12">
-                Use Theme
+                {t('actions.useTheme')}
               </Button>
             </div>
           </div>

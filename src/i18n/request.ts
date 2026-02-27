@@ -6,11 +6,12 @@ export default getRequestConfig(async () => {
     const cookieStore = await cookies();
     const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
 
-    // Import both settings and dashboard messages
-    const [settings, dashboard, dashboard2] = await Promise.all([
+    // Import settings, dashboard, dashboard2 and platform messages
+    const [settings, dashboard, dashboard2, platform] = await Promise.all([
         import(`./../messages/settings/${locale}.json`),
         import(`./../messages/dashboard/${locale}.json`),
-        import(`./../messages/dashboard_2/${locale}.json`)
+        import(`./../messages/dashboard_2/${locale}.json`),
+        import(`./../messages/platform/${locale}.json`)
     ]);
 
     return {
@@ -18,7 +19,8 @@ export default getRequestConfig(async () => {
         messages: {
             ...settings.default,
             ...dashboard.default,
-            ...dashboard2.default
+            ...dashboard2.default,
+            ...platform.default
         }
     };
 });

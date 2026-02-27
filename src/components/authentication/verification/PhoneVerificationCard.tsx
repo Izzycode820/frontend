@@ -8,6 +8,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Loader2, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button'
@@ -40,6 +41,7 @@ export function PhoneVerificationCard({
     onVerified,
     className = ''
 }: PhoneVerificationCardProps) {
+    const t = useTranslations('Authentication.verification.phone')
     const [step, setStep] = useState<VerificationStep>('initial')
     const [otpValues, setOtpValues] = useState<string[]>(['', '', '', '', '', ''])
     const [countdown, setCountdown] = useState(0)
@@ -151,9 +153,9 @@ export function PhoneVerificationCard({
     return (
         <Card className={className}>
             <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Phone Verification</CardTitle>
+                <CardTitle className="text-lg">{t('title')}</CardTitle>
                 <CardDescription>
-                    Verify your phone number to secure your account
+                    {t('description')}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -169,7 +171,7 @@ export function PhoneVerificationCard({
                     <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                         <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span className="text-sm text-green-600 dark:text-green-400">
-                            Phone verified
+                            {t('verified')}
                         </span>
                     </div>
                 ) : (
@@ -177,7 +179,7 @@ export function PhoneVerificationCard({
                         {/* Phone Display + Request Button */}
                         <div className="flex items-center justify-between gap-4">
                             <div>
-                                <Label className="text-sm text-muted-foreground">Phone</Label>
+                                <Label className="text-sm text-muted-foreground">{t('label')}</Label>
                                 <p className="font-medium">{maskedPhone}</p>
                             </div>
 
@@ -191,10 +193,10 @@ export function PhoneVerificationCard({
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Sending...
+                                            {t('sending')}
                                         </>
                                     ) : (
-                                        'Request Code'
+                                        t('requestCode')
                                     )}
                                 </Button>
                             )}
@@ -204,7 +206,7 @@ export function PhoneVerificationCard({
                         {step === 'code_sent' && (
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-2">
-                                    <Label className="text-sm">Enter verification code</Label>
+                                    <Label className="text-sm">{t('enterCode')}</Label>
                                     <div className="flex gap-2 justify-center">
                                         {otpValues.map((value, index) => (
                                             <Input
@@ -233,17 +235,17 @@ export function PhoneVerificationCard({
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Verifying...
+                                            {t('verifying')}
                                         </>
                                     ) : (
-                                        'Verify'
+                                        t('verify')
                                     )}
                                 </Button>
 
                                 {/* Resend Link */}
                                 <div className="text-center text-sm text-muted-foreground">
                                     {countdown > 0 ? (
-                                        <span>Resend code in {countdown}s</span>
+                                        <span>{t('resendIn', { seconds: countdown })}</span>
                                     ) : (
                                         <button
                                             type="button"
@@ -251,7 +253,7 @@ export function PhoneVerificationCard({
                                             disabled={isLoading}
                                             className="text-primary hover:underline disabled:opacity-50"
                                         >
-                                            Resend code
+                                            {t('resend')}
                                         </button>
                                     )}
                                 </div>

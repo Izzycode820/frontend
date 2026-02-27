@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation } from '@apollo/client/react'
@@ -41,6 +42,7 @@ export function WorkspaceSelectionModal({
   themeSlug,
   themeName,
 }: WorkspaceSelectionModalProps) {
+  const t = useTranslations('Theme.details.modal')
   const router = useRouter()
 
   // Hooks
@@ -64,7 +66,7 @@ export function WorkspaceSelectionModal({
 
   const handleContinue = async () => {
     if (!selectedWorkspaceId) {
-      toast.error('Please select a workspace')
+      toast.error(t('errorSelect'))
       return
     }
 
@@ -90,11 +92,11 @@ export function WorkspaceSelectionModal({
       }
 
       if (!data?.addTheme?.success) {
-        toast.error('Failed to add theme')
+        toast.error(t('failed'))
         return
       }
 
-      toast.success('Theme added successfully!')
+      toast.success(t('success'))
 
       // Close modal
       onOpenChange(false)
@@ -103,7 +105,7 @@ export function WorkspaceSelectionModal({
       router.push(`/workspace/${selectedWorkspaceId}/store/themes`)
     } catch (error: any) {
       console.error('Failed to add theme:', error)
-      toast.error('Failed to add theme. Please try again.')
+      toast.error(t('failed'))
     }
   }
 
@@ -111,10 +113,12 @@ export function WorkspaceSelectionModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Assign Theme to Workspace</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Choose which workspace you'd like to use{' '}
-            <span className="font-medium text-foreground">{themeName}</span> in.
+            {t.rich('description', {
+              themeName: themeName,
+              theme: (chunks) => <span className="font-medium text-foreground">{chunks}</span>
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -125,9 +129,9 @@ export function WorkspaceSelectionModal({
             </div>
           ) : activeWorkspaces.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">No active workspaces found.</p>
+              <p className="text-sm text-muted-foreground">{t('noWorkspaces')}</p>
               <Button variant="link" size="sm" className="mt-2">
-                Create a workspace
+                {t('createWorkspace')}
               </Button>
             </div>
           ) : (
@@ -180,7 +184,7 @@ export function WorkspaceSelectionModal({
             onClick={() => onOpenChange(false)}
             disabled={isAddingTheme || isSwitching}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             onClick={handleContinue}
@@ -189,10 +193,10 @@ export function WorkspaceSelectionModal({
             {isAddingTheme || isSwitching ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {isAddingTheme ? 'Adding theme...' : 'Switching workspace...'}
+                {isAddingTheme ? t('adding') : t('switching')}
               </>
             ) : (
-              'Continue'
+              t('continue')
             )}
           </Button>
         </DialogFooter>

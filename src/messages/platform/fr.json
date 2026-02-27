@@ -11,7 +11,7 @@
       "submit": "Se connecter",
       "submitting": "Connexion en cours...",
       "redirecting": "Redirection...",
-      "welcomeBack": "Bon retour !",
+      "welcomeBack": "Bon retour",
       "welcomeBackDesc": "Vous avez été connecté avec succès.",
       "failed": "Échec de la connexion",
       "failedDesc": "Échec de la connexion. Veuillez réessayer.",
@@ -19,7 +19,8 @@
       "createAccount": "Créer un compte",
       "orContinueWith": "Ou continuer avec",
       "google": "Google",
-      "apple": "Apple"
+      "apple": "Apple",
+      "signInToAccount": "Connectez-vous à votre compte HUZILERZ"
     },
     "signup": {
       "title": "Créer un compte",
@@ -28,8 +29,10 @@
       "lastName": "Nom",
       "lastNamePlaceholder": "Nom",
       "email": "Adresse e-mail",
+      "emailAddress": "Adresse e-mail",
       "emailPlaceholder": "Entrez votre e-mail",
       "phone": "Numéro de téléphone",
+      "phoneNumber": "Numéro de téléphone",
       "phonePlaceholder": "+237 6XX XXX XXX",
       "password": "Mot de passe",
       "passwordPlaceholder": "Créez un mot de passe",
@@ -37,8 +40,10 @@
       "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
       "acceptTerms": "J'accepte les",
       "terms": "Conditions d'utilisation",
+      "termsOfService": "Conditions d'utilisation",
       "and": "et la",
       "privacy": "Politique de confidentialité",
+      "privacyPolicy": "Politique de confidentialité",
       "submit": "Créer un compte",
       "submitting": "Création du compte...",
       "success": "Compte créé !",
@@ -46,7 +51,10 @@
       "failed": "Échec de l'inscription",
       "comingSoon": "Bientôt disponible",
       "alreadyHaveAccount": "Vous avez déjà un compte ?",
-      "signIn": "Se connecter"
+      "signIn": "Se connecter",
+      "joinHuzilerz": "Rejoignez HUZILERZ et commencez à construire votre espace de travail",
+      "createAccountTitle": "Créer un compte",
+      "orContinueWith": "Ou continuer avec"
     },
     "profile": {
       "title": "Paramètres du profil",
@@ -77,7 +85,20 @@
       "securityNotifications": "Notifications de sécurité",
       "securityNotificationsDesc": "Recevez des notifications sur les événements de sécurité et les tentatives de connexion",
       "submit": "Enregistrer les modifications",
-      "submitting": "Mise à jour du profil..."
+      "submitting": "Mise à jour du profil...",
+      "avatar": {
+        "title": "Photo de profil",
+        "description": "Téléchargez une photo de profil pour personnaliser votre compte",
+        "alt": "Photo de profil",
+        "remove": "Supprimer",
+        "uploading": "Téléchargement en cours...",
+        "dropzone": "Déposez votre image ici, ou cliquez pour parcourir",
+        "validTypes": "JPEG, PNG, WebP ou GIF jusqu'à {size}MB",
+        "chooseFile": "Choisir un fichier",
+        "invalidType": "Veuillez télécharger un fichier image valide (JPEG, PNG, WebP ou GIF)",
+        "tooLarge": "La taille du fichier doit être inférieure à {size}MB",
+        "failed": "Échec du téléchargement de l'avatar. Veuillez réessayer."
+      }
     },
     "verification": {
       "email": {
@@ -107,6 +128,47 @@
         "resend": "Renvoyer le code"
       }
     },
+    "forgotPassword": {
+      "title": "Mot de passe oublié ?",
+      "description": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "Entrez votre e-mail",
+      "sendLink": "Envoyer le lien de réinitialisation",
+      "sendingLink": "Envoi du lien...",
+      "backToLogin": "Retour à la connexion",
+      "checkEmail": "Vérifiez vos e-mails",
+      "sentInstructions": "Nous avons envoyé les instructions de réinitialisation du mot de passe à",
+      "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+      "errorSending": "Échec de l'envoi de l'e-mail de réinitialisation"
+    },
+    "resetPassword": {
+      "title": "Réinitialiser votre mot de passe",
+      "description": "Entrez votre nouveau mot de passe ci-dessous",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Entrez le nouveau mot de passe",
+      "confirmNewPassword": "Confirmez le nouveau mot de passe",
+      "submit": "Réinitialiser le mot de passe",
+      "submitting": "Réinitialisation en cours...",
+      "success": "Réinitialisation réussie",
+      "successDesc": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+      "continueToLogin": "Continuer vers la connexion",
+      "invalidToken": "Jeton de réinitialisation invalide ou manquant",
+      "failed": "Échec de la réinitialisation du mot de passe"
+    },
+    "verifyPage": {
+      "title": "Vérifiez votre compte",
+      "description": "Complétez la vérification pour sécuriser votre compte",
+      "continueDashboard": "Continuer vers le tableau de bord"
+    },
+    "oauth2": {
+      "processing": "Finalisation de la connexion...",
+      "processingDesc": "Veuillez patienter pendant que nous finissons de configurer votre compte.",
+      "success": "Connexion réussie !",
+      "successDesc": "Redirection vers votre espace de travail...",
+      "failed": "Échec de la connexion",
+      "failedDesc": "Quelque chose s'est mal passé lors de l'authentification.",
+      "tryAgain": "Réessayer"
+    },
     "validation": {
       "emailRequired": "L'e-mail est requis",
       "emailInvalid": "Veuillez entrer une adresse e-mail valide",
@@ -130,6 +192,223 @@
       "usernameMax": "Le nom d'utilisateur doit comporter moins de 20 caractères",
       "usernameInvalid": "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres, des traits d'union et des underscores",
       "bioMax": "La bio doit comporter moins de 500 caractères"
+    },
+    "guards": {
+      "checkingPermissions": "Vérification des permissions...",
+      "accessDenied": "Accès refusé",
+      "needRolePermissions": "Vous avez besoin des permissions {role} pour accéder à cette ressource.",
+      "noRequiredPermissions": "Vous n'avez pas les permissions requises pour accéder à cette ressource.",
+      "noPermission": "Vous n'avez pas la permission d'accéder à cette ressource.",
+      "goBack": "Retourner"
+    },
+    "errorBoundary": {
+      "title": "Erreur d'authentification",
+      "defaultMessage": "Quelque chose s'est mal passé avec l'authentification. Veuillez réessayer.",
+      "tryAgain": "Réessayer",
+      "backToLogin": "Retour à la connexion"
+    },
+    "shared": {
+      "loading": "Chargement..."
+    }
+  },
+  "subscription": {
+      "pricing": {
+        "title": "Choisissez Votre Forfait Idéal",
+        "description": "Tarification flexible avec paiement par Mobile Money pour faire croître votre entreprise",
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "savePercent": "Économisez {percent}%",
+        "loading": "Chargement des forfaits...",
+        "error": "Échec du chargement des forfaits. Veuillez réessayer plus tard.",
+        "footer": {
+          "securePayment": "Paiement sécurisé via MTN Mobile Money, Orange Money et Fapshi",
+          "cancelAnytime": "Annulation possible à tout moment",
+          "support247": "Support 24/7",
+          "noHiddenFees": "Pas de frais cachés"
+        },
+        "cards": {
+          "free": "Gratuit",
+          "year": "an",
+          "month": "mois",
+          "startPromo": "Démarrer promo",
+          "choosePlan": "Choisir le forfait",
+          "processing": "Traitement...",
+          "currentPlan": "Forfait Actuel"
+        },
+        "downgrade": {
+          "title": "Planifier un Rétrogradage",
+          "description": "Vous êtes sur le point de planifier un rétrogradage de {currentPlan} vers {planName}.",
+          "alert": "Vos fonctionnalités actuelles resteront actives jusqu'au {date}. Après cette date, votre forfait passera automatiquement à {planName}.",
+          "cancel": "Annuler",
+          "confirm": "Confirmer le Rétrogradage",
+          "success": "Rétrogradage planifié pour le {date}",
+          "failed": "Échec de la planification du rétrogradage"
+        },
+        "messages": {
+          "failedToDetermine": "Échec de la détermination de l'action",
+          "alreadyOnPlan": "Vous êtes déjà sur le forfait {planName}",
+          "unknownAction": "Type d'action inconnu",
+          "failedToProcess": "Échec du traitement de la sélection du forfait"
+        }
+      },
+      "discount": {
+        "title": "Économisez 15% avec la facturation annuelle",
+        "description": "Choisissez n'importe quel forfait annuel et obtenez 2 mois gratuits. Payez une fois, économisez plus.",
+        "badge": "15% d'économie",
+        "paymentNote": "Payable par MTN Mobile Money, Orange Money ou Fapshi"
+      },
+      "checkout": {
+        "title": "Finalisez Votre Abonnement",
+        "subtitle": "{planName} - Facturation {cycle}",
+        "introPricing": "(Tarif promotionnel)",
+        "preparing": "Préparation du Paiement",
+        "validating": "Validation du tarif et de l'éligibilité...",
+        "networkError": "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
+        "failedToPrepare": "Échec de la préparation du paiement. Veuillez réessayer.",
+        "errorTitle": "Erreur de Paiement",
+        "introAlreadyUsed": {
+          "title": "Offre promotionnelle déjà utilisée",
+          "description": "Votre remise promotionnelle ne peut être utilisée qu'une seule fois. Le tarif régulier s'appliquera."
+        },
+        "backToPlans": "Retour aux Forfaits",
+        "tryAgain": "Réessayer",
+        "success": {
+          "title": "Paiement Réussi !",
+          "description": "Votre abonnement {planName} a été activé",
+          "redirecting": "Redirection vers votre espace de travail..."
+        },
+        "breakdown": {
+          "regularPrice": "Prix Régulier :",
+          "introDiscount": "Remise Promotionnelle :",
+          "youPay": "Vous Payez :"
+        }
+      },
+      "payment": {
+        "shared": {
+          "cancel": "Annuler",
+          "tryAgain": "Réessayer"
+        },
+        "title": "Mode de Paiement",
+        "completeSub": "Finalisez votre abonnement {planName}",
+        "phoneLabel": "Numéro de téléphone",
+        "total": "Total",
+        "pay": "Payer",
+        "processing": "Traitement",
+        "operators": {
+          "mtn": "MTN Mobile Money",
+          "orange": "Orange Money",
+          "momo": "Mobile Money"
+        },
+        "wizard": {
+          "error": "Erreur de Paiement",
+          "subscriptionError": "Erreur d'Abonnement",
+          "failed": "Échec de l'abonnement",
+          "phoneInvalid": "Format de numéro invalide. Utilisez un numéro camerounais (ex : 670123456)",
+          "loginRequired": "Vous devez être connecté pour vous abonner",
+          "methodRequired": "Veuillez sélectionner un mode de paiement",
+          "intentError": "Aucun identifiant d'intention de paiement retourné"
+        },
+        "selector": {
+          "label": "Sélectionnez un opérateur",
+          "error": "Échec du chargement des modes de paiement. Veuillez rafraîchir la page.",
+          "noMethods": "Aucun mode de paiement disponible. Veuillez contacter le support.",
+          "recommended": "Recommandé"
+        },
+        "processor": {
+          "failed": "Échec du Paiement",
+          "success": "Paiement Réussi",
+          "confirmed": "Votre paiement a été confirmé",
+          "processing": "Traitement du Paiement",
+          "instructions": "Veuillez finaliser le paiement sur votre appareil mobile",
+          "waiting": "En attente du Paiement",
+          "prompt": "Vérifiez votre téléphone pour la demande de paiement",
+          "amount": "Montant :",
+          "method": "Méthode :",
+          "phone": "Téléphone :",
+          "reference": "Référence :",
+          "progress": "Progression",
+          "timeElapsed": "Temps écoulé",
+          "step1": "1. Vérifiez votre téléphone pour la demande de paiement",
+          "step2": "2. Entrez votre code PIN Mobile Money pour approuver",
+          "step3": "3. Attendez la confirmation (cela peut prendre jusqu'à 2 minutes)",
+          "successMsg": "Paiement effectué avec succès !"
+      }
+    }
+  },
+  "Showcase": {
+    "page": {
+      "title": "Parcourir tous les thèmes",
+      "loading": "Chargement...",
+      "themesCount": "{count} {count, plural, one {thème} other {thèmes}}",
+      "searchPlaceholder": "Rechercher des thèmes...",
+      "failedToLoad": "Échec du chargement des thèmes",
+      "error": "Erreur lors du chargement du thème",
+      "notFound": "Thème non trouvé",
+      "notFoundDesc": "Le thème que vous recherchez n'existe pas."
+    },
+    "placeholders": {
+      "relatedThemes": "Thèmes Similaires",
+      "reviewsRatings": "Avis et Évaluations",
+      "comingSoon": "Bientôt Disponible",
+      "relatedThemesDesc": "Nous afficherons bientôt des thèmes similaires à celui-ci en fonction de la catégorie et des fonctionnalités.",
+      "reviewsDesc": "Nous travaillons sur l'ajout d'un système d'avis pour les thèmes. Restez à l'écoute pour les notes et les commentaires des utilisateurs !"
+    }
+  },
+  "Theme": {
+    "list": {
+      "filters": {
+        "title": "Filtrer",
+        "price": "Prix",
+        "industry": "Domaine",
+        "done": "Terminé",
+        "clear": "Effacer tous les filtres"
+      },
+      "empty": {
+        "title": "Aucun thème trouvé",
+        "matchFilters": "Aucun thème ne correspond à vos filtres actuels. Essayez d'ajuster vos critères de recherche.",
+        "unavailable": "Aucun thème n'est actuellement disponible. Revenez bientôt !"
+      },
+      "types": {
+        "ecommerce": "E-commerce",
+        "services": "Services",
+        "blog": "Blog",
+        "restaurant": "Restaurant"
+      },
+      "priceTiers": {
+        "free": "Gratuit",
+        "paid": "Payant"
+      },
+      "badge": {
+        "new": "NOUVEAU"
+      }
+    },
+    "details": {
+      "hero": {
+        "noPreview": "Aucun aperçu disponible"
+      },
+      "actions": {
+        "viewDemo": "Voir la Démo",
+        "useTheme": "Utiliser le Thème"
+      },
+      "info": {
+        "priceFree": "Gratuit",
+        "priceExclusive": "Exclusif",
+        "by": "par"
+      },
+      "features": "Fonctionnalités",
+      "modal": {
+        "title": "Attribuer le Thème au Workspace",
+        "description": "Choisissez le workspace dans lequel vous souhaitez utiliser <theme>{themeName}</theme>.",
+        "noWorkspaces": "Aucun workspace actif trouvé.",
+        "createWorkspace": "Créer un workspace",
+        "adding": "Ajout du thème...",
+        "switching": "Changement de workspace...",
+        "continue": "Continuer",
+        "cancel": "Annuler",
+        "errorSelect": "Veuillez sélectionner un workspace",
+        "success": "Thème ajouté avec succès !",
+        "failed": "Échec de l'ajout du thème. Veuillez réessayer."
+      }
     }
   }
 }

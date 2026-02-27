@@ -8,6 +8,7 @@
 
 import React from 'react'
 import { Upload, X, User, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button'
@@ -36,6 +37,7 @@ export function AvatarUpload({
   className = '',
   maxSize = 5 // 5MB default
 }: AvatarUploadProps) {
+  const t = useTranslations('Authentication.profile.avatar')
   const { user, userDisplayName } = useAuth()
   const [isUploading, setIsUploading] = React.useState(false)
   const [dragOver, setDragOver] = React.useState(false)
@@ -46,13 +48,13 @@ export function AvatarUpload({
     // Check file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!allowedTypes.includes(file.type)) {
-      return 'Please upload a valid image file (JPEG, PNG, WebP, or GIF)'
+      return t('invalidType')
     }
 
     // Check file size
     const maxSizeBytes = maxSize * 1024 * 1024
     if (file.size > maxSizeBytes) {
-      return `File size must be less than ${maxSize}MB`
+      return t('tooLarge', { size: maxSize })
     }
 
     return null
@@ -104,7 +106,7 @@ export function AvatarUpload({
       // onSuccess?.(data.avatar_url)
 
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload avatar. Please try again.'
+      const errorMessage = err instanceof Error ? err.message : t('failed')
       onError?.(errorMessage)
       setPreview(null)
     } finally {
@@ -161,10 +163,10 @@ export function AvatarUpload({
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <User className="h-5 w-5" />
-          <span>Profile Picture</span>
+          <span>{t('title')}</span>
         </CardTitle>
         <CardDescription>
-          Upload a profile picture to personalize your account
+          {t('description')}
         </CardDescription>
       </CardHeader>
 
@@ -172,7 +174,7 @@ export function AvatarUpload({
         {/* Current Avatar Display */}
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={displayAvatar} alt="Profile picture" />
+            <AvatarImage src={displayAvatar} alt={t('alt')} />
             <AvatarFallback className="text-lg font-semibold">
               {initials}
             </AvatarFallback>
@@ -193,7 +195,7 @@ export function AvatarUpload({
                 className="text-xs"
               >
                 <X className="h-3 w-3 mr-1" />
-                Remove
+                {t('remove')}
               </Button>
             )}
           </div>
@@ -217,17 +219,17 @@ export function AvatarUpload({
           {isUploading ? (
             <div className="space-y-2">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <p className="text-sm text-muted-foreground">Uploading...</p>
+              <p className="text-sm text-muted-foreground">{t('uploading')}</p>
             </div>
           ) : (
             <div className="space-y-4">
               <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
               <div className="space-y-2">
                 <p className="text-sm font-medium">
-                  Drop your image here, or click to browse
+                  {t('dropzone')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  JPEG, PNG, WebP or GIF up to {maxSize}MB
+                  {t('validTypes', { size: maxSize })}
                 </p>
               </div>
             </div>
@@ -255,12 +257,12 @@ export function AvatarUpload({
           {isUploading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
+              {t('uploading')}
             </>
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4" />
-              Choose file
+              {t('chooseFile')}
             </>
           )}
         </Button>

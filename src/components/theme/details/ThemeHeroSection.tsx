@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 interface ThemeHeroSectionProps {
@@ -9,6 +9,7 @@ interface ThemeHeroSectionProps {
 }
 
 export function ThemeHeroSection({ previewImage, themeName }: ThemeHeroSectionProps) {
+  const t = useTranslations('Theme.details.hero');
   return (
     <section id="overview" className="w-full bg-muted/30 border-b">
       <div className="container mx-auto px-4 py-16 flex flex-col items-center">
@@ -39,7 +40,7 @@ export function ThemeHeroSection({ previewImage, themeName }: ThemeHeroSectionPr
                   />
                 </svg>
               </div>
-              <span className="text-muted-foreground font-medium">No preview available</span>
+              <span className="text-muted-foreground font-medium">{t('noPreview')}</span>
             </div>
           )}
         </div>

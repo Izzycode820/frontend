@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { CheckCircle, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/authentication/useAuth'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/shadcn-ui/button'
 import { Input } from '@/components/shadcn-ui/input'
 import { Label } from '@/components/shadcn-ui/label'
@@ -21,6 +22,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
+  const t = useTranslations('Authentication.forgotPassword')
 
   const { clearError } = useAuth()
 
@@ -34,7 +36,7 @@ export default function ForgotPasswordPage() {
     setError('')
 
     if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address')
+      setError(t('invalidEmail'))
       setIsLoading(false)
       return
     }
@@ -48,7 +50,7 @@ export default function ForgotPasswordPage() {
       setSent(true)
     } catch (err: any) {
       console.error('Password reset error:', err)
-      setError(err.message || 'Failed to send reset email')
+      setError(err.message || t('errorSending'))
     } finally {
       setIsLoading(false)
     }
@@ -66,10 +68,10 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <h1 className="text-2xl font-semibold mb-2">
-                  Check your email
+                  {t('checkEmail')}
                 </h1>
                 <p className="text-muted-foreground mb-2">
-                  We've sent password reset instructions to
+                  {t('sentInstructions')}
                 </p>
                 <p className="font-medium mb-8">
                   {email}
@@ -78,7 +80,7 @@ export default function ForgotPasswordPage() {
                 <Button asChild variant="outline">
                   <Link href="/auth/login">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to login
+                    {t('backToLogin')}
                   </Link>
                 </Button>
               </div>
@@ -95,10 +97,10 @@ export default function ForgotPasswordPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl font-semibold">
-              Forgot your password?
+              {t('title')}
             </CardTitle>
             <CardDescription>
-              Enter your email address and we'll send you a link to reset your password
+              {t('description')}
             </CardDescription>
           </CardHeader>
 
@@ -111,11 +113,11 @@ export default function ForgotPasswordPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
+                <Label htmlFor="email">{t('email')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t('emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -128,14 +130,14 @@ export default function ForgotPasswordPage() {
                 className="w-full"
                 disabled={isLoading}
               >
-                {isLoading ? 'Sending reset link...' : 'Send reset link'}
+                {isLoading ? t('sendingLink') : t('sendLink')}
               </Button>
 
               <div className="text-center">
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/auth/login">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to login
+                    {t('backToLogin')}
                   </Link>
                 </Button>
               </div>

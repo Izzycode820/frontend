@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { PaymentWizard } from '@/components/subscription/payment/PaymentWizard';
@@ -25,7 +26,8 @@ import type { SubscriptionTier, BillingCycle, PricingMode } from '@/types/subscr
  */
 const extractErrorMessage = (
   apolloError: any,
-  mutationResult: any
+  mutationResult: any,
+  t: any
 ): { message: string; code?: string | null } => {
   // Priority 1: Mutation result error (backend returned success: false with error message)
   if (mutationResult?.error) {
@@ -52,7 +54,7 @@ const extractErrorMessage = (
     if (networkErr.result?.errors?.[0]?.message) {
       return { message: networkErr.result.errors[0].message };
     }
-    return { message: 'Network error. Please check your connection and try again.' };
+    return { message: t('checkout.networkError') };
   }
 
   // Priority 4: Apollo error message itself
@@ -62,7 +64,7 @@ const extractErrorMessage = (
   }
 
   // Fallback
-  return { message: 'Failed to prepare checkout. Please try again.' };
+  return { message: t('checkout.failedToPrepare') };
 };
 
 /**
@@ -81,6 +83,7 @@ const extractErrorMessage = (
  * - upgrade: Upgrade to higher tier (PrepareUpgradeCheckout)
  */
 export function CheckoutFlow() {
+  const t = useTranslations('subscription');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -96,7 +99,7 @@ export function CheckoutFlow() {
 
   // Determine flow type
   const isRenewal = action === 'renew' || action === 'reactivate';
-  const isUpgrade = action === 'upgrade';
+  const isUpgrade = action === 'upgrade' || action === 'update';
 
   // MUTATION 1: Standard Checkout (New Subscriptions)
   const [prepareCheckout, { data: standardData, loading: standardLoading, error: standardError }] = useMutation(PrepareSubscriptionCheckoutDocument);
@@ -178,18 +181,18 @@ export function CheckoutFlow() {
   // Error processing - extract actual error message
   const hasError = error || (activeResult && !activeResult.success);
   const { message: errorMessage, code: errorCode } = hasError
-    ? extractErrorMessage(error, activeResult)
+    ? extractErrorMessage(error, activeResult, t)
     : { message: '', code: null };
 
   // Show toast notification when error is detected
   useEffect(() => {
     if (hasError && errorMessage) {
-      toast.error('Checkout Error', {
+      toast.error(t('checkout.errorTitle'), {
         description: errorMessage,
         duration: 6000,
       });
     }
-  }, [hasError, errorMessage]);
+  }, [hasError, errorMessage, t]);
 
   // Loading state - Fetching authoritative price from backend
   if (loading) {
@@ -197,9 +200,9 @@ export function CheckoutFlow() {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto py-16 px-6">
           <div className="max-w-2xl mx-auto mb-8 text-center">
-            <h1 className="text-3xl font-bold mb-2">Preparing Checkout</h1>
+            <h1 className="text-3xl font-bold mb-2">{t('checkout.preparing')}</h1>
             <p className="text-muted-foreground">
-              Validating pricing and eligibility...
+              {t('checkout.validating')}
             </p>
           </div>
 
@@ -228,7 +231,7 @@ export function CheckoutFlow() {
             <div className="mx-auto mb-4 w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
               <AlertCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
             </div>
-            <CardTitle className="text-2xl">Checkout Error</CardTitle>
+            <CardTitle className="text-2xl">{t('checkout.errorTitle')}</CardTitle>
             <CardDescription className="text-base mt-2">
               {errorMessage}
             </CardDescription>
@@ -239,7 +242,7 @@ export function CheckoutFlow() {
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  Your introductory discount can only be used once. Regular pricing will apply.
+                  {t('checkout.introAlreadyUsed.description')}
                 </AlertDescription>
               </Alert>
             )}
@@ -250,7 +253,7 @@ export function CheckoutFlow() {
                 className="w-full"
                 size="lg"
               >
-                Back to Plans
+                {t('checkout.backToPlans')}
               </Button>
 
               {/* Retry button for network errors */}
@@ -261,7 +264,7 @@ export function CheckoutFlow() {
                   className="w-full"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Try Again
+                  {t('checkout.tryAgain')}
                 </Button>
               )}
             </div>
@@ -280,14 +283,14 @@ export function CheckoutFlow() {
             <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            <CardTitle className="text-2xl">Payment Successful!</CardTitle>
+            <CardTitle className="text-2xl">{t('checkout.success.title')}</CardTitle>
             <CardDescription>
-              Your {planName} subscription has been activated
+              {t('checkout.success.description', { planName: planName || '' })}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-sm text-muted-foreground">
-              Redirecting to your workspace...
+              {t('checkout.success.redirecting')}
             </p>
           </CardContent>
         </Card>
@@ -301,10 +304,13 @@ export function CheckoutFlow() {
       <div className="container mx-auto py-16 px-6">
         {/* Header */}
         <div className="max-w-2xl mx-auto mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Complete Your Subscription</h1>
+          <h1 className="text-3xl font-bold mb-2">{t('checkout.title')}</h1>
           <p className="text-muted-foreground">
-            {planName} - {cycle === 'monthly' ? 'Monthly' : 'Yearly'} billing
-            {effectiveMode === 'intro' && ' (Introductory pricing)'}
+            {t('checkout.subtitle', { 
+              planName: planName || '', 
+              cycle: cycle === 'monthly' ? t('pricing.monthly') : t('pricing.yearly') 
+            })}
+            {effectiveMode === 'intro' && ` ${t('checkout.introPricing')}`}
           </p>
           {message && (
             <p className="text-sm text-muted-foreground mt-2">
@@ -321,15 +327,15 @@ export function CheckoutFlow() {
               <AlertDescription>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Regular Price:</span>
+                    <span>{t('checkout.breakdown.regularPrice')}</span>
                     <span className="line-through">{breakdown.basePrice?.toLocaleString()} XAF</span>
                   </div>
                   <div className="flex justify-between text-green-600 font-medium">
-                    <span>Intro Discount:</span>
+                    <span>{t('checkout.breakdown.introDiscount')}</span>
                     <span>-{breakdown.discount?.toLocaleString()} XAF</span>
                   </div>
                   <div className="flex justify-between font-bold border-t pt-1">
-                    <span>You Pay:</span>
+                    <span>{t('checkout.breakdown.youPay')}</span>
                     <span>{breakdown.finalAmount?.toLocaleString()} XAF</span>
                   </div>
                 </div>

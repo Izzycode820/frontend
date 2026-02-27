@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useOAuth2 } from '@/hooks/authentication/useOAuth2';
+import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 
 export default function OAuth2CallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { handleCallback } = useOAuth2();
+  const t = useTranslations('Authentication.oauth2');
 
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [error, setError] = useState('');
@@ -39,7 +41,7 @@ export default function OAuth2CallbackPage() {
 
       } catch (err: any) {
         console.error('OAuth2 callback error:', err);
-        setError(err.message || 'Authentication failed');
+        setError(err.message || t('failed'));
         setStatus('error');
 
         // Redirect to login page after error
@@ -60,10 +62,10 @@ export default function OAuth2CallbackPage() {
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Completing sign in...
+                {t('processing')}
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Please wait while we finish setting up your account.
+                {t('processingDesc')}
               </p>
             </div>
           </div>
@@ -78,10 +80,10 @@ export default function OAuth2CallbackPage() {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Sign in successful!
+                {t('success')}
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Redirecting to your workspace...
+                {t('successDesc')}
               </p>
             </div>
           </div>
@@ -96,16 +98,16 @@ export default function OAuth2CallbackPage() {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Sign in failed
+                {t('failed')}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {error || 'Something went wrong during authentication.'}
+                {error || t('failedDesc')}
               </p>
               <button
                 onClick={() => router.replace('/auth/login')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Try again
+                {t('tryAgain')}
               </button>
             </div>
           </div>
