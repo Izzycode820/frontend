@@ -39,7 +39,7 @@ const getEnvironmentConfig = (): APIConfig => {
   if (isDevelopment) {
     return {
       baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-      timeout: 15000, // 15 seconds for development (slower with debugging)
+      timeout: 45000, // 45 seconds for development (slower with debugging)
       retryAttempts: 2,
       retryDelay: 1000,
       enableLogging: true,
@@ -50,7 +50,7 @@ const getEnvironmentConfig = (): APIConfig => {
   if (isProduction) {
     return {
       baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.huzilerz.com',
-      timeout: 10000, // 10 seconds for production
+      timeout: 30000, // 30 seconds for production
       retryAttempts: 3,
       retryDelay: 2000,
       enableLogging: false,
@@ -60,7 +60,7 @@ const getEnvironmentConfig = (): APIConfig => {
   // Staging/Test configuration
   return {
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://staging-api.huzilerz.com',
-    timeout: 12000,
+    timeout: 35000,
     retryAttempts: 2,
     retryDelay: 1500,
     enableLogging: true,

@@ -82,17 +82,19 @@ export function FilesAndMediaModal({
 
   // Handle selection confirmation
   const handleConfirm = () => {
-    // Get selected items: newly uploaded + items from library
-    const selectedNewUploads = newlyUploaded.filter((item) =>
-      selectedIds.has(item.uploadId)
-    )
-    const selectedLibraryItems = librarySelected.filter((item) =>
+    // Deduplicate by uploadId and categorize
+    const allSelected = [...newlyUploaded, ...librarySelected].filter((item) =>
       selectedIds.has(item.uploadId)
     )
 
+    // Filter out duplicates (prefer most recent metadata)
+    const uniqueSelected = Array.from(
+      new Map(allSelected.map((item) => [item.uploadId, item])).values()
+    )
+
     onSelect({
-      newUploads: selectedNewUploads,
-      existingUploads: selectedLibraryItems,
+      newUploads: uniqueSelected.filter(item => newlyUploaded.some(ni => ni.uploadId === item.uploadId)),
+      existingUploads: uniqueSelected.filter(item => !newlyUploaded.some(ni => ni.uploadId === item.uploadId)),
     })
 
     // Reset state

@@ -89,7 +89,10 @@ export function MediaLibrary({
   // Notify parent when uploads complete (for selection tracking)
   useEffect(() => {
     const completedItems = optimisticItems.filter(
-      (item) => item.status === 'ready' && !reportedIdsRef.current.has(item.uploadId)
+      (item) => {
+        const status = item.status?.toLowerCase()
+        return (status === 'ready' || status === 'completed' || status === 'processing' || status === 'success') && !reportedIdsRef.current.has(item.uploadId)
+      }
     )
 
     if (completedItems.length > 0 && onUploadsComplete) {
@@ -98,7 +101,7 @@ export function MediaLibrary({
       })
       onUploadsComplete(completedItems)
     }
-  }, [optimisticItems.length, onUploadsComplete])
+  }, [optimisticItems, onUploadsComplete])
 
   const handleFilesSelected = async (files: File[]) => {
     await uploadMultiple(files)
@@ -112,7 +115,7 @@ export function MediaLibrary({
 
   // Wrapper to pass both uploadId and item
   const handleToggleSelect = (uploadId: string) => {
-    const item = recentMedia.find((i) => i.uploadId === uploadId)
+    const item = mergedItems.find((i) => i.uploadId === uploadId)
     if (item) {
       onToggleSelect(uploadId, item)
     }

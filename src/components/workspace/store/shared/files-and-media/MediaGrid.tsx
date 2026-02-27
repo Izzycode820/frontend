@@ -217,8 +217,8 @@ export function MediaGrid({
             )}
 
             {/* Processing Overlay */}
-            {item.status === 'processing' && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+            {(item.status?.toLowerCase() === 'processing') && (
+              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center z-20">
                 <div className="text-white text-sm font-medium">
                   {t('processing')}
                 </div>
