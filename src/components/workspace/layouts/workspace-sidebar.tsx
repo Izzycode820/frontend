@@ -8,7 +8,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { IconChevronDown, IconChevronRight, IconCornerDownRight, IconLogout } from "@tabler/icons-react"
+import { IconChevronDown, IconChevronRight, IconCornerDownRight, IconLogout, IconUser } from "@tabler/icons-react"
 import type { WorkspaceSidebarConfig } from "@/types/workspace/dashboard-ui/workspace"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/shadcn-ui/avatar"
@@ -19,6 +19,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/shadcn-ui/dropdown-menu"
 import { useAuth } from "@/hooks/authentication/useAuth"
 import { toast } from "sonner"
@@ -30,6 +31,7 @@ interface WorkspaceSidebarProps {
 
 export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
   const t = useTranslations('Dashboard.navigation')
+  const at = useTranslations('Authentication.logout')
   const pathname = usePathname()
   const router = useRouter()
   const { logout } = useAuth()
@@ -40,7 +42,7 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
   const handleLogout = async () => {
     try {
       await logout()
-      toast.success("Signed out successfully")
+      toast.success(at('success'))
     } catch (error) {
       console.error("Logout error:", error)
     }
@@ -395,12 +397,22 @@ export function WorkspaceSidebar({ config }: WorkspaceSidebarProps) {
               <p className="text-sm font-medium truncate">{config.user.name}</p>
               <p className="text-xs text-muted-foreground truncate">{config.user.email}</p>
             </div>
+            <DropdownMenuItem asChild>
+              <Link
+                href="/profile"
+                className="flex w-full cursor-pointer items-center"
+              >
+                <IconUser className="mr-2 h-4 w-4" />
+                <span>{t('profile') || 'Profile'}</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}
               className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-950/20"
             >
               <IconLogout className="h-4 w-4 mr-2" />
-              Sign Out
+              {t('signOut') || 'Sign Out'}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

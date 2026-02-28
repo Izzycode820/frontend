@@ -10,6 +10,8 @@ query GetPaymentMethods {
     totalTransactions
     successfulTransactions
     lastUsedAt
+    apiUser
+    credentialVerifiedAt
     createdAt
     updatedAt
     capabilities {
@@ -17,6 +19,8 @@ query GetPaymentMethods {
       supportedCurrencies
       supportsRefunds
       supportsWebhooks
+      requiresUrl
+      requiresCredentials
       displayName
     }
   }
@@ -25,6 +29,7 @@ query GetPaymentMethods {
     displayName
     description
     requiresUrl
+    requiresCredentials
     alreadyAdded
   }
 }

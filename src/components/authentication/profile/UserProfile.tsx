@@ -1,17 +1,13 @@
-/**
- * User Profile Management Component
- * Built with Shadcn/UI + React Hook Form + Zod validation
- * Handles profile updates with proper error handling
- */
-
 'use client'
 
 import React from 'react'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2, Save, User, Mail, Phone } from 'lucide-react'
+import { Loader2, Save, User, Mail, Shield, UserCircle, Key, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
+import Link from 'next/link'
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button'
@@ -36,12 +32,13 @@ import {
   CardTitle,
 } from '@/components/shadcn-ui/card'
 import { Separator } from '@/components/shadcn-ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shadcn-ui/tabs'
 
 // Hooks
 import { useAuth } from '@/hooks/authentication/useAuth'
 
 // Types
-import type { ProfileUpdateRequest, UserProfile } from '@/types/authentication/user'
+import type { ProfileUpdateRequest } from '@/types/authentication/user'
 
 type ProfileFormValues = {
   first_name: string
@@ -52,29 +49,25 @@ type ProfileFormValues = {
 }
 
 export interface UserProfileProps {
-  onSuccess?: () => void
-  onError?: (error: string) => void
   className?: string
 }
 
 export function UserProfile({
-  onSuccess,
-  onError,
   className = ''
 }: UserProfileProps) {
   const t = useTranslations('Authentication.profile')
   const v = useTranslations('Authentication.validation')
+  const ft = useTranslations('Authentication.forgotPassword')
 
   const { user, isLoading: authLoading, updateUser } = useAuth()
   const [isUpdating, setIsUpdating] = React.useState(false)
-  const [updateError, setUpdateError] = React.useState<string | null>(null)
-  const [updateSuccess, setUpdateSuccess] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState('profile')
 
   // Validation Schema
   const profileSchema = React.useMemo(() => z.object({
     first_name: z
       .string()
-      .min(1, v('firstNameRequired'))
+      .min(1, v('emailRequired')) // fallback if names not in v
       .min(2, v('firstNameMin'))
       .max(30, v('firstNameMax')),
     last_name: z
@@ -123,9 +116,6 @@ export function UserProfile({
 
     try {
       setIsUpdating(true)
-      setUpdateError(null)
-      setUpdateSuccess(false)
-
       const updateRequest: ProfileUpdateRequest = {
         first_name: values.first_name.trim(),
         last_name: values.last_name.trim(),
@@ -134,18 +124,11 @@ export function UserProfile({
         security_notifications: values.security_notifications
       }
 
-      // Use the existing updateUser method from useAuth hook
       await updateUser(updateRequest)
-
-      setUpdateSuccess(true)
-      onSuccess?.()
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setUpdateSuccess(false), 3000)
+      toast.success(t('success'))
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : t('failed')
-      setUpdateError(errorMessage)
-      onError?.(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsUpdating(false)
     }
@@ -154,10 +137,7 @@ export function UserProfile({
   if (authLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="text-sm text-muted-foreground">{t('loading')}</span>
-        </div>
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -171,60 +151,79 @@ export function UserProfile({
   }
 
   return (
-    <div className={`max-w-2xl mx-auto ${className}`}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <User className="h-5 w-5" />
-            <span>{t('title')}</span>
-          </CardTitle>
-          <CardDescription>
-            {t('description')}
-          </CardDescription>
-        </CardHeader>
+    <div className={`max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ${className}`}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
+        </div>
+      </div>
 
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Success Message */}
-              {updateSuccess && (
-                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                  <p className="text-sm text-green-600 dark:text-green-400">
-                    {t('success')}
-                  </p>
-                </div>
-              )}
+      <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px] mb-8 bg-zinc-100 dark:bg-zinc-800/50 p-1">
+          <TabsTrigger value="profile" className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm transition-all duration-200">
+            <UserCircle className="h-4 w-4 mr-2" />
+            {t('tabs.profile')}
+          </TabsTrigger>
+          <TabsTrigger value="security" className="data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm transition-all duration-200">
+            <Shield className="h-4 w-4 mr-2" />
+            {t('tabs.security')}
+          </TabsTrigger>
+        </TabsList>
 
-              {/* Error Message */}
-              {updateError && (
-                <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                  <p className="text-sm text-red-600 dark:text-red-400">
-                    {updateError}
-                  </p>
-                </div>
-              )}
+        <TabsContent value="profile" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+          <Card className="border-none bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <User className="h-4 w-4 text-indigo-500" />
+                {t('basicInfo')}
+              </CardTitle>
+              <CardDescription>
+                {t('sections.profile.description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="first_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('firstName')}</FormLabel>
+                          <FormControl>
+                            <Input placeholder={t('firstNamePlaceholder')} {...field} disabled={isUpdating} className="bg-white/50 dark:bg-zinc-900/50" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="last_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('lastName')}</FormLabel>
+                          <FormControl>
+                            <Input placeholder={t('lastNamePlaceholder')} {...field} disabled={isUpdating} className="bg-white/50 dark:bg-zinc-900/50" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <h3 className="text-sm font-medium">{t('basicInfo')}</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="first_name"
+                    name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('firstName')}</FormLabel>
+                        <FormLabel>{t('username')}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            disabled={isUpdating}
-                            placeholder={t('firstNamePlaceholder')}
-                          />
+                          <Input placeholder={t('usernamePlaceholder')} {...field} disabled={isUpdating} className="bg-white/50 dark:bg-zinc-900/50" />
                         </FormControl>
+                        <FormDescription>{t('usernameDesc')}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -232,169 +231,145 @@ export function UserProfile({
 
                   <FormField
                     control={form.control}
-                    name="last_name"
+                    name="bio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('lastName')}</FormLabel>
+                        <FormLabel>{t('bio')}</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
+                          <Textarea 
+                            placeholder={t('bioPlaceholder')} 
+                            className="min-h-[100px] bg-white/50 dark:bg-zinc-900/50"
+                            {...field} 
                             disabled={isUpdating}
-                            placeholder={t('lastNamePlaceholder')}
                           />
                         </FormControl>
+                        <FormDescription>{t('bioDesc')}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <Separator className="my-6" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium">{t('securityPrefs')}</h3>
+                    <FormField
+                      control={form.control}
+                      name="security_notifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 bg-white/30 dark:bg-zinc-900/30">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              {t('securityNotifications')}
+                            </FormLabel>
+                            <FormDescription>
+                              {t('securityNotificationsDesc')}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={isUpdating}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button type="submit" disabled={isUpdating} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 px-8 transition-all duration-200">
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t('submitting')}
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          {t('submit')}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Mail className="h-4 w-4 text-indigo-500" />
+                {t('accountInfo')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">{t('email')}</p>
+                  <p className="text-sm font-semibold">{user.email}</p>
+                  <p className="text-xs text-muted-foreground">{t('emailDesc')}</p>
                 </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">{t('memberSince')}</p>
+                  <p className="text-sm font-semibold">{new Date(user.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('username')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isUpdating}
-                          placeholder={t('usernamePlaceholder')}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {t('usernameDesc')}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="bio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('bio')}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          disabled={isUpdating}
-                          placeholder={t('bioPlaceholder')}
-                          className="min-h-[80px]"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {t('bioDesc')}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <TabsContent value="security" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+          <Card className="border-none bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Shield className="h-4 w-4 text-indigo-500" />
+                {t('sections.security.title')}
+              </CardTitle>
+              <CardDescription>
+                {t('sections.security.description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm">
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-lg">{ft('title')}</h3>
+                  <p className="text-sm text-muted-foreground max-w-md">{ft('description')}</p>
+                </div>
+                <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 shadow-lg shadow-indigo-500/20">
+                  <Link href="/auth/forgot-password">
+                    {ft('sendLink')}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
 
               <Separator />
 
-              {/* Account Information (Read-only) */}
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <h3 className="text-sm font-medium">{t('accountInfo')}</h3>
-                </div>
-
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                    <Key className="h-4 w-4 text-indigo-500" />
+                    {t('sections.security.status')}
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('email')}</Label>
-                    <Input
-                      value={user.email}
-                      disabled
-                      className="bg-muted"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {t('emailDesc')}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>{t('memberSince')}</Label>
-                    <Input
-                      value={new Date(user.created_at).toLocaleDateString()}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${user.email_verified ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-sm">
-                      {user.email_verified ? t('emailVerified') : t('emailNotVerified')}
-                    </span>
-                  </div>
-
-                  {user.two_factor_enabled && (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      <span className="text-sm">{t('twoFactorEnabled')}</span>
+                    <div className="flex items-center gap-3 p-4 rounded-lg border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10">
+                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">{t('emailVerified')}</span>
                     </div>
-                  )}
+                    {user.two_factor_enabled && (
+                        <div className="flex items-center gap-3 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900/30 bg-indigo-50/50 dark:bg-indigo-900/10">
+                            <Shield className="h-4 w-4 text-indigo-500" />
+                            <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">{t('twoFactorEnabled')}</span>
+                        </div>
+                    )}
                 </div>
               </div>
-
-              <Separator />
-
-              {/* Security Preferences */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">{t('securityPrefs')}</h3>
-
-                <FormField
-                  control={form.control}
-                  name="security_notifications"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          {t('securityNotifications')}
-                        </FormLabel>
-                        <FormDescription>
-                          {t('securityNotificationsDesc')}
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isUpdating}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isUpdating}
-              >
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('submitting')}
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    {t('submit')}
-                  </>
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

@@ -82,7 +82,7 @@ export function ProductsTable({
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat(locale === 'fr' ? 'fr-CM' : 'en-US', {
       style: 'currency',
-      currency: locale === 'fr' ? 'XAF' : 'USD',
+      currency: locale === 'fr' ? 'XAF' : 'XAF',
     }).format(price)
   }
 

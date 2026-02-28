@@ -59,6 +59,21 @@
     "profile": {
       "title": "Paramètres du profil",
       "description": "Mettez à jour vos informations personnelles et vos préférences",
+      "tabs": {
+        "profile": "Profil",
+        "security": "Sécurité"
+      },
+      "sections": {
+        "profile": {
+          "description": "Mettez à jour votre nom, votre nom d'utilisateur et votre biographie publique.",
+          "title": "Informations de base"
+        },
+        "security": {
+          "title": "Sécurité du compte",
+          "description": "Gérez votre mot de passe et d'autres paramètres de sécurité.",
+          "status": "État de l'authentification"
+        }
+      },
       "success": "Profil mis à jour avec succès !",
       "failed": "Échec de la mise à jour du profil. Veuillez réessayer.",
       "loading": "Chargement du profil...",
@@ -209,6 +224,9 @@
     },
     "shared": {
       "loading": "Chargement..."
+    },
+    "logout": {
+      "success": "Déconnexion réussie"
     }
   },
   "subscription": {

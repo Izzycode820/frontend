@@ -48,6 +48,7 @@
       "preferences": "Préférences",
       "notifications": "Notifications",
       "signOut": "Se déconnecter",
+      "profile": "Profil",
       "menu": "Menu",
       "myStore": "Ma Boutique",
       "light": "Clair",
@@ -80,6 +81,11 @@
     "selectedCount": "{count} {count, plural, one {produit sélectionné} other {produits sélectionnés}}",
     "selectToPerform": "Sélectionnez des produits pour effectuer des actions groupées",
     "addProduct": "Ajouter un produit",
+    "emptyState": {
+      "noProductsYet": "Aucun produit pour le moment",
+      "getStartedHint": "Commencez par ajouter votre premier produit à votre boutique.",
+      "addFirstProduct": "Ajouter votre premier produit"
+    },
     "outOfStock": "En rupture de stock",
     "active": "Actif",
     "pageOf": "Page {current} sur {total}",
@@ -553,9 +559,9 @@
       "subtitle": "Organisez vos produits en catégories ({count} au total)",
       "loading": "Chargement des catégories...",
       "noCategories": "Aucune catégorie trouvée",
-      "noCategoriesYet": "Pas encore de catégories",
       "errorLoading": "Échec du chargement des catégories",
-      "pagination": "Affichage de {start} à {end} sur {total} catégories"
+      "pagination": "Affichage de {start} à {end} sur {total} catégories",
+      "noCategoriesYet": "Aucune catégorie pour le moment"
     },
     "filters": {
       "searchPlaceholder": "Rechercher des catégories par nom...",
@@ -1078,6 +1084,109 @@
     },
     "common": {
       "clickToEdit": "Cliquer pour modifier"
+    }
+  },
+  "Workspaces": {
+    "dashboard": {
+      "loading": "Chargement des espaces de travail...",
+      "error": "Échec du chargement des espaces de travail",
+      "tryAgain": "Réessayer",
+      "provisioning": {
+        "stillSettingUp": "L'espace de travail est en cours de configuration",
+        "pleaseWait": "Cela prend généralement 20 secondes. Veuillez patienter."
+      }
+    },
+    "card": {
+      "type": {
+        "store": "Boutique",
+        "blog": "Blog",
+        "services": "Services",
+        "portfolio": "Portfolio"
+      },
+      "status": {
+        "active": "Actif",
+        "provisioning": "Configuration\u2026",
+        "inactive": "Inactif",
+        "suspended": "Suspendu",
+        "suspended_by_plan": "Limite du forfait",
+        "deleted": "Supprimé"
+      },
+      "role": {
+        "owner": "Propriétaire",
+        "staff": "Employé"
+      },
+      "members": "{count} membres",
+      "created": "Créé",
+      "updated": "Mis à jour",
+      "actions": {
+        "label": "Actions de l'espace de travail",
+        "restore": "Restaurer",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer \u00ab {name} \u00bb ? Vous aurez 5 jours pour le restaurer."
+      },
+      "banners": {
+        "provisioning": {
+          "title": "Configuration de votre espace de travail\u2026",
+          "description": "Cela prend généralement 20 secondes. L'espace de travail sera prêt dans un instant."
+        },
+        "restricted": {
+          "title": "Accès en écriture restreint",
+          "ownerHint": "Renouvelez votre abonnement pour restaurer l'accès complet",
+          "staffHint": "Contactez le propriétaire de l'espace de travail"
+        },
+        "planLimit": {
+          "title": "Espace de travail inaccessible",
+          "ownerHint": "Améliorez votre forfait ou supprimez des espaces de travail en excès",
+          "staffHint": "Contactez le propriétaire de l'espace de travail"
+        },
+        "deletion": {
+          "countdown": "{days}j {hours}h {minutes}min restants pour restaurer",
+          "scheduledDate": "Suppression définitive le {date}"
+        }
+      },
+      "footer": {
+        "workspaceType": "Espace {type}"
+      },
+      "tooltip": {
+        "writeRestricted": "Accès en écriture restreint"
+      }
+    },
+    "createCard": {
+      "title": "Créer un espace de travail",
+      "subtitle": "Lancez une boutique, un blog, des services ou un portfolio",
+      "limitBadge": "{count}/{max}"
+    },
+    "createDialog": {
+      "title": "Créer une nouvelle boutique",
+      "description": "Configurez un nouvel espace de travail pour votre boutique en ligne. Vous pourrez gérer produits, commandes et clients depuis ici.",
+      "storeName": "Nom de la boutique",
+      "storeNamePlaceholder": "ex : Ma Super Boutique",
+      "description2": "Description (facultatif)",
+      "descriptionPlaceholder": "Décrivez brièvement votre boutique...",
+      "cancel": "Annuler",
+      "create": "Créer l'espace de travail",
+      "creating": "Création...",
+      "success": "Espace de travail boutique créé avec succès !",
+      "errors": {
+        "formationPending": "Configuration en attente",
+        "pleaseWait": "Veuillez patienter pendant que nous configurons votre boutique.",
+        "default": "Échec de la création de l'espace de travail. Veuillez réessayer."
+      }
+    },
+    "subscriptionLockout": {
+      "title": "Abonnement suspendu",
+      "subtitle": "L'accès à votre tableau de bord est restreint.",
+      "body": "Votre abonnement {tier} a été suspendu depuis plus de 72 heures. Veuillez réactiver votre forfait pour restaurer l'accès.",
+      "reactivate": "Réactiver le forfait {tier}",
+      "processing": "Traitement...",
+      "changePlans": "Besoin de changer de forfait ?",
+      "startFresh": "Recommencer"
+    },
+    "errorBoundary": {
+      "title": "Erreur d'espace de travail",
+      "description": "Une erreur s'est produite lors des opérations de l'espace de travail. Veuillez réessayer.",
+      "tryAgain": "Réessayer",
+      "backToWorkspaces": "Retour aux espaces de travail"
     }
   }
 }

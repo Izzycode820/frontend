@@ -491,11 +491,11 @@ export default function OrdersListContainer() {
       {selectedOrders.length > 0 && (
         <Card className="border-primary/50 bg-primary/5">
           <CardContent className="py-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+              <p className="text-sm font-medium shrink-0">
                 {tActions('selectedCount', { count: selectedOrders.length })}
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <Button
                   variant="outline"
                   size="sm"
@@ -552,9 +552,10 @@ export default function OrdersListContainer() {
                   {tActions('markProcessing')}
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setSelectedOrders([])}
+                  className="text-muted-foreground"
                 >
                   {tActions('clearSelection')}
                 </Button>

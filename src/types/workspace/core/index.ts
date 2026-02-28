@@ -13,6 +13,7 @@ export type {
   // Workspace CRUD types
   WorkspaceData,
   WorkspaceListItem,
+  WorkspaceStatusType,
   WorkspaceCreateRequest,
   WorkspaceUpdateRequest,
   WorkspaceListResponse,

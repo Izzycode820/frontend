@@ -59,6 +59,20 @@
     "profile": {
       "title": "Profile Settings",
       "description": "Update your personal information and preferences",
+      "tabs": {
+        "profile": "Profile",
+        "security": "Security"
+      },
+      "sections": {
+        "profile": {
+          "description": "Update your name, username and public bio."
+        },
+        "security": {
+          "title": "Account Security",
+          "description": "Manage your password and other security settings.",
+          "status": "Authentication Status"
+        }
+      },
       "success": "Profile updated successfully!",
       "failed": "Failed to update profile. Please try again.",
       "loading": "Loading profile...",
@@ -209,6 +223,9 @@
     },
     "shared": {
       "loading": "Loading..."
+    },
+    "logout": {
+      "success": "Signed out successfully"
     }
   },
   "subscription": {

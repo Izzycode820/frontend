@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button';
@@ -24,6 +26,7 @@ import type { WorkspaceListItem } from '@/types/workspace/core';
 
 export function WorkspaceDashboard() {
   const router = useRouter();
+  const t = useTranslations('Workspaces');
   const {
     workspaces,
     isLoading,
@@ -45,6 +48,14 @@ export function WorkspaceDashboard() {
   const handleWorkspaceSelect = React.useCallback(async (workspace: WorkspaceListItem) => {
     if (isSwitching) return; // Prevent double clicks during switching
 
+    // Guard: provisioning workspaces aren't ready yet
+    if (workspace.status === 'provisioning') {
+      toast.info(t('dashboard.provisioning.stillSettingUp'), {
+        description: t('dashboard.provisioning.pleaseWait'),
+      });
+      return;
+    }
+
     try {
       // Switch workspace context
       await switchWorkspace(workspace.id);
@@ -62,11 +73,9 @@ export function WorkspaceDashboard() {
           workspaceRoute = SERVICES_ROUTES.HOME(workspace.id);
           break;
         case 'portfolio':
-          // Portfolio fallback (if/when implemented)
           workspaceRoute = WORKSPACE_ROUTES.DASHBOARD(workspace.id);
           break;
         default:
-          // Fallback to workspace management page
           workspaceRoute = WORKSPACE_ROUTES.ROOT;
       }
 
@@ -104,7 +113,7 @@ export function WorkspaceDashboard() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-destructive text-lg font-medium mb-2">
-                    Failed to load workspaces
+                    {t('dashboard.error')}
                   </div>
                   <p className="text-muted-foreground">{error}</p>
                   <Button
@@ -112,7 +121,7 @@ export function WorkspaceDashboard() {
                     onClick={() => listWorkspaces(true)}
                     className="mt-4"
                   >
-                    Try Again
+                    {t('dashboard.tryAgain')}
                   </Button>
                 </div>
               </CardContent>

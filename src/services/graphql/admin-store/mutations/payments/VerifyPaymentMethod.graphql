@@ -1,0 +1,12 @@
+mutation VerifyPaymentMethod($methodId: ID!) {
+  verifyPaymentMethod(methodId: $methodId) {
+    success
+    message
+    error
+    paymentMethod {
+      id
+      verified
+      credentialVerifiedAt
+    }
+  }
+}

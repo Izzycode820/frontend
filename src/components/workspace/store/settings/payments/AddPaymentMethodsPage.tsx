@@ -26,6 +26,8 @@ import {
     IconPlus,
     IconLoader2,
     IconCheck,
+    IconEye,
+    IconEyeOff,
 } from '@tabler/icons-react';
 
 /**
@@ -46,6 +48,9 @@ export function AddPaymentMethodsPage() {
     const [showUrlModal, setShowUrlModal] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
     const [checkoutUrl, setCheckoutUrl] = useState('');
+    const [apiUser, setApiUser] = useState('');
+    const [apiKey, setApiKey] = useState('');
+    const [showApiKey, setShowApiKey] = useState(false);
 
     // Query for available providers
     const { data, loading } = useQuery(GetPaymentMethodsDocument);
@@ -68,6 +73,9 @@ export function AddPaymentMethodsPage() {
     const handleAddClick = (provider: string) => {
         setSelectedProvider(provider);
         setCheckoutUrl('');
+        setApiUser('');
+        setApiKey('');
+        setShowApiKey(false);
         setShowUrlModal(true);
     };
 
@@ -87,7 +95,9 @@ export function AddPaymentMethodsPage() {
                 variables: {
                     input: {
                         providerName: selectedProvider,
-                        checkoutUrl: checkoutUrl,
+                        checkoutUrl: checkoutUrl || null,
+                        apiUser: apiUser || null,
+                        apiKey: apiKey || null,
                     },
                 },
             });
@@ -130,6 +140,7 @@ export function AddPaymentMethodsPage() {
     }
 
     const availableProviders = data?.availableProviders?.filter(Boolean) || [];
+    const activeProviderData = availableProviders.find(p => p?.provider === selectedProvider);
 
     return (
         <div className="space-y-6">
@@ -220,35 +231,82 @@ export function AddPaymentMethodsPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="checkoutUrl">{t('fapshiUrl')}</Label>
-                            <Input
-                                id="checkoutUrl"
-                                value={checkoutUrl}
-                                onChange={(e) => setCheckoutUrl(e.target.value)}
-                                placeholder="https://checkout.fapshi.com/pay/..."
-                            />
-                             <p className="text-xs text-muted-foreground">
-                                {t.rich('fapshiHint', {
-                                    link: (chunks) => (
-                                        <a
-                                            href="https://dashboard.fapshi.com"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="underline"
+                        {activeProviderData?.requiresUrl && (
+                            <div className="space-y-2">
+                                <Label htmlFor="checkoutUrl">{t('fapshiUrl')}</Label>
+                                <Input
+                                    id="checkoutUrl"
+                                    value={checkoutUrl}
+                                    onChange={(e) => setCheckoutUrl(e.target.value)}
+                                    placeholder="https://checkout.fapshi.com/pay/..."
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    {t.rich('fapshiHint', {
+                                        link: (chunks: any) => (
+                                            <a
+                                                href="https://dashboard.fapshi.com"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline"
+                                            >
+                                                {chunks}
+                                            </a>
+                                        )
+                                    })}
+                                </p>
+                            </div>
+                        )}
+
+                        {activeProviderData?.requiresCredentials && (
+                            <div className="space-y-4 pt-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="apiUser">{t('apiUser')}</Label>
+                                    <Input
+                                        id="apiUser"
+                                        value={apiUser}
+                                        onChange={(e) => setApiUser(e.target.value)}
+                                        placeholder="e.g. 19e6..."
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="apiKey">{t('apiKey')}</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="apiKey"
+                                            type={showApiKey ? "text" : "password"}
+                                            value={apiKey}
+                                            onChange={(e) => setApiKey(e.target.value)}
+                                            className="pr-10"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                            onClick={() => setShowApiKey(!showApiKey)}
                                         >
-                                            {chunks}
-                                        </a>
-                                    )
-                                })}
-                            </p>
-                        </div>
+                                            {showApiKey ? (
+                                                <IconEyeOff className="h-4 w-4 text-muted-foreground" />
+                                            ) : (
+                                                <IconEye className="h-4 w-4 text-muted-foreground" />
+                                            )}
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('credentialsDesc')}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowUrlModal(false)}>
                             {t('cancel')}
                         </Button>
-                        <Button onClick={handleConfirmAdd} disabled={adding || !checkoutUrl}>
+                        <Button 
+                            onClick={handleConfirmAdd} 
+                            disabled={adding || (!!activeProviderData?.requiresUrl && !checkoutUrl) || (!!activeProviderData?.requiresCredentials && (!apiUser || !apiKey))}
+                        >
                             {adding ? (
                                 <>
                                     <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useSubscription } from '@/hooks/subscription/useSubscription';
 import { Button } from '@/components/shadcn-ui/button';
 import {
@@ -15,16 +16,14 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 
 export function SubscriptionLockoutModal() {
     const router = useRouter();
-    // Destructure 'expiresAt' directly (fixes TS error)
+    const t = useTranslations('Workspaces.subscriptionLockout');
     const { status, expiresAt, tier, billingCycle } = useSubscription();
     const [isReactivating, setIsReactivating] = useState(false);
 
-    // 1. Validation: Must be restricted and have an expiration date
     if (status !== 'restricted' || !expiresAt) {
         return null;
     }
 
-    // 2. Logic: Hard Lock if > 3 days overdue
     const expirationDate = new Date(expiresAt).getTime();
     const daysOverdue = (Date.now() - expirationDate) / (1000 * 60 * 60 * 24);
 
@@ -32,7 +31,6 @@ export function SubscriptionLockoutModal() {
         return null; // Grace period (Soft Lock)
     }
 
-    // 3. Action: Create new subscription for the same tier
     const handleReactivate = () => {
         setIsReactivating(true);
         const params = new URLSearchParams({
@@ -58,9 +56,9 @@ export function SubscriptionLockoutModal() {
                             <AlertCircle className="h-6 w-6 text-red-600" />
                         </div>
                         <div>
-                            <DialogTitle className="text-xl">Subscription Suspended</DialogTitle>
+                            <DialogTitle className="text-xl">{t('title')}</DialogTitle>
                             <DialogDescription className="mt-1">
-                                Access to your store dashboard is restricted.
+                                {t('subtitle')}
                             </DialogDescription>
                         </div>
                     </div>
@@ -69,8 +67,10 @@ export function SubscriptionLockoutModal() {
                 <div className="space-y-6 py-4">
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                         <p className="text-sm text-red-800 leading-relaxed">
-                            Your <strong>{tierName}</strong> subscription has been suspended for more than 72 hours.
-                            Please reactivate your plan to restore access.
+                            {t.rich('body', {
+                                tier: tierName,
+                                strong: (chunks) => <strong>{chunks}</strong>,
+                            })}
                         </p>
                     </div>
 
@@ -81,12 +81,13 @@ export function SubscriptionLockoutModal() {
                         size="lg"
                     >
                         <RefreshCw className={`h-5 w-5 mr-2 ${isReactivating ? 'animate-spin' : ''}`} />
-                        {isReactivating ? 'Processing...' : `Reactivate ${tierName} Plan`}
+                        {isReactivating ? t('processing') : t('reactivate', { tier: tierName })}
                     </Button>
 
                     <div className="text-center pt-2">
                         <p className="text-xs text-gray-500">
-                            Need to change plans? <a href="/billing" className="underline hover:text-gray-700">Start fresh</a>
+                            {t('changePlans')}{' '}
+                            <a href="/billing" className="underline hover:text-gray-700">{t('startFresh')}</a>
                         </p>
                     </div>
                 </div>

@@ -10,6 +10,7 @@ import { immer } from 'zustand/middleware/immer'
 import type {
   WorkspaceData,
   WorkspaceListItem,
+  WorkspaceStatusType,
   WorkspaceCreateRequest,
   WorkspaceUpdateRequest,
   WorkspaceCreateResponse,
@@ -32,7 +33,7 @@ import type { AvailableWorkspace } from '../../../types/authentication/workspace
  */
 function mapToAvailableWorkspaces(workspaces: WorkspaceListItem[]): AvailableWorkspace[] {
   return workspaces
-    .filter(ws => ws.status !== 'deleted') // Only include active/suspended workspaces
+    .filter(ws => ws.status !== 'deleted') // Only include non-deleted workspaces
     .map(ws => ({
       id: ws.id,
       name: ws.name,
@@ -40,7 +41,7 @@ function mapToAvailableWorkspaces(workspaces: WorkspaceListItem[]): AvailableWor
       is_default: false, // Backend should provide this
       user_role: ws.role,
       role: ws.role,
-      status: ws.status as 'active' | 'suspended', // Safe cast after filtering
+      status: (ws.status === 'provisioning' ? 'active' : ws.status) as 'active' | 'suspended', // Cast provisioning → active for auth store
       permissions: ws.permissions,
       member_count: ws.member_count,
       createdAt: ws.createdAt,
@@ -82,6 +83,7 @@ interface WorkspaceStoreState {
   updateWorkspace: (workspaceId: string, request: WorkspaceUpdateRequest) => Promise<WorkspaceUpdateResponse>
   deleteWorkspace: (workspaceId: string) => Promise<WorkspaceDeleteResponse>
   restoreWorkspace: (workspaceId: string) => Promise<WorkspaceRestoreResponse>
+  updateWorkspaceStatus: (workspaceId: string, status: WorkspaceStatusType) => void
 
   // UI Actions
   setCurrentWorkspace: (workspace: WorkspaceData | null) => void
@@ -213,6 +215,29 @@ export const useWorkspaceStore = create<WorkspaceStoreState>()(
           })
           throw error
         }
+      },
+
+      updateWorkspaceStatus: (workspaceId, status) => {
+        set((state) => {
+          const idx = state.workspaces.findIndex(ws => ws.id === workspaceId)
+          if (idx !== -1) {
+            state.workspaces[idx] = {
+              ...state.workspaces[idx],
+              status,
+              provisioningComplete: status === 'active' ? true : state.workspaces[idx].provisioningComplete
+            }
+          }
+          if (state.workspaceDetails[workspaceId]) {
+            state.workspaceDetails[workspaceId] = {
+              ...state.workspaceDetails[workspaceId],
+              status,
+              provisioningComplete: status === 'active' ? true : state.workspaceDetails[workspaceId].provisioningComplete
+            }
+          }
+        })
+        // Sync updated list to auth store so switching also works
+        const { workspaces } = get()
+        syncToAuthStore(workspaces)
       },
 
       updateWorkspace: async (workspaceId, request) => {
@@ -519,6 +544,7 @@ export const workspaceSelectors = {
   updateWorkspace: (state: WorkspaceStoreState) => state.updateWorkspace,
   deleteWorkspace: (state: WorkspaceStoreState) => state.deleteWorkspace,
   restoreWorkspace: (state: WorkspaceStoreState) => state.restoreWorkspace,
+  updateWorkspaceStatus: (state: WorkspaceStoreState) => state.updateWorkspaceStatus,
   setCurrentWorkspace: (state: WorkspaceStoreState) => state.setCurrentWorkspace,
   clearError: (state: WorkspaceStoreState) => state.clearError,
   clearWorkspaces: (state: WorkspaceStoreState) => state.clearWorkspaces,

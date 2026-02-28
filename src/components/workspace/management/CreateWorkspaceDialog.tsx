@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { IconBuildingStore, IconPencil, IconBriefcase } from '@tabler/icons-react'
+import { IconBuildingStore } from '@tabler/icons-react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 // Shadcn/UI Components
 import { Button } from '@/components/shadcn-ui/button'
@@ -59,6 +60,7 @@ export function CreateWorkspaceDialog({
     onWorkspaceCreate
 }: CreateWorkspaceDialogProps) {
     const router = useRouter()
+    const t = useTranslations('Workspaces')
     const { createWorkspace, isCreating } = useWorkspaceManagement()
     const [errorCode, setErrorCode] = useState<string | null>(null)
 
@@ -93,26 +95,20 @@ export function CreateWorkspaceDialog({
                 description: data.description?.trim() || undefined
             })
 
-            // Success
-            toast.success('Store workspace created successfully!')
+            toast.success(t('createDialog.success'))
             onOpenChange(false)
 
             if (onWorkspaceCreate) {
                 onWorkspaceCreate(response)
             } else {
-                // Fallback navigation if no callback provided
                 router.refresh()
             }
         } catch (err: any) {
-            // Error handling
-            // Error handling
-            let errorMessage = 'Failed to create workspace. Please try again.'
+            let errorMessage = t('createDialog.errors.default')
 
             if (err && typeof err === 'object') {
-                // Check if it's our structured error
                 if ('detail' in err && typeof err.detail === 'string') {
                     errorMessage = err.detail
-                    // Clean up Django's list string representation if present e.g. "['...']"
                     if (errorMessage.startsWith("['") && errorMessage.endsWith("']")) {
                         errorMessage = errorMessage.slice(2, -2)
                     }
@@ -125,11 +121,10 @@ export function CreateWorkspaceDialog({
                 errorMessage = err.message
             }
 
-            // Handle specific error codes
             if (err.error_code === 'CREATION_IN_PROGRESS' || errorMessage.includes('Creation in progress')) {
                 setErrorCode('CREATION_IN_PROGRESS')
-                toast.warning('Formation pending', {
-                    description: 'Please wait a moment while we set up your store.'
+                toast.warning(t('createDialog.errors.formationPending'), {
+                    description: t('createDialog.errors.pleaseWait')
                 })
             } else {
                 toast.error(errorMessage)
@@ -139,8 +134,6 @@ export function CreateWorkspaceDialog({
         }
     }
 
-    // getTypeIcon function removed as it is no longer needed
-
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
@@ -149,23 +142,22 @@ export function CreateWorkspaceDialog({
                         <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                             <IconBuildingStore className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <DialogTitle>Create New Store</DialogTitle>
+                        <DialogTitle>{t('createDialog.title')}</DialogTitle>
                     </div>
                     <DialogDescription>
-                        Set up a new workspace for your online store. You can manage products, orders, and customers from here.
+                        {t('createDialog.description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
                     <div className="space-y-4">
-                        {/* Workspace Name */}
                         <div className="space-y-2">
                             <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Store Name
+                                {t('createDialog.storeName')}
                             </label>
                             <Input
                                 id="name"
-                                placeholder="e.g. My Awesome Store"
+                                placeholder={t('createDialog.storeNamePlaceholder')}
                                 {...form.register('name')}
                                 disabled={isCreating}
                                 autoFocus
@@ -177,14 +169,13 @@ export function CreateWorkspaceDialog({
                             )}
                         </div>
 
-                        {/* Description */}
                         <div className="space-y-2">
                             <label htmlFor="description" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Description (Optional)
+                                {t('createDialog.description2')}
                             </label>
                             <Textarea
                                 id="description"
-                                placeholder="Briefly describe your store..."
+                                placeholder={t('createDialog.descriptionPlaceholder')}
                                 {...form.register('description')}
                                 disabled={isCreating}
                                 rows={3}
@@ -205,7 +196,7 @@ export function CreateWorkspaceDialog({
                             onClick={() => onOpenChange(false)}
                             disabled={isCreating}
                         >
-                            Cancel
+                            {t('createDialog.cancel')}
                         </Button>
                         <Button
                             type="submit"
@@ -215,10 +206,10 @@ export function CreateWorkspaceDialog({
                             {isCreating ? (
                                 <>
                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Creating...
+                                    {t('createDialog.creating')}
                                 </>
                             ) : (
-                                'Create Workspace'
+                                t('createDialog.create')
                             )}
                         </Button>
                     </div>

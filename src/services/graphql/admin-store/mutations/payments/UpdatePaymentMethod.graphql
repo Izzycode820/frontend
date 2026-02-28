@@ -1,4 +1,7 @@
-mutation UpdatePaymentMethod($methodId: ID!, $input: UpdatePaymentMethodInput!) {
+mutation UpdatePaymentMethod(
+  $methodId: ID!
+  $input: UpdatePaymentMethodInput!
+) {
   updatePaymentMethod(methodId: $methodId, input: $input) {
     success
     message
@@ -8,6 +11,9 @@ mutation UpdatePaymentMethod($methodId: ID!, $input: UpdatePaymentMethodInput!) 
       providerName
       checkoutUrl
       enabled
+      verified
+      apiUser
+      credentialVerifiedAt
     }
   }
 }

@@ -25,6 +25,7 @@ import { AddPaymentMethodDocument } from '@/services/graphql/admin-store/mutatio
 import { TogglePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/TogglePaymentMethod.generated';
 import { UpdatePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/UpdatePaymentMethod.generated';
 import { RemovePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/RemovePaymentMethod.generated';
+import { VerifyPaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/VerifyPaymentMethod.generated';
 import {
     IconCreditCard,
     IconPlus,
@@ -34,8 +35,12 @@ import {
     IconLoader2,
     IconInfoCircle,
     IconArrowLeft,
+    IconEye,
+    IconEyeOff,
+    IconShieldCheck,
 } from '@tabler/icons-react';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
+import { format } from 'date-fns';
 
 export function PaymentMethodsPage() {
     const router = useRouter();
@@ -50,10 +55,18 @@ export function PaymentMethodsPage() {
         id: string;
         providerName: string;
         checkoutUrl: string | null;
+        apiUser?: string | null;
+        capabilities?: {
+            requiresUrl: boolean | null;
+            requiresCredentials: boolean | null;
+        } | null;
     } | null>(null);
 
     // Form state
     const [checkoutUrl, setCheckoutUrl] = useState('');
+    const [apiUser, setApiUser] = useState('');
+    const [apiKey, setApiKey] = useState('');
+    const [showApiKey, setShowApiKey] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState('fapshi');
 
     // Query
@@ -64,6 +77,7 @@ export function PaymentMethodsPage() {
     const [toggleMethod, { loading: toggling }] = useMutation(TogglePaymentMethodDocument);
     const [updateMethod, { loading: updating }] = useMutation(UpdatePaymentMethodDocument);
     const [removeMethod, { loading: removing }] = useMutation(RemovePaymentMethodDocument);
+    const [verifyMethod, { loading: verifying }] = useMutation(VerifyPaymentMethodDocument);
 
     // Validate Fapshi URL
     const validateFapshiUrl = (url: string): boolean => {
@@ -90,7 +104,9 @@ export function PaymentMethodsPage() {
                 variables: {
                     input: {
                         providerName: selectedProvider,
-                        checkoutUrl: checkoutUrl,
+                        checkoutUrl: checkoutUrl || null,
+                        apiUser: apiUser || null,
+                        apiKey: apiKey || null,
                     },
                 },
             });
@@ -155,7 +171,9 @@ export function PaymentMethodsPage() {
                 variables: {
                     methodId: selectedMethod.id,
                     input: {
-                        checkoutUrl: checkoutUrl,
+                        checkoutUrl: checkoutUrl || null,
+                        apiUser: apiUser || null,
+                        apiKey: apiKey || null,
                     },
                 },
             });
@@ -165,6 +183,8 @@ export function PaymentMethodsPage() {
                 setShowEditModal(false);
                 setSelectedMethod(null);
                 setCheckoutUrl('');
+                setApiUser('');
+                setApiKey('');
                 refetch();
             } else {
                 toast.error(t('error'), {
@@ -174,6 +194,31 @@ export function PaymentMethodsPage() {
         } catch (err) {
             console.error('Update failed:', err);
             toast.error(t('error'), { description: tGen('failedToSave') });
+        }
+    };
+
+    // Handle verification
+    const handleVerify = async () => {
+        if (!selectedMethod) return;
+
+        try {
+            const result = await verifyMethod({
+                variables: {
+                    methodId: selectedMethod.id,
+                },
+            });
+
+            if (result.data?.verifyPaymentMethod?.success) {
+                toast.success(result.data.verifyPaymentMethod.message || t('verified'));
+                refetch();
+            } else {
+                toast.error(t('error'), {
+                    description: result.data?.verifyPaymentMethod?.error || t('notVerified'),
+                });
+            }
+        } catch (err) {
+            console.error('Verification failed:', err);
+            toast.error(t('error'), { description: t('notVerified') });
         }
     };
 
@@ -205,9 +250,12 @@ export function PaymentMethodsPage() {
     };
 
     // Open edit modal
-    const openEditModal = (method: { id: string; providerName: string; checkoutUrl: string | null }) => {
+    const openEditModal = (method: any) => {
         setSelectedMethod(method);
         setCheckoutUrl(method.checkoutUrl || '');
+        setApiUser(method.apiUser || '');
+        setApiKey('');
+        setShowApiKey(false);
         setShowEditModal(true);
     };
 
@@ -325,13 +373,24 @@ export function PaymentMethodsPage() {
                                                         rel="noopener noreferrer"
                                                         className="text-muted-foreground hover:text-foreground flex-shrink-0"
                                                     >
-                                                        <IconExternalLink className="w-4 h-4" />
+                                                        <IconExternalLink className="h-4 w-4" />
                                                     </a>
                                                 </div>
+                                            )}
+                                            {method.apiUser && (
+                                                <p className="text-xs text-muted-foreground mt-2">
+                                                    {t('apiUser')}: <code className="bg-muted px-1 rounded">{method.apiUser}</code>
+                                                </p>
                                             )}
                                             {method.totalTransactions > 0 && (
                                                 <p className="text-xs text-muted-foreground mt-2">
                                                     {t('transactions', { count: method.totalTransactions, rate: method.successRate?.toFixed(1) || '0' })}
+                                                </p>
+                                            )}
+                                            {method.credentialVerifiedAt && (
+                                                <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
+                                                    <IconShieldCheck className="h-3 w-3" />
+                                                    {t('verifiedAt', { date: format(new Date(method.credentialVerifiedAt), 'PPP') })}
                                                 </p>
                                             )}
                                         </div>
@@ -437,15 +496,78 @@ export function PaymentMethodsPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="editCheckoutUrl">{t('fapshiUrl')}</Label>
-                            <Input
-                                id="editCheckoutUrl"
-                                value={checkoutUrl}
-                                onChange={(e) => setCheckoutUrl(e.target.value)}
-                                placeholder="https://checkout.fapshi.com/pay/..."
-                            />
-                        </div>
+                        {selectedMethod?.capabilities?.requiresUrl && (
+                            <div className="space-y-2">
+                                <Label htmlFor="editCheckoutUrl">{t('fapshiUrl')}</Label>
+                                <Input
+                                    id="editCheckoutUrl"
+                                    value={checkoutUrl}
+                                    onChange={(e) => setCheckoutUrl(e.target.value)}
+                                    placeholder="https://checkout.fapshi.com/pay/..."
+                                />
+                            </div>
+                        )}
+
+                        {selectedMethod?.capabilities?.requiresCredentials && (
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="editApiUser">{t('apiUser')}</Label>
+                                    <Input
+                                        id="editApiUser"
+                                        value={apiUser}
+                                        onChange={(e) => setApiUser(e.target.value)}
+                                        placeholder="API User ID"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="editApiKey">{t('apiKey')}</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="editApiKey"
+                                            type={showApiKey ? "text" : "password"}
+                                            value={apiKey}
+                                            onChange={(e) => setApiKey(e.target.value)}
+                                            placeholder="••••••••••••••••"
+                                            className="pr-10"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                            onClick={() => setShowApiKey(!showApiKey)}
+                                        >
+                                            {showApiKey ? (
+                                                <IconEyeOff className="h-4 w-4 text-muted-foreground" />
+                                            ) : (
+                                                <IconEye className="h-4 w-4 text-muted-foreground" />
+                                            )}
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('credentialsDesc')}
+                                    </p>
+                                </div>
+
+                                <div className="pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2"
+                                        onClick={handleVerify}
+                                        disabled={verifying || !apiUser}
+                                    >
+                                        {verifying ? (
+                                            <IconLoader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <IconShieldCheck className="h-4 w-4" />
+                                        )}
+                                        {verifying ? t('verifying') : t('verify')}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowEditModal(false)}>

@@ -48,6 +48,7 @@
       "preferences": "Preferences",
       "notifications": "Notifications",
       "signOut": "Sign Out",
+      "profile": "Profile",
       "menu": "Menu",
       "myStore": "My Store",
       "light": "Light",
@@ -80,6 +81,11 @@
       "selectedCount": "{count} {count, plural, one {product} other {products}} selected",
       "selectToPerform": "Select products to perform bulk actions",
       "addProduct": "Add product",
+      "emptyState": {
+        "noProductsYet": "No products yet",
+        "getStartedHint": "Get started by adding your first product to your store.",
+        "addFirstProduct": "Add your first product"
+      },
       "outOfStock": "Out of stock",
       "active": "Active",
       "pageOf": "Page {current} of {total}",
@@ -556,7 +562,8 @@
       "noCategories": "No categories found",
       "adjustFilters": "Try adjusting your filters",
       "addCategory": "Add category",
-      "pagination": "Showing {start} to {end} of {total} categories"
+      "pagination": "Showing {start} to {end} of {total} categories",
+      "noCategoriesYet": "No categories yet"
     },
     "filters": {
       "searchPlaceholder": "Search categories...",
@@ -573,6 +580,7 @@
     },
     "toolbar": {
       "selectedCount": "{count, plural, =0 {No items selected} one {1 item selected} other {# items selected}}",
+      "selectToPerform": "Select categories to perform actions",
       "bulkActions": "Bulk actions",
       "archive": "Archive",
       "export": "Export",
@@ -1074,5 +1082,108 @@
         "errorCreateCustomer": "Failed to create customer",
         "errorUnexpected": "An unexpected error occurred"
       }
+  },
+  "Workspaces": {
+    "dashboard": {
+      "loading": "Loading workspaces...",
+      "error": "Failed to load workspaces",
+      "tryAgain": "Try Again",
+      "provisioning": {
+        "stillSettingUp": "Workspace is still setting up",
+        "pleaseWait": "This usually takes about 20 seconds. Please wait a moment."
+      }
+    },
+    "card": {
+      "type": {
+        "store": "Store",
+        "blog": "Blog",
+        "services": "Services",
+        "portfolio": "Portfolio"
+      },
+      "status": {
+        "active": "Active",
+        "provisioning": "Setting up\u2026",
+        "inactive": "Inactive",
+        "suspended": "Suspended",
+        "suspended_by_plan": "Plan Limit",
+        "deleted": "Deleted"
+      },
+      "role": {
+        "owner": "Owner",
+        "staff": "Staff"
+      },
+      "members": "{count} members",
+      "created": "Created",
+      "updated": "Updated",
+      "actions": {
+        "label": "Workspace actions",
+        "restore": "Restore",
+        "delete": "Delete",
+        "deleteConfirm": "Delete \"{name}\"? You'll have 5 days to restore it."
+      },
+      "banners": {
+        "provisioning": {
+          "title": "Setting up your workspace\u2026",
+          "description": "This usually takes about 20 seconds. The workspace will be ready shortly."
+        },
+        "restricted": {
+          "title": "Write access restricted",
+          "ownerHint": "Renew subscription to restore full access",
+          "staffHint": "Contact workspace owner to resolve"
+        },
+        "planLimit": {
+          "title": "Workspace inaccessible",
+          "ownerHint": "Upgrade plan or delete excess workspaces",
+          "staffHint": "Contact workspace owner for access"
+        },
+        "deletion": {
+          "countdown": "{days}d {hours}h {minutes}m left to restore",
+          "scheduledDate": "Permanently deletes on {date}"
+        }
+      },
+      "footer": {
+        "workspaceType": "{type} workspace"
+      },
+      "tooltip": {
+        "writeRestricted": "Write access restricted"
+      }
+    },
+    "createCard": {
+      "title": "Create Workspace",
+      "subtitle": "Start a new store, blog, services, or portfolio",
+      "limitBadge": "{count}/{max}"
+    },
+    "createDialog": {
+      "title": "Create New Store",
+      "description": "Set up a new workspace for your online store. You can manage products, orders, and customers from here.",
+      "storeName": "Store Name",
+      "storeNamePlaceholder": "e.g. My Awesome Store",
+      "description2": "Description (Optional)",
+      "descriptionPlaceholder": "Briefly describe your store...",
+      "cancel": "Cancel",
+      "create": "Create Workspace",
+      "creating": "Creating...",
+      "success": "Store workspace created successfully!",
+      "errors": {
+        "formationPending": "Formation pending",
+        "pleaseWait": "Please wait a moment while we set up your store.",
+        "default": "Failed to create workspace. Please try again."
+      }
+    },
+    "subscriptionLockout": {
+      "title": "Subscription Suspended",
+      "subtitle": "Access to your store dashboard is restricted.",
+      "body": "Your {tier} subscription has been suspended for more than 72 hours. Please reactivate your plan to restore access.",
+      "reactivate": "Reactivate {tier} Plan",
+      "processing": "Processing...",
+      "changePlans": "Need to change plans?",
+      "startFresh": "Start fresh"
+    },
+    "errorBoundary": {
+      "title": "Workspace Error",
+      "description": "Something went wrong with workspace operations. Please try again.",
+      "tryAgain": "Try Again",
+      "backToWorkspaces": "Back to Workspaces"
     }
   }
+}

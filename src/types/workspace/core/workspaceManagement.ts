@@ -12,6 +12,7 @@ import { z } from 'zod';
 
 export const WorkspaceStatus = {
   ACTIVE: 'active',
+  PROVISIONING: 'provisioning',
   SUSPENDED: 'suspended',
   SUSPENDED_BY_PLAN: 'suspended_by_plan',
   DELETED: 'deleted',
@@ -95,6 +96,8 @@ export interface WorkspaceData {
   readonly deletedAt?: string | null;
   readonly deletionScheduledFor?: string | null;
   readonly deletionInfo?: WorkspaceDeletionInfo | null;
+  readonly provisioningComplete?: boolean;
+  readonly provisioningStatus?: { status: string; message: string } | null;
 }
 
 /**
@@ -115,6 +118,8 @@ export interface WorkspaceListItem {
   readonly deletedAt?: string | null;
   readonly deletionScheduledFor?: string | null;
   readonly deletionInfo?: WorkspaceDeletionInfo | null;
+  readonly provisioningComplete?: boolean;
+  readonly provisioningStatus?: { status: string; message: string } | null;
 }
 
 // ============================================================================

@@ -21,6 +21,8 @@ import { useTranslations } from 'next-intl';
 import { GetPaymentMethodsDocument } from '@/services/graphql/admin-store/queries/payments/__generated__/GetPaymentMethods.generated';
 import { TogglePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/TogglePaymentMethod.generated';
 import { RemovePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/RemovePaymentMethod.generated';
+import { UpdatePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/UpdatePaymentMethod.generated';
+import { VerifyPaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/VerifyPaymentMethod.generated';
 import {
     IconCreditCard,
     IconPlus,
@@ -29,7 +31,14 @@ import {
     IconLoader2,
     IconInfoCircle,
     IconArrowLeft,
+    IconPencil,
+    IconShieldCheck,
+    IconEye,
+    IconEyeOff,
 } from '@tabler/icons-react';
+import { format } from 'date-fns';
+import { Input } from '@/components/shadcn-ui/input';
+import { Label } from '@/components/shadcn-ui/label';
 
 /**
  * Payment Methods Listing Page
@@ -45,11 +54,25 @@ export function PaymentMethodsListPage() {
     const tGen = useTranslations('General');
 
     // Delete modal state
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedMethod, setSelectedMethod] = useState<{
         id: string;
         providerName: string;
+        displayName?: string | null;
+        checkoutUrl?: string | null;
+        apiUser?: string | null;
+        capabilities?: {
+            requiresUrl: boolean | null;
+            requiresCredentials: boolean | null;
+        } | null;
     } | null>(null);
+
+    // Edit Modal state
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [checkoutUrl, setCheckoutUrl] = useState('');
+    const [apiUser, setApiUser] = useState('');
+    const [apiKey, setApiKey] = useState('');
+    const [showApiKey, setShowApiKey] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // Query
     const { data, loading, error, refetch } = useQuery(GetPaymentMethodsDocument);
@@ -57,6 +80,8 @@ export function PaymentMethodsListPage() {
     // Mutations
     const [toggleMethod, { loading: toggling }] = useMutation(TogglePaymentMethodDocument);
     const [removeMethod, { loading: removing }] = useMutation(RemovePaymentMethodDocument);
+    const [updateMethod, { loading: updating }] = useMutation(UpdatePaymentMethodDocument);
+    const [verifyMethod, { loading: verifying }] = useMutation(VerifyPaymentMethodDocument);
 
     // Handle toggle
     const handleToggle = async (methodId: string, enabled: boolean) => {
@@ -112,6 +137,66 @@ export function PaymentMethodsListPage() {
     // Navigate to add page
     const goToAddPage = () => {
         router.push(`/workspace/${workspaceId}/store/settings/payments/add-payment-methods`);
+    };
+
+    // Handle update
+    const handleUpdate = async () => {
+        if (!selectedMethod) return;
+
+        try {
+            const result = await updateMethod({
+                variables: {
+                    methodId: selectedMethod.id,
+                    input: {
+                        checkoutUrl: checkoutUrl || null,
+                        apiUser: apiUser || null,
+                        apiKey: apiKey || null,
+                    },
+                },
+            });
+
+            if (result.data?.updatePaymentMethod?.success) {
+                toast.success(t('updateSuccess'));
+                setShowEditModal(false);
+                setSelectedMethod(null);
+                setCheckoutUrl('');
+                setApiUser('');
+                setApiKey('');
+                refetch();
+            } else {
+                toast.error(t('error'), {
+                    description: result.data?.updatePaymentMethod?.error || tGen('failedToSave'),
+                });
+            }
+        } catch (err) {
+            console.error('Update failed:', err);
+            toast.error(t('error'), { description: tGen('failedToSave') });
+        }
+    };
+
+    // Handle verification
+    const handleVerify = async () => {
+        if (!selectedMethod) return;
+
+        try {
+            const result = await verifyMethod({
+                variables: {
+                    methodId: selectedMethod.id,
+                },
+            });
+
+            if (result.data?.verifyPaymentMethod?.success) {
+                toast.success(result.data.verifyPaymentMethod.message || t('verified'));
+                refetch();
+            } else {
+                toast.error(t('error'), {
+                    description: result.data?.verifyPaymentMethod?.error || t('notVerified'),
+                });
+            }
+        } catch (err) {
+            console.error('Verification failed:', err);
+            toast.error(t('error'), { description: t('notVerified') });
+        }
     };
 
     if (loading) {
@@ -225,24 +310,46 @@ export function PaymentMethodsListPage() {
                                                     </a>
                                                 </div>
                                             )}
+                                            {method.apiUser && (
+                                                <p className="text-xs text-muted-foreground mt-2">
+                                                    {t('apiUser')}: <code className="bg-muted px-1 rounded">{method.apiUser}</code>
+                                                </p>
+                                            )}
                                             {method.totalTransactions > 0 && (
                                                 <p className="text-xs text-muted-foreground mt-2">
                                                     {t('transactionsShort', { count: method.totalTransactions, rate: method.successRate?.toFixed(1) || '0' })}
                                                 </p>
                                             )}
+                                            {method.credentialVerifiedAt && (
+                                                <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
+                                                    <IconShieldCheck className="h-3 w-3" />
+                                                    {t('verifiedAt', { date: format(new Date(method.credentialVerifiedAt), 'PPP') })}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 self-end sm:self-auto">
+                                    <div className="flex items-center gap-3 self-end sm:self-auto">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground hidden sm:inline">
-                                                {method.enabled ? t('enabled') : t('disabled')}
-                                            </span>
                                             <Switch
                                                 checked={method.enabled}
                                                 onCheckedChange={(checked) => handleToggle(method.id, checked)}
                                                 disabled={toggling}
                                             />
                                         </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => {
+                                                setSelectedMethod(method);
+                                                setCheckoutUrl(method.checkoutUrl || '');
+                                                setApiUser(method.apiUser || '');
+                                                setApiKey('');
+                                                setShowApiKey(false);
+                                                setShowEditModal(true);
+                                            }}
+                                        >
+                                            <IconPencil className="w-4 h-4" />
+                                        </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -267,10 +374,157 @@ export function PaymentMethodsListPage() {
                 <Alert className="bg-blue-500/10 border-blue-500/20">
                     <IconInfoCircle className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="ml-2 text-sm text-blue-900 dark:text-blue-300">
-                        {t('redirectInfo')}
+                        {t.rich('redirectFapshiInfo', {
+                            a: (chunks: any) => (
+                                <a
+                                    href="https://dashboard.fapshi.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline font-medium"
+                                >
+                                    {chunks}
+                                </a>
+                            )
+                        })}
                     </AlertDescription>
                 </Alert>
             </div>
+
+            {/* Edit Modal */}
+            <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('edit')}</DialogTitle>
+                        <DialogDescription>
+                            {selectedMethod?.displayName || selectedMethod?.providerName}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        {!!selectedMethod?.capabilities?.requiresUrl && (
+                            <div className="space-y-2">
+                                <Label htmlFor="editCheckoutUrl">{t('fapshiUrl')}</Label>
+                                <Input
+                                    id="editCheckoutUrl"
+                                    value={checkoutUrl}
+                                    onChange={(e) => setCheckoutUrl(e.target.value)}
+                                    placeholder="https://checkout.fapshi.com/pay/..."
+                                />
+                            </div>
+                        )}
+
+                        {!!selectedMethod?.capabilities?.requiresCredentials && (
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="editApiUser">{t('apiUser')}</Label>
+                                    <Input
+                                        id="editApiUser"
+                                        value={apiUser}
+                                        onChange={(e) => setApiUser(e.target.value)}
+                                        placeholder="API User ID"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="editApiKey">{t('apiKey')}</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="editApiKey"
+                                            type={showApiKey ? "text" : "password"}
+                                            value={apiKey}
+                                            onChange={(e) => setApiKey(e.target.value)}
+                                            placeholder="••••••••••••••••"
+                                            className="pr-10"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                            onClick={() => setShowApiKey(!showApiKey)}
+                                        >
+                                            {showApiKey ? (
+                                                <IconEyeOff className="h-4 w-4 text-muted-foreground" />
+                                            ) : (
+                                                <IconEye className="h-4 w-4 text-muted-foreground" />
+                                            )}
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('credentialsDesc')}
+                                    </p>
+                                </div>
+
+                                <div className="pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2"
+                                        onClick={handleVerify}
+                                        disabled={verifying || !apiUser}
+                                    >
+                                        {verifying ? (
+                                            <IconLoader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <IconShieldCheck className="h-4 w-4" />
+                                        )}
+                                        {verifying ? t('verifying') : t('verify')}
+                                    </Button>
+                                </div>
+
+                                {selectedMethod.providerName.includes('fapshi') && (
+                                    <div className="mt-6 p-4 bg-muted/50 rounded-lg border space-y-3">
+                                        <div className="flex items-start gap-2">
+                                            <IconInfoCircle className="h-4 w-4 text-blue-500 mt-0.5" />
+                                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                                {t.rich('webhookInstructions', {
+                                                    strong: (chunks) => <strong>{chunks}</strong>
+                                                })}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/70">{t('webhookUrl')}</Label>
+                                            <div className="flex items-center gap-2">
+                                                <code className="flex-1 text-[11px] bg-background border px-2 py-1.5 rounded truncate">
+                                                    https://api.huzilerz.com/api/payments/webhooks/fapshi/
+                                                </code>
+                                                <Button
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    className="h-7 text-[10px] px-2"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText('https://api.huzilerz.com/api/payments/webhooks/fapshi/');
+                                                        toast.success(t('copied'));
+                                                    }}
+                                                >
+                                                    {t('copyUrl')}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEditModal(false)}>
+                            {t('cancel')}
+                        </Button>
+                        <Button 
+                            onClick={handleUpdate} 
+                            disabled={updating || (!!selectedMethod?.capabilities?.requiresUrl && !checkoutUrl) || (!!selectedMethod?.capabilities?.requiresCredentials && !apiUser)}
+                        >
+                            {updating ? (
+                                <>
+                                    <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    {t('saving')}
+                                </>
+                            ) : (
+                                t('save')
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Delete Confirmation Modal */}
             <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
