@@ -261,7 +261,12 @@
     "fapshiBalance": "Fapshi Balance",
     "clickToCheckBalance": "Click check to view balance",
     "checking": "Checking...",
-    "check": "Check"
+    "check": "Check",
+    "verified": "Verified",
+    "unverifiedToggleError": "This payment method cannot be enabled because its credentials have not been verified. Please edit the method, re-enter your API User and API Key, and save.",
+    "unverifiedBadge": "Credentials not verified",
+    "unverifiedBadgeDesc": "Edit this method and re-enter your credentials to activate it.",
+    "verifiedBadge": "Credentials verified"
   },
   "Domains": {
     "title": "Domains",

@@ -839,7 +839,7 @@
       "paymentStatus": "Payment status",
       "fulfillmentStatus": "Fulfillment status",
       "items": "Items",
-      "deliveryMethod": "Delivery method",
+      "paymentMethod": "Payment method",
       "noCustomer": "No customer",
       "itemCount": "{count} {count, plural, one {item} other {items}}",
       "offline": "Offline Store",

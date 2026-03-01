@@ -92,7 +92,7 @@ export function OrdersTable({
             <TableHead>{t('paymentStatus')}</TableHead>
             <TableHead>{t('fulfillmentStatus')}</TableHead>
             <TableHead className="text-right">{t('items')}</TableHead>
-            <TableHead>{t('deliveryMethod')}</TableHead>
+            <TableHead>{t('paymentMethod')}</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>

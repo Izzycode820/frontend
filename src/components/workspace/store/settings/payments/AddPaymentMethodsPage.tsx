@@ -53,6 +53,7 @@ export function AddPaymentMethodsPage() {
     const [apiUser, setApiUser] = useState('');
     const [apiKey, setApiKey] = useState('');
     const [showApiKey, setShowApiKey] = useState(false);
+    const [errors, setErrors] = useState<Record<string, boolean>>({});
 
     // Query for available providers
     const { data, loading } = useQuery(GetPaymentMethodsDocument);
@@ -84,6 +85,20 @@ export function AddPaymentMethodsPage() {
     // Handle confirm add
     const handleConfirmAdd = async () => {
         if (!selectedProvider) return;
+
+        // Validation
+        const newErrors: Record<string, boolean> = {};
+        if (activeProviderData?.requiresUrl && !checkoutUrl) newErrors.checkoutUrl = true;
+        if (activeProviderData?.requiresCredentials) {
+            if (!apiUser) newErrors.apiUser = true;
+            if (!apiKey) newErrors.apiKey = true;
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error(tGen('pleaseFillRequiredFields') || 'Please fill all required fields');
+            return;
+        }
 
         if (selectedProvider === 'fapshi' && !validateFapshiUrl(checkoutUrl)) {
             toast.error(t('invalidUrl'), {
@@ -235,12 +250,18 @@ export function AddPaymentMethodsPage() {
                     <div className="space-y-4 py-4">
                         {activeProviderData?.requiresUrl && (
                             <div className="space-y-2">
-                                <Label htmlFor="checkoutUrl">{t('fapshiUrl')}</Label>
+                                <Label htmlFor="checkoutUrl">
+                                    {t('fapshiUrl')} <span className="text-destructive">*</span>
+                                </Label>
                                 <Input
                                     id="checkoutUrl"
                                     value={checkoutUrl}
-                                    onChange={(e) => setCheckoutUrl(e.target.value)}
+                                    onChange={(e) => {
+                                        setCheckoutUrl(e.target.value);
+                                        setErrors(prev => ({ ...prev, checkoutUrl: false }));
+                                    }}
                                     placeholder="https://checkout.fapshi.com/pay/..."
+                                    className={errors.checkoutUrl ? "border-destructive focus-visible:ring-destructive" : ""}
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     {t.rich('fapshiHint', {
@@ -285,24 +306,35 @@ export function AddPaymentMethodsPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="apiUser">{t('apiUser')}</Label>
+                                    <Label htmlFor="apiUser">
+                                        {t('apiUser')} <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                         id="apiUser"
                                         value={apiUser}
-                                        onChange={(e) => setApiUser(e.target.value)}
+                                        onChange={(e) => {
+                                            setApiUser(e.target.value);
+                                            setErrors(prev => ({ ...prev, apiUser: false }));
+                                        }}
                                         placeholder={t('apiUserPlaceholder')}
+                                        className={errors.apiUser ? "border-destructive focus-visible:ring-destructive" : ""}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="apiKey">{t('apiKey')}</Label>
+                                    <Label htmlFor="apiKey">
+                                        {t('apiKey')} <span className="text-destructive">*</span>
+                                    </Label>
                                     <div className="relative">
                                         <Input
                                             id="apiKey"
                                             type={showApiKey ? "text" : "password"}
                                             value={apiKey}
-                                            onChange={(e) => setApiKey(e.target.value)}
+                                            onChange={(e) => {
+                                                setApiKey(e.target.value);
+                                                setErrors(prev => ({ ...prev, apiKey: false }));
+                                            }}
                                             placeholder={t('apiKeyPlaceholder')}
-                                            className="pr-10"
+                                            className={`pr-10 ${errors.apiKey ? "border-destructive focus-visible:ring-destructive" : ""}`}
                                         />
                                         <Button
                                             type="button"
@@ -331,7 +363,7 @@ export function AddPaymentMethodsPage() {
                         </Button>
                         <Button 
                             onClick={handleConfirmAdd} 
-                            disabled={adding || (!!activeProviderData?.requiresUrl && !checkoutUrl) || (!!activeProviderData?.requiresCredentials && (!apiUser || !apiKey))}
+                            disabled={adding}
                         >
                             {adding ? (
                                 <>

@@ -76,6 +76,7 @@ export function PaymentMethodsListPage() {
     const [apiKey, setApiKey] = useState('');
     const [showApiKey, setShowApiKey] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [errors, setErrors] = useState<Record<string, boolean>>({});
 
     // Query
     const { data, loading, error, refetch } = useQuery(GetPaymentMethodsDocument);
@@ -151,6 +152,20 @@ export function PaymentMethodsListPage() {
     const handleUpdate = async () => {
         if (!selectedMethod) return;
 
+        // Validation
+        const newErrors: Record<string, boolean> = {};
+        if (selectedMethod.capabilities?.requiresUrl && !checkoutUrl) newErrors.checkoutUrl = true;
+        if (selectedMethod.capabilities?.requiresCredentials) {
+            if (!apiUser) newErrors.apiUser = true;
+            if (!apiKey) newErrors.apiKey = true;
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error(tGen('pleaseFillRequiredFields') || 'Please fill all required fields');
+            return;
+        }
+
         try {
             const result = await updateMethod({
                 variables: {
@@ -185,6 +200,16 @@ export function PaymentMethodsListPage() {
     // Handle verification
     const handleVerify = async () => {
         if (!selectedMethod) return;
+
+        // Validation
+        const newErrors: Record<string, boolean> = {};
+        if (!apiUser) newErrors.apiUser = true;
+        if (!apiKey) newErrors.apiKey = true;
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
 
         try {
             const result = await verifyMethod({
@@ -477,12 +502,18 @@ export function PaymentMethodsListPage() {
                     <div className="space-y-4 py-4">
                         {!!selectedMethod?.capabilities?.requiresUrl && (
                             <div className="space-y-2">
-                                <Label htmlFor="editCheckoutUrl">{t('fapshiUrl')}</Label>
+                                <Label htmlFor="editCheckoutUrl">
+                                    {t('fapshiUrl')} <span className="text-destructive">*</span>
+                                </Label>
                                 <Input
                                     id="editCheckoutUrl"
                                     value={checkoutUrl}
-                                    onChange={(e) => setCheckoutUrl(e.target.value)}
+                                    onChange={(e) => {
+                                        setCheckoutUrl(e.target.value);
+                                        setErrors(prev => ({ ...prev, checkoutUrl: false }));
+                                    }}
                                     placeholder="https://checkout.fapshi.com/pay/..."
+                                    className={errors.checkoutUrl ? "border-destructive focus-visible:ring-destructive" : ""}
                                 />
                             </div>
                         )}
@@ -513,24 +544,35 @@ export function PaymentMethodsListPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="editApiUser">{t('apiUser')}</Label>
+                                    <Label htmlFor="editApiUser">
+                                        {t('apiUser')} <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                         id="editApiUser"
                                         value={apiUser}
-                                        onChange={(e) => setApiUser(e.target.value)}
+                                        onChange={(e) => {
+                                            setApiUser(e.target.value);
+                                            setErrors(prev => ({ ...prev, apiUser: false }));
+                                        }}
                                         placeholder={t('apiUserPlaceholder')}
+                                        className={errors.apiUser ? "border-destructive focus-visible:ring-destructive" : ""}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="editApiKey">{t('apiKey')}</Label>
+                                    <Label htmlFor="editApiKey">
+                                        {t('apiKey')} <span className="text-destructive">*</span>
+                                    </Label>
                                     <div className="relative">
                                         <Input
                                             id="editApiKey"
                                             type={showApiKey ? "text" : "password"}
                                             value={apiKey}
-                                            onChange={(e) => setApiKey(e.target.value)}
+                                            onChange={(e) => {
+                                                setApiKey(e.target.value);
+                                                setErrors(prev => ({ ...prev, apiKey: false }));
+                                            }}
                                             placeholder={t('apiKeyPlaceholder')}
-                                            className="pr-10"
+                                            className={`pr-10 ${errors.apiKey ? "border-destructive focus-visible:ring-destructive" : ""}`}
                                         />
                                         <Button
                                             type="button"
@@ -569,37 +611,6 @@ export function PaymentMethodsListPage() {
                                     </Button>
                                 </div>
 
-                                {selectedMethod.providerName.includes('fapshi') && (
-                                    <div className="mt-6 p-4 bg-muted/50 rounded-lg border space-y-3">
-                                        <div className="flex items-start gap-2">
-                                            <IconInfoCircle className="h-4 w-4 text-blue-500 mt-0.5" />
-                                            <p className="text-xs text-muted-foreground leading-relaxed">
-                                                {t.rich('webhookInstructions', {
-                                                    strong: (chunks) => <strong>{chunks}</strong>
-                                                })}
-                                            </p>
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/70">{t('webhookUrl')}</Label>
-                                            <div className="flex items-center gap-2">
-                                                <code className="flex-1 text-[11px] bg-background border px-2 py-1.5 rounded truncate">
-                                                    https://api.huzilerz.com/api/payments/webhooks/fapshi/
-                                                </code>
-                                                <Button
-                                                    size="sm"
-                                                    variant="secondary"
-                                                    className="h-7 text-[10px] px-2"
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText('https://api.huzilerz.com/api/payments/webhooks/fapshi/');
-                                                        toast.success(t('copied'));
-                                                    }}
-                                                >
-                                                    {t('copyUrl')}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
@@ -609,7 +620,7 @@ export function PaymentMethodsListPage() {
                         </Button>
                         <Button 
                             onClick={handleUpdate} 
-                            disabled={updating || (!!selectedMethod?.capabilities?.requiresUrl && !checkoutUrl) || (!!selectedMethod?.capabilities?.requiresCredentials && !apiUser)}
+                            disabled={updating}
                         >
                             {updating ? (
                                 <>

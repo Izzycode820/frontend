@@ -261,7 +261,12 @@
     "fapshiBalance": "Solde Fapshi",
     "clickToCheckBalance": "Cliquez sur vérifier pour voir le solde",
     "checking": "Vérification...",
-    "check": "Vérifier"
+    "check": "Vérifier",
+    "verified": "Vérifié",
+    "unverifiedToggleError": "Ce mode de paiement ne peut pas être activé car ses identifiants n'ont pas été vérifiés. Veuillez modifier la méthode, ressaisir votre utilisateur API et votre clé API, puis enregistrer.",
+    "unverifiedBadge": "Identifiants non vérifiés",
+    "unverifiedBadgeDesc": "Modifiez cette méthode et ressaisissez vos identifiants pour l'activer.",
+    "verifiedBadge": "Identifiants vérifiés"
   },
   "Domains": {
     "title": "Domaines",

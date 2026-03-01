@@ -781,7 +781,7 @@
       "paymentStatus": "Statut de paiement",
       "fulfillmentStatus": "Statut de traitement",
       "items": "Articles",
-      "deliveryMethod": "Méthode de livraison",
+      "paymentMethod": "Méthode de paiement",
       "noCustomer": "Aucun client",
       "itemCount": "{count} {count, plural, one {article} other {articles}}",
       "offline": "Boutique physique",
