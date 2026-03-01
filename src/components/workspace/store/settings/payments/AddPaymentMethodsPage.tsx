@@ -8,6 +8,7 @@ import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Button } from '@/components/shadcn-ui/button';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
+import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
 import {
     Dialog,
     DialogContent,
@@ -28,6 +29,7 @@ import {
     IconCheck,
     IconEye,
     IconEyeOff,
+    IconCopy,
 } from '@tabler/icons-react';
 
 /**
@@ -259,13 +261,36 @@ export function AddPaymentMethodsPage() {
 
                         {activeProviderData?.requiresCredentials && (
                             <div className="space-y-4 pt-2">
+                                <div className="rounded-md bg-blue-500/10 border border-blue-500/20 p-3">
+                                    <p className="text-[12px] leading-relaxed text-blue-900 dark:text-blue-300">
+                                        <strong className="font-semibold px-1 bg-blue-500/20 rounded mr-1">{t('webhookSetup')}</strong> 
+                                        {t('webhookSetupDesc')}
+                                    </p>
+                                    <div className="mt-2 p-2 bg-background/50 rounded border text-[11px] font-mono break-all flex items-center justify-between group">
+                                        <span className="flex-1 mr-2 select-all opacity-80">
+                                            https://api.huzilerz.com/api/payments/webhooks/fapshi_api/
+                                        </span>
+                                        <Button
+                                            title={t('copyLink')}
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-5 w-5 opacity-40 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText("https://api.huzilerz.com/api/payments/webhooks/fapshi_api/");
+                                                toast.success(t('webhookUrlCopied'));
+                                            }}
+                                        >
+                                            <IconCopy className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="apiUser">{t('apiUser')}</Label>
                                     <Input
                                         id="apiUser"
                                         value={apiUser}
                                         onChange={(e) => setApiUser(e.target.value)}
-                                        placeholder="e.g. 19e6..."
+                                        placeholder={t('apiUserPlaceholder')}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -276,6 +301,7 @@ export function AddPaymentMethodsPage() {
                                             type={showApiKey ? "text" : "password"}
                                             value={apiKey}
                                             onChange={(e) => setApiKey(e.target.value)}
+                                            placeholder={t('apiKeyPlaceholder')}
                                             className="pr-10"
                                         />
                                         <Button

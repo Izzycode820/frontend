@@ -42,6 +42,7 @@ import { ArchiveOrderDocument } from '@/services/graphql/admin-store/mutations/o
 import { UnarchiveOrderDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/UnarchiveOrder.generated';
 import { CancelOrderDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/CancelOrder.generated';
 import { MarkOrderAsPaidDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/MarkOrderAsPaid.generated';
+import { SyncOrderPaymentStatusDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/SyncOrderPaymentStatus.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { toast } from 'sonner';
 
@@ -147,6 +148,11 @@ export default function OrdersListContainer() {
 
   const [markOrderAsPaid] = useMutation(MarkOrderAsPaidDocument, {
     refetchQueries: ['GetOrders'],
+    awaitRefetchQueries: true,
+  });
+
+  const [syncOrderPaymentStatus, { loading: isSyncing }] = useMutation(SyncOrderPaymentStatusDocument, {
+    refetchQueries: ['GetOrders', 'GetOrder'],
     awaitRefetchQueries: true,
   });
 
@@ -380,6 +386,20 @@ export default function OrdersListContainer() {
     }
   };
 
+  const handleSyncOrderPayment = async (orderId: string) => {
+    try {
+      const result = await syncOrderPaymentStatus({ variables: { orderId } });
+      if (result.data?.syncOrderPaymentStatus?.success) {
+        toast.success(tActions('successSynced'));
+      } else {
+        toast.error(result.data?.syncOrderPaymentStatus?.error || tActions('errorSync'));
+      }
+    } catch (e) {
+      toast.error(tActions('errorSync'));
+      console.error('Sync order payment error:', e);
+    }
+  };
+
   // Reset to page 1 when filters change
   React.useEffect(() => {
     setCurrentPage(1);
@@ -430,6 +450,8 @@ export default function OrdersListContainer() {
           onBulkMarkAsPaid={handleBulkMarkAsPaid}
           onBulkCancel={handleBulkCancel}
           onBulkStatusUpdate={handleBulkStatusUpdate}
+          onSyncPayment={handleSyncOrderPayment}
+          isSyncing={isSyncing}
           isLoading={loading}
           // Filter Props
           paymentStatus={paymentStatus}
@@ -602,6 +624,8 @@ export default function OrdersListContainer() {
           workspaceId={currentWorkspace?.id || ''}
           onArchiveOrder={handleArchiveOrder}
           onUnarchiveOrder={handleUnarchiveOrder}
+          onSyncPayment={handleSyncOrderPayment}
+          isSyncing={isSyncing}
           totalCount={totalCount}
         />
       )}

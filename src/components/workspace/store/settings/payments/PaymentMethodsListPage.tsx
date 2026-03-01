@@ -23,6 +23,7 @@ import { TogglePaymentMethodDocument } from '@/services/graphql/admin-store/muta
 import { RemovePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/RemovePaymentMethod.generated';
 import { UpdatePaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/UpdatePaymentMethod.generated';
 import { VerifyPaymentMethodDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/VerifyPaymentMethod.generated';
+import { GetFapshiBalanceDocument } from '@/services/graphql/admin-store/mutations/payments/__generated__/GetFapshiBalance.generated';
 import {
     IconCreditCard,
     IconPlus,
@@ -35,6 +36,8 @@ import {
     IconShieldCheck,
     IconEye,
     IconEyeOff,
+    IconCopy,
+    IconRefresh,
 } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { Input } from '@/components/shadcn-ui/input';
@@ -82,6 +85,11 @@ export function PaymentMethodsListPage() {
     const [removeMethod, { loading: removing }] = useMutation(RemovePaymentMethodDocument);
     const [updateMethod, { loading: updating }] = useMutation(UpdatePaymentMethodDocument);
     const [verifyMethod, { loading: verifying }] = useMutation(VerifyPaymentMethodDocument);
+    const [getFapshiBalance, { loading: checkingBalance }] = useMutation(GetFapshiBalanceDocument);
+
+    // Balance states
+    const [balances, setBalances] = useState<Record<string, { amount: number; currency: string; serviceName: string }>>({});
+    const [checkingId, setCheckingId] = useState<string | null>(null);
 
     // Handle toggle
     const handleToggle = async (methodId: string, enabled: boolean) => {
@@ -196,6 +204,36 @@ export function PaymentMethodsListPage() {
         } catch (err) {
             console.error('Verification failed:', err);
             toast.error(t('error'), { description: t('notVerified') });
+        }
+    };
+
+    // Handle check balance
+    const handleCheckBalance = async (methodId: string) => {
+        setCheckingId(methodId);
+        try {
+            const result = await getFapshiBalance();
+
+            if (result.data?.getFapshiBalance?.success) {
+                const data = result.data.getFapshiBalance;
+                setBalances(prev => ({
+                    ...prev,
+                    [methodId]: {
+                        amount: data.balance || 0,
+                        currency: data.currency || 'XAF',
+                        serviceName: data.serviceName || 'Fapshi'
+                    }
+                }));
+                toast.success(t('balanceUpdated'));
+            } else {
+                toast.error(t('error'), {
+                    description: result.data?.getFapshiBalance?.error || t('failedToFetchBalance'),
+                });
+            }
+        } catch (err) {
+            console.error('Balance check failed:', err);
+            toast.error(t('error'), { description: t('failedToConnectFapshi') });
+        } finally {
+            setCheckingId(null);
         }
     };
 
@@ -326,6 +364,43 @@ export function PaymentMethodsListPage() {
                                                     {t('verifiedAt', { date: format(new Date(method.credentialVerifiedAt), 'PPP') })}
                                                 </p>
                                             )}
+
+                                            {/* Fapshi Balance Check (Only for fapshi_api) */}
+                                            {method.providerName === 'fapshi_api' && (
+                                                <div className="mt-4 p-3 bg-muted/30 rounded-lg border border-dashed border-muted-foreground/20 max-w-sm">
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <div className="min-w-0">
+                                                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold mb-0.5">{t('fapshiBalance')}</p>
+                                                            {balances[method.id] ? (
+                                                                <div className="flex items-baseline gap-1.5 overflow-hidden">
+                                                                    <span className="text-lg font-bold text-foreground tabular-nums">
+                                                                        {balances[method.id].currency} {balances[method.id].amount.toLocaleString()}
+                                                                    </span>
+                                                                    <span className="text-[10px] text-muted-foreground truncate opacity-70">
+                                                                        ({balances[method.id].serviceName})
+                                                                    </span>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-xs text-muted-foreground/60 italic font-medium">{t('clickToCheckBalance')}</p>
+                                                            )}
+                                                        </div>
+                                                        <Button 
+                                                            variant="secondary" 
+                                                            size="sm" 
+                                                            className="h-8 gap-2 text-xs font-semibold px-3 shadow-sm"
+                                                            onClick={() => handleCheckBalance(method.id)}
+                                                            disabled={checkingId === method.id}
+                                                        >
+                                                            {checkingId === method.id ? (
+                                                                <IconLoader2 className="w-3.5 h-3.5 animate-spin" />
+                                                            ) : (
+                                                                <IconRefresh className="w-3.5 h-3.5" />
+                                                            )}
+                                                            {checkingId === method.id ? t('checking') : t('check')}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 self-end sm:self-auto">
@@ -414,13 +489,36 @@ export function PaymentMethodsListPage() {
 
                         {!!selectedMethod?.capabilities?.requiresCredentials && (
                             <div className="space-y-4">
+                                <div className="rounded-md bg-blue-500/10 border border-blue-500/20 p-3">
+                                    <p className="text-[12px] leading-relaxed text-blue-900 dark:text-blue-300">
+                                        <strong className="font-semibold px-1 bg-blue-500/20 rounded mr-1">{t('webhookUrl')}</strong> 
+                                        {t('webhookSetupDesc')}
+                                    </p>
+                                    <div className="mt-2 p-2 bg-background/50 rounded border text-[11px] font-mono break-all flex items-center justify-between group">
+                                        <span className="flex-1 mr-2 select-all opacity-80">
+                                            https://api.huzilerz.com/api/payments/webhooks/fapshi_api/
+                                        </span>
+                                        <Button
+                                            title={t('copyLink')}
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-5 w-5 opacity-40 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText("https://api.huzilerz.com/api/payments/webhooks/fapshi_api/");
+                                                toast.success(t('webhookUrlCopied'));
+                                            }}
+                                        >
+                                            <IconCopy className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="editApiUser">{t('apiUser')}</Label>
                                     <Input
                                         id="editApiUser"
                                         value={apiUser}
                                         onChange={(e) => setApiUser(e.target.value)}
-                                        placeholder="API User ID"
+                                        placeholder={t('apiUserPlaceholder')}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -431,7 +529,7 @@ export function PaymentMethodsListPage() {
                                             type={showApiKey ? "text" : "password"}
                                             value={apiKey}
                                             onChange={(e) => setApiKey(e.target.value)}
-                                            placeholder="••••••••••••••••"
+                                            placeholder={t('apiKeyPlaceholder')}
                                             className="pr-10"
                                         />
                                         <Button

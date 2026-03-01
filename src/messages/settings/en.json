@@ -248,7 +248,20 @@
     "credentialsDesc": "Enter your Fapshi API credentials to enable automated Mobile Money payments.",
     "addFapshiTitle": "Add Fapshi Payment",
     "addFapshiDesc": "Enter your Fapshi checkout URL to accept mobile money payments.",
-    "back": "Back to payment settings"
+    "back": "Back to payment settings",
+    "webhookSetup": "Step 3: Webhook Setup",
+    "webhookSetupDesc": "Register the URL below in your Fapshi dashboard settings to receive real-time payment notifications.",
+    "copyLink": "Copy link",
+    "webhookUrlCopied": "Webhook URL copied!",
+    "apiUserPlaceholder": "e.g. 19e6...",
+    "apiKeyPlaceholder": "••••••••••••••••",
+    "balanceUpdated": "Balance updated",
+    "failedToFetchBalance": "Failed to fetch balance",
+    "failedToConnectFapshi": "Failed to connect to Fapshi",
+    "fapshiBalance": "Fapshi Balance",
+    "clickToCheckBalance": "Click check to view balance",
+    "checking": "Checking...",
+    "check": "Check"
   },
   "Domains": {
     "title": "Domains",

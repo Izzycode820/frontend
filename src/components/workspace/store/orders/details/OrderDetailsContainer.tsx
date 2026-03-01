@@ -8,6 +8,7 @@ import { ArchiveOrderDocument } from '@/services/graphql/admin-store/mutations/o
 import { UnarchiveOrderDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/UnarchiveOrder.generated';
 import { UpdateOrderStatusDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/UpdateOrderStatus.generated';
 import { MarkOrderAsPaidDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/MarkOrderAsPaid.generated';
+import { SyncOrderPaymentStatusDocument } from '@/services/graphql/admin-store/mutations/orders/__generated__/SyncOrderPaymentStatus.generated';
 import { useWorkspaceStore, workspaceSelectors } from '@/stores/authentication/workspaceStore';
 import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { OrderDetailsHeader } from './OrderDetailsHeader';
@@ -55,6 +56,12 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
   });
 
   const [markOrderAsPaid] = useMutation(MarkOrderAsPaidDocument, {
+    refetchQueries: ['GetOrder', 'GetOrders'],
+    awaitRefetchQueries: true,
+  });
+
+
+  const [syncOrderPaymentStatus, { loading: isSyncing }] = useMutation(SyncOrderPaymentStatusDocument, {
     refetchQueries: ['GetOrder', 'GetOrders'],
     awaitRefetchQueries: true,
   });
@@ -144,6 +151,20 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
     }
   };
 
+  const handleSyncPayment = async () => {
+    try {
+      const result = await syncOrderPaymentStatus({ variables: { orderId } });
+      if (result.data?.syncOrderPaymentStatus?.success) {
+        toast.success(commonT('toasts.successSynced'));
+      } else {
+        toast.error(result.data?.syncOrderPaymentStatus?.error || commonT('toasts.errorSync'));
+      }
+    } catch (e) {
+      toast.error(commonT('toasts.errorSync'));
+      console.error('Sync payment error:', e);
+    }
+  };
+
   // Loading state with Skeleton - show only if we have NO data yet
   if (loading && !data?.order) {
     return <OrderDetailsSkeleton />;
@@ -182,6 +203,8 @@ export default function OrderDetailsContainer({ orderId }: OrderDetailsContainer
         onCancel={handleCancel}
         onArchive={handleArchive}
         onUnarchive={handleUnarchive}
+        onSyncPayment={handleSyncPayment}
+        isSyncing={isSyncing}
         canBeCancelled={order.canBeCancelled ?? false}
         canBeRefunded={order.canBeRefunded ?? false}
         canBeArchived={order.canBeArchived ?? false}

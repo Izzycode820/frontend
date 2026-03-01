@@ -1,0 +1,9 @@
+mutation GetFapshiBalance {
+  getFapshiBalance {
+    success
+    balance
+    currency
+    serviceName
+    error
+  }
+}

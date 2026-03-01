@@ -62,6 +62,8 @@ interface MobileOrdersListProps {
     onOrderSourceChange: (value: string | null) => void;
     shippingRegion: string | null;
     onShippingRegionChange: (value: string | null) => void;
+    onSyncPayment?: (orderId: string) => void;
+    isSyncing?: boolean;
 }
 
 export function MobileOrdersList({
@@ -88,6 +90,8 @@ export function MobileOrdersList({
     onOrderSourceChange,
     shippingRegion,
     onShippingRegionChange,
+    onSyncPayment,
+    isSyncing,
 }: MobileOrdersListProps) {
     const t = useTranslations('Orders.mobile');
     const tList = useTranslations('Orders.list');
@@ -340,6 +344,8 @@ export function MobileOrdersList({
                             isSelectionMode={selectedOrders.length > 0}
                             onSelect={onSelectOrder}
                             onLongPress={onLongPressOrder}
+                            onSyncPayment={onSyncPayment}
+                            isSyncing={isSyncing}
                         />
                     ))}
                     {/* Show skeletons at bottom if loading more pages */}

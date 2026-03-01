@@ -4,8 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslations } from 'next-intl';
-import { Check, ChevronRight } from 'lucide-react';
+import { ChevronRight, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/shadcn-ui/button';
 import { OrderStatusBadge } from '../OrderStatusBadge';
 import { formatCurrency } from '@/utils/currency';
 import type { GetOrdersQuery } from '@/services/graphql/admin-store/queries/orders/__generated__/getOrders.generated';
@@ -23,6 +24,8 @@ interface OrderCardProps {
     isSelectionMode: boolean; // NEW: Are we in multi-select mode?
     onSelect: (orderId: string) => void;
     onLongPress: (orderId: string) => void;
+    onSyncPayment?: (orderId: string) => void;
+    isSyncing?: boolean;
 }
 
 export function OrderCard({
@@ -32,6 +35,8 @@ export function OrderCard({
     isSelectionMode,
     onSelect,
     onLongPress,
+    onSyncPayment,
+    isSyncing,
 }: OrderCardProps) {
     const t = useTranslations('Orders.table');
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
@@ -135,6 +140,23 @@ export function OrderCard({
                 <div className="text-[10px] text-zinc-400">
                     {t('itemCount', { count: order.itemCount ?? 0 })}
                 </div>
+                {(order.paymentStatus as string) === 'PENDING' && onSyncPayment && (
+                    <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onSyncPayment(order.id);
+                            }}
+                            disabled={isSyncing}
+                        >
+                            <RefreshCw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+                        </Button>
+                    </div>
+                )}
             </div>
         </Link>
     );

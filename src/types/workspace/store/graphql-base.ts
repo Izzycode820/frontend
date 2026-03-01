@@ -1501,6 +1501,19 @@ export interface GetCsvUploadProgress {
 }
 
 /**
+ * Fetch Fapshi service balance for the merchant.
+ * Requires billing:manage permission.
+ */
+export interface GetFapshiBalance {
+  __typename?: "GetFapshiBalance";
+  balance?: Maybe<Scalars["Float"]["output"]>;
+  currency?: Maybe<Scalars["String"]["output"]>;
+  error?: Maybe<Scalars["String"]["output"]>;
+  serviceName?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
  * Get real-time progress of import operation
  *
  * Performance: Fast cache lookup (< 5ms)
@@ -2238,6 +2251,11 @@ export interface Mutation {
    */
   getCsvUploadProgress?: Maybe<GetCsvUploadProgress>;
   /**
+   * Fetch Fapshi service balance for the merchant.
+   * Requires billing:manage permission.
+   */
+  getFapshiBalance?: Maybe<GetFapshiBalance>;
+  /**
    * Get real-time progress of import operation
    *
    * Performance: Fast cache lookup (< 5ms)
@@ -2345,6 +2363,14 @@ export interface Mutation {
   suspendStaff?: Maybe<SuspendStaff>;
   /** Sync inventory using SalesChannelService */
   syncInventory?: Maybe<SyncInventory>;
+  /**
+   * Sync order payment status with provider (manual fallback)
+   *
+   * Performance: Atomic update with provider check
+   * Security: Workspace scoping and permission validation
+   * Use Case: Admin manually syncs payment if webhook is delayed or for sandbox testing (670000000)
+   */
+  syncOrderPaymentStatus?: Maybe<SyncOrderPaymentStatus>;
   /**
    * Toggle category visibility with atomic transaction
    *
@@ -3223,6 +3249,16 @@ export interface MutationSyncInventoryArgs {
   channelId: Scalars["ID"]["input"];
   productId: Scalars["String"]["input"];
   quantity: Scalars["Int"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationSyncOrderPaymentStatusArgs {
+  orderId: Scalars["String"]["input"];
 }
 
 /**
@@ -5526,6 +5562,21 @@ export interface SyncInventory {
   __typename?: "SyncInventory";
   channelProduct?: Maybe<ChannelProductType>;
   message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
+ * Sync order payment status with provider (manual fallback)
+ *
+ * Performance: Atomic update with provider check
+ * Security: Workspace scoping and permission validation
+ * Use Case: Admin manually syncs payment if webhook is delayed or for sandbox testing (670000000)
+ */
+export interface SyncOrderPaymentStatus {
+  __typename?: "SyncOrderPaymentStatus";
+  error?: Maybe<Scalars["String"]["output"]>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  order?: Maybe<OrderType>;
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 

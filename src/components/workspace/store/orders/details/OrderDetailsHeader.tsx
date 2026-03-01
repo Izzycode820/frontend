@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, MoreVertical, Printer } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Printer, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/shadcn-ui/button';
 import {
   DropdownMenu,
@@ -29,6 +30,8 @@ interface OrderDetailsHeaderProps {
   canBeUnarchived: boolean;
   canMarkAsPaid?: boolean;
   onMarkAsPaid?: () => void;
+  onSyncPayment?: () => void;
+  isSyncing?: boolean;
 }
 
 export function OrderDetailsHeader({
@@ -49,6 +52,8 @@ export function OrderDetailsHeader({
   canBeUnarchived,
   canMarkAsPaid,
   onMarkAsPaid,
+  onSyncPayment,
+  isSyncing,
 }: OrderDetailsHeaderProps) {
   const t = useTranslations('Orders.details.header');
   return (
@@ -85,6 +90,17 @@ export function OrderDetailsHeader({
           <div className="flex items-center gap-2 self-end sm:self-auto">
             {/* Desktop: Show Primary Actions */}
             <div className="hidden sm:flex gap-2">
+              {(paymentStatus as string) === 'PENDING' && onSyncPayment && (
+                <Button 
+                  variant="outline" 
+                  onClick={onSyncPayment} 
+                  size="sm"
+                  disabled={isSyncing}
+                >
+                  <RefreshCw className={cn("mr-2 h-4 w-4", isSyncing && "animate-spin")} />
+                  {t('syncPayment')}
+                </Button>
+              )}
               {canMarkAsPaid && (
                 <Button onClick={onMarkAsPaid} size="sm">
                   {t('markAsPaid')}
@@ -105,6 +121,17 @@ export function OrderDetailsHeader({
 
             {/* Mobile: Consolidated Menu */}
             <div className="sm:hidden flex gap-2">
+              {(paymentStatus as string) === 'PENDING' && onSyncPayment && (
+                <Button 
+                  variant="outline" 
+                  onClick={onSyncPayment} 
+                  size="sm" 
+                  className="flex-1"
+                  disabled={isSyncing}
+                >
+                  <RefreshCw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+                </Button>
+              )}
               {canMarkAsPaid && (
                 <Button onClick={onMarkAsPaid} size="sm" className="flex-1">
                   {t('markPaidShort')}
@@ -141,6 +168,12 @@ export function OrderDetailsHeader({
                 {canBeCancelled && (
                   <DropdownMenuItem onClick={onCancel} className="text-destructive">
                     {t('cancel')}
+                  </DropdownMenuItem>
+                )}
+                {(paymentStatus as string) === 'PENDING' && onSyncPayment && (
+                  <DropdownMenuItem onClick={onSyncPayment} disabled={isSyncing}>
+                    <RefreshCw className={cn("mr-2 h-4 w-4", isSyncing && "animate-spin")} />
+                    {t('syncPayment')}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>

@@ -903,7 +903,11 @@
       "errorBulkMarkAsPaid": "An error occurred during bulk mark as paid",
       "errorBulkUpdate": "An error occurred during bulk update",
       "errorArchive": "An error occurred while archiving order",
-      "errorUnarchive": "An error occurred while unarchiving order"
+      "errorUnarchive": "An error occurred while unarchiving order",
+      "syncPayment": "Sync Payment",
+      "syncing": "Syncing...",
+      "successSynced": "Payment status synced",
+      "errorSync": "Failed to sync payment status"
     },
     "mobile": {
       "searchPlaceholder": "Search orders...",
@@ -1010,6 +1014,7 @@
           "from": "from",
           "markAsPaid": "Mark as Paid",
           "markPaidShort": "Mark Paid",
+          "syncPayment": "Sync Payment",
           "refund": "Refund",
           "edit": "Edit",
           "print": "Print order",

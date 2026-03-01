@@ -845,7 +845,11 @@
       "errorBulkMarkAsPaid": "Une erreur s'est produite lors du marquage comme payé groupé",
       "errorBulkUpdate": "Une erreur s'est produite lors de la mise à jour groupée",
       "errorArchive": "Une erreur s'est produite lors de l'archivage de la commande",
-      "errorUnarchive": "Une erreur s'est produite lors du désarchivage de la commande"
+      "errorUnarchive": "Une erreur s'est produite lors du désarchivage de la commande",
+      "syncPayment": "Synchroniser paiement",
+      "syncing": "Synchronisation...",
+      "successSynced": "Statut paiement synchronisé",
+      "errorSync": "Échec synchronisation paiement"
     },
     "mobile": {
       "searchPlaceholder": "Rechercher des commandes...",
@@ -960,6 +964,7 @@
         "archive": "Archiver",
         "unarchive": "Désarchiver",
         "cancel": "Annuler",
+        "syncPayment": "Synchroniser paiement",
         "backToOrders": "Retour"
       },
       "sidebar": {
@@ -1016,6 +1021,9 @@
         "orderUnarchived": "Commande désarchivée avec succès",
         "markPaidSuccess": "Commande marquée comme payée",
         "markFulfilledSuccess": "Commande marquée comme traitée",
+        "syncSuccess": "Statut du paiement synchronisé",
+        "syncError": "Échec de la synchronisation",
+        "syncing": "Synchronisation...",
         "commentPosted": "Commentaire publié"
       }
     },

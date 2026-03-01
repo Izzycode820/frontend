@@ -1,0 +1,12 @@
+mutation SyncOrderPaymentStatus($orderId: String!) {
+  syncOrderPaymentStatus(orderId: $orderId) {
+    success
+    message
+    error
+    order {
+      id
+      status
+      paymentStatus
+    }
+  }
+}

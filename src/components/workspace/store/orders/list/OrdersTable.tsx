@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
 import { Button } from '@/components/shadcn-ui/button';
-import { MoreHorizontal, Archive, ArchiveRestore } from 'lucide-react';
+import { MoreHorizontal, Archive, ArchiveRestore, RefreshCw } from 'lucide-react';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { formatCurrency } from '@/utils/currency';
 import type { GetOrdersQuery } from '@/services/graphql/admin-store/queries/orders/__generated__/getOrders.generated';
@@ -36,6 +36,8 @@ interface OrdersTableProps {
   workspaceId: string;
   onArchiveOrder?: (orderId: string) => void;
   onUnarchiveOrder?: (orderId: string) => void;
+  onSyncPayment?: (orderId: string) => void;
+  isSyncing?: boolean;
   totalCount: number;
 }
 
@@ -47,6 +49,8 @@ export function OrdersTable({
   workspaceId,
   onArchiveOrder,
   onUnarchiveOrder,
+  onSyncPayment,
+  isSyncing,
   totalCount,
 }: OrdersTableProps) {
   const t = useTranslations('Orders.table');
@@ -171,6 +175,12 @@ export function OrdersTable({
                         <DropdownMenuItem onClick={() => onUnarchiveOrder(order.id)}>
                           <ArchiveRestore className="mr-2 h-4 w-4" />
                           {tActions('unarchive')}
+                        </DropdownMenuItem>
+                      )}
+                       {(order.paymentStatus as string) === 'PENDING' && onSyncPayment && (
+                        <DropdownMenuItem onClick={() => onSyncPayment(order.id)} disabled={isSyncing}>
+                          <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                          {tActions('syncPayment')}
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
