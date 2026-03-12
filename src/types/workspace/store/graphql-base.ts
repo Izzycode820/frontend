@@ -5488,8 +5488,42 @@ export interface StoreAnalytics {
  * All fields optional - only provided fields are updated.
  */
 export interface StoreProfileInput {
-  /** Store phone (Cameroon format: +237XXXXXXXXX) */
+  /** Accent brand color (hex) */
+  accentColor?: InputMaybe<Scalars["String"]["input"]>;
+  /** Address line 1 */
+  addressLine1?: InputMaybe<Scalars["String"]["input"]>;
+  /** Address line 2 */
+  addressLine2?: InputMaybe<Scalars["String"]["input"]>;
+  /** City */
+  city?: InputMaybe<Scalars["String"]["input"]>;
+  /** Country */
+  country?: InputMaybe<Scalars["String"]["input"]>;
+  /** Store currency code */
+  currency?: InputMaybe<Scalars["String"]["input"]>;
+  /** Default storefront language */
+  defaultLocale?: InputMaybe<Scalars["String"]["input"]>;
+  /** Dimension unit (cm, m, in, ft) */
+  dimensionUnit?: InputMaybe<Scalars["String"]["input"]>;
+  /** Store favicon URL */
+  faviconUrl?: InputMaybe<Scalars["String"]["input"]>;
+  /** Legal business name */
+  legalName?: InputMaybe<Scalars["String"]["input"]>;
+  /** Store logo URL */
+  logoUrl?: InputMaybe<Scalars["String"]["input"]>;
+  /** Prefix for order IDs */
+  orderPrefix?: InputMaybe<Scalars["String"]["input"]>;
+  /** Suffix for order IDs */
+  orderSuffix?: InputMaybe<Scalars["String"]["input"]>;
+  /** Store phone (International format: +XXXXXXXXXXXX) */
   phoneNumber?: InputMaybe<Scalars["String"]["input"]>;
+  /** Postal code */
+  postalCode?: InputMaybe<Scalars["String"]["input"]>;
+  /** Primary brand color (hex) */
+  primaryColor?: InputMaybe<Scalars["String"]["input"]>;
+  /** Secondary brand color (hex) */
+  secondaryColor?: InputMaybe<Scalars["String"]["input"]>;
+  /** State/Province */
+  state?: InputMaybe<Scalars["String"]["input"]>;
   /** Store description or tagline */
   storeDescription?: InputMaybe<Scalars["String"]["input"]>;
   /** Primary contact email */
@@ -5498,9 +5532,13 @@ export interface StoreProfileInput {
   storeName?: InputMaybe<Scalars["String"]["input"]>;
   /** Customer support email */
   supportEmail?: InputMaybe<Scalars["String"]["input"]>;
+  /** List of supported languages (e.g., ['en', 'fr']) */
+  supportedLocales?: InputMaybe<Array<InputMaybe<Scalars["String"]["input"]>>>;
   /** Store timezone */
   timezone?: InputMaybe<Scalars["String"]["input"]>;
-  /** WhatsApp number (Cameroon format: +237XXXXXXXXX) */
+  /** Weight unit (kg, g, lb, oz) */
+  weightUnit?: InputMaybe<Scalars["String"]["input"]>;
+  /** WhatsApp number (International format: +XXXXXXXXXXXX) */
   whatsappNumber?: InputMaybe<Scalars["String"]["input"]>;
 }
 
@@ -5511,12 +5549,44 @@ export interface StoreProfileInput {
  */
 export interface StoreProfileType extends Node {
   __typename?: "StoreProfileType";
+  /** Accent brand color (hex code) */
+  accentColor: Scalars["String"]["output"];
+  /** Street address */
+  addressLine1: Scalars["String"]["output"];
+  /** Apartment, suite, etc. */
+  addressLine2: Scalars["String"]["output"];
+  /** City */
+  city: Scalars["String"]["output"];
+  /** Country */
+  country: Scalars["String"]["output"];
   createdAt: Scalars["DateTime"]["output"];
-  /** Store currency (locked to XAF for Cameroon) */
+  /** Store currency */
   currency: WorkspaceStoreStoreProfileCurrencyChoices;
+  /** Default language for the storefront (e.g., en, fr) */
+  defaultLocale: Scalars["String"]["output"];
+  /** Default unit for product dimensions */
+  dimensionUnit: WorkspaceStoreStoreProfileDimensionUnitChoices;
+  /** URL to store favicon image */
+  faviconUrl: Scalars["String"]["output"];
   id: Scalars["ID"]["output"];
-  /** Store phone number (Cameroon format: +237XXXXXXXXX) */
+  /** Legal business name */
+  legalName: Scalars["String"]["output"];
+  /** URL to store logo image */
+  logoUrl: Scalars["String"]["output"];
+  /** Prefix for order IDs (e.g., SNK-) */
+  orderPrefix: Scalars["String"]["output"];
+  /** Suffix for order IDs (e.g., -CM) */
+  orderSuffix: Scalars["String"]["output"];
+  /** Store phone number (International format: +XXXXXXXXXXXX) */
   phoneNumber: Scalars["String"]["output"];
+  /** Postal or ZIP code */
+  postalCode: Scalars["String"]["output"];
+  /** Primary brand color (hex code) */
+  primaryColor: Scalars["String"]["output"];
+  /** Secondary brand color (hex code) */
+  secondaryColor: Scalars["String"]["output"];
+  /** State or province */
+  state: Scalars["String"]["output"];
   /** Store description or tagline */
   storeDescription: Scalars["String"]["output"];
   /** Primary contact email for the store */
@@ -5525,10 +5595,14 @@ export interface StoreProfileType extends Node {
   storeName: Scalars["String"]["output"];
   /** Customer support email (optional) */
   supportEmail: Scalars["String"]["output"];
+  /** List of supported languages (e.g., ["en", "fr"]) */
+  supportedLocales: Scalars["JSONString"]["output"];
   /** Store timezone for display purposes */
   timezone: WorkspaceStoreStoreProfileTimezoneChoices;
   updatedAt: Scalars["DateTime"]["output"];
-  /** WhatsApp number for order notifications (Cameroon format: +237XXXXXXXXX) */
+  /** Default unit for product weight */
+  weightUnit: WorkspaceStoreStoreProfileWeightUnitChoices;
+  /** WhatsApp number for order notifications (International format: +XXXXXXXXXXXX) */
   whatsappNumber: Scalars["String"]["output"];
 }
 
@@ -6253,6 +6327,10 @@ export enum WorkspaceStoreCommentStatusChoices {
   Approved = "APPROVED",
   /** Pending */
   Pending = "PENDING",
+  /** Removed */
+  Removed = "REMOVED",
+  /** Spam */
+  Spam = "SPAM",
 }
 
 /** An enumeration. */
@@ -6549,16 +6627,56 @@ export enum WorkspaceStoreSalesChannelChannelTypeChoices {
 
 /** An enumeration. */
 export enum WorkspaceStoreStoreProfileCurrencyChoices {
+  /** Canadian Dollar */
+  Cad = "CAD",
+  /** Euro */
+  Eur = "EUR",
+  /** British Pound Sterling */
+  Gbp = "GBP",
+  /** Nigerian Naira */
+  Ngn = "NGN",
+  /** United States Dollar */
+  Usd = "USD",
   /** Central African CFA franc */
   Xaf = "XAF",
+}
+
+/** An enumeration. */
+export enum WorkspaceStoreStoreProfileDimensionUnitChoices {
+  /** Centimeters */
+  Cm = "CM",
+  /** Feet */
+  Ft = "FT",
+  /** Inches */
+  In = "IN",
+  /** Meters */
+  M = "M",
 }
 
 /** An enumeration. */
 export enum WorkspaceStoreStoreProfileTimezoneChoices {
   /** Douala (UTC+1) */
   AfricaDouala = "AFRICA_DOUALA",
+  /** Johannesburg (UTC+2) */
+  AfricaJohannesburg = "AFRICA_JOHANNESBURG",
   /** Lagos (UTC+1) */
   AfricaLagos = "AFRICA_LAGOS",
+  /** Nairobi (UTC+3) */
+  AfricaNairobi = "AFRICA_NAIROBI",
+  /** Universal Coordinated Time */
+  Utc = "UTC",
+}
+
+/** An enumeration. */
+export enum WorkspaceStoreStoreProfileWeightUnitChoices {
+  /** Grams */
+  G = "G",
+  /** Kilograms */
+  Kg = "KG",
+  /** Pounds */
+  Lb = "LB",
+  /** Ounces */
+  Oz = "OZ",
 }
 
 /**

@@ -1,5 +1,6 @@
 import { SidebarRoot } from '../sidebar/SidebarRoot';
 import { CategorySelector } from '../custom-fields/CategorySelector';
+import { BlogSelector } from '../custom-fields/BlogSelector';
 import { DiscountSelector } from '../custom-fields/DiscountSelector';
 import { ColorPicker } from '../custom-fields/ColorPicker';
 import { ImagePicker } from '../custom-fields/ImagePicker';
@@ -9,6 +10,7 @@ import { TextField } from '../custom-fields/TextField';
 import { Toggle } from '../custom-fields/Toggle';
 import { VideoPicker } from '../custom-fields/VideoPicker';
 import { LinkSelector } from '../custom-fields/LinkSelector';
+import { MenuSelector } from '../custom-fields/MenuSelector';
 
 export const puckOverrides = {
   // Replace entire left sidebar with our custom implementation
@@ -20,6 +22,7 @@ export const puckOverrides = {
   // Custom field types - allows themes to use new field types without importing from frontend
   fieldTypes: {
     categorySelector: CategorySelector,
+    blogSelector: BlogSelector,
     discountSelector: DiscountSelector,
     colorPicker: ColorPicker,
     imagePicker: ImagePicker,
@@ -29,5 +32,6 @@ export const puckOverrides = {
     toggle: Toggle,
     videoPicker: VideoPicker,
     linkSelector: LinkSelector,
+    menuSelector: MenuSelector,
   },
 };

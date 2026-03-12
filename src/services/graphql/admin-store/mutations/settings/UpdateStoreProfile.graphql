@@ -11,8 +11,25 @@ mutation UpdateStoreProfile($input: StoreProfileInput!) {
       supportEmail
       phoneNumber
       whatsappNumber
+      logoUrl
+      primaryColor
+      secondaryColor
+      accentColor
       currency
       timezone
+      defaultLocale
+      supportedLocales
+      orderPrefix
+      orderSuffix
+      weightUnit
+      dimensionUnit
+      legalName
+      addressLine1
+      addressLine2
+      city
+      state
+      postalCode
+      country
       updatedAt
     }
   }

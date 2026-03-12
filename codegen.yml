@@ -23,8 +23,8 @@ ignoreNoDocuments: true
 schema: admin-store.json
 
 documents:
-  - "src/services/graphql/admin-store/mutations/orders/SyncOrderPaymentStatus.graphql"
-  - "src/services/graphql/admin-store/mutations/payments/GetFapshiBalance.graphql"
+  - "src/services/graphql/admin-store/mutations/settings/UpdateStoreProfile.graphql"
+  - "src/services/graphql/admin-store/queries/settings/GetStoreProfile.graphql"
 
 generates:
   # Base types for the store domain
