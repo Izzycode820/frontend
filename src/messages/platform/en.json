@@ -396,7 +396,8 @@
         "paid": "Paid"
       },
       "badge": {
-        "new": "NEW"
+        "new": "NEW",
+        "comingSoon": "COMING SOON"
       }
     },
     "details": {

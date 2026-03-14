@@ -176,6 +176,7 @@ export default function ThemeStorePage() {
                       templateType={theme!.templateType}
                       priceTier={theme!.priceTier}
                       priceAmount={theme!.priceAmount}
+                      status={theme!.status as any}
                       onClick={() => handleThemeClick(theme!.slug)}
                     />
                   ))}

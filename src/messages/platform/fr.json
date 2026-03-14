@@ -397,7 +397,8 @@
         "paid": "Payant"
       },
       "badge": {
-        "new": "NOUVEAU"
+        "new": "NOUVEAU",
+        "comingSoon": "BIENTÔT DISPONIBLE"
       }
     },
     "details": {

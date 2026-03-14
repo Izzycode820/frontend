@@ -3,7 +3,7 @@
 import React from 'react';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { useTranslations } from 'next-intl';
-import { ThemeTemplateTemplateTypeChoices, ThemeTemplatePriceTierChoices } from '@/types/themes/graphql-base';
+import { ThemeTemplateTemplateTypeChoices, ThemeTemplatePriceTierChoices, ThemeTemplateStatusChoices } from '@/types/themes/graphql-base';
 import { cn } from '@/lib/utils';
 
 interface ThemeCardProps {
@@ -13,6 +13,7 @@ interface ThemeCardProps {
   templateType: ThemeTemplateTemplateTypeChoices;
   priceTier: ThemeTemplatePriceTierChoices;
   priceAmount: string | null;
+  status?: ThemeTemplateStatusChoices;
   onClick: () => void;
 }
 
@@ -23,6 +24,7 @@ export function ThemeCard({
   templateType,
   priceTier,
   priceAmount,
+  status = ThemeTemplateStatusChoices.Active,
   onClick,
 }: ThemeCardProps) {
   const t = useTranslations('Theme.list.types');
@@ -46,11 +48,15 @@ export function ThemeCard({
   };
 
   const isNew = false; // Placeholder for "NEW" badge logic if available in future
+  const isComingSoon = status !== ThemeTemplateStatusChoices.Active;
 
   return (
     <div
-      className="group cursor-pointer flex flex-col space-y-3"
-      onClick={onClick}
+      className={cn(
+        "group flex flex-col space-y-3 transition-all duration-300",
+        isComingSoon ? "opacity-60 grayscale cursor-not-allowed" : "cursor-pointer"
+      )}
+      onClick={isComingSoon ? undefined : onClick}
     >
       <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted border border-border/40 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-border/80">
         {previewImage ? (
@@ -69,6 +75,13 @@ export function ThemeCard({
         )}
 
         {/* Overlay on hover could go here if desired */}
+        {isComingSoon && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/20 backdrop-blur-[2px]">
+            <Badge variant="secondary" className="bg-foreground text-background font-bold tracking-widest px-3 py-1 text-[10px] uppercase shadow-lg border-none">
+              {tBadge('comingSoon') || 'Coming Soon'}
+            </Badge>
+          </div>
+        )}
       </div>
 
       <div className="space-y-1">

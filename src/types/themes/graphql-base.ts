@@ -634,6 +634,8 @@ export enum ThemeTemplateStatusChoices {
   Deprecated = "DEPRECATED",
   /** Draft */
   Draft = "DRAFT",
+  /** Published */
+  Published = "PUBLISHED",
 }
 
 /** An enumeration. */

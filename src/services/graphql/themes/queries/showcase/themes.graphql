@@ -1,19 +1,19 @@
-  query Themes(
-    $first: Int
-    $after: String
-    $name_Icontains: String
-    $slug: String
-    $templateType: String
-    $priceTier: String
+query Themes(
+  $first: Int
+  $after: String
+  $name_Icontains: String
+  $slug: String
+  $templateType: String
+  $priceTier: String
+) {
+  themes(
+    first: $first
+    after: $after
+    name_Icontains: $name_Icontains
+    slug: $slug
+    templateType: $templateType
+    priceTier: $priceTier
   ) {
-    themes(
-      first: $first
-      after: $after
-      name_Icontains: $name_Icontains
-      slug: $slug
-      templateType: $templateType
-      priceTier: $priceTier
-    ) {
     edges {
       node {
         id
@@ -23,6 +23,7 @@
         previewImage
         priceTier
         priceAmount
+        status
       }
       cursor
     }
