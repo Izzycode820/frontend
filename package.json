@@ -57,8 +57,10 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tabler/icons-react": "^3.37.1",
     "@tanstack/react-table": "^8.21.3",
+    "@tiptap/extension-font-family": "^3.20.1",
     "@tiptap/extension-link": "^3.14.0",
     "@tiptap/extension-text-align": "^3.14.0",
+    "@tiptap/extension-text-style": "^3.20.1",
     "@tiptap/extension-underline": "^3.14.0",
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
@@ -104,7 +106,11 @@
     "use-editable": "^2.3.3",
     "vaul": "^1.1.2",
     "zod": "^3.25.76",
-    "zustand": "^5.0.9"
+    "zustand": "^5.0.9",
+    "typescript": "^5",
+    "@types/node": "^20.19.9",
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -117,17 +123,13 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/minimatch": "^5.1.2",
-    "@types/node": "^20.19.9",
     "@types/papaparse": "^5.3.16",
-    "@types/react": "^19",
     "@types/react-color": "^3.0.13",
-    "@types/react-dom": "^19",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.8",
     "prettier": "^3.8.1",
     "shadcn": "^3.2.1",
-    "tailwindcss": "^4.1.11",
-    "typescript": "^5"
+    "tailwindcss": "^4.1.11"
   }
 }
