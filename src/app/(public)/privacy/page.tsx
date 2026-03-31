@@ -13,7 +13,7 @@ export default function PrivacyPage() {
                 <section className="mb-8">
                     <h2>1. Introduction</h2>
                     <p>
-                        At HUZILERZ, we respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and share information about you when you use our websites and services in Cameroon.
+                        HUZILERZ is an AI-powered commerce platform owned and operated by <strong className="text-black dark:text-white">Steve Akum Abo</strong>, a sole proprietor based in Cameroon. We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and share information about you when you use our websites and services.
                     </p>
                 </section>
 
@@ -79,8 +79,10 @@ export default function PrivacyPage() {
 
                 <section className="mb-8">
                     <h2>8. Contact Us</h2>
-                    <p>
-                        If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:privacy@huzilerz.com" className="text-blue-600 hover:underline">privacy@huzilerz.com</a>.
+                    <p className="space-y-1">
+                        If you have any questions about this Privacy Policy, please contact us at:<br/>
+                        <strong>Legal Entity:</strong> Steve Akum Abo<br/>
+                        <strong>Email:</strong> <a href="mailto:privacy@huzilerz.com" className="text-blue-600 hover:underline">privacy@huzilerz.com</a>
                     </p>
                 </section>
             </div>

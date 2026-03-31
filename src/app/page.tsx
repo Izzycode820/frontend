@@ -128,13 +128,24 @@ export default function BetaPage() {
           <p className="text-gray-400 mb-10">Have questions about our AI WhatsApp automation? Get in touch with our team.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <section className="space-y-6">
-              <h3 className="text-xl font-medium text-white">Business Information</h3>
-              <div className="space-y-2 text-gray-400">
-                <p><strong className="text-white">Legal Entity:</strong> STEVE AKUM ABO</p>
-                <p><strong className="text-white">Registered Address:</strong> CSIPLI WOURI, CSIPLI WOURI, LITTORAL, 00000, Cameroon</p>
-                <p><strong className="text-white">Email:</strong> abosteve32@gmail.com</p>
-                <p><strong className="text-white">Phone:</strong> +237 654972680</p>
+            <section className="space-y-8">
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-white">About Huzilerz</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  Huzilerz is an AI-powered commerce platform designed to help merchants sell through WhatsApp and facebook and instagram. 
+                  This service is operated by <strong className="text-white">Steve Akum Abo</strong>, a sole proprietor based in Cameroon.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <h3 className="text-xl font-medium text-white">Business Information</h3>
+                <div className="space-y-3 text-gray-400 text-sm">
+                  <p><strong className="text-white">Legal Entity Name:</strong> STEVE AKUM ABO</p>
+                  <p><strong className="text-white">Business Type:</strong> Sole Proprietorship (Huzilerz Brand)</p>
+                  <p><strong className="text-white">Registered Address:</strong> CSIPLI WOURI, CSIPLI WOURI, LITTORAL, 00000, Cameroon</p>
+                  <p><strong className="text-white">Email:</strong> abosteve32@gmail.com</p>
+                  <p><strong className="text-white">Phone:</strong> +237 654972680</p>
+                </div>
               </div>
 
                {/* Links for Meta Verification */}
@@ -174,8 +185,9 @@ export default function BetaPage() {
 
       {/* Footer */}
       <footer className="w-full py-12 border-t border-white/5 text-center">
-        <p className="text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} ABO STEVE AKUM-Huzilers camp. All rights reserved.
+        <p className="text-gray-500 text-xs">
+          &copy; {new Date().getFullYear()} Huzilerz. All rights reserved. <br/>
+          Huzilerz is operated by Steve Akum Abo (Sole Proprietor).
         </p>
       </footer>
     </div>

@@ -13,10 +13,10 @@ export default function TermsPage() {
                 <section className="mb-8">
                     <h2>1. Introduction</h2>
                     <p>
-                        Welcome to HUZILERZ ("we," "our," or "us"). By accessing or using our website, mobile application, and software-as-a-service platform (collectively, the "Service"), you agree to be bound by these Terms of Service ("Terms").
+                        Welcome to HUZILERZ. These Terms of Service ("Terms") constitute a legally binding agreement between you and <strong className="text-black dark:text-white">Steve Akum Abo</strong> (Sole Proprietor), operating under the brand name HUZILERZ, and governed by the laws of the Republic of Cameroon and the OHADA Uniform Acts.
                     </p>
                     <p>
-                        These Terms constitute a legally binding agreement between you and HUZILERZ, operating under the laws of the Republic of Cameroon and the OHADA Uniform Acts.
+                        By accessing or using our website, mobile application, and software-as-a-service platform (collectively, the "Service"), you agree to be bound by these Terms.
                     </p>
                 </section>
 
@@ -98,8 +98,10 @@ export default function TermsPage() {
 
                 <section className="mb-8">
                     <h2>9. Contact Us</h2>
-                    <p>
-                        If you have any questions about these Terms, please contact us at: <a href="mailto:support@huzilerz.com" className="text-blue-600 hover:underline">support@huzilerz.com</a> (or via our support widget when available).
+                    <p className="space-y-1">
+                        If you have any questions about these Terms, please contact us at:<br/>
+                        <strong>Legal Entity:</strong> Steve Akum Abo<br/>
+                        <strong>Email:</strong> <a href="mailto:support@huzilerz.com" className="text-blue-600 hover:underline">support@huzilerz.com</a>
                     </p>
                 </section>
             </div>
