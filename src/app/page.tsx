@@ -120,11 +120,62 @@ export default function BetaPage() {
         </div>
 
       </main>
+      
+      {/* Contact Section for Meta Verification */}
+      <section id="contact" className="w-full py-20 bg-black border-t border-white/5">
+        <div className="max-w-4xl mx-auto px-6 font-sans">
+          <h2 className="text-3xl font-medium mb-6 text-white">Contact Us</h2>
+          <p className="text-gray-400 mb-10">Have questions about our AI WhatsApp automation? Get in touch with our team.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <section className="space-y-6">
+              <h3 className="text-xl font-medium text-white">Business Information</h3>
+              <div className="space-y-2 text-gray-400">
+                <p><strong className="text-white">Legal Entity:</strong> STEVE AKUM ABO</p>
+                <p><strong className="text-white">Registered Address:</strong> CSIPLI WOURI, CSIPLI WOURI, LITTORAL, 00000, Cameroon</p>
+                <p><strong className="text-white">Email:</strong> abosteve32@gmail.com</p>
+                <p><strong className="text-white">Phone:</strong> +237 654972680</p>
+              </div>
+
+               {/* Links for Meta Verification */}
+              <div className="flex gap-6 pt-6 text-sm font-medium text-gray-500 border-t border-white/5">
+                  <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                  <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                  <Link href="/privacy" className="hover:text-white transition-colors">Cookies</Link>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-medium mb-6 text-white">Send us a Message</h3>
+              <form className="flex flex-col gap-4">
+                <input 
+                  type="text" 
+                  placeholder="Your Name" 
+                  className="bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors" 
+                />
+                <input 
+                  type="email" 
+                  placeholder="Your Email" 
+                  className="bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors" 
+                />
+                <textarea 
+                  placeholder="How can we help?" 
+                  rows={4} 
+                  className="bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors" 
+                ></textarea>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 font-medium transition-all">
+                  Send Message
+                </Button>
+              </form>
+            </section>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="w-full py-12 border-t border-white/5 text-center">
         <p className="text-gray-500 text-sm">
-          {t('copyright', { year: new Date().getFullYear() })}
+          &copy; {new Date().getFullYear()} ABO STEVE AKUM-Huzilers camp. All rights reserved.
         </p>
       </footer>
     </div>
