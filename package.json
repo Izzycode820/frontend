@@ -112,7 +112,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4.1.11",
-    "@tailwindcss/postcss": "^4"
+    "@tailwindcss/postcss": "^4",
+    "@types/react-color": "^3.0.13"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -125,7 +126,6 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@types/minimatch": "^5.1.2",
     "@types/papaparse": "^5.3.16",
-    "@types/react-color": "^3.0.13",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.8",
