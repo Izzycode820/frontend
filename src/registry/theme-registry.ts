@@ -9,8 +9,8 @@
  * - User Data: Per-workspace puck_data JSON (from DB) - Customizable
  *
  * ⚠️  AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
- * Generated on: 2026-02-02T03:41:39.292Z
- * Total themes: 2
+ * Generated on: 2026-04-25T01:53:51.891Z
+ * Total themes: 3
  *
  * To update this file, run:
  *   npm run generate-registry
@@ -29,6 +29,8 @@ type ThemeConfigLoader = () => Promise<{
  * Maps theme slugs to npm package imports.
  */
 export const THEME_REGISTRY: Record<string, ThemeConfigLoader> = {
+  // Clean Fast food e-commerce template with modern design
+  'ecommerce-fudi': () => import('@huzilerz/theme-fudi') as Promise<any>,
   // Premium Apple-style tech store with minimalist design, smooth animations, and immersive product showcases
   'ecommerce-apple-forest': () => import('@huzilerz/theme-khendu-apple') as Promise<any>,
   // Clean Shoe e-commerce template with modern design
@@ -88,5 +90,5 @@ export function preloadTheme(themeSlug: string): void {
   }
 }
 
-export const REGISTRY_SIZE = 2;
-export const REGISTRY_THEMES = ['ecommerce-apple-forest', 'ecommerce-sneakers'];
+export const REGISTRY_SIZE = 3;
+export const REGISTRY_THEMES = ['ecommerce-fudi', 'ecommerce-apple-forest', 'ecommerce-sneakers'];
