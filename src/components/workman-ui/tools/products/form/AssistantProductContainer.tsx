@@ -48,6 +48,7 @@ export function AssistantProductContainer({
         allowBackorders: false,
         metaTitle: initialData.meta_title || '',
         metaDescription: initialData.meta_description || '',
+        slug: '',
         shippingRequired: initialData.shipping_required ?? true,
         status: (initialData.status as any) || 'draft',
     }));
@@ -106,6 +107,7 @@ export function AssistantProductContainer({
                     seo: {
                         metaTitle: formData.metaTitle,
                         metaDescription: formData.metaDescription,
+                        slug: formData.slug,
                     },
                     shipping: {
                         requiresShipping: formData.shippingRequired,

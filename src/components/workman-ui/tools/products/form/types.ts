@@ -31,6 +31,7 @@ export interface AssistantProductFormData {
   // SEO
   metaTitle: string;
   metaDescription: string;
+  slug: string;
 
   // Shipping
   shippingRequired: boolean;
