@@ -39,7 +39,7 @@ function MenuSelectorListInner({
       workspaceId: currentWorkspace?.id || ''
     },
     skip: !isOpen || !currentWorkspace?.id,
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   });
 

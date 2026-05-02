@@ -49,10 +49,33 @@ export function useNotificationSocket(options?: UseNotificationSocketOptions) {
     const reconnectAttempts = useRef(0);
     const maxReconnectAttempts = 5;
 
-    const connect = useCallback(() => {
-        if (!isAuthenticated || !token) {
+    // Use refs for options to prevent callback identity from triggering reconnects
+    const optionsRef = useRef(options);
+    useEffect(() => {
+        optionsRef.current = options;
+    }, [options]);
+
+
+    const connect = useCallback(async () => {
+        if (!isAuthenticated) {
             return;
         }
+
+        // 1. Proactive Token Refresh (Industry Standard v3.0)
+        // Ensure we have a fresh identity before the wire-handshake
+        const authStore = useAuthStore.getState();
+        if (authStore.isTokenExpired()) {
+            try {
+                await authStore.refreshTokenSafe();
+            } catch (error) {
+                // If refresh fails, don't attempt connection; wait for next retry or manual login
+                return;
+            }
+        }
+
+        // Get fresh token after potential refresh
+        const currentToken = useAuthStore.getState().token;
+        if (!currentToken) return;
 
         // Don't connect if already connected
         if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -61,7 +84,7 @@ export function useNotificationSocket(options?: UseNotificationSocketOptions) {
 
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsHost = process.env.NEXT_PUBLIC_WS_HOST || 'localhost:8000';
-        const wsUrl = `${wsProtocol}//${wsHost}/ws/notifications/?token=${token}`;
+        const wsUrl = `${wsProtocol}//${wsHost}/ws/notifications/?token=${currentToken}`;
 
         try {
             const ws = new WebSocket(wsUrl);
@@ -93,7 +116,8 @@ export function useNotificationSocket(options?: UseNotificationSocketOptions) {
                                 notifications: [notification, ...prev.notifications],
                                 lastNotification: notification,
                             }));
-                            options?.onNewNotification?.(notification);
+                            optionsRef.current?.onNewNotification?.(notification);
+
 
                             // Play system notification sound
                             playNotificationSound(notification);
@@ -104,7 +128,8 @@ export function useNotificationSocket(options?: UseNotificationSocketOptions) {
                                 ...prev,
                                 unreadCount: data.unread_count || 0,
                             }));
-                            options?.onUnreadCountChange?.(data.unread_count || 0);
+                            optionsRef.current?.onUnreadCountChange?.(data.unread_count || 0);
+
                             break;
 
                         case 'notification_read':
@@ -168,7 +193,8 @@ export function useNotificationSocket(options?: UseNotificationSocketOptions) {
         } catch (e) {
             console.error('[NotificationSocket] Connection failed:', e);
         }
-    }, [isAuthenticated, token, options]);
+    }, [isAuthenticated, token]);
+
 
     const disconnect = useCallback(() => {
         if (reconnectTimeoutRef.current) {

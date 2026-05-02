@@ -79,7 +79,7 @@ interface WorkspaceStoreState {
   // Actions - Workspace Management
   listWorkspaces: (force?: boolean) => Promise<void>
   getWorkspace: (workspaceId: string) => Promise<void>
-  createWorkspace: (request: WorkspaceCreateRequest) => Promise<WorkspaceCreateResponse>
+  createWorkspace: (request: WorkspaceCreateRequest, options?: Record<string, any>) => Promise<WorkspaceCreateResponse>
   updateWorkspace: (workspaceId: string, request: WorkspaceUpdateRequest) => Promise<WorkspaceUpdateResponse>
   deleteWorkspace: (workspaceId: string) => Promise<WorkspaceDeleteResponse>
   restoreWorkspace: (workspaceId: string) => Promise<WorkspaceRestoreResponse>
@@ -187,14 +187,14 @@ export const useWorkspaceStore = create<WorkspaceStoreState>()(
         }
       },
 
-      createWorkspace: async (request) => {
+      createWorkspace: async (request, options = {}) => {
         set((state) => {
           state.isCreating = true
           state.error = null
         })
 
         try {
-          const response = await workspaceService.createWorkspace(request)
+          const response = await workspaceService.createWorkspace(request, options)
 
           set((state) => {
             // Add new workspace to the list (Creator is always owner)

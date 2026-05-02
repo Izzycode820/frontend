@@ -1,0 +1,8 @@
+subscription OnMessageAdded($conversationId: ID!) {
+  onMessageAdded(conversationId: $conversationId) {
+    id
+    body
+    senderType
+    createdAt
+  }
+}

@@ -71,7 +71,8 @@ function LinkSelectorListInner({
       first: 100,
       search: debouncedSearch 
     },
-    skip: !isOpen || view !== 'COLLECTIONS'
+    skip: !isOpen || view !== 'COLLECTIONS',
+    fetchPolicy: 'cache-and-network'
   });
 
   const { data: productsData, loading: productsLoading } = useQuery(GetProductsPickerDocument, {
@@ -79,16 +80,19 @@ function LinkSelectorListInner({
       first: 50,
       search: debouncedSearch
     },
-    skip: !isOpen || view !== 'PRODUCTS'
+    skip: !isOpen || view !== 'PRODUCTS',
+    fetchPolicy: 'cache-and-network'
   });
 
   const { data: pagesData, loading: pagesLoading } = useQuery(GetPagesDocument, {
     variables: { workspaceId },
-    skip: !isOpen || view !== 'PAGES' || !workspaceId
+    skip: !isOpen || view !== 'PAGES' || !workspaceId,
+    fetchPolicy: 'cache-and-network'
   });
 
   const { data: blogsData, loading: blogsLoading } = useQuery(GetBlogsDocument, {
-    skip: !isOpen || view !== 'BLOGS'
+    skip: !isOpen || view !== 'BLOGS',
+    fetchPolicy: 'cache-and-network'
   });
 
   const { data: articlesData, loading: articlesLoading } = useQuery(GetArticlesDocument, {
@@ -96,7 +100,8 @@ function LinkSelectorListInner({
       limit: 50,
       search: debouncedSearch
     },
-    skip: !isOpen || view !== 'ARTICLES'
+    skip: !isOpen || view !== 'ARTICLES',
+    fetchPolicy: 'cache-and-network'
   });
 
   // Reset view when closing

@@ -1,0 +1,8 @@
+mutation SendMerchantMessage($sessionId: String, $message: String!) {
+  sendMerchantMessage(sessionId: $sessionId, message: $message) {
+    success
+    sessionId
+    errorCode
+    responseMessage
+  }
+}

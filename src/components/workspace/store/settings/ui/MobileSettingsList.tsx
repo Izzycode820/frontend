@@ -12,7 +12,8 @@ import {
     Settings,
     Receipt,
     Crown,
-    ChevronRight
+    ChevronRight,
+    Bot
 } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
@@ -26,6 +27,11 @@ const settingsSections = [
                 id: 'general',
                 href: '/general',
                 icon: Settings,
+            },
+            {
+                id: 'workman',
+                href: '/workman',
+                icon: Bot,
             },
         ],
     },

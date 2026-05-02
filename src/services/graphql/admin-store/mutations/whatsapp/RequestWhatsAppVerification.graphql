@@ -1,0 +1,14 @@
+mutation RequestWhatsAppVerification(
+  $accountId: ID!
+  $method: String
+  $language: String
+) {
+  requestWhatsappVerification(
+    accountId: $accountId
+    method: $method
+    language: $language
+  ) {
+    success
+    error
+  }
+}

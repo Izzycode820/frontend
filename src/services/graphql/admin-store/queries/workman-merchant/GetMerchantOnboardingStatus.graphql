@@ -1,0 +1,11 @@
+query GetMerchantOnboardingStatus {
+  merchantOnboardingStatus {
+    steps {
+      id
+      status
+      metadata
+    }
+    currentStepId
+    merchantTier
+  }
+}

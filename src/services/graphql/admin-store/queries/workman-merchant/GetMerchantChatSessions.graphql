@@ -1,0 +1,8 @@
+query GetMerchantChatSessions {
+  merchantChatSessions {
+    id
+    title
+    createdAt
+    updatedAt
+  }
+}

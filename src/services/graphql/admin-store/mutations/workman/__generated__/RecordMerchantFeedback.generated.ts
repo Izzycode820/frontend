@@ -1,0 +1,16 @@
+import * as Types from '../../../../../../types/workspace/store/graphql-base';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type RecordMerchantFeedbackMutationVariables = Types.Exact<{
+  customerPhone: Types.Scalars['String']['input'];
+  actionLabel: Types.Scalars['String']['input'];
+  actionMessage: Types.Scalars['String']['input'];
+  outcome: Types.Scalars['String']['input'];
+  conversationId?: Types.InputMaybe<Types.Scalars['String']['input']>;
+}>;
+
+
+export type RecordMerchantFeedbackMutation = { __typename?: 'Mutation', recordMerchantFeedback: { __typename?: 'RecordMerchantFeedback', success: boolean | null, message: string | null } | null };
+
+
+export const RecordMerchantFeedbackDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RecordMerchantFeedback"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"customerPhone"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"actionLabel"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"actionMessage"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"outcome"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"conversationId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"recordMerchantFeedback"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"customerPhone"},"value":{"kind":"Variable","name":{"kind":"Name","value":"customerPhone"}}},{"kind":"Argument","name":{"kind":"Name","value":"actionLabel"},"value":{"kind":"Variable","name":{"kind":"Name","value":"actionLabel"}}},{"kind":"Argument","name":{"kind":"Name","value":"actionMessage"},"value":{"kind":"Variable","name":{"kind":"Name","value":"actionMessage"}}},{"kind":"Argument","name":{"kind":"Name","value":"outcome"},"value":{"kind":"Variable","name":{"kind":"Name","value":"outcome"}}},{"kind":"Argument","name":{"kind":"Name","value":"conversationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"conversationId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<RecordMerchantFeedbackMutation, RecordMerchantFeedbackMutationVariables>;

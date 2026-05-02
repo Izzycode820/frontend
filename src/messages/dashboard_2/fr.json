@@ -668,6 +668,15 @@
     "failed": "Échec du chargement des analytiques",
     "unknownError": "Une erreur inconnue est survenue",
     "notAvailable": "Analytiques non disponibles",
+    "charts": {
+      "sales": "Ventes totales dans le temps",
+      "sessions": "Sessions dans le temps",
+      "aov": "Valeur moyenne de commande",
+      "conversionRate": "Taux de conversion dans le temps"
+    },
+    "breakdown": {
+      "title": "Répartition totale des ventes"
+    },
     "funnel": {
       "title": "Entonnoir de conversion",
       "conversionRate": "Taux de conversion",
@@ -685,6 +694,22 @@
       "returning": "Récurrents",
       "total": "Total",
       "newCustomerRate": "Taux de nouveaux clients"
+    },
+    "devices": {
+      "title": "Sessions par appareil",
+      "mobile": "Mobile",
+      "desktop": "Bureau",
+      "tablet": "Tablette",
+      "other": "Autre",
+      "noTraffic": "Aucun trafic"
+    },
+    "sessions": {
+      "title": "Sessions de la boutique",
+      "viewReport": "Voir le rapport",
+      "visitors": "Visiteurs",
+      "chartTitle": "Sessions dans le temps",
+      "previousPeriod": "Période précédente",
+      "currentPeriod": "Période actuelle"
     },
     "payments": {
       "title": "Modes de paiement",

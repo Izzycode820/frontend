@@ -15,6 +15,7 @@ import {
   IconWorldWww,
   IconBell,
   IconPencil,
+  IconBrandWhatsapp,
 } from "@tabler/icons-react"
 import type {
   NavMainItem,
@@ -123,6 +124,11 @@ export function getStoreSidebarConfig(
             },
           ],
         },
+        // {
+        //   name: "whatsApp",
+        //   url: STORE_ROUTES.CHANNELS.WHATSAPP(workspaceId),
+        //   icon: IconBrandWhatsapp,
+        // },
       ],
     },
   ]

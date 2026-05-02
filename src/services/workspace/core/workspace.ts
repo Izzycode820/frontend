@@ -51,10 +51,13 @@ export class WorkspaceService extends BaseService {
    * Create new workspace
    * Backend: POST /api/workspaces/create/
    */
-  async createWorkspace(request: WorkspaceCreateRequest): Promise<WorkspaceCreateResponse> {
+  async createWorkspace(
+    request: WorkspaceCreateRequest,
+    options: Omit<import('../../api/client').RequestOptions, 'method' | 'body'> = {}
+  ): Promise<WorkspaceCreateResponse> {
     this.validateRequired(request as unknown as Record<string, unknown>, ['name', 'type'])
 
-    return this.post<WorkspaceCreateResponse>('/create/', request)
+    return this.post<WorkspaceCreateResponse>('/create/', request, options)
   }
 
   /**

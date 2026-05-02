@@ -7,7 +7,7 @@ query GetStoreAnalytics($days: Int = 30) {
     analyticsLevel
     generatedAt
     hasAccess
-    
+
     # BASIC tier data
     cards {
       title
@@ -15,12 +15,21 @@ query GetStoreAnalytics($days: Int = 30) {
       trend
       trendDirection
     }
-    
+
     chart {
       data {
         date
         orders
         revenue
+        sessions
+        aov
+        conversionRate
+        previousDate
+        previousOrders
+        previousRevenue
+        previousSessions
+        previousAov
+        previousConversionRate
       }
       config {
         orders {
@@ -33,7 +42,7 @@ query GetStoreAnalytics($days: Int = 30) {
         }
       }
     }
-    
+
     paymentBreakdown {
       mobileMoney
       cashOnDelivery
@@ -41,7 +50,7 @@ query GetStoreAnalytics($days: Int = 30) {
       whatsapp
       bankTransfer
     }
-    
+
     # PRO tier data (null if not available)
     funnel {
       stages {
@@ -55,14 +64,37 @@ query GetStoreAnalytics($days: Int = 30) {
         cartAbandoned
       }
     }
-    
+
     customers {
       newCustomers
       returningCustomers
       total
       newRate
     }
-    
+
+    sessions {
+      total
+      trend
+      visitors
+      visitorsTrend
+    }
+
+    topProducts {
+      id
+      name
+      views
+      sales
+      revenue
+    }
+
+    activeSessions
+
+    devices {
+      desktop
+      mobile
+      tablet
+    }
+
     # Error handling
     error
     requiredPlan

@@ -1,0 +1,6 @@
+mutation VerifyWhatsAppAccount($accountId: ID!, $code: String!) {
+  verifyWhatsappAccount(accountId: $accountId, code: $code) {
+    success
+    error
+  }
+}

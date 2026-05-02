@@ -34,6 +34,11 @@ import type { WorkspaceAuthContext } from "@/types/authentication/workspace"
 import { MobileBottomNav } from "@/components/workspace/layouts/mobile/mobile-bottom-nav"
 import { MobileHeader } from "@/components/workspace/layouts/mobile/mobile-header"
 import { MobileMenuDrawer } from "@/components/workspace/layouts/mobile/mobile-menu-drawer"
+import { usePathname } from "next/navigation"
+import { ChatContainer } from "@/components/workspace/store/dashboard/chat/ChatContainer"
+import { MerchantChatProvider } from "@/components/workspace/store/dashboard/chat/MerchantChatContext"
+import { cn } from "@/lib/utils"
+
 
 // ============================================================================
 // Configuration
@@ -103,6 +108,9 @@ export function StoreLayoutClient({ children }: StoreLayoutClientProps) {
   const t = useTranslations('Dashboard.navigation')
   const router = useRouter()
   const params = useParams()
+  const pathname = usePathname()
+  const isChatMode = pathname?.includes('/store/chat')
+
   const workspaceId = params?.workspace_id as string
 
   // Hydration guard - prevents SSR/client mismatch
@@ -238,15 +246,26 @@ export function StoreLayoutClient({ children }: StoreLayoutClientProps) {
 
 
   return (
-    <>
+    <MerchantChatProvider>
       <WorkspaceLayout
         sidebar={<WorkspaceSidebar config={sidebarConfig} />}
         header={<WorkspaceHeader title={`${currentWorkspace.name} - ${t('store')}`} />}
         mobileHeader={<MobileHeader user={{ name: user.username, email: user.email, avatar: user.avatar }} workspaceId={currentWorkspace.id} />}
         mobileNav={<MobileBottomNav onMenuClick={() => setIsMobileMenuOpen(true)} />}
       >
-        {children}
+        <div className="relative h-full w-full">
+           {/* Dashboard Area - Hidden when in Chat mode */}
+           <div className={cn("h-full w-full", isChatMode ? "hidden" : "block")}>
+              {children}
+           </div>
+
+           {/* Chat Area - Persistent, never unmounted */}
+           <div className={cn("absolute inset-0 z-10", isChatMode ? "block" : "hidden pointer-events-none opacity-0")}>
+              <ChatContainer />
+           </div>
+        </div>
       </WorkspaceLayout>
+
 
       {/* Mobile Drawer (Portal based) */}
       <MobileMenuDrawer
@@ -254,6 +273,6 @@ export function StoreLayoutClient({ children }: StoreLayoutClientProps) {
         isOpen={isMobileMenuOpen}
         onClose={setIsMobileMenuOpen}
       />
-    </>
+    </MerchantChatProvider>
   )
 }

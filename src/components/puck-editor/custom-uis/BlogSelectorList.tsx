@@ -41,7 +41,7 @@ function BlogSelectorListInner({
   // This query now correctly uses adminStoreClient from provider
   const { data, loading, error, refetch } = useQuery(GetBlogsDocument, {
     skip: !isOpen, // Only query when sheet is open
-    fetchPolicy: 'network-only', // Always fetch fresh data, never use cache
+    fetchPolicy: 'cache-and-network', // Show cache first, then update from network
     notifyOnNetworkStatusChange: true,
   });
 

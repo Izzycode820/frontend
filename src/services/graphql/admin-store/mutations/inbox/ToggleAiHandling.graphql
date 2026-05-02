@@ -1,0 +1,11 @@
+mutation ToggleAiHandling($conversationId: ID!, $mode: AiAutonomyModeEnum!) {
+  toggleAiHandling(conversationId: $conversationId, mode: $mode) {
+    success
+    conversation {
+      id
+      isAiActive
+      aiAutonomyMode
+      status
+    }
+  }
+}

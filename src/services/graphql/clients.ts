@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, from } from '@apollo/client'
+import { ApolloClient, InMemoryCache, from, ApolloLink, Observable } from '@apollo/client'
 import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs'
 import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
@@ -42,16 +42,40 @@ const authLink = setContext((_, { headers }) => {
   }
 })
 
-// Error handling middleware
+// ─── Email Verification Link ──────────────────────────────────────────────────
+// Intercepts EVERY Apollo response (including partial data + errors from errorPolicy:'all')
+// and hard-redirects to /auth/verify when EMAIL_NOT_VERIFIED is present.
+// Uses Observable subscription instead of .map() for Apollo type compatibility.
+
+const verificationLink = new ApolloLink((operation, forward) =>
+  new Observable(observer => {
+    const sub = forward(operation).subscribe({
+      next(response) {
+        const blocked = response.errors?.some(
+          (e: any) => e.extensions?.code === 'EMAIL_NOT_VERIFIED'
+        )
+        if (blocked && typeof window !== 'undefined' && window.location.pathname !== '/auth/verify') {
+          console.warn('[Apollo] EMAIL_NOT_VERIFIED — hard redirecting to /auth/verify')
+          window.location.href = '/auth/verify'
+        }
+        observer.next(response)
+      },
+      error: observer.error.bind(observer),
+      complete: observer.complete.bind(observer),
+    })
+    return () => sub.unsubscribe()
+  })
+)
+
+// General error logger (network errors, non-verification GraphQL errors)
 const errorLink = onError(({ graphQLErrors, networkError }: any) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message, locations, path }: any) =>
-      console.log(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
+      console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
     )
   if (networkError) console.log(`[Network error]: ${networkError}`)
 })
+
 
 // Admin Store API Client (Workspace-scoped)
 const uploadLink = new UploadHttpLink({
@@ -61,6 +85,7 @@ const uploadLink = new UploadHttpLink({
 
 export const adminStoreClient = new ApolloClient({
   link: from([
+    verificationLink,
     errorLink,
     authLink.concat(uploadLink),
   ]),
@@ -95,6 +120,7 @@ const hostinguploadLink = new UploadHttpLink({
 
 export const hostinClient = new ApolloClient({
   link: from([
+    verificationLink,
     errorLink,
     authLink.concat(hostinguploadLink),
   ]),
@@ -129,8 +155,9 @@ const themeUploadLink = new UploadHttpLink({
 
 export const themeClient = new ApolloClient({
   link: from([
+    verificationLink,
     errorLink,
-    authLink.concat(themeUploadLink), // ✅ Add authLink for mutations
+    authLink.concat(themeUploadLink),
   ]),
   cache: new InMemoryCache(),
 })
@@ -143,8 +170,9 @@ const subscriptionUploadLink = new UploadHttpLink({
 
 export const subscriptionClient = new ApolloClient({
   link: from([
+    verificationLink,
     errorLink,
-    authLink.concat(subscriptionUploadLink), // ✅ Add authLink for authenticated queries/mutations
+    authLink.concat(subscriptionUploadLink),
   ]),
   cache: new InMemoryCache({
     typePolicies: {
@@ -174,6 +202,7 @@ const notificationUploadLink = new UploadHttpLink({
 
 export const notificationClient = new ApolloClient({
   link: from([
+    verificationLink,
     errorLink,
     authLink.concat(notificationUploadLink),
   ]),

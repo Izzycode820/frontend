@@ -39,6 +39,17 @@ import {
 } from '@/components/shadcn-ui/select';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
 
+const COUNTRY_CODES = [
+    { code: '+237', label: 'CM (+237)' },
+    { code: '+236', label: 'CF (+236)' },
+    { code: '+235', label: 'TD (+235)' },
+    { code: '+240', label: 'GQ (+240)' },
+    { code: '+241', label: 'GA (+241)' },
+    { code: '+242', label: 'CG (+242)' },
+    { code: '+234', label: 'NG (+234)' },
+    { code: '+90', label: 'TR (+90)' },
+];
+
 export function GeneralSettingsPage() {
     const router = useRouter();
     const params = useParams();
@@ -50,7 +61,9 @@ export function GeneralSettingsPage() {
     const [storeEmail, setStoreEmail] = useState('');
     const [supportEmail, setSupportEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [phoneCode, setPhoneCode] = useState('+237');
     const [whatsappNumber, setWhatsappNumber] = useState('');
+    const [whatsappCode, setWhatsappCode] = useState('+237');
     
     // Branding
     const [primaryColor, setPrimaryColor] = useState('');
@@ -96,9 +109,23 @@ export function GeneralSettingsPage() {
             setStoreDescription(profile.storeDescription || '');
             setStoreEmail(profile.storeEmail || '');
             setSupportEmail(profile.supportEmail || '');
-            // Strip +237 prefix for display
-            setPhoneNumber(profile.phoneNumber?.replace(/^\+237/, '') || '');
-            setWhatsappNumber(profile.whatsappNumber?.replace(/^\+237/, '') || '');
+            // Safe parsing of numbers into Code + Value
+            const parsePhone = (full: string | null | undefined, defaultCode = '+237') => {
+                if (!full) return { code: defaultCode, number: '' };
+                const found = COUNTRY_CODES.find(c => full.startsWith(c.code));
+                if (found) {
+                    return { code: found.code, number: full.substring(found.code.length).trim() };
+                }
+                return { code: defaultCode, number: full.trim() }; 
+            };
+
+            const parsedPhone = parsePhone(profile.phoneNumber);
+            setPhoneCode(parsedPhone.code);
+            setPhoneNumber(parsedPhone.number);
+
+            const parsedWhatsApp = parsePhone(profile.whatsappNumber);
+            setWhatsappCode(parsedWhatsApp.code);
+            setWhatsappNumber(parsedWhatsApp.number);
             
             // Branding
             setPrimaryColor(profile.primaryColor || '');
@@ -149,32 +176,22 @@ export function GeneralSettingsPage() {
         setIsDirty(true);
     };
 
-    // Relaxed validation for international format (+ followed by digits)
-    const validateInternationalPhone = (phone: string): boolean => {
-        if (!phone) return true;
-        return /^\+[1-9]\d{1,14}$/.test(phone);
-    };
-
-    // Format phone number with + for API if not present
-    const formatPhoneForApi = (phone: string): string | null => {
-        if (!phone) return null;
-        if (phone.startsWith('+')) return phone;
-        return `+${phone}`;
+    // Safe builder function before saving
+    const buildFullPhone = (code: string, number: string): string | null => {
+        if (!number || !number.trim()) return null;
+        // if user magically pasted +237 ... strip code overlaps dynamically just in case
+        let cleanNumber = number.trim().replace(/^0+/, ''); // strip leading zeros
+        if (cleanNumber.startsWith(code)) {
+            cleanNumber = cleanNumber.substring(code.length).trim();
+        } else if (cleanNumber.startsWith('+')) {
+            // They pasted a full international string, just trust it directly bypass code
+            return cleanNumber;
+        }
+        return `${code}${cleanNumber}`;
     };
 
     // Save handler
     const handleSave = async () => {
-        // Validate phone numbers
-        if (whatsappNumber && !validateInternationalPhone(formatPhoneForApi(whatsappNumber) || '')) {
-            toast.error(t('invalidWhatsApp'));
-            return;
-        }
-
-        if (phoneNumber && !validateInternationalPhone(formatPhoneForApi(phoneNumber) || '')) {
-            toast.error(t('invalidPhone'));
-            return;
-        }
-
         try {
             const result = await updateProfile({
                 variables: {
@@ -183,8 +200,8 @@ export function GeneralSettingsPage() {
                         storeDescription: storeDescription || null,
                         storeEmail: storeEmail || null,
                         supportEmail: supportEmail || null,
-                        phoneNumber: formatPhoneForApi(phoneNumber),
-                        whatsappNumber: formatPhoneForApi(whatsappNumber),
+                        phoneNumber: buildFullPhone(phoneCode, phoneNumber),
+                        whatsappNumber: buildFullPhone(whatsappCode, whatsappNumber),
                         primaryColor: primaryColor || null,
                         secondaryColor: secondaryColor || null,
                         accentColor: accentColor || null,
@@ -353,15 +370,22 @@ export function GeneralSettingsPage() {
                                 {t('phoneNumber')}
                             </Label>
                             <div className="flex">
-                                <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
-                                    +
-                                </span>
+                                <Select value={phoneCode} onValueChange={(v) => { setPhoneCode(v); setIsDirty(true); }}>
+                                    <SelectTrigger className="w-[100px] rounded-r-none border-r-0 focus:ring-0 focus:ring-offset-0 bg-muted/30">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {COUNTRY_CODES.map(c => (
+                                            <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <Input
                                     id="phoneNumber"
                                     type="tel"
                                     value={phoneNumber}
                                     onChange={handleChange(setPhoneNumber)}
-                                    placeholder="237612345678"
+                                    placeholder="612 34 56 78"
                                     className="rounded-l-none"
                                 />
                             </div>
@@ -394,15 +418,22 @@ export function GeneralSettingsPage() {
                             {t('whatsappNumber')}
                         </Label>
                         <div className="flex max-w-md">
-                            <span className="inline-flex items-center px-3 text-sm text-muted-foreground bg-muted border border-r-0 border-input rounded-l-md">
-                                +
-                            </span>
+                                <Select value={whatsappCode} onValueChange={(v) => { setWhatsappCode(v); setIsDirty(true); }}>
+                                    <SelectTrigger className="w-[100px] rounded-r-none border-r-0 focus:ring-0 focus:ring-offset-0 bg-muted/30">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {COUNTRY_CODES.map(c => (
+                                            <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             <Input
                                 id="whatsappNumber"
                                 type="tel"
                                 value={whatsappNumber}
                                 onChange={handleChange(setWhatsappNumber)}
-                                placeholder="237612345678"
+                                placeholder="612 34 56 78"
                                 className="rounded-l-none"
                             />
                         </div>

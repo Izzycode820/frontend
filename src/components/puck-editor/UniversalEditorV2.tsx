@@ -152,10 +152,22 @@ export default function UniversalEditorV2({
           onChange={handleChange}
           overrides={{
             ...puckOverrides,
-            // Wrap iframe content with MemoryRouter for react-router-dom Link components in themes
-            iframe: ({ children }) => (
-              <MemoryRouter>{children}</MemoryRouter>
-            ),
+            // Wrap iframe content with MemoryRouter & Inject Tailwind CSS to simulate true browser environment
+            iframe: ({ children, document }) => {
+              useEffect(() => {
+                if (document && !document.getElementById("puck-tailwind")) {
+                  const tag = document.createElement("script");
+                  tag.id = "puck-tailwind";
+                  tag.src = "https://cdn.tailwindcss.com";
+                  tag.async = true;
+                  document.head.appendChild(tag);
+                }
+              }, [document]);
+
+              return (
+                <MemoryRouter>{children}</MemoryRouter>
+              );
+            },
             headerActions: ({ children }) => (
               <>
                 {onPreview && (
@@ -240,7 +252,7 @@ export default function UniversalEditorV2({
               )
             }
           ]}
-          // Enable iframe for proper viewport simulation
+          // Enable iframe for proper viewport simulation & styling
           iframe={{
             enabled: true,
             waitForStyles: true

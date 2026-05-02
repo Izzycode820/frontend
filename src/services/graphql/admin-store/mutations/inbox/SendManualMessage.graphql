@@ -1,0 +1,12 @@
+mutation SendManualMessage($conversationId: ID!, $body: String!, $interactiveData: GenericScalar) {
+  sendManualMessage(conversationId: $conversationId, body: $body, interactiveData: $interactiveData) {
+    success
+    message {
+      id
+      body
+      senderType
+      interactiveData
+      createdAt
+    }
+  }
+}

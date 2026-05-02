@@ -1,0 +1,11 @@
+mutation CreateMerchantSession($title: String!) {
+  createMerchantSession(title: $title) {
+    success
+    session {
+      id
+      title
+    }
+    errorCode
+    responseMessage
+  }
+}

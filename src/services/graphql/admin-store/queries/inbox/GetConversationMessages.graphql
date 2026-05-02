@@ -1,0 +1,22 @@
+query GetConversationMessages($conversationId: ID!) {
+  inboxMessages(conversation: $conversationId) {
+    edges {
+      node {
+        id
+        body
+        senderType
+        interactiveData
+        voiceUrl
+        voiceDuration
+        voiceWaveform
+        mediaType
+        mediaMimeType
+        latitude
+        longitude
+        locationName
+        locationAddress
+        createdAt
+      }
+    }
+  }
+}

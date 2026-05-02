@@ -1,0 +1,10 @@
+query GetMerchantChatHistory($sessionId: String!) {
+  merchantChatHistory(sessionId: $sessionId) {
+    id
+    prompt
+    response
+    domain
+    intent
+    createdAt
+  }
+}

@@ -4,6 +4,9 @@ import { ThemeWrapper } from "@/components/workspace/store/config/theme-wrapper"
 import { StoreLayoutClient } from "@/components/workspace/store/config/store-layout-client"
 import { ApolloProvider } from "@apollo/client/react"
 import { adminStoreClient } from "@/services/graphql/clients"
+import { MerchantChatProvider } from "@/components/workspace/store/dashboard/chat/MerchantChatContext"
+
+
 
 import "@/app/(protected)/workspace/[workspace_id]/store/theme.css"
 
@@ -32,6 +35,8 @@ export default function DashboardLayout({
           {children}
         </StoreLayoutClient>
       </ThemeWrapper>
+
+
     </ApolloProvider>
   )
 }

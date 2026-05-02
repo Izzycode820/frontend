@@ -1,0 +1,14 @@
+import * as Types from '../../../../../../types/workspace/store/graphql-base';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type SendManualMessageMutationVariables = Types.Exact<{
+  conversationId: Types.Scalars['ID']['input'];
+  body: Types.Scalars['String']['input'];
+  interactiveData?: Types.InputMaybe<Types.Scalars['GenericScalar']['input']>;
+}>;
+
+
+export type SendManualMessageMutation = { __typename?: 'Mutation', sendManualMessage: { __typename?: 'SendManualMessageMutation', success: boolean | null, message: { __typename?: 'InboxMessageType', id: string, body: string, senderType: Types.WorkspaceInboxInboxMessageSenderTypeChoices, interactiveData: any | null, createdAt: string } | null } | null };
+
+
+export const SendManualMessageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SendManualMessage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"conversationId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"body"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"interactiveData"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"GenericScalar"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sendManualMessage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"conversationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"conversationId"}}},{"kind":"Argument","name":{"kind":"Name","value":"body"},"value":{"kind":"Variable","name":{"kind":"Name","value":"body"}}},{"kind":"Argument","name":{"kind":"Name","value":"interactiveData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"interactiveData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"body"}},{"kind":"Field","name":{"kind":"Name","value":"senderType"}},{"kind":"Field","name":{"kind":"Name","value":"interactiveData"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<SendManualMessageMutation, SendManualMessageMutationVariables>;

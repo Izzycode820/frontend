@@ -103,7 +103,7 @@ export function WorkspaceContextLoader({ children }: WorkspaceContextLoaderProps
                 <p className="text-red-500">
                     {restorationError || 'Workspace context missing'}
                 </p>
-                <a href="/workspaces" className="text-sm text-blue-600 hover:underline">
+                <a href="/workspace" className="text-sm text-blue-600 hover:underline">
                     ← Return to Dashboard
                 </a>
             </div>

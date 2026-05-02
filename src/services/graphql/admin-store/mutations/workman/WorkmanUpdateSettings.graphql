@@ -1,0 +1,41 @@
+mutation WorkmanUpdateSettings(
+  $llmProvider: String
+  $autoReplyEnabled: Boolean
+  $newCustomerHandler: String
+  $personas: GenericScalar
+  $brainConfig: GenericScalar
+  $minConfidence: Float
+  $primaryLanguage: String
+  $supportedLanguages: GenericScalar
+  $autoAdaptLanguage: Boolean
+  $operatingHours: GenericScalar
+) {
+  workmanUpdateSettings(
+    llmProvider: $llmProvider
+    autoReplyEnabled: $autoReplyEnabled
+    newCustomerHandler: $newCustomerHandler
+    personas: $personas
+    brainConfig: $brainConfig
+    minConfidence: $minConfidence
+    primaryLanguage: $primaryLanguage
+    supportedLanguages: $supportedLanguages
+    autoAdaptLanguage: $autoAdaptLanguage
+    operatingHours: $operatingHours
+  ) {
+    success
+    message
+    settings {
+      id
+      llmProvider
+      autoReplyEnabled
+      newCustomerHandler
+      personas
+      brainConfig
+      minConfidence
+      primaryLanguage
+      supportedLanguages
+      autoAdaptLanguage
+      operatingHours
+    }
+  }
+}

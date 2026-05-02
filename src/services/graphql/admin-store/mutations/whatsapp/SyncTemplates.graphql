@@ -1,0 +1,6 @@
+mutation SyncTemplates($accountId: ID!) {
+  syncWhatsappTemplates(accountId: $accountId) {
+    success
+    error
+  }
+}

@@ -1,0 +1,6 @@
+mutation StopWorkmanLoop($conversationId: String!) {
+  stopWorkmanLoop(conversationId: $conversationId) {
+    success
+    message
+  }
+}

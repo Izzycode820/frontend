@@ -1,0 +1,15 @@
+query GetWorkmanSettings {
+  workmanSettings {
+    id
+    llmProvider
+    autoReplyEnabled
+    newCustomerHandler
+    personas
+    brainConfig
+    minConfidence
+    primaryLanguage
+    supportedLanguages
+    autoAdaptLanguage
+    operatingHours
+  }
+}

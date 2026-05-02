@@ -30,6 +30,12 @@ query GetProductsList(
         category { id name }
         productType
         vendor
+        currency
+        metaSync {
+          id
+          status
+          lastSyncAt
+        }
         createdAt
       }
     }

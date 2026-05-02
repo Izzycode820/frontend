@@ -1,0 +1,26 @@
+query GetCustomerAdvisoryProfile($customerPhone: String!) {
+  customerAdvisoryProfile(customerPhone: $customerPhone) {
+    id
+    customerPhone
+    aiScore
+    conversionProbability
+    dropRisk
+    dropRiskLevel
+    priceSensitivity
+    decisiveness
+    trustLevel
+    currentIntent
+    intentConfidence
+    activeIntervention
+    messageCount
+    lastAnalyzedAt
+    isStale
+    sentimentHistory
+    lastAdviserOutput
+    currentDomain
+    currentState
+    previousState
+    isStateTransitionPaused
+    pauseReason
+  }
+}

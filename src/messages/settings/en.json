@@ -632,6 +632,10 @@
       "notifications": {
         "label": "Notifications",
         "description": "Email and SMS notifications"
+      },
+      "workman": {
+        "label": "Workman AI",
+        "description": "Configure AI agent and brain"
       }
     }
   }

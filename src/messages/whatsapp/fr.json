@@ -1,0 +1,101 @@
+{
+  "WhatsAppNav": {
+    "title": "Canal WhatsApp",
+    "items": {
+      "overview": {
+        "label": "Aperçu"
+      },
+      "inbox": {
+        "label": "Boîte de réception"
+      },
+      "templates": {
+        "label": "Modèles"
+      },
+      "api_control": {
+        "label": "Contrôle API",
+        "description": "Paramètres de connexion et statut d'intégration de l'API Meta Cloud."
+      }
+    }
+  },
+  "WhatsAppInbox": {
+    "title": "Boîte de réception",
+    "search": "Rechercher des clients...",
+    "advisor": {
+      "title": "Conseiller Stratégique",
+      "intent": "Intention Prédite",
+      "strategy": "Stratégie de Vente en Direct",
+      "recommendations": "Réponses Suggérées par l'IA",
+      "cart_value": "Opportunité Active"
+    },
+    "auto_reply_mode": "⚡ Mode Réponse Auto (Hors Services)",
+    "draft_mode": "📝 Mode Brouillon (Pendant Services)",
+    "ai_active": "IA Activée",
+    "take_over": "Reprendre Main"
+  },
+  "WhatsAppOverview": {
+    "title": "Aperçu WhatsApp",
+    "placeholder": "Aperçu du canal e-commerce WhatsApp - Statistiques et informations IA à venir."
+  },
+  "WhatsAppOnboarding": {
+    "title": "Connecter WhatsApp Business",
+    "description": "Utilisez votre propre numéro sur Huzilerz et boostez-le avec l'IA.",
+    "steps": {
+      "checklist": "Liste de contrôle",
+      "connect": "Connecter",
+      "method": "Vérifier",
+      "finish": "Terminer",
+      "link": "Lier avec Meta",
+      "link_description": "Connectez-vous avec Facebook pour sélectionner votre compte WhatsApp Business et votre numéro.",
+      "continue_facebook": "Continuer avec Facebook",
+      "back": "Retour"
+    },
+    "checklist": {
+      "title": "Avant de vous connecter",
+      "warning": "CRITICAL : Si ce numéro est actif sur une application mobile, vous DEVEZ d'abord supprimer le compte. Désinstaller l'application ne suffit pas.",
+      "learning": "Qu'est-ce que le BYON ? Cela vous permet d'utiliser votre numéro professionnel existant avec nos outils IA, mais il ne fonctionnera plus sur les applications mobiles WhatsApp standard.",
+      "note": "Vous aurez besoin d'un compte Facebook personnel pour gérer l'ID Business.",
+      "item_delete": "J'ai supprimé mon compte WhatsApp de mon téléphone OU c'est un nouveau numéro.",
+      "item_facebook": "J'ai un compte Facebook prêt.",
+      "item_ready": "Je suis prêt à recevoir un code de vérification à 6 chiffres."
+    },
+    "verify": {
+      "title": "Vérifiez votre numéro",
+      "description": "Choisissez comment vous souhaitez recevoir votre code de vérification à 6 chiffres.",
+      "sms": "Envoyer SMS",
+      "voice": "Appel vocal",
+      "sms_description": "Recevez un code à 6 chiffres par SMS",
+      "voice_description": "Recevez un appel vocal avec le code",
+      "request_code": "Demander le code",
+      "enter_code": "Entrez le code de vérification",
+      "code_sent": "Code de vérification envoyé au {number}",
+      "code_sent_to": "Nous avons envoyé un code à votre numéro se terminant par {digits}",
+      "verifying": "Vérification...",
+      "success": "Compte vérifié avec succès !",
+      "change_method": "Changer de méthode de vérification"
+    },
+    "errors": {
+      "no_account": "Aucun compte sélectionné ou ID manquant.",
+      "connect_failed": "Échec de la connexion au compte. Veuillez réessayer.",
+      "verify_failed": "La vérification a échoué. Vérifiez le code et réessayez."
+    },
+    "footer_terms": "En connectant votre compte WhatsApp, vous acceptez les conditions commerciales de Meta et nos politiques d'intégration."
+  },
+  "WhatsAppAccount": {
+    "title": "Compte WhatsApp",
+    "verified": "Vérifié",
+    "pending": "Attente de vérification",
+    "waba_id": "ID WABA",
+    "phone_id": "ID Numéro de téléphone",
+    "disconnect": "Déconnecter le compte",
+    "api_info": "Votre compte est connecté au Cloud WhatsApp de Huzilerz. Tous les messages entrants seront traités par l'IA selon vos paramètres dans le tableau de bord Workman.",
+    "manage_meta": "Gérer dans Meta",
+    "cards": {
+      "brain_title": "Mémoire du Cerveau",
+      "brain_description": "L'IA utilise la mémoire de votre boutique pour répondre.",
+      "template_title": "Sync des Modèles",
+      "template_description": "Synchronisez vos modèles Meta ici.",
+      "limits_title": "Limites de Messagerie",
+      "limits_description": "Limite de Tier 1 : 1k clients/24h."
+    }
+  }
+}

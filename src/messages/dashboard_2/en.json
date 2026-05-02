@@ -668,6 +668,15 @@
     "failed": "Failed to load analytics",
     "unknownError": "Unknown error occurred",
     "notAvailable": "Analytics Not Available",
+    "charts": {
+      "sales": "Total Sales Over Time",
+      "sessions": "Sessions Over Time",
+      "aov": "Average Order Value",
+      "conversionRate": "Conversion Rate Over Time"
+    },
+    "breakdown": {
+      "title": "Total Sales Breakdown"
+    },
     "funnel": {
       "title": "Conversion Funnel",
       "conversionRate": "Conversion Rate",
@@ -685,6 +694,22 @@
       "returning": "Returning",
       "total": "Total",
       "newCustomerRate": "New Customer Rate"
+    },
+    "devices": {
+      "title": "Sessions by device",
+      "mobile": "Mobile",
+      "desktop": "Desktop",
+      "tablet": "Tablet",
+      "other": "Other",
+      "noTraffic": "No Traffic Yet"
+    },
+    "sessions": {
+      "title": "Online store sessions",
+      "viewReport": "View report",
+      "visitors": "Visitors",
+      "chartTitle": "Sessions over time",
+      "previousPeriod": "Previous Period",
+      "currentPeriod": "Current Period"
     },
     "payments": {
       "title": "Payment Methods",

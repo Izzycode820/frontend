@@ -1,0 +1,9 @@
+query GetStrategicInsights($conversationId: ID!) {
+  inboxConversation(id: $conversationId) {
+    id
+    isAiActive
+    aiAutonomyMode
+    cartValue
+    aiStrategyContext
+  }
+}

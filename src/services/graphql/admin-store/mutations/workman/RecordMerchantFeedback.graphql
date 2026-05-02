@@ -1,0 +1,18 @@
+mutation RecordMerchantFeedback(
+  $customerPhone: String!
+  $actionLabel: String!
+  $actionMessage: String!
+  $outcome: String!
+  $conversationId: String
+) {
+  recordMerchantFeedback(
+    customerPhone: $customerPhone
+    actionLabel: $actionLabel
+    actionMessage: $actionMessage
+    outcome: $outcome
+    conversationId: $conversationId
+  ) {
+    success
+    message
+  }
+}

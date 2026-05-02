@@ -1,0 +1,120 @@
+/* StrategicAdviser.css — Mature Protocol Styles */
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-gradient {
+  0%, 100% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes wave-animation {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}
+
+@keyframes strategic-pulse {
+  0% { border-color: rgba(99, 102, 241, 0.3); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+  25% { border-color: #818cf8; box-shadow: 0 0 20px 4px rgba(99, 102, 241, 0.5); }
+  50% { border-color: #6366f1; box-shadow: 0 0 35px 8px rgba(99, 102, 241, 0.8); }
+  75% { border-color: #818cf8; box-shadow: 0 0 20px 4px rgba(99, 102, 241, 0.5); }
+  100% { border-color: rgba(99, 102, 241, 0.3); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+}
+
+.thinking-wave {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.thinking-wave span {
+  width: 4px;
+  height: 4px;
+  background-color: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  animation: wave-animation 1.4s infinite ease-in-out;
+}
+
+.thinking-wave span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-wave span:nth-child(3) { animation-delay: 0.4s; }
+
+.strategy-card-pulse {
+  animation: strategic-pulse 2s ease-in-out 2;
+}
+
+.ai-active-pulse {
+  background: linear-gradient(135deg, #6366f1, #a855f7, #06b6d4);
+  filter: blur(4px);
+}
+
+.glow-strategic {
+  box-shadow: 0 0 20px -5px rgba(132, 85, 239, 0.2);
+}
+
+.sentiment-sparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.spark-bar {
+  width: 3px;
+  border-radius: 1px;
+  transition: height 0.3s ease;
+}
+
+.intel-chip-border {
+  position: relative;
+  background: #27272a; /* Zinc 800 */
+  border-radius: 9999px;
+  padding: 1px;
+  overflow: hidden;
+}
+
+.intel-chip-border::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent 0%, #6366f1 25%, #a855f7 50%, #06b6d4 75%, transparent 100%);
+  animation: spin-slow 4s linear infinite;
+}
+
+.intel-chip-content {
+  position: relative;
+  background: #09090b; /* Zinc 950 */
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  z-index: 1;
+}
+
+.metric-value-transition {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar for Zinc theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}

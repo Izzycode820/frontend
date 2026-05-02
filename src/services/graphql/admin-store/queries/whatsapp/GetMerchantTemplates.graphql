@@ -1,0 +1,14 @@
+query GetMerchantTemplates($accountId: ID) {
+  marketingTemplates(accountId: $accountId) {
+    id
+    name
+    category
+    status
+    language
+    bodyText
+    headerText
+    footerText
+    buttons
+    updatedAt
+  }
+}

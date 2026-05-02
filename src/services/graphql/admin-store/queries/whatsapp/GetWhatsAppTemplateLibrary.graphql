@@ -1,0 +1,13 @@
+query GetWhatsAppTemplateLibrary {
+  marketingWhatsappTemplateLibrary {
+    id
+    name
+    category
+    language
+    components
+    bodyText
+    headerText
+    footerText
+    buttons
+  }
+}

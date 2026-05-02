@@ -14,6 +14,7 @@ import { getEndpointURL, API_BASE } from './config'
 export interface RequestOptions {
   method?: string
   body?: string
+  headers?: HeadersInit
   requireAuth?: boolean
   skipAuth?: boolean
   timeout?: number

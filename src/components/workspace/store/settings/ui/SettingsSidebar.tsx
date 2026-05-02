@@ -11,7 +11,8 @@ import {
   Users,
   Settings,
   Receipt,
-  Crown
+  Crown,
+  Bot
 } from 'lucide-react';
 
 import { useTranslations } from 'next-intl';
@@ -56,6 +57,11 @@ const settingsNavItems = [
     id: 'staff',
     href: '/staff',
     icon: Users,
+  },
+  {
+    id: 'workman',
+    href: '/workman',
+    icon: Bot,
   },
 ];
 

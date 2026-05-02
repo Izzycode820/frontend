@@ -28,6 +28,7 @@ export interface Scalars {
   BigInt: { input: any; output: any };
   DateTime: { input: string; output: string };
   Decimal: { input: any; output: any };
+  GenericScalar: { input: any; output: any };
   JSONString: { input: any; output: any };
   UUID: { input: string; output: string };
   Upload: { input: any; output: any };
@@ -46,6 +47,14 @@ export interface AcceptInvite {
   member?: Maybe<WorkspaceMemberType>;
   message?: Maybe<Scalars["String"]["output"]>;
   success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/** Deep-copy a default system template for a workspace. */
+export interface ActivateAutomationTemplate {
+  __typename?: "ActivateAutomationTemplate";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+  workflow?: Maybe<AutomationWorkflowType>;
 }
 
 /** Add comment to order timeline */
@@ -110,6 +119,12 @@ export interface AddressInput {
   city?: InputMaybe<Scalars["String"]["input"]>;
   /** Cameroon region */
   region?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+export enum AiAutonomyModeEnum {
+  Auto = "AUTO",
+  Off = "OFF",
+  Shadow = "SHADOW",
 }
 
 /**
@@ -185,6 +200,65 @@ export interface ArticleType extends Node {
   title: Scalars["String"]["output"];
   updatedAt: Scalars["DateTime"]["output"];
   url?: Maybe<Scalars["String"]["output"]>;
+}
+
+/** Schema for a configuration field required by a Node in the UI. */
+export interface AutomationNodeFieldType {
+  __typename?: "AutomationNodeFieldType";
+  label: Scalars["String"]["output"];
+  name: Scalars["String"]["output"];
+  required: Scalars["Boolean"]["output"];
+  type: Scalars["String"]["output"];
+}
+
+/** Dynamic schema for an available Automation Node type. */
+export interface AutomationNodeRegistryType {
+  __typename?: "AutomationNodeRegistryType";
+  category: Scalars["String"]["output"];
+  configSchema: Array<AutomationNodeFieldType>;
+  description: Scalars["String"]["output"];
+  maxExits: Scalars["Int"]["output"];
+  name: Scalars["String"]["output"];
+  type: Scalars["String"]["output"];
+}
+
+/** Input for a single automation step node in the graph. */
+export interface AutomationStepInput {
+  config?: InputMaybe<Scalars["JSONString"]["input"]>;
+  id: Scalars["String"]["input"];
+  nextStep?: InputMaybe<Scalars["String"]["input"]>;
+  nextStepFalse?: InputMaybe<Scalars["String"]["input"]>;
+  type: Scalars["String"]["input"];
+}
+
+/** GraphQL type for Automation Step (Graph Node). */
+export interface AutomationStepType extends Node {
+  __typename?: "AutomationStepType";
+  /** Step-type-specific configuration */
+  config: Scalars["JSONString"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
+  /** The next step to execute. For conditionals, this is the TRUE path. */
+  nextStep?: Maybe<AutomationStepType>;
+  /** For conditional steps, this is the FALSE path. */
+  nextStepFalse?: Maybe<AutomationStepType>;
+  stepType: WorkspaceMarketingAutomationStepStepTypeChoices;
+  updatedAt: Scalars["DateTime"]["output"];
+}
+
+/** GraphQL type for Automation Workflow. */
+export interface AutomationWorkflowType extends Node {
+  __typename?: "AutomationWorkflowType";
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
+  /** Inactive workflows do not process new triggers */
+  isActive: Scalars["Boolean"]["output"];
+  /** Merchant-facing workflow name (e.g., Abandoned Cart Recovery) */
+  name: Scalars["String"]["output"];
+  steps?: Maybe<Array<Maybe<AutomationStepType>>>;
+  /** The OS event that activates this workflow */
+  triggerType: WorkspaceMarketingAutomationWorkflowTriggerTypeChoices;
+  updatedAt: Scalars["DateTime"]["output"];
 }
 
 /**
@@ -525,7 +599,6 @@ export interface CategoryType extends Node {
   description: Scalars["String"]["output"];
   /** Featured image URL from featured_media FK */
   featuredImageUrl?: Maybe<Scalars["String"]["output"]>;
-  /** Featured image for this category/collection */
   featuredMedia?: Maybe<MediaUploadType>;
   id: Scalars["ID"]["output"];
   /** Whether collection is featured on homepage */
@@ -719,12 +792,30 @@ export interface ChartData {
 /** Single data point in time-series chart - BASIC tier */
 export interface ChartDataPoint {
   __typename?: "ChartDataPoint";
+  /** Average Order Value for the day */
+  aov: Scalars["Float"]["output"];
+  /** Conversion rate for the day */
+  conversionRate?: Maybe<Scalars["Float"]["output"]>;
   /** ISO date (YYYY-MM-DD) */
   date: Scalars["String"]["output"];
   /** Order count for the day */
   orders: Scalars["Int"]["output"];
+  /** Previous period AOV */
+  previousAov?: Maybe<Scalars["Float"]["output"]>;
+  /** Previous period Conversion Rate */
+  previousConversionRate?: Maybe<Scalars["Float"]["output"]>;
+  /** ISO date (YYYY-MM-DD) for previous period */
+  previousDate?: Maybe<Scalars["String"]["output"]>;
+  /** Previous period Order count */
+  previousOrders?: Maybe<Scalars["Int"]["output"]>;
+  /** Previous period Revenue */
+  previousRevenue?: Maybe<Scalars["Float"]["output"]>;
+  /** Previous period Sessions */
+  previousSessions?: Maybe<Scalars["Int"]["output"]>;
   /** Revenue for the day */
   revenue: Scalars["Float"]["output"];
+  /** Sessions (Page Views) for the day */
+  sessions: Scalars["Int"]["output"];
 }
 
 /** Chart series configurations for orders and revenue */
@@ -744,6 +835,16 @@ export interface ChartSeriesConfig {
 export interface ClearImportProgress {
   __typename?: "ClearImportProgress";
   message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
+ * Mutation to archive/clear the current thread when limits are hit.
+ * We delete the WorkmanMerchantConversation logs.
+ * Because FSM state runs through WorkmanMerchantProfile, the AI maintains context perfectly.
+ */
+export interface ClearMerchantThread {
+  __typename?: "ClearMerchantThread";
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
@@ -780,6 +881,14 @@ export interface CommentType extends Node {
   status: WorkspaceStoreCommentStatusChoices;
   statusDisplay?: Maybe<Scalars["String"]["output"]>;
   updatedAt: Scalars["DateTime"]["output"];
+}
+
+/** Connect a new WABA to the workspace. */
+export interface ConnectWhatsAppAccount {
+  __typename?: "ConnectWhatsAppAccount";
+  account?: Maybe<WhatsAppBusinessType>;
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
 /**
@@ -887,6 +996,26 @@ export interface CreateLocation {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+/** Create a new draft campaign. */
+export interface CreateMarketingCampaign {
+  __typename?: "CreateMarketingCampaign";
+  campaign?: Maybe<MarketingCampaignType>;
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
+ * Creates a new sidebar thread.
+ * ENFORCES THE GATED GROWTH LOCK: Blocks parallel threads if in ONBOARDING (C0-C9).
+ */
+export interface CreateMerchantSession {
+  __typename?: "CreateMerchantSession";
+  errorCode?: Maybe<Scalars["String"]["output"]>;
+  responseMessage?: Maybe<Scalars["String"]["output"]>;
+  session?: Maybe<WorkmanChatSessionType>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 /**
  * Create a new order with validation and inventory checks
  *
@@ -949,6 +1078,52 @@ export interface CreateWhatsAppOrder {
   order?: Maybe<OrderType>;
   success?: Maybe<Scalars["Boolean"]["output"]>;
   unavailableItems?: Maybe<Array<Maybe<Scalars["JSONString"]["output"]>>>;
+}
+
+/**
+ * GraphQL type for the Strategic Adviser per-customer profile.
+ * Exposes trajectory scores, behavioral traits, sentiment history,
+ * and the ai_score badge value for the conversation list.
+ */
+export interface CustomerAdvisoryProfileType extends Node {
+  __typename?: "CustomerAdvisoryProfileType";
+  activeIntervention: WorkmanCustomerAdvisoryProfileActiveInterventionChoices;
+  /** Merchant-facing 0-100 intent score for conversation card badge. */
+  aiScore?: Maybe<Scalars["Int"]["output"]>;
+  /** Probability (0.0-1.0) that this customer completes a purchase. */
+  conversionProbability: Scalars["Float"]["output"];
+  currentDomain: WorkmanCustomerAdvisoryProfileCurrentDomainChoices;
+  currentIntent: WorkmanCustomerAdvisoryProfileCurrentIntentChoices;
+  /** Current state within the domain (e.g., payment_requested). */
+  currentState: Scalars["String"]["output"];
+  customerPhone: Scalars["String"]["output"];
+  /** How quickly the customer makes purchase decisions. */
+  decisiveness: Scalars["Float"]["output"];
+  /** Probability (0.0-1.0) that this customer will disengage. */
+  dropRisk: Scalars["Float"]["output"];
+  /** Categorical threshold derived from drop_risk score for UI signal coloring. */
+  dropRiskLevel: WorkmanCustomerAdvisoryProfileDropRiskLevelChoices;
+  id: Scalars["ID"]["output"];
+  /** AI confidence in the current_intent classification (0.0-1.0). */
+  intentConfidence: Scalars["Float"]["output"];
+  /** Marks the profile as outdated (e.g., conversation closed). */
+  isStale: Scalars["Boolean"]["output"];
+  /** True if the AI is waiting for merchant approval (e.g., during bargaining). */
+  isStateTransitionPaused: Scalars["Boolean"]["output"];
+  /** Full structured output of the last adviser analysis. */
+  lastAdviserOutput?: Maybe<Scalars["GenericScalar"]["output"]>;
+  lastAnalyzedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  /** Total messages analyzed by the Adviser for this customer. */
+  messageCount: Scalars["Int"]["output"];
+  /** The reason why the AI agent paused the flow. */
+  pauseReason?: Maybe<Scalars["String"]["output"]>;
+  previousState?: Maybe<Scalars["String"]["output"]>;
+  /** How strongly the customer reacts to price (0=indifferent, 1=highly sensitive). */
+  priceSensitivity: Scalars["Float"]["output"];
+  /** Rolling list of per-message sentiment floats for the sparkline. */
+  sentimentHistory?: Maybe<Scalars["GenericScalar"]["output"]>;
+  /** Estimated merchant trust based on tone and engagement depth. */
+  trustLevel: Scalars["Float"]["output"];
 }
 
 /**
@@ -1118,6 +1293,13 @@ export interface DeleteArticle {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+/** Soft-delete an automation workflow. */
+export interface DeleteAutomationWorkflow {
+  __typename?: "DeleteAutomationWorkflow";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 export interface DeleteBlog {
   __typename?: "DeleteBlog";
   message?: Maybe<Scalars["String"]["output"]>;
@@ -1183,6 +1365,12 @@ export interface DeleteMedia {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+/** Mutation to completely delete a thread session from the sidebar UI and its history. */
+export interface DeleteMerchantSession {
+  __typename?: "DeleteMerchantSession";
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 /** Delete shipping package */
 export interface DeletePackage {
   __typename?: "DeletePackage";
@@ -1211,6 +1399,14 @@ export interface DeleteSalesChannel {
   __typename?: "DeleteSalesChannel";
   message?: Maybe<Scalars["String"]["output"]>;
   success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/** Device breakdown - ADVANCED tier */
+export interface DeviceMetrics {
+  __typename?: "DeviceMetrics";
+  desktop: Scalars["Int"]["output"];
+  mobile: Scalars["Int"]["output"];
+  tablet: Scalars["Int"]["output"];
 }
 
 /** Input for creating/updating discounts */
@@ -1587,6 +1783,94 @@ export interface ImportResultType {
   warnings?: Maybe<Array<Maybe<Scalars["String"]["output"]>>>;
 }
 
+/** Import a standard template from the SaaS library. */
+export interface ImportWhatsAppTemplate {
+  __typename?: "ImportWhatsAppTemplate";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+  template?: Maybe<WhatsAppTemplateType>;
+}
+
+export interface InboxConversationConnection {
+  __typename?: "InboxConversationConnection";
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<InboxConversationEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars["Int"]["output"]>;
+}
+
+/** A Relay edge containing a `InboxConversation` and its cursor. */
+export interface InboxConversationEdge {
+  __typename?: "InboxConversationEdge";
+  /** A cursor for use in pagination */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge */
+  node?: Maybe<InboxConversationType>;
+}
+
+export interface InboxConversationType extends Node {
+  __typename?: "InboxConversationType";
+  aiAutonomyMode?: Maybe<AiAutonomyModeEnum>;
+  /** AI brain state, suggested drafts, and confidence scores for the merchant. */
+  aiStrategyContext: Scalars["JSONString"]["output"];
+  /** Current potential sales value linked to this thread. */
+  cartValue: Scalars["Decimal"]["output"];
+  customerPhone: Scalars["String"]["output"];
+  id: Scalars["ID"]["output"];
+  /** Legacy flag. Replaced by ai_autonomy_mode but kept for backward compatibility. */
+  isAiActive: Scalars["Boolean"]["output"];
+  isStateTransitionPaused?: Maybe<Scalars["Boolean"]["output"]>;
+  lastMessage?: Maybe<InboxMessageType>;
+  pauseReason?: Maybe<Scalars["String"]["output"]>;
+  status: WorkspaceInboxInboxConversationStatusChoices;
+  unreadCount: Scalars["Int"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+  workmanSettings?: Maybe<WorkmanSettingsType>;
+}
+
+export interface InboxMessageConnection {
+  __typename?: "InboxMessageConnection";
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<InboxMessageEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars["Int"]["output"]>;
+}
+
+/** A Relay edge containing a `InboxMessage` and its cursor. */
+export interface InboxMessageEdge {
+  __typename?: "InboxMessageEdge";
+  /** A cursor for use in pagination */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge */
+  node?: Maybe<InboxMessageType>;
+}
+
+export interface InboxMessageType extends Node {
+  __typename?: "InboxMessageType";
+  body?: Maybe<Scalars["String"]["output"]>;
+  conversation: InboxConversationType;
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
+  interactiveData?: Maybe<Scalars["GenericScalar"]["output"]>;
+  latitude?: Maybe<Scalars["Float"]["output"]>;
+  locationAddress?: Maybe<Scalars["String"]["output"]>;
+  locationName?: Maybe<Scalars["String"]["output"]>;
+  longitude?: Maybe<Scalars["Float"]["output"]>;
+  mediaId?: Maybe<Scalars["String"]["output"]>;
+  mediaMimeType?: Maybe<Scalars["String"]["output"]>;
+  mediaType?: Maybe<Scalars["String"]["output"]>;
+  mediaUrl?: Maybe<Scalars["String"]["output"]>;
+  metaMessageId?: Maybe<Scalars["String"]["output"]>;
+  /** General metadata for media duration, waveform, or other transient properties. */
+  metadata: Scalars["JSONString"]["output"];
+  senderType: WorkspaceInboxInboxMessageSenderTypeChoices;
+  voiceDuration?: Maybe<Scalars["Int"]["output"]>;
+  voiceUrl?: Maybe<Scalars["String"]["output"]>;
+  voiceWaveform?: Maybe<Array<Maybe<Scalars["Float"]["output"]>>>;
+}
+
 /** Input for inventory-related fields (Shopify-style) */
 export interface InventoryInput {
   allowBackorders?: InputMaybe<Scalars["Boolean"]["input"]>;
@@ -1823,6 +2107,46 @@ export interface MarkOrderAsPaid {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+/** GraphQL type for Marketing Campaign. */
+export interface MarketingCampaignType extends Node {
+  __typename?: "MarketingCampaignType";
+  account?: Maybe<WhatsAppBusinessType>;
+  /** Timestamp when all recipients have been processed */
+  completedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  createdAt: Scalars["DateTime"]["output"];
+  deliveredCount?: Maybe<Scalars["Int"]["output"]>;
+  deliveryRate?: Maybe<Scalars["Float"]["output"]>;
+  id: Scalars["ID"]["output"];
+  /** Merchant-facing name of the campaign */
+  name: Scalars["String"]["output"];
+  readCount?: Maybe<Scalars["Int"]["output"]>;
+  readRate?: Maybe<Scalars["Float"]["output"]>;
+  /** When to start sending. Null means 'Send Now' when triggered. */
+  scheduledAt?: Maybe<Scalars["DateTime"]["output"]>;
+  sentCount?: Maybe<Scalars["Int"]["output"]>;
+  status: WorkspaceMarketingMarketingCampaignStatusChoices;
+  template?: Maybe<WhatsAppTemplateType>;
+  updatedAt: Scalars["DateTime"]["output"];
+}
+
+export interface MarketingCampaignTypeConnection {
+  __typename?: "MarketingCampaignTypeConnection";
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<MarketingCampaignTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars["Int"]["output"]>;
+}
+
+/** A Relay edge containing a `MarketingCampaignType` and its cursor. */
+export interface MarketingCampaignTypeEdge {
+  __typename?: "MarketingCampaignTypeEdge";
+  /** A cursor for use in pagination */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge */
+  node?: Maybe<MarketingCampaignType>;
+}
+
 /**
  * Media Upload GraphQL Type - URL-focused design
  *
@@ -1945,6 +2269,21 @@ export interface MerchantPaymentMethodType extends Node {
   verified: Scalars["Boolean"]["output"];
 }
 
+/** GraphQL type for Meta Product Sync Status. */
+export interface MetaProductSyncType extends Node {
+  __typename?: "MetaProductSyncType";
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
+  lastSyncAt?: Maybe<Scalars["DateTime"]["output"]>;
+  /** Internal ID assigned by Meta */
+  metaProductId?: Maybe<Scalars["String"]["output"]>;
+  /** The core SaaS product */
+  product: ProductType;
+  rejectionReason?: Maybe<Scalars["String"]["output"]>;
+  status: WorkspaceMarketingMetaProductSyncStatusChoices;
+  updatedAt: Scalars["DateTime"]["output"];
+}
+
 /**
  * Root GraphQL Mutation
  *
@@ -1961,6 +2300,8 @@ export interface Mutation {
    * Security: Token-based validation, single-use
    */
   acceptInvite?: Maybe<AcceptInvite>;
+  /** Deep-copy a default system template for a workspace. */
+  activateAutomationTemplate?: Maybe<ActivateAutomationTemplate>;
   /** Add comment to order timeline */
   addOrderComment?: Maybe<AddOrderComment>;
   /**
@@ -2115,6 +2456,14 @@ export interface Mutation {
    * Use after: Import completed and user acknowledged results
    */
   clearImportProgress?: Maybe<ClearImportProgress>;
+  /**
+   * Mutation to archive/clear the current thread when limits are hit.
+   * We delete the WorkmanMerchantConversation logs.
+   * Because FSM state runs through WorkmanMerchantProfile, the AI maintains context perfectly.
+   */
+  clearMerchantThread?: Maybe<ClearMerchantThread>;
+  /** Connect a new WABA to the workspace. */
+  connectWhatsappAccount?: Maybe<ConnectWhatsAppAccount>;
   createArticle?: Maybe<CreateArticle>;
   createBlog?: Maybe<CreateBlog>;
   /**
@@ -2152,6 +2501,13 @@ export interface Mutation {
   createInventoryForVariant?: Maybe<CreateInventoryForVariant>;
   /** Create location (warehouse/store) */
   createLocation?: Maybe<CreateLocation>;
+  /** Create a new draft campaign. */
+  createMarketingCampaign?: Maybe<CreateMarketingCampaign>;
+  /**
+   * Creates a new sidebar thread.
+   * ENFORCES THE GATED GROWTH LOCK: Blocks parallel threads if in ONBOARDING (C0-C9).
+   */
+  createMerchantSession?: Maybe<CreateMerchantSession>;
   /**
    * Create a new order with validation and inventory checks
    *
@@ -2181,6 +2537,8 @@ export interface Mutation {
    */
   createWhatsappOrder?: Maybe<CreateWhatsAppOrder>;
   deleteArticle?: Maybe<DeleteArticle>;
+  /** Soft-delete an automation workflow. */
+  deleteAutomationWorkflow?: Maybe<DeleteAutomationWorkflow>;
   deleteBlog?: Maybe<DeleteBlog>;
   /**
    * Delete category with atomic transaction
@@ -2209,6 +2567,8 @@ export interface Mutation {
    * User can manually manage their storage
    */
   deleteMedia?: Maybe<DeleteMedia>;
+  /** Mutation to completely delete a thread session from the sidebar UI and its history. */
+  deleteMerchantSession?: Maybe<DeleteMerchantSession>;
   /** Delete shipping package */
   deletePackage?: Maybe<DeletePackage>;
   /**
@@ -2279,6 +2639,8 @@ export interface Mutation {
    * Reliability: Comprehensive error handling
    */
   getLowStockAlerts?: Maybe<GetLowStockAlerts>;
+  /** Import a standard template from the SaaS library. */
+  importWhatsappTemplate?: Maybe<ImportWhatsAppTemplate>;
   /**
    * Invite staff to workspace with email and role
    * Following Shopify "Add users" pattern
@@ -2317,6 +2679,11 @@ export interface Mutation {
    */
   reactivateStaff?: Maybe<ReactivateStaff>;
   /**
+   * Mutation to record a merchant's feedback (accept/dismiss) on a smart action.
+   * Triggers a background task to append the feedback to marketing_knowledge.
+   */
+  recordMerchantFeedback?: Maybe<RecordMerchantFeedback>;
+  /**
    * Remove a payment method from workspace.
    *
    * Uses atomic transaction with row-level locking.
@@ -2347,6 +2714,8 @@ export interface Mutation {
    * Performance: Bulk update for efficiency
    */
   reorderCategories?: Maybe<ReorderCategories>;
+  /** Trigger an SMS/Voice verification code from Meta. */
+  requestWhatsappVerification?: Maybe<RequestWhatsAppVerification>;
   /**
    * Resend workspace invitation email
    * Extends expiration date and resends email
@@ -2354,6 +2723,24 @@ export interface Mutation {
    * Requires: 'staff:invite' permission
    */
   resendInvite?: Maybe<ResendInvite>;
+  /**
+   * Mutation to manually resume the Workman AI for a specific customer.
+   * Clears the intervention pause flag.
+   */
+  resumeWorkman?: Maybe<ResumeWorkman>;
+  sendManualMessage?: Maybe<SendManualMessageMutation>;
+  /**
+   * SendMessage to the Merchant AI Assistant.
+   * Enforces thread limits (max 20 messages per session).
+   */
+  sendMerchantMessage?: Maybe<SendMerchantMessage>;
+  /**
+   * Mutation to immediately signal a running Workman Agent to stop its loop.
+   * Uses Redis for a fast, non-blocking interruption flag.
+   */
+  stopWorkmanLoop?: Maybe<StopWorkmanLoop>;
+  /** Submit a draft campaign for dispatch. */
+  submitMarketingCampaign?: Maybe<SubmitMarketingCampaign>;
   /**
    * Suspend staff member from workspace (temporary, can be reactivated)
    *
@@ -2371,6 +2758,13 @@ export interface Mutation {
    * Use Case: Admin manually syncs payment if webhook is delayed or for sandbox testing (670000000)
    */
   syncOrderPaymentStatus?: Maybe<SyncOrderPaymentStatus>;
+  /** Sync selected products to Meta Catalog. */
+  syncProductsToMeta?: Maybe<SyncProductsToMeta>;
+  /** Sync templates from Meta for a specific account. */
+  syncWhatsappTemplates?: Maybe<SyncWhatsAppTemplates>;
+  toggleAiHandling?: Maybe<ToggleAiHandlingMutation>;
+  /** Activate or deactivate an automation workflow. */
+  toggleAutomationWorkflow?: Maybe<ToggleAutomationWorkflow>;
   /**
    * Toggle category visibility with atomic transaction
    *
@@ -2417,6 +2811,8 @@ export interface Mutation {
    */
   unarchiveOrder?: Maybe<UnarchiveOrder>;
   updateArticle?: Maybe<UpdateArticle>;
+  /** Atomic overwrite of an automation workflow's graph nodes. */
+  updateAutomationGraph?: Maybe<UpdateAutomationGraph>;
   updateBlog?: Maybe<UpdateBlog>;
   /**
    * Update category with atomic transaction (Shopify-style)
@@ -2547,8 +2943,22 @@ export interface Mutation {
    * 3. Store in MediaUpload table
    */
   uploadMediaFromUrl?: Maybe<UploadMediaFromUrl>;
+  /**
+   * Dedicated mutation for uploading PIM legacy documents for AI processing.
+   * Triggers the background celery task to chunk, parse, and ingest the document.
+   */
+  uploadStoreDocument?: Maybe<UploadStoreDocument>;
   /** Manually trigger verification of payment method credentials. */
   verifyPaymentMethod?: Maybe<VerifyPaymentMethod>;
+  /** Submit 6-digit code to Meta and activate the account. */
+  verifyWhatsappAccount?: Maybe<VerifyWhatsAppAccount>;
+  /** Update the global AI configuration for the workspace. */
+  workmanUpdateSettings?: Maybe<UpdateWorkmanSettings>;
+  /**
+   * Mutation for a merchant to physically update the Workman AI's memory matrix.
+   * The AI uses this memo to understand the brand identity, tone, and guardrails.
+   */
+  workmanUpdateStoreMemo?: Maybe<UpdateStoreMemo>;
 }
 
 /**
@@ -2559,6 +2969,16 @@ export interface Mutation {
  */
 export interface MutationAcceptInviteArgs {
   token: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationActivateAutomationTemplateArgs {
+  templateSlug: Scalars["String"]["input"];
 }
 
 /**
@@ -2751,6 +3171,31 @@ export interface MutationClearImportProgressArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationClearMerchantThreadArgs {
+  sessionId: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationConnectWhatsappAccountArgs {
+  accessToken: Scalars["String"]["input"];
+  displayPhoneNumber?: InputMaybe<Scalars["String"]["input"]>;
+  isActive?: InputMaybe<Scalars["Boolean"]["input"]>;
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  phoneNumberId: Scalars["String"]["input"];
+  wabaId: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationCreateArticleArgs {
   input: ArticleInput;
 }
@@ -2840,6 +3285,28 @@ export interface MutationCreateLocationArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationCreateMarketingCampaignArgs {
+  accountId: Scalars["ID"]["input"];
+  name: Scalars["String"]["input"];
+  templateId: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationCreateMerchantSessionArgs {
+  title: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationCreateOrderArgs {
   orderData: OrderCreateInput;
 }
@@ -2900,6 +3367,16 @@ export interface MutationDeleteArticleArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationDeleteAutomationWorkflowArgs {
+  workflowId: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationDeleteBlogArgs {
   id: Scalars["ID"]["input"];
 }
@@ -2952,6 +3429,16 @@ export interface MutationDeleteLocationArgs {
  */
 export interface MutationDeleteMediaArgs {
   uploadId: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationDeleteMerchantSessionArgs {
+  sessionId: Scalars["String"]["input"];
 }
 
 /**
@@ -3026,6 +3513,17 @@ export interface MutationGetCsvUploadProgressArgs {
  */
 export interface MutationGetImportProgressArgs {
   jobId: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationImportWhatsappTemplateArgs {
+  accountId?: InputMaybe<Scalars["ID"]["input"]>;
+  libraryTemplateId: Scalars["String"]["input"];
 }
 
 /**
@@ -3184,6 +3682,20 @@ export interface MutationReactivateStaffArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationRecordMerchantFeedbackArgs {
+  actionLabel: Scalars["String"]["input"];
+  actionMessage: Scalars["String"]["input"];
+  conversationId?: InputMaybe<Scalars["String"]["input"]>;
+  customerPhone: Scalars["String"]["input"];
+  outcome: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationRemovePaymentMethodArgs {
   methodId: Scalars["ID"]["input"];
 }
@@ -3225,8 +3737,74 @@ export interface MutationReorderCategoriesArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationRequestWhatsappVerificationArgs {
+  accountId: Scalars["ID"]["input"];
+  language?: InputMaybe<Scalars["String"]["input"]>;
+  method?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationResendInviteArgs {
   inviteId: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationResumeWorkmanArgs {
+  customerPhone: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationSendManualMessageArgs {
+  body: Scalars["String"]["input"];
+  conversationId: Scalars["ID"]["input"];
+  interactiveData?: InputMaybe<Scalars["GenericScalar"]["input"]>;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationSendMerchantMessageArgs {
+  message: Scalars["String"]["input"];
+  sessionId?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationStopWorkmanLoopArgs {
+  conversationId: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationSubmitMarketingCampaignArgs {
+  campaignId: Scalars["ID"]["input"];
+  recipientPhones: Array<InputMaybe<Scalars["String"]["input"]>>;
 }
 
 /**
@@ -3259,6 +3837,48 @@ export interface MutationSyncInventoryArgs {
  */
 export interface MutationSyncOrderPaymentStatusArgs {
   orderId: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationSyncProductsToMetaArgs {
+  productIds: Array<InputMaybe<Scalars["ID"]["input"]>>;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationSyncWhatsappTemplatesArgs {
+  accountId: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationToggleAiHandlingArgs {
+  conversationId: Scalars["ID"]["input"];
+  mode: AiAutonomyModeEnum;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationToggleAutomationWorkflowArgs {
+  isActive: Scalars["Boolean"]["input"];
+  workflowId: Scalars["ID"]["input"];
 }
 
 /**
@@ -3333,6 +3953,17 @@ export interface MutationUnarchiveOrderArgs {
 export interface MutationUpdateArticleArgs {
   id: Scalars["ID"]["input"];
   input: ArticleInput;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationUpdateAutomationGraphArgs {
+  steps: Array<AutomationStepInput>;
+  workflowId: Scalars["ID"]["input"];
 }
 
 /**
@@ -3567,8 +4198,58 @@ export interface MutationUploadMediaFromUrlArgs {
  * Combines all mutation types for the admin store API
  * All mutations use @transaction.atomic for data integrity
  */
+export interface MutationUploadStoreDocumentArgs {
+  file: Scalars["Upload"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
 export interface MutationVerifyPaymentMethodArgs {
   methodId: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationVerifyWhatsappAccountArgs {
+  accountId: Scalars["ID"]["input"];
+  code: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationWorkmanUpdateSettingsArgs {
+  autoAdaptLanguage?: InputMaybe<Scalars["Boolean"]["input"]>;
+  autoReplyEnabled?: InputMaybe<Scalars["Boolean"]["input"]>;
+  brainConfig?: InputMaybe<Scalars["GenericScalar"]["input"]>;
+  llmProvider?: InputMaybe<Scalars["String"]["input"]>;
+  minConfidence?: InputMaybe<Scalars["Float"]["input"]>;
+  newCustomerHandler?: InputMaybe<Scalars["String"]["input"]>;
+  operatingHours?: InputMaybe<Scalars["GenericScalar"]["input"]>;
+  personas?: InputMaybe<Scalars["GenericScalar"]["input"]>;
+  primaryLanguage?: InputMaybe<Scalars["String"]["input"]>;
+  supportedLanguages?: InputMaybe<Scalars["GenericScalar"]["input"]>;
+}
+
+/**
+ * Root GraphQL Mutation
+ *
+ * Combines all mutation types for the admin store API
+ * All mutations use @transaction.atomic for data integrity
+ */
+export interface MutationWorkmanUpdateStoreMemoArgs {
+  memoContent: Scalars["String"]["input"];
 }
 
 /**
@@ -3673,6 +4354,20 @@ export interface NavigationUpdate {
 export interface Node {
   /** The ID of the object */
   id: Scalars["ID"]["output"];
+}
+
+export interface OnboardingStatusType {
+  __typename?: "OnboardingStatusType";
+  currentStepId?: Maybe<Scalars["String"]["output"]>;
+  merchantTier?: Maybe<Scalars["String"]["output"]>;
+  steps?: Maybe<Array<Maybe<OnboardingStepType>>>;
+}
+
+export interface OnboardingStepType {
+  __typename?: "OnboardingStepType";
+  id?: Maybe<Scalars["String"]["output"]>;
+  metadata?: Maybe<Scalars["GenericScalar"]["output"]>;
+  status?: Maybe<Scalars["String"]["output"]>;
 }
 
 /** GraphQL type for OrderComment model */
@@ -4137,11 +4832,11 @@ export interface ProductType extends Node {
   /** Cost/wholesale price */
   costPrice?: Maybe<Scalars["Decimal"]["output"]>;
   createdAt: Scalars["DateTime"]["output"];
+  currency?: Maybe<Scalars["String"]["output"]>;
   /** Product description */
   description: Scalars["String"]["output"];
   /** Featured image URL from featured_media FK */
   featuredImageUrl?: Maybe<Scalars["String"]["output"]>;
-  /** Primary product image (thumbnail/featured) */
   featuredMedia?: Maybe<MediaUploadType>;
   hasDimensions?: Maybe<Scalars["Boolean"]["output"]>;
   /** Whether product has variants */
@@ -4149,8 +4844,7 @@ export interface ProductType extends Node {
   id: Scalars["ID"]["output"];
   /** Inventory health status */
   inventoryHealth: WorkspaceStoreProductInventoryHealthChoices;
-  /** Available stock quantity */
-  inventoryQuantity: Scalars["Int"]["output"];
+  inventoryQuantity?: Maybe<Scalars["Int"]["output"]>;
   isInStock?: Maybe<Scalars["Boolean"]["output"]>;
   isLowStock?: Maybe<Scalars["Boolean"]["output"]>;
   isOnSale?: Maybe<Scalars["Boolean"]["output"]>;
@@ -4158,6 +4852,7 @@ export interface ProductType extends Node {
   mediaGallery?: Maybe<Array<Maybe<MediaUploadType>>>;
   /** SEO meta description */
   metaDescription: Scalars["String"]["output"];
+  metaSync?: Maybe<MetaProductSyncType>;
   /** SEO meta title */
   metaTitle: Scalars["String"]["output"];
   /** Product name */
@@ -4274,10 +4969,10 @@ export interface ProductVariantType extends Node {
   effectivePrice?: Maybe<Scalars["Float"]["output"]>;
   /** Featured image URL from featured_media FK */
   featuredImageUrl?: Maybe<Scalars["String"]["output"]>;
-  /** Featured image for this variant */
   featuredMedia?: Maybe<MediaUploadType>;
   id: Scalars["ID"]["output"];
   inventory?: Maybe<Array<Maybe<InventoryType>>>;
+  inventoryQuantity?: Maybe<Scalars["Int"]["output"]>;
   /** Available for purchase */
   isActive: Scalars["Boolean"]["output"];
   isAvailable?: Maybe<Scalars["Boolean"]["output"]>;
@@ -4381,6 +5076,8 @@ export interface Query {
   comments?: Maybe<CommentConnection>;
   /** Get single customer by ID */
   customer?: Maybe<CustomerType>;
+  /** Get the Strategic Adviser profile for a specific customer in this workspace. */
+  customerAdvisoryProfile?: Maybe<CustomerAdvisoryProfileType>;
   /** Get customer by phone number */
   customerByPhone?: Maybe<CustomerType>;
   /** List all customers with pagination and filtering */
@@ -4397,6 +5094,12 @@ export interface Query {
   featuredCategories?: Maybe<Array<Maybe<CategoryType>>>;
   /** Get featured products */
   featuredProducts?: Maybe<Array<Maybe<ProductType>>>;
+  /** Get a single inbox conversation by ID */
+  inboxConversation?: Maybe<InboxConversationType>;
+  /** List all inbox conversations for the workspace */
+  inboxConversations?: Maybe<InboxConversationConnection>;
+  /** List messages for a specific conversation */
+  inboxMessages?: Maybe<InboxMessageConnection>;
   /** List all inventory with pagination and filtering */
   inventory?: Maybe<InventoryTypeConnection>;
   /** Get inventory for specific location */
@@ -4407,8 +5110,38 @@ export interface Query {
   locations?: Maybe<Array<Maybe<LocationType>>>;
   /** Get low stock items across all regions */
   lowStockItems?: Maybe<Array<Maybe<InventoryType>>>;
+  /** Get a single automation workflow by ID. */
+  marketingAutomation?: Maybe<AutomationWorkflowType>;
+  /** Get the dynamic configuration schema for all supported Automation Nodes (used by the Drag-and-Drop builder). */
+  marketingAutomationNodes?: Maybe<Array<Maybe<AutomationNodeRegistryType>>>;
+  /** List all automation workflows. */
+  marketingAutomations?: Maybe<Array<Maybe<AutomationWorkflowType>>>;
+  /** Get a single marketing campaign by ID. */
+  marketingCampaign?: Maybe<MarketingCampaignType>;
+  /** Paginated list of marketing campaigns. */
+  marketingCampaigns?: Maybe<MarketingCampaignTypeConnection>;
+  /** List all products synced to Meta Catalog. */
+  marketingSyncedProducts?: Maybe<Array<Maybe<MetaProductSyncType>>>;
+  /** List WhatsApp Templates, optionally filtered by account. */
+  marketingTemplates?: Maybe<Array<Maybe<WhatsAppTemplateType>>>;
+  /** Get a single WhatsApp Business Account by ID. */
+  marketingWhatsappAccount?: Maybe<WhatsAppBusinessType>;
+  /** List all WhatsApp Business Accounts for the workspace. */
+  marketingWhatsappAccounts?: Maybe<Array<Maybe<WhatsAppBusinessType>>>;
+  /** Get public WhatsApp/Meta configuration for the frontend. */
+  marketingWhatsappConfig?: Maybe<WhatsAppConfigType>;
+  /** List pre-defined standard WhatsApp templates provided by the SaaS. */
+  marketingWhatsappTemplateLibrary?: Maybe<
+    Array<Maybe<WhatsAppLibraryTemplateType>>
+  >;
   /** Get permission summary grouped by resource */
   memberPermissionSummary?: Maybe<Array<Maybe<PermissionSummaryType>>>;
+  /** Fetch the messages inside a specific session thread */
+  merchantChatHistory?: Maybe<Array<WorkmanMerchantConversationType>>;
+  /** Fetch the active sidebar chat sessions for the workspace (Max 5) */
+  merchantChatSessions?: Maybe<Array<WorkmanChatSessionType>>;
+  /** Get the current 'Smart Ladder' setup progress */
+  merchantOnboardingStatus?: Maybe<OnboardingStatusType>;
   /** Get current user's permissions in workspace */
   myPermissions?: Maybe<MyPermissionsType>;
   /** Get single menu details */
@@ -4464,6 +5197,8 @@ export interface Query {
   variants?: Maybe<ProductVariantTypeConnection>;
   /** Get variants by product ID */
   variantsByProduct?: Maybe<Array<Maybe<ProductVariantType>>>;
+  /** Get the global AI configuration for the workspace */
+  workmanSettings?: Maybe<WorkmanSettingsType>;
   /** Get single workspace member details (requires staff:view permission) */
   workspaceMember?: Maybe<WorkspaceMemberType>;
   /** List all workspace members with status and roles (requires staff:view permission) */
@@ -4699,6 +5434,16 @@ export interface QueryCustomerArgs {
  * Combines all query types for the admin store API
  * All queries are automatically workspace-scoped via JWT middleware
  */
+export interface QueryCustomerAdvisoryProfileArgs {
+  customerPhone: Scalars["String"]["input"];
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
 export interface QueryCustomerByPhoneArgs {
   phone: Scalars["String"]["input"];
 }
@@ -4792,6 +5537,46 @@ export interface QueryFeaturedProductsArgs {
  * Combines all query types for the admin store API
  * All queries are automatically workspace-scoped via JWT middleware
  */
+export interface QueryInboxConversationArgs {
+  id: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryInboxConversationsArgs {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  customerPhone?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  status?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryInboxMessagesArgs {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  conversation?: InputMaybe<Scalars["ID"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  senderType?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
 export interface QueryInventoryArgs {
   after?: InputMaybe<Scalars["String"]["input"]>;
   before?: InputMaybe<Scalars["String"]["input"]>;
@@ -4843,8 +5628,76 @@ export interface QueryLowStockItemsArgs {
  * Combines all query types for the admin store API
  * All queries are automatically workspace-scoped via JWT middleware
  */
+export interface QueryMarketingAutomationArgs {
+  id: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryMarketingCampaignArgs {
+  id: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryMarketingCampaignsArgs {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  offset?: InputMaybe<Scalars["Int"]["input"]>;
+  status?: InputMaybe<Scalars["String"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryMarketingTemplatesArgs {
+  accountId?: InputMaybe<Scalars["ID"]["input"]>;
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryMarketingWhatsappAccountArgs {
+  id: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
 export interface QueryMemberPermissionSummaryArgs {
   memberId: Scalars["ID"]["input"];
+}
+
+/**
+ * Root GraphQL Query
+ *
+ * Combines all query types for the admin store API
+ * All queries are automatically workspace-scoped via JWT middleware
+ */
+export interface QueryMerchantChatHistoryArgs {
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  offset?: InputMaybe<Scalars["Int"]["input"]>;
+  sessionId: Scalars["String"]["input"];
 }
 
 /**
@@ -5246,6 +6099,16 @@ export interface RecentActivityType {
 }
 
 /**
+ * Mutation to record a merchant's feedback (accept/dismiss) on a smart action.
+ * Triggers a background task to append the feedback to marketing_knowledge.
+ */
+export interface RecordMerchantFeedback {
+  __typename?: "RecordMerchantFeedback";
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
  * Remove a payment method from workspace.
  *
  * Uses atomic transaction with row-level locking.
@@ -5304,6 +6167,13 @@ export interface ReorderCategories {
   updatedCount?: Maybe<Scalars["Int"]["output"]>;
 }
 
+/** Trigger an SMS/Voice verification code from Meta. */
+export interface RequestWhatsAppVerification {
+  __typename?: "RequestWhatsAppVerification";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 /**
  * Resend workspace invitation email
  * Extends expiration date and resends email
@@ -5314,6 +6184,16 @@ export interface ResendInvite {
   __typename?: "ResendInvite";
   error?: Maybe<Scalars["String"]["output"]>;
   invite?: Maybe<WorkspaceInviteType>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
+ * Mutation to manually resume the Workman AI for a specific customer.
+ * Clears the intervention pause flag.
+ */
+export interface ResumeWorkman {
+  __typename?: "ResumeWorkman";
   message?: Maybe<Scalars["String"]["output"]>;
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
@@ -5430,6 +6310,25 @@ export interface SalesChannelTypeEdge {
   node?: Maybe<SalesChannelType>;
 }
 
+export interface SendManualMessageMutation {
+  __typename?: "SendManualMessageMutation";
+  error?: Maybe<Scalars["String"]["output"]>;
+  message?: Maybe<InboxMessageType>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
+ * SendMessage to the Merchant AI Assistant.
+ * Enforces thread limits (max 20 messages per session).
+ */
+export interface SendMerchantMessage {
+  __typename?: "SendMerchantMessage";
+  errorCode?: Maybe<Scalars["String"]["output"]>;
+  responseMessage?: Maybe<Scalars["String"]["output"]>;
+  sessionId?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 /** Input for shipping-related fields */
 export interface ShippingInput {
   /** Shipping package ID (optional - falls back to default) */
@@ -5451,6 +6350,16 @@ export interface StatusUpdateInput {
 }
 
 /**
+ * Mutation to immediately signal a running Workman Agent to stop its loop.
+ * Uses Redis for a fast, non-blocking interruption flag.
+ */
+export interface StopWorkmanLoop {
+  __typename?: "StopWorkmanLoop";
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
  * Complete store analytics dashboard - tier-gated
  *
  * BASIC: cards, chart, payment_breakdown
@@ -5461,6 +6370,8 @@ export interface StatusUpdateInput {
  */
 export interface StoreAnalytics {
   __typename?: "StoreAnalytics";
+  /** Active sessions in last 15 mins (PRO+) */
+  activeSessions?: Maybe<Scalars["Int"]["output"]>;
   /** Analytics capability level */
   analyticsLevel: Scalars["String"]["output"];
   /** 4 metric cards */
@@ -5469,6 +6380,8 @@ export interface StoreAnalytics {
   chart?: Maybe<ChartData>;
   /** Customer metrics (PRO+) */
   customers?: Maybe<CustomerMetrics>;
+  /** Device breakdown (ADVANCED+) */
+  devices?: Maybe<DeviceMetrics>;
   /** Error message if access denied */
   error?: Maybe<Scalars["String"]["output"]>;
   /** Conversion funnel (PRO+) */
@@ -5481,6 +6394,10 @@ export interface StoreAnalytics {
   paymentBreakdown?: Maybe<PaymentBreakdown>;
   /** Required plan for access */
   requiredPlan?: Maybe<Scalars["String"]["output"]>;
+  /** Online store sessions metrics (PRO+) */
+  sessions?: Maybe<StoreSessionsMetrics>;
+  /** Top performing products (PRO+) */
+  topProducts?: Maybe<Array<Maybe<TopProduct>>>;
 }
 
 /**
@@ -5595,8 +6512,7 @@ export interface StoreProfileType extends Node {
   storeName: Scalars["String"]["output"];
   /** Customer support email (optional) */
   supportEmail: Scalars["String"]["output"];
-  /** List of supported languages (e.g., ["en", "fr"]) */
-  supportedLocales: Scalars["JSONString"]["output"];
+  supportedLocales?: Maybe<Array<Maybe<Scalars["String"]["output"]>>>;
   /** Store timezone for display purposes */
   timezone: WorkspaceStoreStoreProfileTimezoneChoices;
   updatedAt: Scalars["DateTime"]["output"];
@@ -5604,6 +6520,36 @@ export interface StoreProfileType extends Node {
   weightUnit: WorkspaceStoreStoreProfileWeightUnitChoices;
   /** WhatsApp number for order notifications (International format: +XXXXXXXXXXXX) */
   whatsappNumber: Scalars["String"]["output"];
+}
+
+export interface StoreSessionsMetrics {
+  __typename?: "StoreSessionsMetrics";
+  /** Total sessions in period */
+  total: Scalars["Int"]["output"];
+  /** Sessions growth percentage */
+  trend: Scalars["Float"]["output"];
+  /** Total unique visitors in period */
+  visitors: Scalars["Int"]["output"];
+  /** Visitors growth percentage */
+  visitorsTrend: Scalars["Float"]["output"];
+}
+
+/** Submit a draft campaign for dispatch. */
+export interface SubmitMarketingCampaign {
+  __typename?: "SubmitMarketingCampaign";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/** Root GraphQL Subscription */
+export interface Subscription {
+  __typename?: "Subscription";
+  onMessageAdded?: Maybe<InboxMessageType>;
+}
+
+/** Root GraphQL Subscription */
+export interface SubscriptionOnMessageAddedArgs {
+  conversationId: Scalars["ID"]["input"];
 }
 
 /**
@@ -5654,6 +6600,21 @@ export interface SyncOrderPaymentStatus {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+/** Sync selected products to Meta Catalog. */
+export interface SyncProductsToMeta {
+  __typename?: "SyncProductsToMeta";
+  count?: Maybe<Scalars["Int"]["output"]>;
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/** Sync templates from Meta for a specific account. */
+export interface SyncWhatsAppTemplates {
+  __typename?: "SyncWhatsAppTemplates";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
 /**
  * Represents a hardcoded system path (e.g. 'Search', 'Account').
  * Used to populate UI dropdowns.
@@ -5675,6 +6636,21 @@ export interface TimelineEventType {
   message: Scalars["String"]["output"];
   metadata?: Maybe<Scalars["JSONString"]["output"]>;
   type: Scalars["String"]["output"];
+}
+
+export interface ToggleAiHandlingMutation {
+  __typename?: "ToggleAiHandlingMutation";
+  conversation?: Maybe<InboxConversationType>;
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/** Activate or deactivate an automation workflow. */
+export interface ToggleAutomationWorkflow {
+  __typename?: "ToggleAutomationWorkflow";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+  workflow?: Maybe<AutomationWorkflowType>;
 }
 
 /**
@@ -5735,6 +6711,16 @@ export interface ToggleProductStatus {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+/** Top selling / viewed product - PRO tier */
+export interface TopProduct {
+  __typename?: "TopProduct";
+  id: Scalars["String"]["output"];
+  name: Scalars["String"]["output"];
+  revenue: Scalars["Float"]["output"];
+  sales: Scalars["Int"]["output"];
+  views: Scalars["Int"]["output"];
+}
+
 /**
  * Transfer inventory between locations
  *
@@ -5778,6 +6764,13 @@ export interface UpdateArticle {
   __typename?: "UpdateArticle";
   article?: Maybe<ArticleType>;
   message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/** Atomic overwrite of an automation workflow's graph nodes. */
+export interface UpdateAutomationGraph {
+  __typename?: "UpdateAutomationGraph";
+  error?: Maybe<Scalars["String"]["output"]>;
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
@@ -5978,6 +6971,16 @@ export interface UpdateSalesChannel {
 }
 
 /**
+ * Mutation for a merchant to physically update the Workman AI's memory matrix.
+ * The AI uses this memo to understand the brand identity, tone, and guardrails.
+ */
+export interface UpdateStoreMemo {
+  __typename?: "UpdateStoreMemo";
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/**
  * Update store profile settings.
  *
  * Validates Cameroon phone numbers and returns proper error messages.
@@ -5998,6 +7001,14 @@ export interface UpdateVariant {
   message?: Maybe<Scalars["String"]["output"]>;
   success?: Maybe<Scalars["Boolean"]["output"]>;
   variant?: Maybe<ProductVariantType>;
+}
+
+/** Update the global AI configuration for the workspace. */
+export interface UpdateWorkmanSettings {
+  __typename?: "UpdateWorkmanSettings";
+  message?: Maybe<Scalars["String"]["output"]>;
+  settings?: Maybe<WorkmanSettingsType>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
 /**
@@ -6076,6 +7087,18 @@ export interface UploadMediaFromUrl {
 }
 
 /**
+ * Dedicated mutation for uploading PIM legacy documents for AI processing.
+ * Triggers the background celery task to chunk, parse, and ingest the document.
+ */
+export interface UploadStoreDocument {
+  __typename?: "UploadStoreDocument";
+  error?: Maybe<Scalars["String"]["output"]>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+  upload?: Maybe<MediaUploadType>;
+}
+
+/**
  * GraphQL type for User model
  * Minimal user information for staff management
  */
@@ -6142,6 +7165,280 @@ export interface VerifyPaymentMethod {
   success?: Maybe<Scalars["Boolean"]["output"]>;
 }
 
+/** Submit 6-digit code to Meta and activate the account. */
+export interface VerifyWhatsAppAccount {
+  __typename?: "VerifyWhatsAppAccount";
+  error?: Maybe<Scalars["String"]["output"]>;
+  success?: Maybe<Scalars["Boolean"]["output"]>;
+}
+
+/** GraphQL type for WhatsApp Business Account (WABA). */
+export interface WhatsAppBusinessType extends Node {
+  __typename?: "WhatsAppBusinessType";
+  /** The Meta Catalog ID linked to this WhatsApp account */
+  catalogId?: Maybe<Scalars["String"]["output"]>;
+  createdAt: Scalars["DateTime"]["output"];
+  /** Formatted phone number (e.g., +1 234 567 890) */
+  displayPhoneNumber?: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["ID"]["output"];
+  /** Is this number active and ready to send? */
+  isActive: Scalars["Boolean"]["output"];
+  /** Custom name for the account */
+  name?: Maybe<Scalars["String"]["output"]>;
+  /** Meta's internal ID for the phone number */
+  phoneNumberId: Scalars["String"]["output"];
+  /** Current quality rating from Meta */
+  qualityRating: WorkspaceMarketingWhatsAppBusinessAccountQualityRatingChoices;
+  templates?: Maybe<Array<Maybe<WhatsAppTemplateType>>>;
+  updatedAt: Scalars["DateTime"]["output"];
+  /** WhatsApp Business Account ID */
+  wabaId: Scalars["String"]["output"];
+}
+
+/** Configuration for WhatsApp integration. */
+export interface WhatsAppConfigType {
+  __typename?: "WhatsAppConfigType";
+  appId?: Maybe<Scalars["String"]["output"]>;
+}
+
+/**
+ * GraphQL type for a SaaS-provided standard template (from the library).
+ * These are static definitions and do not have dynamic IDs.
+ */
+export interface WhatsAppLibraryTemplateType {
+  __typename?: "WhatsAppLibraryTemplateType";
+  bodyText?: Maybe<Scalars["String"]["output"]>;
+  buttons?: Maybe<Scalars["JSONString"]["output"]>;
+  category?: Maybe<Scalars["String"]["output"]>;
+  components?: Maybe<Scalars["JSONString"]["output"]>;
+  description?: Maybe<Scalars["String"]["output"]>;
+  footerText?: Maybe<Scalars["String"]["output"]>;
+  headerText?: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["String"]["output"];
+  language?: Maybe<Scalars["String"]["output"]>;
+  name: Scalars["String"]["output"];
+}
+
+/** GraphQL type for WhatsApp Template. */
+export interface WhatsAppTemplateType extends Node {
+  __typename?: "WhatsAppTemplateType";
+  bodyText?: Maybe<Scalars["String"]["output"]>;
+  buttons?: Maybe<Scalars["JSONString"]["output"]>;
+  category: WorkspaceMarketingWhatsAppTemplateCategoryChoices;
+  /** Raw JSON component structure for formatting */
+  components: Scalars["JSONString"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
+  footerText?: Maybe<Scalars["String"]["output"]>;
+  headerText?: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["ID"]["output"];
+  /** Language code (e.g., en, fr) */
+  language: Scalars["String"]["output"];
+  /** Template name in Meta Business Manager */
+  name: Scalars["String"]["output"];
+  status: WorkspaceMarketingWhatsAppTemplateStatusChoices;
+  updatedAt: Scalars["DateTime"]["output"];
+}
+
+export interface WorkmanChatSessionType extends Node {
+  __typename?: "WorkmanChatSessionType";
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
+  isActive: Scalars["Boolean"]["output"];
+  /** The specific thread this message belongs to. */
+  messages: WorkmanMerchantConversationTypeConnection;
+  /** UI Label for the thread */
+  title: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+  user?: Maybe<UserType>;
+  /** Workspace this record belongs to */
+  workspace: WorkspaceType;
+}
+
+export interface WorkmanChatSessionTypeMessagesArgs {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  before?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  last?: InputMaybe<Scalars["Int"]["input"]>;
+  offset?: InputMaybe<Scalars["Int"]["input"]>;
+}
+
+/** An enumeration. */
+export enum WorkmanCustomerAdvisoryProfileActiveInterventionChoices {
+  /** Churn Risk Detected */
+  ChurnRisk = "CHURN_RISK",
+  /** Custom Shipping Quote Required */
+  CustomerShipping = "CUSTOMER_SHIPPING",
+  /** Human Agent Requested */
+  HumanRequested = "HUMAN_REQUESTED",
+  /** Customer Inactivity Warning */
+  Inactivity = "INACTIVITY",
+  /** None */
+  None = "NONE",
+  /** Over-Negotiation Detected */
+  OverNegotiating = "OVER_NEGOTIATING",
+  /** Manual Payment Verification Required */
+  PaymentVerification = "PAYMENT_VERIFICATION",
+  /** AI Stuck in Loop */
+  SystemLoop = "SYSTEM_LOOP",
+}
+
+/** An enumeration. */
+export enum WorkmanCustomerAdvisoryProfileCurrentDomainChoices {
+  /** Cart Management */
+  Cart = "CART",
+  /** Checkout Flow */
+  Checkout = "CHECKOUT",
+  /** Product Discovery */
+  Discovery = "DISCOVERY",
+  /** Shipping & Logistics */
+  Logistics = "LOGISTICS",
+  /** Post-Purchase Protocol */
+  PostPurchase = "POST_PURCHASE",
+  /** Post-Purchase/Support */
+  Support = "SUPPORT",
+}
+
+/** An enumeration. */
+export enum WorkmanCustomerAdvisoryProfileCurrentIntentChoices {
+  /** Churn / Drop Risk */
+  ChurnRisk = "CHURN_RISK",
+  /** Complaint */
+  Complaint = "COMPLAINT",
+  /** General Inquiry */
+  GeneralInquiry = "GENERAL_INQUIRY",
+  /** High Purchase Intent */
+  HighIntent = "HIGH_INTENT",
+  /** Human Agent Requested */
+  HumanRequested = "HUMAN_REQUESTED",
+  /** Negotiation */
+  Negotiation = "NEGOTIATION",
+  /** Post-Purchase Follow-up */
+  PostPurchase = "POST_PURCHASE",
+  /** Product Research */
+  ProductResearch = "PRODUCT_RESEARCH",
+}
+
+/** An enumeration. */
+export enum WorkmanCustomerAdvisoryProfileDropRiskLevelChoices {
+  /** High (> 65%) */
+  High = "HIGH",
+  /** Low (< 30%) */
+  Low = "LOW",
+  /** Medium (30-65%) */
+  Medium = "MEDIUM",
+}
+
+export interface WorkmanMerchantConversationType extends Node {
+  __typename?: "WorkmanMerchantConversationType";
+  createdAt: Scalars["DateTime"]["output"];
+  domain: WorkmanWorkmanMerchantConversationDomainChoices;
+  id: Scalars["ID"]["output"];
+  intent: WorkmanWorkmanMerchantConversationIntentChoices;
+  prompt: Scalars["String"]["output"];
+  /** The structured JSON response from Workman */
+  response?: Maybe<Scalars["GenericScalar"]["output"]>;
+  /** The specific thread this message belongs to. */
+  session?: Maybe<WorkmanChatSessionType>;
+  updatedAt: Scalars["DateTime"]["output"];
+  user?: Maybe<UserType>;
+  /** Workspace this record belongs to */
+  workspace: WorkspaceType;
+}
+
+export interface WorkmanMerchantConversationTypeConnection {
+  __typename?: "WorkmanMerchantConversationTypeConnection";
+  /** Contains the nodes in this connection. */
+  edges: Array<Maybe<WorkmanMerchantConversationTypeEdge>>;
+  /** Pagination data for this connection. */
+  pageInfo: PageInfo;
+}
+
+/** A Relay edge containing a `WorkmanMerchantConversationType` and its cursor. */
+export interface WorkmanMerchantConversationTypeEdge {
+  __typename?: "WorkmanMerchantConversationTypeEdge";
+  /** A cursor for use in pagination */
+  cursor: Scalars["String"]["output"];
+  /** The item at the end of the edge */
+  node?: Maybe<WorkmanMerchantConversationType>;
+}
+
+export interface WorkmanSettingsType extends Node {
+  __typename?: "WorkmanSettingsType";
+  /** If true, AI adapts to the customer’s language (if supported). */
+  autoAdaptLanguage: Scalars["Boolean"]["output"];
+  /** If enabled, AI responds automatically. If disabled, it drafts suggestions. */
+  autoReplyEnabled: Scalars["Boolean"]["output"];
+  brainConfig?: Maybe<Scalars["GenericScalar"]["output"]>;
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
+  /** Primary LLM engine for this store. */
+  llmProvider: WorkmanWorkmanSettingsLlmProviderChoices;
+  /** Minimum confidence score (0.0 to 1.0) for the AI to respond. */
+  minConfidence: Scalars["Float"]["output"];
+  /** Who handles the very first message from a new customer? */
+  newCustomerHandler: WorkmanWorkmanSettingsNewCustomerHandlerChoices;
+  operatingHours?: Maybe<Scalars["GenericScalar"]["output"]>;
+  /** If true, threads explicitly set to AUTO will stay autonomous even during shifts. */
+  overrideShiftAutonomy: Scalars["Boolean"]["output"];
+  personas?: Maybe<Scalars["GenericScalar"]["output"]>;
+  /** Default "Brand Voice" language. */
+  primaryLanguage: Scalars["String"]["output"];
+  supportedLanguages?: Maybe<Scalars["GenericScalar"]["output"]>;
+  updatedAt: Scalars["DateTime"]["output"];
+  /** Workspace this record belongs to */
+  workspace: WorkspaceType;
+}
+
+/** An enumeration. */
+export enum WorkmanWorkmanMerchantConversationDomainChoices {
+  /** Acquisition / Pre-Auth */
+  Acquisition = "ACQUISITION",
+  /** Catalog Ops */
+  Catalog = "CATALOG",
+  /** Conversion / Store Creation */
+  Conversion = "CONVERSION",
+  /** Marketing & Growth */
+  Growth = "GROWTH",
+  /** Analytics & Briefings */
+  Insights = "INSIGHTS",
+  /** Store Setup */
+  Onboarding = "ONBOARDING",
+  /** SaaS Support */
+  Support = "SUPPORT",
+}
+
+/** An enumeration. */
+export enum WorkmanWorkmanMerchantConversationIntentChoices {
+  /** Analytics & Performance Review */
+  BusinessInsights = "BUSINESS_INSIGHTS",
+  /** Product/Collection Operations */
+  CatalogManagement = "CATALOG_MANAGEMENT",
+  /** General Marketing/Business Brainstorming */
+  GeneralKnowledge = "GENERAL_KNOWLEDGE",
+  /** Marketing & Social Planning */
+  MarketingStrategy = "MARKETING_STRATEGY",
+  /** How-to / Technical Support */
+  OperationalHelp = "OPERATIONAL_HELP",
+  /** Guided Store Onboarding */
+  StoreSetup = "STORE_SETUP",
+}
+
+/** An enumeration. */
+export enum WorkmanWorkmanSettingsLlmProviderChoices {
+  /** DeepSeek */
+  Deepseek = "DEEPSEEK",
+  /** Google Gemini */
+  Gemini = "GEMINI",
+}
+
+/** An enumeration. */
+export enum WorkmanWorkmanSettingsNewCustomerHandlerChoices {
+  /** AI Agent */
+  Ai = "AI",
+  /** Merchant (Human) */
+  Merchant = "MERCHANT",
+}
+
 /** An enumeration. */
 export enum WorkspaceCoreCustomerCustomerTypeChoices {
   /** Small Business */
@@ -6182,6 +7479,26 @@ export enum WorkspaceCoreWorkspaceInviteStatusChoices {
   Sent = "SENT",
 }
 
+/** An enumeration. */
+export enum WorkspaceInboxInboxConversationStatusChoices {
+  /** Active (AI Handling) */
+  ActiveAi = "ACTIVE_AI",
+  /** Closed */
+  Closed = "CLOSED",
+  /** Paused (Merchant Handling) */
+  PausedAi = "PAUSED_AI",
+}
+
+/** An enumeration. */
+export enum WorkspaceInboxInboxMessageSenderTypeChoices {
+  /** Customer */
+  Customer = "CUSTOMER",
+  /** Merchant */
+  Merchant = "MERCHANT",
+  /** Workman AI */
+  Workman = "WORKMAN",
+}
+
 /**
  * GraphQL type for WorkspaceInvite model
  * Represents pending invitations (supports multiple roles like Shopify)
@@ -6218,6 +7535,94 @@ export interface WorkspaceInviteTypeRolesArgs {
   first?: InputMaybe<Scalars["Int"]["input"]>;
   last?: InputMaybe<Scalars["Int"]["input"]>;
   offset?: InputMaybe<Scalars["Int"]["input"]>;
+}
+
+/** An enumeration. */
+export enum WorkspaceMarketingAutomationStepStepTypeChoices {
+  /** Send Message (Omni-Channel) */
+  ActionSendMessage = "ACTION_SEND_MESSAGE",
+  /** Check Conditions / Branch */
+  ConditionGroup = "CONDITION_GROUP",
+  /** Wait / Time Delay */
+  Delay = "DELAY",
+}
+
+/** An enumeration. */
+export enum WorkspaceMarketingAutomationWorkflowTriggerTypeChoices {
+  /** Cart Abandoned */
+  CartAbandoned = "CART_ABANDONED",
+  /** Checkout Abandoned */
+  CheckoutAbandoned = "CHECKOUT_ABANDONED",
+  /** Customer Created (Welcome) */
+  CustomerCreated = "CUSTOMER_CREATED",
+  /** No Purchase in N Days */
+  CustomerWinback = "CUSTOMER_WINBACK",
+  /** First Purchase Completed */
+  FirstPurchase = "FIRST_PURCHASE",
+  /** Order Fulfilled */
+  OrderFulfilled = "ORDER_FULFILLED",
+  /** Order Placed */
+  OrderPlaced = "ORDER_PLACED",
+}
+
+/** An enumeration. */
+export enum WorkspaceMarketingMarketingCampaignStatusChoices {
+  /** Cancelled */
+  Cancelled = "CANCELLED",
+  /** Completed */
+  Completed = "COMPLETED",
+  /** Draft */
+  Draft = "DRAFT",
+  /** Paused - Rate Limit Reached */
+  Paused = "PAUSED",
+  /** Scheduled */
+  Scheduled = "SCHEDULED",
+  /** Sending */
+  Sending = "SENDING",
+}
+
+/** An enumeration. */
+export enum WorkspaceMarketingMetaProductSyncStatusChoices {
+  /** Approved */
+  Approved = "APPROVED",
+  /** Pending Meta Review */
+  Pending = "PENDING",
+  /** Rejected */
+  Rejected = "REJECTED",
+  /** Not Synced */
+  Unsynced = "UNSYNCED",
+}
+
+/** An enumeration. */
+export enum WorkspaceMarketingWhatsAppBusinessAccountQualityRatingChoices {
+  /** Green - High Quality */
+  Green = "GREEN",
+  /** Red - Low Quality */
+  Red = "RED",
+  /** Yellow - Medium Quality */
+  Yellow = "YELLOW",
+}
+
+/** An enumeration. */
+export enum WorkspaceMarketingWhatsAppTemplateCategoryChoices {
+  /** Authentication */
+  Authentication = "AUTHENTICATION",
+  /** Marketing */
+  Marketing = "MARKETING",
+  /** Utility */
+  Utility = "UTILITY",
+}
+
+/** An enumeration. */
+export enum WorkspaceMarketingWhatsAppTemplateStatusChoices {
+  /** Approved */
+  Approved = "APPROVED",
+  /** Paused by Meta */
+  Paused = "PAUSED",
+  /** Pending Approval */
+  Pending = "PENDING",
+  /** Rejected */
+  Rejected = "REJECTED",
 }
 
 /**

@@ -1,0 +1,7 @@
+mutation SyncProductsToMeta($productIds: [ID!]!) {
+  syncProductsToMeta(productIds: $productIds) {
+    success
+    count
+    error
+  }
+}

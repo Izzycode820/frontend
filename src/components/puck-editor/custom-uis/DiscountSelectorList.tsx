@@ -38,7 +38,7 @@ function DiscountSelectorListInner({
       status: 'ACTIVE' as any, // Only show active discounts
     },
     skip: !isOpen,
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   });
 

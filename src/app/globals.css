@@ -243,5 +243,76 @@
 
   body {
     @apply bg-background text-foreground overscroll-none;
+  }/* Unified Zinc Scrollbars (Shadcn Style) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a; /* zinc-800 */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46; /* zinc-700 */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
   }
+}
+
+/* Neon F1 Racing Border Effect */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --gradient-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+
+.neon-f1-container {
+  --shiny-cta-bg: #09090b;
+  --shiny-cta-highlight: #818cf8; /* indigo-400 */
+  --shiny-cta-shine: #ffffff;
+  
+  --animation: gradient-angle linear infinite;
+  --duration: 2s;
+  
+  position: relative;
+  isolation: isolate;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+    conic-gradient(
+        from var(--gradient-angle),
+        transparent 0%,
+        transparent 90%,
+        var(--shiny-cta-highlight) 95%,
+        var(--shiny-cta-shine) 97.5%,
+        var(--shiny-cta-highlight) 100%
+      ) border-box;
+  animation: var(--animation) var(--duration);
+}
+
+@keyframes gradient-angle {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+/* Remove old f1 classes that use ::before since we merged the logic */
+.neon-f1-inner {
+  display: contents;
 }

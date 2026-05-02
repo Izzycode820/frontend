@@ -1,5 +1,6 @@
-import { DashboardContainer } from "@/components/workspace/store/dashboard/DashboardContainer"
+import { OnboardingPageClient } from "@/components/workspace/store/dashboard/chat/OnboardingPageClient"
 
 export default function Page() {
-  return <DashboardContainer />
+  return <OnboardingPageClient />
 }
+

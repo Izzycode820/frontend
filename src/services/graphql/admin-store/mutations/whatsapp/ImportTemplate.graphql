@@ -1,0 +1,11 @@
+mutation ImportTemplate($libraryId: String!, $accountId: ID) {
+  importWhatsappTemplate(libraryTemplateId: $libraryId, accountId: $accountId) {
+    success
+    error
+    template {
+      id
+      name
+      status
+    }
+  }
+}

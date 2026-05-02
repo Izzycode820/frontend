@@ -1,0 +1,5 @@
+mutation DeleteMerchantSession($sessionId: String!) {
+  deleteMerchantSession(sessionId: $sessionId) {
+    success
+  }
+}

@@ -135,6 +135,25 @@ export class ErrorHandler {
         return responseData
       }
 
+      // ── Email verification gate ────────────────────────────────────────────
+      // Fired for REST 403s where the backend returns { code: 'EMAIL_NOT_VERIFIED' }
+      if (
+        response.status === 403 &&
+        responseData &&
+        typeof responseData === 'object' &&
+        (responseData as Record<string, unknown>)['code'] === 'EMAIL_NOT_VERIFIED'
+      ) {
+        console.warn('[REST] Email not verified — redirecting to verification page')
+        window.dispatchEvent(new CustomEvent('email-not-verified'))
+        throw new APIError(
+          'Email verification required.',
+          403,
+          'EMAIL_NOT_VERIFIED',
+          responseData,
+          endpoint
+        )
+      }
+
       // Check if this is a discriminated union error (has error_code field)
       // These errors should be thrown as-is so type guards can identify them
       if (
@@ -159,6 +178,7 @@ export class ErrorHandler {
       throw new APIError('Failed to process response', response.status)
     }
   }
+
 
   /**
    * Handle fetch/network errors

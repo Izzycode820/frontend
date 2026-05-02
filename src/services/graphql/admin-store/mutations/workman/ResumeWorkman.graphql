@@ -1,0 +1,6 @@
+mutation ResumeWorkman($customerPhone: String!) {
+  resumeWorkman(customerPhone: $customerPhone) {
+    success
+    message
+  }
+}

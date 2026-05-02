@@ -89,11 +89,21 @@ export function CreateWorkspaceDialog({
     const onSubmit = async (data: CreateWorkspaceFormValues) => {
         setErrorCode(null)
         try {
-            const response = await createWorkspace({
-                name: data.name.trim(),
-                type: 'store',
-                description: data.description?.trim() || undefined
-            })
+            // Handoff Logic: Pass Guest Device ID to link chat history
+            const guestDeviceId = typeof window !== 'undefined' 
+                ? localStorage.getItem('workman_guest_device_id') 
+                : null
+
+            const response = await createWorkspace(
+                {
+                    name: data.name.trim(),
+                    type: 'store',
+                    description: data.description?.trim() || undefined
+                },
+                {
+                    headers: guestDeviceId ? { 'X-Workman-Device-ID': guestDeviceId } : {}
+                }
+            )
 
             toast.success(t('createDialog.success'))
             onOpenChange(false)

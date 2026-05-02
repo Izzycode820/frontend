@@ -1,0 +1,11 @@
+query GetWhatsAppAccounts {
+  marketingWhatsappAccounts {
+    id
+    name
+    wabaId
+    phoneNumberId
+    displayPhoneNumber
+    isActive
+    qualityRating
+  }
+}

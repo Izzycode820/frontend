@@ -16,3 +16,4 @@ export { CategorySelector } from './CategorySelector';
 export { DiscountSelector } from './DiscountSelector';
 export { LinkSelector } from './LinkSelector';
 export { MenuSelector } from './MenuSelector';
+export { PositionPicker } from './PositionPicker';

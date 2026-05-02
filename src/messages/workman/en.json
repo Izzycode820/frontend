@@ -1,0 +1,137 @@
+{
+  "Workman": {
+    "title": "Workman AI Configuration",
+    "description": "Fine-tune your autonomous AI agent. Configure its intelligence engine, operating hours, and core brand memory.",
+    "tabs": {
+        "general": "General",
+        "brain": "Brain & Memory",
+        "persona": "Persona",
+        "schedule": "Schedule"
+    },
+    "loading": "Loading",
+    "engine": {
+        "title": "Engine & Autonomy",
+        "description": "Primary model and response baseline",
+        "autoReply": "Auto-Reply Mode",
+        "autoReplyDesc": "Automatically respond to customers",
+        "provider": "LLM Provider",
+        "gemini": "Google Gemini 2.5 Pro",
+        "deepseek": "DeepSeek V3",
+        "confidence": "Min. Confidence",
+        "confidenceDesc": "AI will only respond automatically if it's over this threshold.",
+        "newCustomer": "New Customer Handover",
+        "newCustomerDesc": "Who should handle a new customer thread first?",
+        "ai": "AI Agent",
+        "merchant": "Merchant (Human)"
+    },
+    "localization": {
+        "title": "Localization",
+        "description": "Default voice and adaptive behavior",
+        "primaryLanguage": "Primary Language",
+        "autoAdapt": "Auto-Adapt",
+        "autoAdaptDesc": "Detect and switch to customer language",
+        "supportedLanguages": "Supported Languages"
+    },
+    "brain": {
+        "title": "Brand Identity Memo",
+        "description": "Update the core knowledge that guides all AI responses",
+        "sync": "Sync Brain",
+        "placeholder": "e.g. Our brand is friendly, we never offer discounts over 10%, we are based in Douala...",
+        "footer": "This information is securely stored and used as a primary guardrail for RAG.",
+        "config": "Knowledge Sources",
+        "catalogue": "Product Catalogue",
+        "memo": "Store Identity Memo",
+        "memory": "Customer Memory"
+    },
+    "schedule": {
+        "title": "Operating Hours",
+        "description": "Configure when the AI is allowed to respond to customers",
+        "active": "Active",
+        "offline": "Offline",
+        "start": "Start",
+        "end": "End"
+    },
+    "days": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+    },
+    "personas": {
+        "friendly": "Friendly",
+        "closer": "Closer",
+        "advisor": "Advisor",
+        "customer_service": "Customer Service",
+        "analyser": "Analyser",
+        "educationer": "Educationer"
+    },
+    "quickSettings": {
+        "title": "Workman AI Quick Settings",
+        "description": "Adjust the global autonomy and engine of your AI assistant.",
+        "confidence": "Min. Confidence",
+        "confidenceDesc": "AI will only respond automatically if it's over this threshold.",
+        "confidenceDescManual": "AI will only respond if it's over this threshold.",
+        "fullConfig": "Full Configuration",
+        "done": "Done"
+    },
+    "messages": {
+        "success": "Settings updated successfully",
+        "error": "Failed to update settings",
+        "syncSuccess": "Store AI memory updated and sync triggered",
+        "syncError": "Failed to update store memory"
+    },
+    "onboarding": {
+        "PRODUCT_CREATION": {
+            "pending": {
+                "title": "Welcome, I am Workman, your AI assistant. Let's create your first product.",
+                "description": "What do you want to sell? or ask me to inspire you.",
+                "action": "Start Creating"
+            },
+            "completed": {
+                "title": "First product live.",
+                "description": "Your storefront now has its first offering. Ready to manage delivery logistics?",
+                "action": "Configure Shipping"
+            }
+        },
+        "SHIPPING_SETUP": {
+            "pending": {
+                "title": "Next is shipping logistics.",
+                "description": "Define regional rates for delivery across Cameroon.",
+                "action": "Add Shipping Zones"
+            },
+            "completed": {
+                "title": "Logistics configured.",
+                "description": "Shipping rules are now active. Proceed to branding and theme selection.",
+                "action": "Select Theme"
+            }
+        },
+        "THEME_SELECTION": {
+            "pending": {
+                "title": "Your Website is what reflects your brand.",
+                "description": "Select a professional design that matches your store's identity.",
+                "action": "Open Theme Store"
+            },
+            "completed": {
+                "title": "Theme finalized.",
+                "description": "Design applied. Final step: subscription choice.",
+                "action": "Choose Plan"
+            }
+        },
+        "SUBSCRIPTION": {
+            "pending": {
+                "title": "Without a paid subscription, your growth will be limited.",
+                "description": "Grab your promo with 80% off for 28 days to unlock all sales and more AI credits.",
+                "action": "Review Plans"
+            },
+            "completed": {
+                "title": "Configuration complete.",
+                "description": "Account fully provisioned. Transitioning to strategy mode.",
+                "action": "Enter Strategy"
+            }
+        }
+    }
+  }
+}

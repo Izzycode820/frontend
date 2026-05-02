@@ -36,7 +36,7 @@ export interface UseWorkspaceManagementReturn {
   // Actions (stable references)
   listWorkspaces: (force?: boolean) => Promise<void>
   getWorkspace: (workspaceId: string) => Promise<void>
-  createWorkspace: (request: WorkspaceCreateRequest) => Promise<WorkspaceCreateResponse>
+  createWorkspace: (request: WorkspaceCreateRequest, options?: Record<string, any>) => Promise<WorkspaceCreateResponse>
   updateWorkspace: (workspaceId: string, request: WorkspaceUpdateRequest) => Promise<WorkspaceUpdateResponse>
   deleteWorkspace: (workspaceId: string) => Promise<WorkspaceDeleteResponse>
   restoreWorkspace: (workspaceId: string) => Promise<WorkspaceRestoreResponse>
@@ -92,8 +92,8 @@ export function useWorkspaceManagement(): UseWorkspaceManagementReturn {
     return getWorkspaceAction(workspaceId)
   }, [getWorkspaceAction])
 
-  const createWorkspace = useCallback(async (request: WorkspaceCreateRequest): Promise<WorkspaceCreateResponse> => {
-    return createWorkspaceAction(request)
+  const createWorkspace = useCallback(async (request: WorkspaceCreateRequest, options?: Record<string, any>): Promise<WorkspaceCreateResponse> => {
+    return createWorkspaceAction(request, options)
   }, [createWorkspaceAction])
 
   const updateWorkspace = useCallback(async (workspaceId: string, request: WorkspaceUpdateRequest): Promise<WorkspaceUpdateResponse> => {

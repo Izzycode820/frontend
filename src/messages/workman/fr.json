@@ -1,0 +1,137 @@
+{
+  "Workman": {
+    "title": "Configuration de l'IA Workman",
+    "description": "Affinez votre agent IA autonome. Configurez son moteur d'intelligence, ses heures d'ouverture et sa mémoire de marque.",
+    "tabs": {
+        "general": "Général",
+        "brain": "Cerveau & Mémoire",
+        "persona": "Persona",
+        "schedule": "Planning"
+    },
+    "loading": "Chargement",
+    "engine": {
+        "title": "Moteur & Autonomie",
+        "description": "Modèle principal et base de réponse",
+        "autoReply": "Mode Réponse Automatique",
+        "autoReplyDesc": "Répondre automatiquement aux clients",
+        "provider": "Fournisseur LLM",
+        "gemini": "Google Gemini 2.5 Pro",
+        "deepseek": "DeepSeek V3",
+        "confidence": "Confiance Min.",
+        "confidenceDesc": "L'IA ne répondra automatiquement que si elle dépasse ce seuil.",
+        "newCustomer": "Prise en charge Nouveau Client",
+        "newCustomerDesc": "Qui doit gérer un nouveau fil client en premier ?",
+        "ai": "Agent IA",
+        "merchant": "Marchand (Humain)"
+    },
+    "localization": {
+        "title": "Localisation",
+        "description": "Voix par défaut et comportement adaptatif",
+        "primaryLanguage": "Langue Principale",
+        "autoAdapt": "Auto-Adaptation",
+        "autoAdaptDesc": "Détecter et passer à la langue du client",
+        "supportedLanguages": "Langues Supportées"
+    },
+    "brain": {
+        "title": "Mémo d'Identité de Marque",
+        "description": "Mettre à jour les connaissances de base qui guident toutes les réponses de l'IA",
+        "sync": "Synchroniser le Cerveau",
+        "placeholder": "ex: Notre marque est amicale, nous n'offrons jamais de remises de plus de 10%, nous sommes basés à Douala...",
+        "footer": "Ces informations sont stockées en toute sécurité et utilisées comme garde-fou principal pour le RAG.",
+        "config": "Sources de Connaissances",
+        "catalogue": "Catalogue Produits",
+        "memo": "Mémo d'Identité du Magasin",
+        "memory": "Mémoire Client"
+    },
+    "schedule": {
+        "title": "Heures d'Ouverture",
+        "description": "Configurez quand l'IA est autorisée à répondre aux clients",
+        "active": "Actif",
+        "offline": "Hors ligne",
+        "start": "Début",
+        "end": "Fin"
+    },
+    "days": {
+        "mon": "Lundi",
+        "tue": "Mardi",
+        "wed": "Mercredi",
+        "thu": "Jeudi",
+        "fri": "Vendredi",
+        "sat": "Samedi",
+        "sun": "Dimanche"
+    },
+    "personas": {
+        "friendly": "Amical",
+        "closer": "Concluant",
+        "advisor": "Conseiller",
+        "customer_service": "Service Client",
+        "analyser": "Analyseur",
+        "educationer": "Éducateur"
+    },
+    "quickSettings": {
+        "title": "Réglages Rapides IA Workman",
+        "description": "Ajustez l'autonomie globale et le moteur de votre assistant IA.",
+        "confidence": "Confiance Min.",
+        "confidenceDesc": "L'IA ne répondra automatiquement que si elle dépasse ce seuil.",
+        "confidenceDescManual": "L'IA ne répondra que si elle dépasse ce seuil.",
+        "fullConfig": "Configuration Complète",
+        "done": "Terminé"
+    },
+    "messages": {
+        "success": "Paramètres mis à jour avec succès",
+        "error": "Échec de la mise à jour des paramètres",
+        "syncSuccess": "Mémoire de l'IA mise à jour et synchronisation déclenchée",
+        "syncError": "Échec de la mise à jour de la mémoire de l'IA"
+    },
+    "onboarding": {
+        "PRODUCT_CREATION": {
+            "pending": {
+                "title": "Bienvenue, je suis Workman, votre assistant IA. Créons votre premier produit.",
+                "description": "Qu'est-ce que vous voulez vendre? ou demandez-moi de vous inspirer.",
+                "action": "Commencer la création"
+            },
+            "completed": {
+                "title": "Premier produit en ligne.",
+                "description": "Votre boutique a maintenant sa première offre. Prêt à gérer la logistique de livraison ?",
+                "action": "Configurer la Livraison"
+            }
+        },
+        "SHIPPING_SETUP": {
+            "pending": {
+                "title": "Configurer la logistique d'expédition.",
+                "description": "Définissez des tarifs régionaux pour la livraison à travers le Cameroun.",
+                "action": "Ajouter des Zones d'Expédition"
+            },
+            "completed": {
+                "title": "Logistique configurée.",
+                "description": "Les règles d'expédition sont maintenant actives. Passez au branding et au thème.",
+                "action": "Choisir un Thème"
+            }
+        },
+        "THEME_SELECTION": {
+            "pending": {
+                "title": "Votre site web est ce qui reflète votre marque.",
+                "description": "Sélectionnez un design professionnel qui correspond à l'identité de votre boutique.",
+                "action": "Ouvrir la Boutique de Thèmes"
+            },
+            "completed": {
+                "title": "Thème finalisé.",
+                "description": "Design appliqué. Dernière étape : choix du forfait.",
+                "action": "Choisir un Plan"
+            }
+        },
+        "SUBSCRIPTION": {
+            "pending": {
+                "title": "Sans abonnement payant, votre croissance sera limitée.",
+                "description": "Saisissez votre promo avec 80% de réduction pendant 28 jours pour débloquer toutes les ventes et plus de crédits IA.",
+                "action": "Voir les Forfaits"
+            },
+            "completed": {
+                "title": "Configuration terminée.",
+                "description": "Compte entièrement provisionné. Passage en mode stratégie.",
+                "action": "Entrer en Stratégie"
+            }
+        }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+import * as Types from '../../../../../../types/workspace/store/graphql-base';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type GetWorkmanSettingsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+
+
+export type GetWorkmanSettingsQuery = { __typename?: 'Query', workmanSettings: { __typename?: 'WorkmanSettingsType', id: string, llmProvider: Types.WorkmanWorkmanSettingsLlmProviderChoices, autoReplyEnabled: boolean, newCustomerHandler: Types.WorkmanWorkmanSettingsNewCustomerHandlerChoices, personas: any, brainConfig: any, minConfidence: number, primaryLanguage: string, supportedLanguages: any, autoAdaptLanguage: boolean, operatingHours: any } | null };
+
+
+export const GetWorkmanSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetWorkmanSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"workmanSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"llmProvider"}},{"kind":"Field","name":{"kind":"Name","value":"autoReplyEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"newCustomerHandler"}},{"kind":"Field","name":{"kind":"Name","value":"personas"}},{"kind":"Field","name":{"kind":"Name","value":"brainConfig"}},{"kind":"Field","name":{"kind":"Name","value":"minConfidence"}},{"kind":"Field","name":{"kind":"Name","value":"primaryLanguage"}},{"kind":"Field","name":{"kind":"Name","value":"supportedLanguages"}},{"kind":"Field","name":{"kind":"Name","value":"autoAdaptLanguage"}},{"kind":"Field","name":{"kind":"Name","value":"operatingHours"}}]}}]}}]} as unknown as DocumentNode<GetWorkmanSettingsQuery, GetWorkmanSettingsQueryVariables>;

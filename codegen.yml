@@ -23,8 +23,9 @@ ignoreNoDocuments: true
 schema: admin-store.json
 
 documents:
-  - "src/services/graphql/admin-store/mutations/settings/UpdateStoreProfile.graphql"
-  - "src/services/graphql/admin-store/queries/settings/GetStoreProfile.graphql"
+# "src/services/graphql/admin-store/queries/workman-merchant/GetMerchantOnboardingStatus.graphql"
+ - "src/services/graphql/admin-store/mutations/workman-merchant/SendMerchantMessage.graphql"
+
 
 generates:
   # Base types for the store domain

@@ -1,0 +1,6 @@
+mutation WorkmanUpdateStoreMemo($memoContent: String!) {
+  workmanUpdateStoreMemo(memoContent: $memoContent) {
+    success
+    message
+  }
+}

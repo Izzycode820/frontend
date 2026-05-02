@@ -38,7 +38,7 @@ export default function EditCategoryPage() {
     onCompleted: (data) => {
       if (data.updateCategory?.success && data.updateCategory?.category) {
         toast.success(t('toasts.updateSuccess', { name: data.updateCategory.category.name }));
-        router.push(`/workspace/${currentWorkspace?.id}/store/categories`);
+        router.push(`/workspace/${currentWorkspace?.id}/store/products/categories`);
       } else {
         toast.error(data.updateCategory?.error || t('toasts.updateError'));
       }
@@ -111,7 +111,7 @@ export default function EditCategoryPage() {
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
             <div className="flex items-center gap-4 mb-4">
-              <Link href={`/workspace/${currentWorkspace?.id}/store/categories`}>
+              <Link href={`/workspace/${currentWorkspace?.id}/store/products/categories`}>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>

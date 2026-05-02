@@ -1,0 +1,101 @@
+{
+  "WhatsAppNav": {
+    "title": "WhatsApp Channel",
+    "items": {
+      "overview": {
+        "label": "Overview"
+      },
+      "inbox": {
+        "label": "Inbox"
+      },
+      "templates": {
+        "label": "Templates"
+      },
+      "api_control": {
+        "label": "API Control",
+        "description": "Connection settings and Meta Cloud API integration status."
+      }
+    }
+  },
+  "WhatsAppInbox": {
+    "title": "Inbox",
+    "search": "Search customers...",
+    "advisor": {
+      "title": "Strategic Advisor",
+      "intent": "Predicted Intent",
+      "strategy": "Live Sales Strategy",
+      "recommendations": "AI Suggested Replies",
+      "cart_value": "Active Opportunity"
+    },
+    "auto_reply_mode": "⚡ Auto-Reply Mode (After Hours)",
+    "draft_mode": "📝 Draft Mode (During Shifts)",
+    "ai_active": "AI Active",
+    "take_over": "Take Over"
+  },
+  "WhatsAppOverview": {
+    "title": "WhatsApp Overview",
+    "placeholder": "WhatsApp Ecommerce Channel Overview - Statistics and AI Insights coming soon."
+  },
+  "WhatsAppOnboarding": {
+    "title": "Connect WhatsApp Business",
+    "description": "Bring your own number to Huzilerz and power it with AI.",
+    "steps": {
+      "checklist": "Checklist",
+      "connect": "Connect",
+      "method": "Verify",
+      "finish": "Finish",
+      "link": "Link with Meta",
+      "link_description": "Log in with Facebook to select your WhatsApp Business Account and phone number.",
+      "continue_facebook": "Continue with Facebook",
+      "back": "Go Back"
+    },
+    "checklist": {
+      "title": "Before You Connect",
+      "warning": "CRITICAL: If this number is active on a mobile app, you MUST delete the account first. Simply uninstalling is not enough.",
+      "learning": "What is BYON? This allows you to use your existing business number with our professional AI tools, but it will no longer work on the standard WhatsApp mobile apps.",
+      "note": "You will need a personal Facebook account to manage the Business ID.",
+      "item_delete": "I have deleted my WhatsApp account from my phone OR this is a clean number.",
+      "item_facebook": "I have a Facebook account ready.",
+      "item_ready": "I am ready to receive a 6-digit verification code."
+    },
+    "verify": {
+      "title": "Verify Your Number",
+      "description": "Choose how you want to receive your 6-digit verification code.",
+      "sms": "Send SMS",
+      "voice": "Voice Call",
+      "sms_description": "Get a 6-digit code via text",
+      "voice_description": "Receive a phone call with the code",
+      "request_code": "Request Code",
+      "enter_code": "Enter Verification Code",
+      "code_sent": "Verification code sent to {number}",
+      "code_sent_to": "We've sent a code to your number ending in {digits}",
+      "verifying": "Verifying...",
+      "success": "Account verified successfully!",
+      "change_method": "Change verification method"
+    },
+    "errors": {
+      "no_account": "No account selected or ID missing.",
+      "connect_failed": "Failed to connect account. Please try again.",
+      "verify_failed": "Verification failed. Check the code and try again."
+    },
+    "footer_terms": "By connecting your WhatsApp account, you agree to Meta's Business Terms and our integration policies."
+  },
+  "WhatsAppAccount": {
+    "title": "WhatsApp Account",
+    "verified": "Verified",
+    "pending": "Pending Verification",
+    "waba_id": "WABA ID",
+    "phone_id": "Phone Number ID",
+    "disconnect": "Disconnect Account",
+    "api_info": "Your account is connected to the Huzilerz WhatsApp Cloud. All incoming messages will be handled by the AI as per your settings in the Workman dashboard.",
+    "manage_meta": "Manage in Meta",
+    "cards": {
+      "brain_title": "Brain Memory",
+      "brain_description": "AI use your store memory to reply.",
+      "template_title": "Template Sync",
+      "template_description": "Sync your Meta templates here.",
+      "limits_title": "Messaging Limits",
+      "limits_description": "Tier 1 limit: 1k customers/24h."
+    }
+  }
+}

@@ -1,0 +1,28 @@
+mutation ConnectWhatsAppAccount(
+  $wabaId: String!
+  $phoneNumberId: String!
+  $accessToken: String!
+  $isActive: Boolean
+  $name: String
+  $displayPhoneNumber: String
+) {
+  connectWhatsappAccount(
+    wabaId: $wabaId
+    phoneNumberId: $phoneNumberId
+    accessToken: $accessToken
+    isActive: $isActive
+    name: $name
+    displayPhoneNumber: $displayPhoneNumber
+  ) {
+    success
+    account {
+      id
+      wabaId
+      phoneNumberId
+      isActive
+      name
+      displayPhoneNumber
+    }
+    error
+  }
+}
